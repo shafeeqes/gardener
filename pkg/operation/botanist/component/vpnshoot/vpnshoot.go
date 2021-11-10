@@ -28,6 +28,9 @@ import (
 const (
 	// ManagedResourceName is the name of the ManagedResource containing the resource specifications.
 	ManagedResourceName = "shoot-core-vpnshoot"
+
+	deploymentName = "vpn-shoot"
+	containerName  = "vpn-shoot"
 )
 
 type Interface interface {
