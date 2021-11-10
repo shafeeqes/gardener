@@ -31,10 +31,13 @@ const (
 
 	deploymentName = "vpn-shoot"
 	containerName  = "vpn-shoot"
+
+	serviceName = "vpn-test"
 )
 
 type Interface interface {
 	component.DeployWaiter
+	component.MonitoringComponent
 }
 
 // New creates a new instance of DeployWaiter for vpnshoot
@@ -42,21 +45,21 @@ func New(
 	client client.Client,
 	namespace string,
 	image string,
-) component.DeployWaiter {
-	return &vpnshoot{
+) Interface {
+	return &vpnShoot{
 		client:    client,
 		namespace: namespace,
 		image:     image,
 	}
 }
 
-type vpnshoot struct {
+type vpnShoot struct {
 	client    client.Client
 	namespace string
 	image     string
 }
 
-func (v *vpnshoot) Deploy(ctx context.Context) error {
+func (v *vpnShoot) Deploy(ctx context.Context) error {
 	data, err := v.computeResourcesData()
 	if err != nil {
 		return err
@@ -64,27 +67,27 @@ func (v *vpnshoot) Deploy(ctx context.Context) error {
 	return managedresources.CreateForShoot(ctx, v.client, v.namespace, ManagedResourceName, false, data)
 }
 
-func (v *vpnshoot) Destroy(ctx context.Context) error {
+func (v *vpnShoot) Destroy(ctx context.Context) error {
 	return managedresources.DeleteForShoot(ctx, v.client, v.namespace, ManagedResourceName)
 }
 
 var TimeoutWaitForManagedResource = 2 * time.Minute
 
-func (v *vpnshoot) Wait(ctx context.Context) error {
+func (v *vpnShoot) Wait(ctx context.Context) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, TimeoutWaitForManagedResource)
 	defer cancel()
 
 	return managedresources.WaitUntilHealthy(timeoutCtx, v.client, v.namespace, ManagedResourceName)
 }
 
-func (v *vpnshoot) WaitCleanup(ctx context.Context) error {
+func (v *vpnShoot) WaitCleanup(ctx context.Context) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, TimeoutWaitForManagedResource)
 	defer cancel()
 
 	return managedresources.WaitUntilDeleted(timeoutCtx, v.client, v.namespace, ManagedResourceName)
 }
 
-func (v *vpnshoot) computeResourcesData() (map[string][]byte, error) {
+func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 	registry := managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 	return registry.AddAllAndSerialize()
