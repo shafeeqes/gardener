@@ -71,7 +71,7 @@ var _ = Describe("VPNShoot", func() {
 		}
 	})
 
-	Describe("Deploy", func() {
+	Describe("#Deploy", func() {
 		It("should succesfully deploy all resources", func() {
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(MatchError(apierrors.NewNotFound(schema.GroupResource{
 				Group:    resourcesv1alpha1.SchemeGroupVersion.Group,
@@ -113,7 +113,7 @@ var _ = Describe("VPNShoot", func() {
 		})
 	})
 
-	Describe("Destroy", func() {
+	Describe("#Destroy", func() {
 		It("should successfully destroy all resources", func() {
 			Expect(c.Create(ctx, managedResource)).To(Succeed())
 			Expect(c.Create(ctx, managedResourceSecret)).To(Succeed())
@@ -146,7 +146,7 @@ var _ = Describe("VPNShoot", func() {
 			resetVars()
 		})
 
-		Describe("Wait", func() {
+		Describe("#Wait", func() {
 			It("should fail because reading the ManagedResource fails", func() {
 				Expect(component.Wait(ctx)).To(MatchError(ContainSubstring("not found")))
 			})

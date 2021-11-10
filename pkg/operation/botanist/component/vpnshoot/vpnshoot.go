@@ -30,6 +30,10 @@ const (
 	ManagedResourceName = "shoot-core-vpnshoot"
 )
 
+type Interface interface {
+	component.DeployWaiter
+}
+
 // New creates a new instance of DeployWaiter for vpnshoot
 func New(
 	client client.Client,
