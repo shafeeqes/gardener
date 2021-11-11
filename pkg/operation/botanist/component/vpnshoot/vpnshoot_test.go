@@ -73,6 +73,38 @@ var _ = Describe("VPNShoot", func() {
 
 	Describe("#Deploy", func() {
 		It("should succesfully deploy all resources", func() {
+			var (
+				serviceAccountYAML = `apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: null
+  labels:
+    app: vpn-shoot
+  name: vpn-shoot
+  namespace: kube-system
+`
+				serviceYAML = `apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: vpn-shoot
+  name: vpn-shoot
+  namespace: kube-system
+spec:
+  ports:
+  - name: openvpn
+    port: 4314
+    protocol: TCP
+    targetPort: 1194
+  selector:
+    app: vpn-shoot
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+`
+			)
+
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(MatchError(apierrors.NewNotFound(schema.GroupResource{
 				Group:    resourcesv1alpha1.SchemeGroupVersion.Group,
 				Resource: "managedresources",
@@ -109,7 +141,10 @@ var _ = Describe("VPNShoot", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 			Expect(managedResourceSecret.Type).To(Equal(corev1.SecretTypeOpaque))
-			Expect(managedResourceSecret.Data).To(HaveLen(0))
+			Expect(managedResourceSecret.Data).To(HaveLen(2))
+			Expect(string(managedResourceSecret.Data["serviceaccount__kube-system__vpn-shoot.yaml"])).To(Equal(serviceAccountYAML))
+			Expect(string(managedResourceSecret.Data["service__kube-system__vpn-shoot.yaml"])).To(Equal(serviceYAML))
+
 		})
 	})
 

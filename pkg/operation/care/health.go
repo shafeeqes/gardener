@@ -301,6 +301,8 @@ func init() {
 	utilruntime.Must(err)
 	versionConstraintGreaterEqual132, err = semver.NewConstraint(">= 1.32")
 	utilruntime.Must(err)
+	versionConstraintGreaterEqual132, err = semver.NewConstraint(">= 1.36")
+	utilruntime.Must(err)
 }
 
 // checkSystemComponents checks whether the system components of a Shoot are running.

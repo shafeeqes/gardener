@@ -22,17 +22,28 @@ import (
 	"github.com/gardener/gardener/pkg/operation/botanist/component"
 	"github.com/gardener/gardener/pkg/utils/managedresources"
 
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
+	// LabelKey is the key of a label used for the identification of VPNShoot pods.
+	LabelKey = "app"
+	// LabelValue is the value of a label used for the identification of VPNShoot pods.
+	LabelValue = "vpn-shoot"
 	// ManagedResourceName is the name of the ManagedResource containing the resource specifications.
 	ManagedResourceName = "shoot-core-vpnshoot"
-
+	// servicePort is the service port used for the VPN LoadBalancer.
+	servicePort int32 = 4314
+	// containerPort is the target port used for the VPN LoadBalancer.
+	containerPort int32 = 1194
+	//deploymentName is the name of the vpnShoot deployment
 	deploymentName = "vpn-shoot"
-	containerName  = "vpn-shoot"
 
-	serviceName = "vpn-test"
+	containerName = "vpn-shoot"
+	serviceName   = "vpn-test"
 )
 
 type Interface interface {
@@ -88,7 +99,39 @@ func (v *vpnShoot) WaitCleanup(ctx context.Context) error {
 }
 
 func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
-	registry := managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
+	var (
+		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
-	return registry.AddAllAndSerialize()
+		serviceAccount = &corev1.ServiceAccount{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "vpn-shoot",
+				Namespace: metav1.NamespaceSystem,
+				Labels:    map[string]string{LabelKey: LabelValue},
+			},
+		}
+
+		service = &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "vpn-shoot",
+				Namespace: metav1.NamespaceSystem,
+				Labels:    map[string]string{LabelKey: LabelValue},
+			},
+			Spec: corev1.ServiceSpec{
+				Selector: map[string]string{LabelKey: LabelValue},
+				Type:     corev1.ServiceTypeLoadBalancer,
+				Ports: []corev1.ServicePort{
+					{
+						Name:       "openvpn",
+						Port:       servicePort,
+						TargetPort: intstr.FromInt(int(containerPort)),
+						Protocol:   corev1.ProtocolTCP,
+					},
+				},
+			},
+		}
+	)
+	return registry.AddAllAndSerialize(
+		serviceAccount,
+		service,
+	)
 }
