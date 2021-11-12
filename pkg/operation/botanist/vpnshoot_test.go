@@ -15,6 +15,9 @@
 package botanist_test
 
 import (
+	"net"
+
+	"github.com/gardener/gardener/charts"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	mockkubernetes "github.com/gardener/gardener/pkg/client/kubernetes/mock"
 	"github.com/gardener/gardener/pkg/operation"
@@ -48,13 +51,18 @@ var _ = Describe("VPNShoot", func() {
 			kubernetesClient = mockkubernetes.NewMockInterface(ctrl)
 
 			botanist.K8sSeedClient = kubernetesClient
-			botanist.Shoot = &shootpkg.Shoot{}
+			botanist.Shoot = &shootpkg.Shoot{
+				Networks: &shootpkg.Networks{
+					Pods:     &net.IPNet{IP: []byte("192.168.0.0"), Mask: []byte("16")},
+					Services: &net.IPNet{IP: []byte("10.0.0.0"), Mask: []byte("24")},
+				},
+			}
 			botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{})
 		})
 
 		It("should successfully create a vpnshoot interface", func() {
 			kubernetesClient.EXPECT().Client()
-			botanist.ImageVector = imagevector.ImageVector{{Name: "vpn-shoot"}}
+			botanist.ImageVector = imagevector.ImageVector{{Name: charts.ImageNameVpnShoot}, {Name: charts.ImageNameVpnShootClient}}
 
 			VPNShoot, err := botanist.DefaultVPNShoot()
 			Expect(VPNShoot).NotTo(BeNil())

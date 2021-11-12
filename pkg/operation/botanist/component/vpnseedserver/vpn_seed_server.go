@@ -51,8 +51,8 @@ const (
 	GatewayPort = 8132
 	// VpnSeedServerTLSAuth is the name of seed server tlsauth Secret.
 	VpnSeedServerTLSAuth = "vpn-seed-server-tlsauth"
-	// vpnSeedServerDH is the name of seed server DH Secret.
-	vpnSeedServerDH = "vpn-seed-server-dh"
+	// VpnSeedServerDH is the name of seed server DH Secret.
+	VpnSeedServerDH = "vpn-seed-server-dh"
 	// VpnShootSecretName is the name of the shoot secret.
 	VpnShootSecretName = "vpn-shoot-client"
 	// DeploymentName is the name of vpn seed server deployment.
@@ -192,7 +192,7 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 
 		dhSecret = &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      vpnSeedServerDH,
+				Name:      VpnSeedServerDH,
 				Namespace: v.namespace,
 			},
 			Type: corev1.SecretTypeOpaque,
@@ -391,7 +391,7 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 									MountPath: mountPathTLSAuth,
 								},
 								{
-									Name:      vpnSeedServerDH,
+									Name:      VpnSeedServerDH,
 									MountPath: mountPathDH,
 								},
 							},
@@ -471,7 +471,7 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 							},
 						},
 						{
-							Name: vpnSeedServerDH,
+							Name: VpnSeedServerDH,
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName:  dhSecret.Name,
@@ -597,7 +597,7 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 		&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: "vpn-seed-server-envoy-config"}},
 		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: DeploymentName}},
 		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: VpnSeedServerTLSAuth}},
-		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: vpnSeedServerDH}},
+		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: VpnSeedServerDH}},
 		&networkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: DeploymentName, Namespace: v.namespace}},
 		&networkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: DeploymentName, Namespace: v.namespace}},
 		v.emptyEnvoyFilter(),
@@ -617,7 +617,7 @@ func (v *vpnSeedServer) Destroy(ctx context.Context) error {
 		&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: "vpn-seed-server-envoy-config"}},
 		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: DeploymentName}},
 		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: VpnSeedServerTLSAuth}},
-		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: vpnSeedServerDH}},
+		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: v.namespace, Name: VpnSeedServerDH}},
 		&networkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: DeploymentName, Namespace: v.namespace}},
 		&networkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: DeploymentName, Namespace: v.namespace}},
 		v.emptyEnvoyFilter(),

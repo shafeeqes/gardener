@@ -4,6 +4,7 @@ apiVersion: {{ template "rbacversion" . }}
 kind: ClusterRole
 metadata:
   name: system:gardener.cloud:vpn-seed
+  namespace: kube-system
   annotations:
     resources.gardener.cloud/mode: Ignore
 ---
@@ -11,5 +12,6 @@ apiVersion: {{ template "rbacversion" . }}
 kind: ClusterRoleBinding
 metadata:
   name: system:gardener.cloud:vpn-seed
+  namespace: kube-system
   annotations:
     resources.gardener.cloud/mode: Ignore

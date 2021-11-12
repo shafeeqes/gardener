@@ -28,17 +28,17 @@ var _ = Describe("Logging", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(loggingConfig.Parsers).To(Equal(`[PARSER]
-	Name        vpnshootParser
-	Format      regex
-	Regex       ^(?<time>[^0-9]*\d{1,2}\s+[^\s]+\s+\d{4})\s+(?<log>.*)
-	Time_Key    time
-	Time_Format %a %b%t%d %H:%M:%S %Y
+    Name        vpnShootParser
+    Format      regex
+    Regex       ^(?<time>[^0-9]*\d{1,2}\s+[^\s]+\s+\d{4})\s+(?<log>.*)
+    Time_Key    time
+    Time_Format %a %b%t%d %H:%M:%S %Y
 `))
 			Expect(loggingConfig.Filters).To(Equal(`[FILTER]
     Name                parser
     Match               kubernetes.*vpn-shoot*vpn-shoot*
     Key_Name            log
-    Parser              vpnshootParser
+    Parser              vpnShootParser
     Reserve_Data        True
 `))
 			Expect(loggingConfig.PodPrefix).To(BeEmpty())

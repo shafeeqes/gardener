@@ -293,6 +293,7 @@ func (h *Health) checkControlPlane(
 
 var versionConstraintGreaterEqual131 *semver.Constraints
 var versionConstraintGreaterEqual132 *semver.Constraints
+var versionConstraintGreaterEqual137 *semver.Constraints
 
 func init() {
 	var err error
@@ -301,7 +302,7 @@ func init() {
 	utilruntime.Must(err)
 	versionConstraintGreaterEqual132, err = semver.NewConstraint(">= 1.32")
 	utilruntime.Must(err)
-	versionConstraintGreaterEqual132, err = semver.NewConstraint(">= 1.36")
+	versionConstraintGreaterEqual137, err = semver.NewConstraint(">= 1.37")
 	utilruntime.Must(err)
 }
 
@@ -326,7 +327,7 @@ func (h *Health) checkSystemComponents(
 		managedResources = append(managedResources, coredns.ManagedResourceName)
 	}
 
-	if versionConstraintGreaterEqual132.Check(checker.gardenerVersion) {
+	if versionConstraintGreaterEqual137.Check(checker.gardenerVersion) {
 		// TODO: Add this ManagedResource unconditionally to the `managedResourcesShoot` in a future version.
 		managedResources = append(managedResources, vpnshoot.ManagedResourceName)
 	}

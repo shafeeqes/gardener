@@ -19,13 +19,13 @@ import (
 )
 
 const (
-	loggingParserName = "vpnshootParser"
+	loggingParserName = "vpnShootParser"
 	loggingParser     = `[PARSER]
-	Name        ` + loggingParserName + `
-	Format      regex
-	Regex       ^(?<time>[^0-9]*\d{1,2}\s+[^\s]+\s+\d{4})\s+(?<log>.*)
-	Time_Key    time
-	Time_Format %a %b%t%d %H:%M:%S %Y
+    Name        ` + loggingParserName + `
+    Format      regex
+    Regex       ^(?<time>[^0-9]*\d{1,2}\s+[^\s]+\s+\d{4})\s+(?<log>.*)
+    Time_Key    time
+    Time_Format %a %b%t%d %H:%M:%S %Y
 `
 	loggingFilter = `[FILTER]
     Name                parser

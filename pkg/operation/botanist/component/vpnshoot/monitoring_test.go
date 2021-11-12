@@ -28,7 +28,10 @@ var _ = Describe("Monitoring", func() {
 	var component component.MonitoringComponent
 
 	BeforeEach(func() {
-		component = New(nil, "", "", true)
+		values := Values{
+			VPAEnabled: true,
+		}
+		component = New(nil, "", values)
 	})
 
 	It("should successfully test the scrape config", func() {

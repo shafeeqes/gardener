@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCoreDNS(t *testing.T) {
+func TestVPNShoot(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Botanist Component VPNShoot Suite")
 }

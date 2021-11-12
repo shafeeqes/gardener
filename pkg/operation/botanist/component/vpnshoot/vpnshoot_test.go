@@ -41,7 +41,7 @@ var _ = Describe("VPNShoot", func() {
 	var (
 		ctx = context.TODO()
 
-		managedResourceName = "shoot-core-vpnshoot"
+		managedResourceName = "shoot-core-vpn-shoot"
 		namespace           = "some-namespace"
 		image               = "some-image:some-tag"
 
@@ -51,6 +51,52 @@ var _ = Describe("VPNShoot", func() {
 		managedResource       *resourcesv1alpha1.ManagedResource
 		managedResourceSecret *corev1.Secret
 
+		// secretTLSAuthYAML = `apiVersion: v1
+		// data:
+		//   bar: YmF6
+		// immutable: true
+		// kind: Secret
+		// metadata:
+		//   creationTimestamp: null
+		//   labels:
+		//   resources.gardener.cloud/garbage-collectable-reference: "true"
+		//   name: ` + SecretNameTLSAuth + `
+		//   namespace: kube-system
+		// type: Opaque
+		// `
+
+		// 		deploymentYAML = `apiVersion: apps/v1
+		// kind: Deployment
+		// metadata:
+		//   annotations:
+		//     ` + references.AnnotationKey(references.KindSecret, SecretName) + `: ` + SecretName + `
+		//   creationTimestamp: null
+		//   labels:
+		//     gardener.cloud/role: system-component
+		// 	app: vpn-shoot
+		//     origin: gardener
+		// spec:
+		//   revisionHistoryLimit: 1
+		//   replicas: 1
+		//   strategy:
+		//     rollingUpdate:
+		// 	  maxSurge: 100%
+		// 	  maxUnavailable: 0%
+		// 	type: RollingUpdate
+		//   selector:
+		//     matchLabels:
+		//       app: vpn-shoot
+		//   template:
+		//     metadata:
+		//       annotations:
+		// 	    ` + references.AnnotationKey(references.KindSecret, SecretName) + `: ` + SecretName + `
+		// 	  creationTimestamp: null
+		//       labels:
+		//         origin: gardener
+		//         gardener.cloud/role: system-component
+		//         app: vpn-shoot
+		//         type: tunnel
+		// `
 		clusterRoleYAML = `apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -142,8 +188,8 @@ spec:
     containerPolicies:
     - containerName: '*'
       minAllowed:
-        cpu: 50m
-        memory: 150Mi
+        cpu: 10m
+        memory: 10Mi
   targetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -156,7 +202,11 @@ status: {}
 
 	BeforeEach(func() {
 		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
-		vpnShoot = New(c, namespace, image, true)
+		values := Values{
+			Image:      image,
+			VPAEnabled: true,
+		}
+		vpnShoot = New(c, namespace, values)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
 			ObjectMeta: metav1.ObjectMeta{
@@ -212,7 +262,7 @@ status: {}
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 			Expect(managedResourceSecret.Type).To(Equal(corev1.SecretTypeOpaque))
-			Expect(managedResourceSecret.Data).To(HaveLen(6))
+			Expect(managedResourceSecret.Data).To(HaveLen(10))
 
 			Expect(string(managedResourceSecret.Data["clusterrole____system_gardener.cloud_vpn-seed.yaml"])).To(Equal(clusterRoleYAML))
 			Expect(string(managedResourceSecret.Data["clusterrolebinding____system_gardener.cloud_vpn-seed.yaml"])).To(Equal(clusterRoleBindingYAML))
@@ -220,6 +270,8 @@ status: {}
 			Expect(string(managedResourceSecret.Data["serviceaccount__kube-system__vpn-shoot.yaml"])).To(Equal(serviceAccountYAML))
 			Expect(string(managedResourceSecret.Data["service__kube-system__vpn-shoot.yaml"])).To(Equal(serviceYAML))
 			Expect(string(managedResourceSecret.Data["verticalpodautoscaler__kube-system__vpn-shoot.yaml"])).To(Equal(vpaYAML))
+			//Expect(string(managedResourceSecret.Data["secret__kube-system__"+SecretNameTLSAuth+".yaml"])).To(Equal(secretTLSAuthYAML))
+			//Expect(string(managedResourceSecret.Data["deployment__kube-system__vpn-shoot.yaml"])).To(Equal(deploymentYAML))
 
 		})
 	})

@@ -102,7 +102,7 @@ metric_relabel_configs:
 )
 
 // ScrapeConfigs returns the scrape configurations for Prometheus.
-func (c *vpnShoot) ScrapeConfigs() ([]string, error) {
+func (v *vpnShoot) ScrapeConfigs() ([]string, error) {
 	return []string{monitoringScrapeConfig}, nil
 }
 
