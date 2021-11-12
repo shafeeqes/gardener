@@ -20,7 +20,6 @@ import (
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
-	"github.com/gardener/gardener/pkg/operation/botanist/component"
 	. "github.com/gardener/gardener/pkg/operation/botanist/component/vpnshoot"
 	"github.com/gardener/gardener/pkg/utils/retry"
 	retryfake "github.com/gardener/gardener/pkg/utils/retry/fake"
@@ -46,35 +45,13 @@ var _ = Describe("VPNShoot", func() {
 		namespace           = "some-namespace"
 		image               = "some-image:some-tag"
 
-		c         client.Client
-		component component.DeployWaiter
+		c        client.Client
+		vpnShoot Interface
 
 		managedResource       *resourcesv1alpha1.ManagedResource
 		managedResourceSecret *corev1.Secret
-	)
 
-	BeforeEach(func() {
-		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
-		component = New(c, namespace, image)
-
-		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
-		}
-		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
-		}
-	})
-
-	Describe("#Deploy", func() {
-		It("should succesfully deploy all resources", func() {
-			var (
-				clusterRoleYAML = `apiVersion: rbac.authorization.k8s.io/v1
+		clusterRoleYAML = `apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
@@ -89,7 +66,7 @@ rules:
   verbs:
   - get
 `
-				clusterRoleBindingYAML = `apiVersion: rbac.authorization.k8s.io/v1
+		clusterRoleBindingYAML = `apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   annotations:
@@ -104,7 +81,7 @@ subjects:
 - kind: User
   name: vpn-seed
 `
-				networkPolicyYAML = `apiVersion: networking.k8s.io/v1
+		networkPolicyYAML = `apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   annotations:
@@ -125,7 +102,7 @@ spec:
   - Egress
   - Ingress
 `
-				serviceAccountYAML = `apiVersion: v1
+		serviceAccountYAML = `apiVersion: v1
 kind: ServiceAccount
 metadata:
   creationTimestamp: null
@@ -134,7 +111,7 @@ metadata:
   name: vpn-shoot
   namespace: kube-system
 `
-				serviceYAML = `apiVersion: v1
+		serviceYAML = `apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
@@ -154,7 +131,50 @@ spec:
 status:
   loadBalancer: {}
 `
-			)
+		vpaYAML = `apiVersion: autoscaling.k8s.io/v1beta2
+kind: VerticalPodAutoscaler
+metadata:
+  creationTimestamp: null
+  name: vpn-shoot
+  namespace: kube-system
+spec:
+  resourcePolicy:
+    containerPolicies:
+    - containerName: '*'
+      minAllowed:
+        cpu: 50m
+        memory: 150Mi
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vpn-shoot
+  updatePolicy:
+    updateMode: Auto
+status: {}
+`
+	)
+
+	BeforeEach(func() {
+		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
+		vpnShoot = New(c, namespace, image, true)
+
+		managedResource = &resourcesv1alpha1.ManagedResource{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      managedResourceName,
+				Namespace: namespace,
+			},
+		}
+		managedResourceSecret = &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "managedresource-" + managedResource.Name,
+				Namespace: namespace,
+			},
+		}
+	})
+
+	//TODO(shafeeqes): Add test for w/0 VPA case
+	Describe("#Deploy", func() {
+		It("should succesfully deploy all resources", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(MatchError(apierrors.NewNotFound(schema.GroupResource{
 				Group:    resourcesv1alpha1.SchemeGroupVersion.Group,
@@ -166,7 +186,7 @@ status:
 				Resource: "secrets",
 			}, managedResourceSecret.Name)))
 
-			Expect(component.Deploy(ctx)).To(Succeed())
+			Expect(vpnShoot.Deploy(ctx)).To(Succeed())
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
@@ -192,13 +212,14 @@ status:
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 			Expect(managedResourceSecret.Type).To(Equal(corev1.SecretTypeOpaque))
-			Expect(managedResourceSecret.Data).To(HaveLen(5))
+			Expect(managedResourceSecret.Data).To(HaveLen(6))
 
 			Expect(string(managedResourceSecret.Data["clusterrole____system_gardener.cloud_vpn-seed.yaml"])).To(Equal(clusterRoleYAML))
 			Expect(string(managedResourceSecret.Data["clusterrolebinding____system_gardener.cloud_vpn-seed.yaml"])).To(Equal(clusterRoleBindingYAML))
 			Expect(string(managedResourceSecret.Data["networkpolicy__kube-system__gardener.cloud--allow-vpn.yaml"])).To(Equal(networkPolicyYAML))
 			Expect(string(managedResourceSecret.Data["serviceaccount__kube-system__vpn-shoot.yaml"])).To(Equal(serviceAccountYAML))
 			Expect(string(managedResourceSecret.Data["service__kube-system__vpn-shoot.yaml"])).To(Equal(serviceYAML))
+			Expect(string(managedResourceSecret.Data["verticalpodautoscaler__kube-system__vpn-shoot.yaml"])).To(Equal(vpaYAML))
 
 		})
 	})
@@ -211,7 +232,7 @@ status:
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 
-			Expect(component.Destroy(ctx)).To(Succeed())
+			Expect(vpnShoot.Destroy(ctx)).To(Succeed())
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(MatchError(apierrors.NewNotFound(schema.GroupResource{Group: resourcesv1alpha1.SchemeGroupVersion.Group, Resource: "managedresources"}, managedResource.Name)))
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(MatchError(apierrors.NewNotFound(schema.GroupResource{Group: corev1.SchemeGroupVersion.Group, Resource: "secrets"}, managedResourceSecret.Name)))
@@ -238,7 +259,7 @@ status:
 
 		Describe("#Wait", func() {
 			It("should fail because reading the ManagedResource fails", func() {
-				Expect(component.Wait(ctx)).To(MatchError(ContainSubstring("not found")))
+				Expect(vpnShoot.Wait(ctx)).To(MatchError(ContainSubstring("not found")))
 			})
 
 			It("should fail because the ManagedResource doesn't become healthy", func() {
@@ -265,7 +286,7 @@ status:
 					},
 				}))
 
-				Expect(component.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
+				Expect(vpnShoot.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
 			})
 
 			It("should successfully wait for the managed resource to become healthy", func() {
@@ -292,7 +313,7 @@ status:
 					},
 				}))
 
-				Expect(component.Wait(ctx)).To(Succeed())
+				Expect(vpnShoot.Wait(ctx)).To(Succeed())
 			})
 		})
 
@@ -302,11 +323,11 @@ status:
 
 				Expect(c.Create(ctx, managedResource)).To(Succeed())
 
-				Expect(component.WaitCleanup(ctx)).To(MatchError(ContainSubstring("still exists")))
+				Expect(vpnShoot.WaitCleanup(ctx)).To(MatchError(ContainSubstring("still exists")))
 			})
 
 			It("should not return an error when it's already removed", func() {
-				Expect(component.WaitCleanup(ctx)).To(Succeed())
+				Expect(vpnShoot.WaitCleanup(ctx)).To(Succeed())
 			})
 		})
 	})

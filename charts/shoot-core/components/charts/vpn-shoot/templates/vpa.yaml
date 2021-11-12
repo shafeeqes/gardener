@@ -4,11 +4,6 @@ kind: VerticalPodAutoscaler
 metadata:
   name: vpn-shoot
   namespace: {{ .Release.Namespace }}
-spec:
-  targetRef:
-    apiVersion: {{ include "deploymentversion" . }}
-    kind: Deployment
-    name: vpn-shoot
-  updatePolicy:
-    updateMode: "Auto"
+  annotations:
+    resources.gardener.cloud/mode: Ignore
 {{- end }}

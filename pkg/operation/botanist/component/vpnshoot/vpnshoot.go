@@ -24,11 +24,15 @@ import (
 	"github.com/gardener/gardener/pkg/operation/botanist/component"
 	"github.com/gardener/gardener/pkg/utils/managedresources"
 
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	autoscalingv1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -60,18 +64,21 @@ func New(
 	client client.Client,
 	namespace string,
 	image string,
+	vpaEnabled bool,
 ) Interface {
 	return &vpnShoot{
-		client:    client,
-		namespace: namespace,
-		image:     image,
+		client:     client,
+		namespace:  namespace,
+		image:      image,
+		vpaEnabled: vpaEnabled,
 	}
 }
 
 type vpnShoot struct {
-	client    client.Client
-	namespace string
-	image     string
+	client     client.Client
+	namespace  string
+	image      string
+	vpaEnabled bool
 }
 
 func (v *vpnShoot) Deploy(ctx context.Context) error {
@@ -155,6 +162,7 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 				PolicyTypes: []networkingv1.PolicyType{networkingv1.PolicyTypeEgress, networkingv1.PolicyTypeIngress},
 			},
 		}
+
 		serviceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "vpn-shoot",
@@ -182,12 +190,46 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 				},
 			},
 		}
+		vpa *autoscalingv1beta2.VerticalPodAutoscaler
 	)
+
+	if v.vpaEnabled {
+		vpaUpdateMode := autoscalingv1beta2.UpdateModeAuto
+		vpa = &autoscalingv1beta2.VerticalPodAutoscaler{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "vpn-shoot",
+				Namespace: metav1.NamespaceSystem,
+			},
+			Spec: autoscalingv1beta2.VerticalPodAutoscalerSpec{
+				TargetRef: &autoscalingv1.CrossVersionObjectReference{
+					APIVersion: appsv1.SchemeGroupVersion.String(),
+					Kind:       "Deployment",
+					Name:       deploymentName,
+				},
+				UpdatePolicy: &autoscalingv1beta2.PodUpdatePolicy{
+					UpdateMode: &vpaUpdateMode,
+				},
+				ResourcePolicy: &autoscalingv1beta2.PodResourcePolicy{
+					ContainerPolicies: []autoscalingv1beta2.ContainerResourcePolicy{
+						{
+							ContainerName: autoscalingv1beta2.DefaultContainerResourcePolicy,
+							MinAllowed: corev1.ResourceList{
+								corev1.ResourceCPU:    resource.MustParse("50m"),
+								corev1.ResourceMemory: resource.MustParse("150Mi"),
+							},
+						},
+					},
+				},
+			},
+		}
+	}
+
 	return registry.AddAllAndSerialize(
 		clusterRole,
 		clusterRoleBinding,
 		networkPolicy,
 		serviceAccount,
 		service,
+		vpa,
 	)
 }

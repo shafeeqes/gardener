@@ -35,7 +35,6 @@ import (
 	"github.com/gardener/gardener/pkg/utils/flow"
 	gutil "github.com/gardener/gardener/pkg/utils/gardener"
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
-	"github.com/gardener/gardener/pkg/utils/secrets"
 	secretutils "github.com/gardener/gardener/pkg/utils/secrets"
 
 	corev1 "k8s.io/api/core/v1"
@@ -178,7 +177,7 @@ func (b *Botanist) DeploySecrets(ctx context.Context) error {
 	}
 
 	if b.Shoot.WantsVerticalPodAutoscaler {
-		if err := b.storeStaticTokenAsSecrets(ctx, secretsManager.StaticToken, secretsManager.DeployedSecrets[v1beta1constants.SecretNameCACluster].Data[secrets.DataKeyCertificateCA], vpaSecrets); err != nil {
+		if err := b.storeStaticTokenAsSecrets(ctx, secretsManager.StaticToken, secretsManager.DeployedSecrets[v1beta1constants.SecretNameCACluster].Data[secretutils.DataKeyCertificateCA], vpaSecrets); err != nil {
 			return err
 		}
 	}
