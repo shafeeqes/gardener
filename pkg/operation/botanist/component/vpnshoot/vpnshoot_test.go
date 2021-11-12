@@ -74,6 +74,36 @@ var _ = Describe("VPNShoot", func() {
 	Describe("#Deploy", func() {
 		It("should succesfully deploy all resources", func() {
 			var (
+				clusterRoleYAML = `apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: system:gardener.cloud:vpn-seed
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - vpn-shoot
+  resources:
+  - services
+  verbs:
+  - get
+`
+				clusterRoleBindingYAML = `apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    resources.gardener.cloud/delete-on-invalid-update: "true"
+  creationTimestamp: null
+  name: system:gardener.cloud:vpn-seed
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:gardener.cloud:vpn-seed
+subjects:
+- kind: User
+  name: vpn-seed
+`
 				networkPolicyYAML = `apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -162,8 +192,10 @@ status:
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 			Expect(managedResourceSecret.Type).To(Equal(corev1.SecretTypeOpaque))
-			Expect(managedResourceSecret.Data).To(HaveLen(3))
+			Expect(managedResourceSecret.Data).To(HaveLen(5))
 
+			Expect(string(managedResourceSecret.Data["clusterrole____system_gardener.cloud_vpn-seed.yaml"])).To(Equal(clusterRoleYAML))
+			Expect(string(managedResourceSecret.Data["clusterrolebinding____system_gardener.cloud_vpn-seed.yaml"])).To(Equal(clusterRoleBindingYAML))
 			Expect(string(managedResourceSecret.Data["networkpolicy__kube-system__gardener.cloud--allow-vpn.yaml"])).To(Equal(networkPolicyYAML))
 			Expect(string(managedResourceSecret.Data["serviceaccount__kube-system__vpn-shoot.yaml"])).To(Equal(serviceAccountYAML))
 			Expect(string(managedResourceSecret.Data["service__kube-system__vpn-shoot.yaml"])).To(Equal(serviceYAML))
