@@ -74,6 +74,27 @@ var _ = Describe("VPNShoot", func() {
 	Describe("#Deploy", func() {
 		It("should succesfully deploy all resources", func() {
 			var (
+				networkPolicyYAML = `apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    gardener.cloud/description: Allows the VPN to communicate with shoot components
+      and makes the VPN reachable from the seed.
+  creationTimestamp: null
+  name: gardener.cloud--allow-vpn
+  namespace: kube-system
+spec:
+  egress:
+  - {}
+  ingress:
+  - {}
+  podSelector:
+    matchLabels:
+      app: vpn-shoot
+  policyTypes:
+  - Egress
+  - Ingress
+`
 				serviceAccountYAML = `apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -141,7 +162,9 @@ status:
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 			Expect(managedResourceSecret.Type).To(Equal(corev1.SecretTypeOpaque))
-			Expect(managedResourceSecret.Data).To(HaveLen(2))
+			Expect(managedResourceSecret.Data).To(HaveLen(3))
+
+			Expect(string(managedResourceSecret.Data["networkpolicy__kube-system__gardener.cloud--allow-vpn.yaml"])).To(Equal(networkPolicyYAML))
 			Expect(string(managedResourceSecret.Data["serviceaccount__kube-system__vpn-shoot.yaml"])).To(Equal(serviceAccountYAML))
 			Expect(string(managedResourceSecret.Data["service__kube-system__vpn-shoot.yaml"])).To(Equal(serviceYAML))
 

@@ -18,11 +18,13 @@ import (
 	"context"
 	"time"
 
+	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	"github.com/gardener/gardener/pkg/operation/botanist/component"
 	"github.com/gardener/gardener/pkg/utils/managedresources"
 
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -102,6 +104,23 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 	var (
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
+		networkPolicy = &networkingv1.NetworkPolicy{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "gardener.cloud--allow-vpn",
+				Namespace: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					v1beta1constants.GardenerDescription: "Allows the VPN to communicate with shoot components and makes the VPN reachable from the seed.",
+				},
+			},
+			Spec: networkingv1.NetworkPolicySpec{
+				PodSelector: metav1.LabelSelector{
+					MatchLabels: map[string]string{LabelKey: LabelValue},
+				},
+				Egress:      []networkingv1.NetworkPolicyEgressRule{{}},
+				Ingress:     []networkingv1.NetworkPolicyIngressRule{{}},
+				PolicyTypes: []networkingv1.PolicyType{networkingv1.PolicyTypeEgress, networkingv1.PolicyTypeIngress},
+			},
+		}
 		serviceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "vpn-shoot",
@@ -131,6 +150,7 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 		}
 	)
 	return registry.AddAllAndSerialize(
+		networkPolicy,
 		serviceAccount,
 		service,
 	)
