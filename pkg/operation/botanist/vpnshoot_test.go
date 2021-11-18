@@ -49,7 +49,6 @@ var _ = Describe("VPNShoot", func() {
 
 		BeforeEach(func() {
 			kubernetesClient = mockkubernetes.NewMockInterface(ctrl)
-
 			botanist.K8sSeedClient = kubernetesClient
 			botanist.Shoot = &shootpkg.Shoot{
 				Networks: &shootpkg.Networks{
@@ -60,22 +59,32 @@ var _ = Describe("VPNShoot", func() {
 			botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{})
 		})
 
-		It("should successfully create a vpnshoot interface", func() {
+		It("should successfully create a vpnShoot interface for ReversedVPN not enabled case", func() {
 			kubernetesClient.EXPECT().Client()
-			botanist.ImageVector = imagevector.ImageVector{{Name: charts.ImageNameVpnShoot}, {Name: charts.ImageNameVpnShootClient}}
+			botanist.ImageVector = imagevector.ImageVector{{Name: charts.ImageNameVpnShoot}}
+			botanist.Shoot.ReversedVPNEnabled = false
 
-			VPNShoot, err := botanist.DefaultVPNShoot()
-			Expect(VPNShoot).NotTo(BeNil())
+			vpnShoot, err := botanist.DefaultVPNShoot()
+			Expect(vpnShoot).NotTo(BeNil())
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should successfully create a vpnShoot interface for ReversedVPN enabled case", func() {
+			kubernetesClient.EXPECT().Client()
+			botanist.ImageVector = imagevector.ImageVector{{Name: charts.ImageNameVpnShootClient}}
+			botanist.Shoot.ReversedVPNEnabled = true
+
+			vpnShoot, err := botanist.DefaultVPNShoot()
+			Expect(vpnShoot).NotTo(BeNil())
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should return an error because the image cannot be found", func() {
 			botanist.ImageVector = imagevector.ImageVector{}
 
-			VPNShoot, err := botanist.DefaultVPNShoot()
-			Expect(VPNShoot).To(BeNil())
+			vpnShoot, err := botanist.DefaultVPNShoot()
+			Expect(vpnShoot).To(BeNil())
 			Expect(err).To(HaveOccurred())
 		})
 	})
-
 })
