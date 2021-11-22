@@ -31,6 +31,7 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,11 +82,9 @@ type Values struct {
 	// PodAnnotations is the set of additional annotations to be used for the pods.
 	PodAnnotations map[string]string
 	// VPAEnabled marks whether VerticalPodAutoscaler is enabled for the shoot.
-	VPAEnabled bool
-	//ReversedVPNValues contains the specifications for the ReversedVPN.
+	VPAEnabled        bool
 	ReversedVPNValues ReversedVPNValues
-	//NetworkValues contains the network related values.
-	NetworkValues NetworkValues
+	NetworkValues     NetworkValues
 }
 
 // New creates a new instance of DeployWaiter for vpnshoot
@@ -192,6 +191,7 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 				Labels:    getLabels(),
 			},
 		}
+
 		networkPolicy = &networkingv1.NetworkPolicy{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "gardener.cloud--allow-vpn",
@@ -209,13 +209,77 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 				PolicyTypes: []networkingv1.PolicyType{networkingv1.PolicyTypeEgress, networkingv1.PolicyTypeIngress},
 			},
 		}
+
+		podSecurityPolicy = &policyv1beta1.PodSecurityPolicy{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "gardener.kube-system.vpn-shoot",
+			},
+			Spec: policyv1beta1.PodSecurityPolicySpec{
+				Privileged: true,
+				Volumes: []policyv1beta1.FSType{
+					"secret",
+					"emptyDir",
+				},
+				AllowedCapabilities: []corev1.Capability{
+					"NET_ADMIN",
+				},
+				RunAsUser: policyv1beta1.RunAsUserStrategyOptions{
+					Rule: policyv1beta1.RunAsUserStrategyRunAsAny,
+				},
+				SELinux: policyv1beta1.SELinuxStrategyOptions{
+					Rule: policyv1beta1.SELinuxStrategyRunAsAny,
+				},
+				SupplementalGroups: policyv1beta1.SupplementalGroupsStrategyOptions{
+					Rule: policyv1beta1.SupplementalGroupsStrategyRunAsAny,
+				},
+				FSGroup: policyv1beta1.FSGroupStrategyOptions{
+					Rule: policyv1beta1.FSGroupStrategyRunAsAny,
+				},
+			},
+		}
+
+		clusterRolePSP = &rbacv1.ClusterRole{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "gardener.cloud:psp:kube-system:vpn-shoot",
+			},
+			Rules: []rbacv1.PolicyRule{
+				{
+					APIGroups:     []string{"policy", "extensions"},
+					ResourceNames: []string{"gardener.kube-system.vpn-shoot"},
+					Resources:     []string{"podsecuritypolicies"},
+					Verbs:         []string{"use"},
+				},
+			},
+		}
+
+		roleBindingPSP = &rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "gardener.cloud:psp:vpn-shoot",
+				Namespace: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
+				},
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: rbacv1.GroupName,
+				Kind:     "ClusterRole",
+				Name:     "gardener.cloud:psp:kube-system:vpn-shoot",
+			},
+			Subjects: []rbacv1.Subject{{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      serviceAccount.Name,
+				Namespace: serviceAccount.Namespace,
+			}},
+		}
+
 		deployment = &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      deploymentName,
 				Namespace: metav1.NamespaceSystem,
 				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleSystemComponent,
-					v1beta1constants.LabelApp:   LabelValue,
+					v1beta1constants.GardenRole:     v1beta1constants.GardenRoleSystemComponent,
+					v1beta1constants.LabelApp:       LabelValue,
+					managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
 				},
 			},
 			Spec: appsv1.DeploymentSpec{
@@ -374,6 +438,9 @@ func (v *vpnShoot) computeResourcesData() (map[string][]byte, error) {
 		clusterRoleBinding,
 		service,
 		vpa,
+		podSecurityPolicy,
+		clusterRolePSP,
+		roleBindingPSP,
 	)
 }
 
@@ -387,6 +454,7 @@ type Secrets struct {
 	Server component.Secret
 }
 
+//ReversedVPNValues contains the configuration values for the ReversedVPN.
 type ReversedVPNValues struct {
 	// Enabled marks whether ReversedVPN is enabled for the shoot
 	Enabled bool
@@ -398,6 +466,7 @@ type ReversedVPNValues struct {
 	OpenVPNPort int32
 }
 
+//NetworkValues contains the configuration values for the network.
 type NetworkValues struct {
 	// PodCIDR is the CIDR of the pod network.
 	PodCIDR string

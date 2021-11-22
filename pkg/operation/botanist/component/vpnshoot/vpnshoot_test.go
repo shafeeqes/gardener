@@ -183,6 +183,60 @@ metadata:
   name: vpn-shoot
   namespace: kube-system
 `
+			podSecurityPolicyYAML = `apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  creationTimestamp: null
+  name: gardener.kube-system.vpn-shoot
+spec:
+  allowedCapabilities:
+  - NET_ADMIN
+  fsGroup:
+    rule: RunAsAny
+  privileged: true
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - secret
+  - emptyDir
+`
+			clusterRolePSPYAML = `apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: gardener.cloud:psp:kube-system:vpn-shoot
+rules:
+- apiGroups:
+  - policy
+  - extensions
+  resourceNames:
+  - gardener.kube-system.vpn-shoot
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+`
+			roleBindingPSPYAML = `apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    resources.gardener.cloud/delete-on-invalid-update: "true"
+  creationTimestamp: null
+  name: gardener.cloud:psp:vpn-shoot
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gardener.cloud:psp:kube-system:vpn-shoot
+subjects:
+- kind: ServiceAccount
+  name: vpn-shoot
+  namespace: kube-system
+`
 			vpaYAML = `apiVersion: autoscaling.k8s.io/v1beta2
 kind: VerticalPodAutoscaler
 metadata:
@@ -204,23 +258,23 @@ spec:
     updateMode: Auto
 status: {}
 `
-			deploymentYAMLFor = func(reversedVPNEnabled bool, vpaEnabled bool) string {
+			deploymentYAMLFor = func(reversedVPNEnabled, vpaEnabled bool) string {
 				out := `apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-`
+  annotations:`
 				if !reversedVPNEnabled {
-					out += `    ` + references.AnnotationKey(references.KindSecret, secretNameDHTest) + `: ` + secretNameDHTest + `
-`
+					out += `
+    ` + references.AnnotationKey(references.KindSecret, secretNameDHTest) + `: ` + secretNameDHTest + ``
 				}
-
-				out += `    ` + references.AnnotationKey(references.KindSecret, secretNameTest) + `: ` + secretNameTest + `
+				out += `
+    ` + references.AnnotationKey(references.KindSecret, secretNameTest) + `: ` + secretNameTest + `
     ` + references.AnnotationKey(references.KindSecret, secretNameTLSAuthTest) + `: ` + secretNameTLSAuthTest + `
   creationTimestamp: null
   labels:
     app: vpn-shoot
     gardener.cloud/role: system-component
+    origin: gardener
   name: vpn-shoot
   namespace: kube-system
 spec:
@@ -236,14 +290,14 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-`
+      annotations:`
 				if !reversedVPNEnabled {
-					out += `        ` + references.AnnotationKey(references.KindSecret, secretNameDHTest) + `: ` + secretNameDHTest + `
-`
+					out += `
+        ` + references.AnnotationKey(references.KindSecret, secretNameDHTest) + `: ` + secretNameDHTest + ``
 				}
 
-				out += `        ` + references.AnnotationKey(references.KindSecret, secretNameTest) + `: ` + secretNameTest + `
+				out += `
+        ` + references.AnnotationKey(references.KindSecret, secretNameTest) + `: ` + secretNameTest + `
         ` + references.AnnotationKey(references.KindSecret, secretNameTLSAuthTest) + `: ` + secretNameTLSAuthTest + `
       creationTimestamp: null
       labels:
@@ -260,34 +314,34 @@ spec:
         - name: POD_NETWORK
           value: ` + podNetwork + `
         - name: NODE_NETWORK
-          value: ` + nodeNetwork + `
-`
+          value: ` + nodeNetwork + ``
 				if reversedVPNEnabled {
-					out += `        - name: ENDPOINT
+					out += `
+        - name: ENDPOINT
           value: ` + endPoint + `
         - name: OPENVPN_PORT
           value: "` + strconv.Itoa(int(openVPNPort)) + `"
         - name: REVERSED_VPN_HEADER
-          value: ` + reversedVPNHeader + `
-`
+          value: ` + reversedVPNHeader + ``
 				}
-				out += `        image: ` + image + `
+				out += `
+        image: ` + image + `
         imagePullPolicy: IfNotPresent
         name: vpn-shoot
-        resources:
-`
+        resources:`
 				if vpaEnabled {
-					out += `          limits:
+					out += `
+          limits:
             cpu: 400m
-            memory: 400Mi
-`
+            memory: 400Mi`
 				} else {
-					out += `          limits:
+					out += `
+          limits:
             cpu: "1"
-            memory: 1Gi
-`
+            memory: 1Gi`
 				}
-				out += `          requests:
+				out += `
+          requests:
             cpu: 100m
             memory: 100Mi
         securityContext:
@@ -322,16 +376,16 @@ spec:
       - name: vpn-shoot-tlsauth
         secret:
           defaultMode: 400
-          secretName: ` + secretNameTLSAuthTest + `
-`
+          secretName: ` + secretNameTLSAuthTest + ``
 				if !reversedVPNEnabled {
-					out += `      - name: vpn-shoot-dh
+					out += `
+      - name: vpn-shoot-dh
         secret:
           defaultMode: 400
-          secretName: ` + secretNameDHTest + `
-`
+          secretName: ` + secretNameDHTest + ``
 				}
-				out += `status: {}
+				out += `
+status: {}
 `
 				return out
 			}
@@ -424,6 +478,9 @@ status:
 			Expect(string(managedResourceSecret.Data["serviceaccount__kube-system__vpn-shoot.yaml"])).To(Equal(serviceAccountYAML))
 			Expect(string(managedResourceSecret.Data["secret__kube-system__"+secretNameTest+".yaml"])).To(Equal(secretYAML))
 			Expect(string(managedResourceSecret.Data["secret__kube-system__"+secretNameTLSAuthTest+".yaml"])).To(Equal(secretTLSAuthYAML))
+			Expect(string(managedResourceSecret.Data["podsecuritypolicy____gardener.kube-system.vpn-shoot.yaml"])).To(Equal(podSecurityPolicyYAML))
+			Expect(string(managedResourceSecret.Data["clusterrole____gardener.cloud_psp_kube-system_vpn-shoot.yaml"])).To(Equal(clusterRolePSPYAML))
+			Expect(string(managedResourceSecret.Data["rolebinding__kube-system__gardener.cloud_psp_vpn-shoot.yaml"])).To(Equal(roleBindingPSPYAML))
 		})
 
 		Context("VPNShoot with ReversedVPN not enabled", func() {
@@ -445,7 +502,6 @@ status:
 				})
 
 				It("should succesfully deploy all resources", func() {
-					Expect(managedResourceSecret.Data).To(HaveLen(9))
 					Expect(string(managedResourceSecret.Data["deployment__kube-system__vpn-shoot.yaml"])).To(Equal(deploymentYAMLFor(false, false)))
 				})
 			})
@@ -456,7 +512,6 @@ status:
 				})
 
 				It("should succesfully deploy all resources", func() {
-					Expect(managedResourceSecret.Data).To(HaveLen(10))
 					Expect(string(managedResourceSecret.Data["verticalpodautoscaler__kube-system__vpn-shoot.yaml"])).To(Equal(vpaYAML))
 					Expect(string(managedResourceSecret.Data["deployment__kube-system__vpn-shoot.yaml"])).To(Equal(deploymentYAMLFor(false, true)))
 				})
@@ -474,7 +529,6 @@ status:
 				})
 
 				It("should succesfully deploy all resources", func() {
-					Expect(managedResourceSecret.Data).To(HaveLen(5))
 					Expect(string(managedResourceSecret.Data["deployment__kube-system__vpn-shoot.yaml"])).To(Equal(deploymentYAMLFor(true, false)))
 				})
 			})
@@ -485,7 +539,6 @@ status:
 				})
 
 				It("should succesfully deploy all resources", func() {
-					Expect(managedResourceSecret.Data).To(HaveLen(6))
 					Expect(string(managedResourceSecret.Data["verticalpodautoscaler__kube-system__vpn-shoot.yaml"])).To(Equal(vpaYAML))
 					Expect(string(managedResourceSecret.Data["deployment__kube-system__vpn-shoot.yaml"])).To(Equal(deploymentYAMLFor(true, true)))
 				})
