@@ -83,13 +83,6 @@ filter-kubernetes.conf: |-
 
   [FILTER]
       Name                parser
-      Match               kubernetes.*addons-nginx-ingress-controller*nginx-ingress-controller*
-      Key_Name            log
-      Parser              kubeapiserverParser
-      Reserve_Data        True
-
-  [FILTER]
-      Name                parser
       Match               kubernetes.*node-exporter*node-exporter*
       Key_Name            log
       Parser              nodeexporterParser

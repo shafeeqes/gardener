@@ -602,6 +602,7 @@ func RunReconcileSeedFlow(
 			dependencywatchdog.CentralLoggingConfiguration,
 			seedadmissioncontroller.CentralLoggingConfiguration,
 			resourcemanager.CentralLoggingConfiguration,
+			nginxingress.CentralLoggingConfiguration,
 			// shoot control plane components
 			etcd.CentralLoggingConfiguration,
 			clusterautoscaler.CentralLoggingConfiguration,
