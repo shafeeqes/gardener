@@ -26,6 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	autoscalingv1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
@@ -38,6 +39,7 @@ const (
 	// LabelAppValue is the value of a label used for the identification of vpn-shoot pods.
 	LabelAppValue = "nginx-ingress"
 
+	name           = "nginx-ingress"
 	controllerName = "nginx-ingress-controller"
 	deploymentName = "nginx-ingress"
 	serviceName    = "nginx-ingress"
@@ -112,6 +114,67 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 
+		clusterRole = &rbacv1.ClusterRole{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   "gardener.cloud:seed:" + name,
+				Labels: getLabels(),
+			},
+			Rules: []rbacv1.PolicyRule{
+				{
+					APIGroups: []string{""},
+					Resources: []string{"endpoints", "nodes", "pods", "secrets"},
+					Verbs:     []string{"list", "watch"},
+				},
+				{
+					APIGroups: []string{""},
+					Resources: []string{"nodes"},
+					Verbs:     []string{"get"},
+				},
+				{
+					APIGroups: []string{""},
+					Resources: []string{"services", "configmaps"},
+					Verbs:     []string{"get", "list", "update", "watch"},
+				},
+				{
+					APIGroups: []string{"extensions", "\"networking.k8s.io\""},
+					Resources: []string{"ingresses"},
+					Verbs:     []string{"get", "list", "watch"},
+				},
+				{
+					APIGroups: []string{""},
+					Resources: []string{"events"},
+					Verbs:     []string{"create", "patch"},
+				},
+				{
+					APIGroups: []string{"extensions", "\"networking.k8s.io\""},
+					Resources: []string{"ingresses/status"},
+					Verbs:     []string{"update"},
+				},
+				{
+					APIGroups: []string{"\"networking.k8s.io\""},
+					Resources: []string{"ingressclasses"},
+					Verbs:     []string{"get", "list", "watch"},
+				},
+			},
+		}
+
+		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   "gardener.cloud:seed:" + name,
+				Labels: getLabels(),
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: rbacv1.GroupName,
+				Kind:     "ClusterRole",
+				Name:     clusterRole.Name,
+			},
+			Subjects: []rbacv1.Subject{{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      serviceAccount.Name,
+				Namespace: serviceAccount.Namespace,
+			}},
+		}
+
 		deployment = &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      controllerName,
@@ -151,8 +214,15 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 	)
+
 	return registry.AddAllAndSerialize(
 		serviceAccount,
 		vpa,
-		deployment)
+		deployment,
+		clusterRole,
+		clusterRoleBinding)
+}
+
+func getLabels() map[string]string {
+	return map[string]string{v1beta1constants.LabelApp: LabelAppValue}
 }
