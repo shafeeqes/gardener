@@ -26,9 +26,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
+	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	autoscalingv1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -39,10 +41,22 @@ const (
 	// LabelAppValue is the value of a label used for the identification of vpn-shoot pods.
 	LabelAppValue = "nginx-ingress"
 
-	name           = "nginx-ingress"
-	controllerName = "nginx-ingress-controller"
-	deploymentName = "nginx-ingress"
-	serviceName    = "nginx-ingress"
+	labelKeyComponent    = "component"
+	labelValueController = "controller"
+	labelValueBackend    = "nginx-ingress-k8s-backend"
+
+	name                  = "nginx-ingress"
+	controllerName        = "nginx-ingress-controller"
+	deploymentName        = "nginx-ingress"
+	serviceNameController = "nginx-ingress-controller"
+	serviceNameBackend    = "nginx-ingress-k8s-backend"
+
+	servicePortControllerHttp  int32 = 80
+	targetPortControllerHttp   int32 = 80
+	servicePortControllerHttps int32 = 443
+	targetPortControllerHttps  int32 = 443
+	servicePortBackend         int32 = 80
+	targetPortBackend          int32 = 8080
 )
 
 // Values is a set of configuration values for the nginxIngress component.
@@ -104,20 +118,132 @@ func (n *nginxIngress) WaitCleanup(ctx context.Context) error {
 
 func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 	var (
-		registry = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
+		intStrOne = intstr.FromInt(1)
+		registry  = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
+				Name:      name,
 				Namespace: n.namespace,
 				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
 			},
 		}
 
+		serviceController = &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceNameController,
+				Namespace: n.namespace,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp: LabelAppValue,
+					labelKeyComponent:         labelValueController,
+				},
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeLoadBalancer,
+				Ports: []corev1.ServicePort{
+					{
+						Name:       "http",
+						Port:       servicePortControllerHttp,
+						Protocol:   corev1.ProtocolTCP,
+						TargetPort: intstr.FromInt(int(targetPortControllerHttp)),
+					},
+					{
+						Name:       "https",
+						Port:       servicePortControllerHttps,
+						Protocol:   corev1.ProtocolTCP,
+						TargetPort: intstr.FromInt(int(targetPortControllerHttps)),
+					},
+				},
+				Selector: getLabels("controller"),
+			},
+		}
+
+		serviceBackend = &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceNameBackend,
+				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Namespace: n.namespace,
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeClusterIP,
+				Ports: []corev1.ServicePort{{
+					Port:       servicePortBackend,
+					TargetPort: intstr.FromInt(int(targetPortBackend)),
+				}},
+				Selector: getLabels("backend"),
+			},
+		}
+
+		podDisruptionBudgetController = &policyv1beta1.PodDisruptionBudget{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      controllerName,
+				Namespace: n.namespace,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp: LabelAppValue,
+					labelKeyComponent:         labelValueController,
+				},
+			},
+			Spec: policyv1beta1.PodDisruptionBudgetSpec{
+				MinAvailable: &intStrOne,
+				Selector: &metav1.LabelSelector{
+					MatchLabels: getLabels("controller"),
+				},
+			},
+		}
+
+		roleBackend = &rbacv1.Role{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: n.namespace,
+				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+			},
+			Rules: []rbacv1.PolicyRule{
+				{
+					APIGroups: []string{""},
+					Resources: []string{"configmaps", "namespaces", "pods", "secrets"},
+					Verbs:     []string{"get"},
+				},
+				{
+					APIGroups:     []string{""},
+					Resources:     []string{"configmaps"},
+					ResourceNames: []string{"ingress-controller-leader-nginx"},
+					Verbs:         []string{"get", "update"},
+				},
+				{
+					APIGroups: []string{""},
+					Resources: []string{"configmaps"},
+					Verbs:     []string{"create"},
+				},
+				{
+					APIGroups: []string{""},
+					Resources: []string{"endpoints"},
+					Verbs:     []string{"create", "get", "update"},
+				},
+			},
+		}
+
+		roleBindingBackend = &rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: n.namespace,
+				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: rbacv1.GroupName,
+				Kind:     "Role",
+				Name:     roleBackend.Name,
+			},
+			Subjects: []rbacv1.Subject{{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      serviceAccount.Name,
+				Namespace: serviceAccount.Namespace,
+			}},
+		}
+
 		clusterRole = &rbacv1.ClusterRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   "gardener.cloud:seed:" + name,
-				Labels: getLabels(),
+				Labels: map[string]string{v1beta1constants.LabelApp: LabelAppValue},
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -161,7 +287,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   "gardener.cloud:seed:" + name,
-				Labels: getLabels(),
+				Labels: map[string]string{v1beta1constants.LabelApp: LabelAppValue},
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -175,7 +301,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 
-		deployment = &appsv1.Deployment{
+		deploymentController = &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      controllerName,
 				Namespace: n.namespace,
@@ -195,7 +321,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
 					Kind:       "Deployment",
-					Name:       deployment.Name,
+					Name:       deploymentController.Name,
 				},
 				UpdatePolicy: &autoscalingv1beta2.PodUpdatePolicy{
 					UpdateMode: &updateMode,
@@ -218,11 +344,27 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 	return registry.AddAllAndSerialize(
 		serviceAccount,
 		vpa,
-		deployment,
+		deploymentController,
 		clusterRole,
-		clusterRoleBinding)
+		clusterRoleBinding,
+		serviceController,
+		serviceBackend,
+		podDisruptionBudgetController,
+		roleBackend,
+		roleBindingBackend,
+	)
 }
 
-func getLabels() map[string]string {
-	return map[string]string{v1beta1constants.LabelApp: LabelAppValue}
+func getLabels(resourceType string) map[string]string {
+	labels := map[string]string{
+		v1beta1constants.LabelApp: LabelAppValue,
+		"release":                 "addons",
+	}
+	if resourceType == "controller" {
+		labels[labelKeyComponent] = labelValueController
+	} else {
+		labels[labelKeyComponent] = labelValueBackend
+	}
+
+	return labels
 }
