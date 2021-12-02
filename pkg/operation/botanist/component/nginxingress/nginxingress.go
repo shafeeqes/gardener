@@ -21,8 +21,12 @@ import (
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	"github.com/gardener/gardener/pkg/operation/botanist/component"
+	"github.com/gardener/gardener/pkg/resourcemanager/controller/garbagecollector/references"
+	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/gardener/gardener/pkg/utils/managedresources"
+	"github.com/gardener/gardener/pkg/utils/version"
 
+	"github.com/Masterminds/semver"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -31,32 +35,39 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	autoscalingv1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
-	// ManagedResourceName is the name of the ManagedResource containing the resource specifications.
-	ManagedResourceName = "nginx-ingress"
-	// LabelAppValue is the value of a label used for the identification of vpn-shoot pods.
-	LabelAppValue = "nginx-ingress"
+	name                = "nginx-ingress"
+	managedResourceName = name
 
+	labelAppValue        = "nginx-ingress"
 	labelKeyComponent    = "component"
 	labelValueController = "controller"
 	labelValueBackend    = "nginx-ingress-k8s-backend"
+	labelKeyRelease      = "release"
+	labelValueAddons     = "addons"
 
-	name                  = "nginx-ingress"
-	controllerName        = "nginx-ingress-controller"
-	deploymentName        = "nginx-ingress"
-	serviceNameController = "nginx-ingress-controller"
+	controllerName            = "nginx-ingress-controller"
+	depoloymentNameController = "nginx-ingress-controller"
+	containerNameController   = "nginx-ingress-controller"
+	serviceNameController     = "nginx-ingress-controller"
+
+	deploymentNameBackend = "nginx-ingress-k8s-backend"
+	containerNameBackend  = "nginx-ingress-k8s-backend"
 	serviceNameBackend    = "nginx-ingress-k8s-backend"
 
-	servicePortControllerHttp  int32 = 80
-	targetPortControllerHttp   int32 = 80
-	servicePortControllerHttps int32 = 443
-	targetPortControllerHttps  int32 = 443
-	servicePortBackend         int32 = 80
-	targetPortBackend          int32 = 8080
+	servicePortControllerHttp    int32 = 80
+	containerPortControllerHttp  int32 = 80
+	servicePortControllerHttps   int32 = 443
+	containerPortControllerHttps int32 = 443
+
+	servicePortBackend   int32 = 80
+	containerPortBackend int32 = 8080
 )
 
 // Values is a set of configuration values for the nginxIngress component.
@@ -65,6 +76,8 @@ type Values struct {
 	ImageController string
 	// ImageDefaultBackend is the container image used for Default Ingress backend.
 	ImageDefaultBackend string
+	// 	KubernetesVersion is the version of kubernetes for the seed cluster.
+	KubernetesVersion *semver.Version
 }
 
 // New creates a new instance of DeployWaiter for nginxIngress
@@ -91,11 +104,11 @@ func (n *nginxIngress) Deploy(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return managedresources.CreateForSeed(ctx, n.client, n.namespace, ManagedResourceName, false, data)
+	return managedresources.CreateForSeed(ctx, n.client, n.namespace, managedResourceName, false, data)
 }
 
 func (n *nginxIngress) Destroy(ctx context.Context) error {
-	return managedresources.DeleteForSeed(ctx, n.client, n.namespace, ManagedResourceName)
+	return managedresources.DeleteForSeed(ctx, n.client, n.namespace, managedResourceName)
 }
 
 // TimeoutWaitForManagedResource is the timeout used while waiting for the ManagedResources to become healthy
@@ -106,26 +119,48 @@ func (n *nginxIngress) Wait(ctx context.Context) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, TimeoutWaitForManagedResource)
 	defer cancel()
 
-	return managedresources.WaitUntilHealthy(timeoutCtx, n.client, n.namespace, ManagedResourceName)
+	return managedresources.WaitUntilHealthy(timeoutCtx, n.client, n.namespace, managedResourceName)
 }
 
 func (n *nginxIngress) WaitCleanup(ctx context.Context) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, TimeoutWaitForManagedResource)
 	defer cancel()
 
-	return managedresources.WaitUntilDeleted(timeoutCtx, n.client, n.namespace, ManagedResourceName)
+	return managedresources.WaitUntilDeleted(timeoutCtx, n.client, n.namespace, managedResourceName)
 }
 
 func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: controllerName,
+			Labels: map[string]string{
+				v1beta1constants.LabelApp: labelAppValue,
+				labelKeyComponent:         labelValueController,
+			},
+			Namespace: n.namespace,
+		},
+		Data: map[string]string{
+			"server-name-hash-bucket-size": "256",
+			"use-proxy-protocol":           "false",
+			"worker-processes":             "2",
+		},
+	}
+
+	utilruntime.Must(kutil.MakeUnique(configMap))
+
 	var (
-		intStrOne = intstr.FromInt(1)
-		registry  = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
+		intStrOne                              = intstr.FromInt(1)
+		uIDPodSecurityContextBackend     int64 = 65534
+		fsGroupPodSecurityContextBackend int64 = 65534
+		uIDPodSecurityContextController  int64 = 101
+
+		registry = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: n.namespace,
-				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
 			},
 		}
 
@@ -134,7 +169,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				Name:      serviceNameController,
 				Namespace: n.namespace,
 				Labels: map[string]string{
-					v1beta1constants.LabelApp: LabelAppValue,
+					v1beta1constants.LabelApp: labelAppValue,
 					labelKeyComponent:         labelValueController,
 				},
 			},
@@ -145,13 +180,13 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 						Name:       "http",
 						Port:       servicePortControllerHttp,
 						Protocol:   corev1.ProtocolTCP,
-						TargetPort: intstr.FromInt(int(targetPortControllerHttp)),
+						TargetPort: intstr.FromInt(int(containerPortControllerHttp)),
 					},
 					{
 						Name:       "https",
 						Port:       servicePortControllerHttps,
 						Protocol:   corev1.ProtocolTCP,
-						TargetPort: intstr.FromInt(int(targetPortControllerHttps)),
+						TargetPort: intstr.FromInt(int(containerPortControllerHttps)),
 					},
 				},
 				Selector: getLabels("controller"),
@@ -161,14 +196,14 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		serviceBackend = &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceNameBackend,
-				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
 				Namespace: n.namespace,
 			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
 				Ports: []corev1.ServicePort{{
 					Port:       servicePortBackend,
-					TargetPort: intstr.FromInt(int(targetPortBackend)),
+					TargetPort: intstr.FromInt(int(containerPortBackend)),
 				}},
 				Selector: getLabels("backend"),
 			},
@@ -179,7 +214,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				Name:      controllerName,
 				Namespace: n.namespace,
 				Labels: map[string]string{
-					v1beta1constants.LabelApp: LabelAppValue,
+					v1beta1constants.LabelApp: labelAppValue,
 					labelKeyComponent:         labelValueController,
 				},
 			},
@@ -195,7 +230,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: n.namespace,
-				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -226,7 +261,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: n.namespace,
-				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -243,7 +278,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		clusterRole = &rbacv1.ClusterRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   "gardener.cloud:seed:" + name,
-				Labels: map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Labels: map[string]string{v1beta1constants.LabelApp: labelAppValue},
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -287,7 +322,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   "gardener.cloud:seed:" + name,
-				Labels: map[string]string{v1beta1constants.LabelApp: LabelAppValue},
+				Labels: map[string]string{v1beta1constants.LabelApp: labelAppValue},
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -301,12 +336,60 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 
-		deploymentController = &appsv1.Deployment{
+		deploymentBackend = &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      controllerName,
+				Name:      deploymentNameBackend,
 				Namespace: n.namespace,
-				Labels: map[string]string{
-					v1beta1constants.LabelApp: LabelAppValue,
+				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
+			},
+			Spec: appsv1.DeploymentSpec{
+				RevisionHistoryLimit: pointer.Int32(2),
+				Replicas:             pointer.Int32(2),
+				Selector: &metav1.LabelSelector{
+					MatchLabels: getLabels("backend"),
+				},
+				Template: corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: getLabels("backend"),
+					},
+					Spec: corev1.PodSpec{
+						PriorityClassName: v1beta1constants.PriorityClassNameShootControlPlane,
+						SecurityContext: &corev1.PodSecurityContext{
+							RunAsUser: &uIDPodSecurityContextBackend,
+							FSGroup:   &fsGroupPodSecurityContextBackend,
+						},
+						Containers: []corev1.Container{{
+							Name:            containerNameBackend,
+							Image:           n.values.ImageDefaultBackend,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path:   "/healthy",
+										Port:   intstr.FromInt(int(containerPortBackend)),
+										Scheme: corev1.URISchemeHTTP,
+									},
+								},
+								InitialDelaySeconds: 30,
+								TimeoutSeconds:      5,
+							},
+							Ports: []corev1.ContainerPort{{
+								ContainerPort: containerPortBackend,
+								Protocol:      corev1.ProtocolTCP,
+							}},
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("100m"),
+									corev1.ResourceMemory: resource.MustParse("100Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("20m"),
+									corev1.ResourceMemory: resource.MustParse("20Mi"),
+								},
+							},
+						}},
+						TerminationGracePeriodSeconds: pointer.Int64(60),
+					},
 				},
 			},
 		}
@@ -339,12 +422,156 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				},
 			},
 		}
+
+		deploymentController = &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      depoloymentNameController,
+				Namespace: n.namespace,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp: labelAppValue,
+					labelKeyComponent:         labelValueController,
+				},
+			},
+			Spec: appsv1.DeploymentSpec{
+				Replicas:             pointer.Int32(3),
+				RevisionHistoryLimit: pointer.Int32(2),
+				Selector: &metav1.LabelSelector{
+					MatchLabels: getLabels("controller"),
+				},
+				Template: corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: getLabels("controller"),
+					},
+					Spec: corev1.PodSpec{
+						PriorityClassName: v1beta1constants.PriorityClassNameShootControlPlane,
+						Affinity: &corev1.Affinity{
+							PodAffinity: &corev1.PodAffinity{
+								PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{{
+									Weight: 100,
+									PodAffinityTerm: corev1.PodAffinityTerm{
+										TopologyKey: corev1.LabelHostname,
+										LabelSelector: &metav1.LabelSelector{
+											MatchExpressions: []metav1.LabelSelectorRequirement{
+												{
+													Key:      v1beta1constants.LabelApp,
+													Operator: metav1.LabelSelectorOpIn,
+													Values:   []string{labelAppValue},
+												},
+												{
+													Key:      labelKeyComponent,
+													Operator: metav1.LabelSelectorOpIn,
+													Values:   []string{labelValueController},
+												},
+												{
+													Key:      labelKeyRelease,
+													Operator: metav1.LabelSelectorOpIn,
+													Values:   []string{labelValueAddons},
+												},
+											},
+										},
+									}},
+								},
+							},
+						},
+						Containers: []corev1.Container{{
+							Name:            containerNameController,
+							Image:           n.values.ImageController,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Args:            n.getArgs(configMap),
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{"ALL"},
+									Add:  []corev1.Capability{"NET_BIND_SERVICE"},
+								},
+								RunAsUser:                &uIDPodSecurityContextController,
+								AllowPrivilegeEscalation: pointer.Bool(true),
+							},
+							Env: []corev1.EnvVar{
+								{
+									Name: "POD_NAME",
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: containerNameController,
+										},
+									},
+								},
+								{
+									Name: "POD_NAMESPACE",
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: n.namespace,
+										},
+									},
+								},
+							},
+							LivenessProbe: &corev1.Probe{
+								FailureThreshold: 3,
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path:   "/healthz",
+										Port:   intstr.FromInt(10254),
+										Scheme: corev1.URISchemeHTTP,
+									},
+								},
+								InitialDelaySeconds: 40,
+								PeriodSeconds:       10,
+								SuccessThreshold:    1,
+								TimeoutSeconds:      1,
+							},
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          "http",
+									ContainerPort: containerPortControllerHttp,
+									Protocol:      corev1.ProtocolTCP,
+								},
+								{
+									Name:          "https",
+									ContainerPort: containerPortControllerHttps,
+									Protocol:      corev1.ProtocolTCP,
+								},
+							},
+							ReadinessProbe: &corev1.Probe{
+								FailureThreshold:    3,
+								InitialDelaySeconds: 40,
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path:   "/healthz",
+										Port:   intstr.FromInt(10254),
+										Scheme: corev1.URISchemeHTTP,
+									},
+								},
+								PeriodSeconds:    10,
+								SuccessThreshold: 1,
+								TimeoutSeconds:   1,
+							},
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("400m"),
+									corev1.ResourceMemory: resource.MustParse("1500Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("100m"),
+									corev1.ResourceMemory: resource.MustParse("375Mi"),
+								},
+							},
+						}},
+						HostNetwork:                   false,
+						ServiceAccountName:            serviceAccount.Name,
+						TerminationGracePeriodSeconds: pointer.Int64(60),
+					},
+				},
+			},
+		}
 	)
+
+	utilruntime.Must(references.InjectAnnotations(deploymentController))
 
 	return registry.AddAllAndSerialize(
 		serviceAccount,
 		vpa,
+		configMap,
 		deploymentController,
+		deploymentBackend,
 		clusterRole,
 		clusterRoleBinding,
 		serviceController,
@@ -357,8 +584,8 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 
 func getLabels(resourceType string) map[string]string {
 	labels := map[string]string{
-		v1beta1constants.LabelApp: LabelAppValue,
-		"release":                 "addons",
+		v1beta1constants.LabelApp: labelAppValue,
+		labelKeyRelease:           labelValueAddons,
 	}
 	if resourceType == "controller" {
 		labels[labelKeyComponent] = labelValueController
@@ -367,4 +594,23 @@ func getLabels(resourceType string) map[string]string {
 	}
 
 	return labels
+}
+
+func (n *nginxIngress) getArgs(configMap *corev1.ConfigMap) []string {
+	ingressClass := "seed-nginx"
+	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
+		ingressClass = "k8s.io/seed-nginx"
+	}
+
+	return []string{
+		"/nginx-ingress-controller",
+		"--default-backend-service=garden/nginx-ingress-k8s-backend",
+		"--enable-ssl-passthrough=true",
+		"--publish-service=garden/nginx-ingress-controller",
+		"--election-id=ingress-controller-seed-leader",
+		`--ingress-class=` + ingressClass,
+		"--update-status=true",
+		"--annotations-prefix=nginx.ingress.kubernetes.io",
+		`--configmap=garden/` + configMap.Name,
+	}
 }
