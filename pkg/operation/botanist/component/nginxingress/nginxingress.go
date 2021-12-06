@@ -43,11 +43,6 @@ const (
 	serviceName    = "nginx-ingress"
 )
 
-// Interface contains functions for a nginxIngress Deployer
-type Interface interface {
-	component.DeployWaiter
-}
-
 // Values is a set of configuration values for the nginxIngress component.
 type Values struct {
 	// ImageController is the container image used for nginxIngress Controller.
@@ -61,7 +56,7 @@ func New(
 	client client.Client,
 	namespace string,
 	values Values,
-) Interface {
+) component.DeployWaiter {
 	return &nginxIngress{
 		client:    client,
 		namespace: namespace,
