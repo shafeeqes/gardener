@@ -72,7 +72,7 @@ const (
 )
 
 var (
-	ingressClassName = "seed-nginx"
+	ingressClassName = v1beta1constants.SeedNginxIngressClass122
 )
 
 // Values is a set of configuration values for the nginxIngress component.
@@ -81,7 +81,7 @@ type Values struct {
 	ImageController string
 	// ImageDefaultBackend is the container image used for Default Ingress backend.
 	ImageDefaultBackend string
-	// 	KubernetesVersion is the version of kubernetes for the seed cluster.
+	// KubernetesVersion is the version of kubernetes for the seed cluster.
 	KubernetesVersion *semver.Version
 }
 
@@ -135,8 +135,8 @@ func (n *nginxIngress) WaitCleanup(ctx context.Context) error {
 }
 
 func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
-	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
-		ingressClassName = "k8s.io/seed-nginx"
+	if !version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
+		ingressClassName = v1beta1constants.SeedNginxIngressClass
 	}
 
 	configMap := &corev1.ConfigMap{
@@ -271,7 +271,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: n.namespace,
-				Labels:    map[string]string{v1beta1constants.LabelApp: "nginx-ingress-backend"},
+				Labels:    map[string]string{v1beta1constants.LabelApp: labelValueBackend},
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -354,7 +354,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			},
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: pointer.Int32(2),
-				Replicas:             pointer.Int32(2),
+				Replicas:             pointer.Int32(1),
 				Selector: &metav1.LabelSelector{
 					MatchLabels: getLabels("backend"),
 				},
@@ -412,6 +412,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 					v1beta1constants.LabelApp: labelAppValue,
 					labelKeyComponent:         labelValueController,
 				},
+				Annotations: map[string]string{
+					references.AnnotationKey(references.KindConfigMap, configMap.Name): configMap.Name,
+				},
 			},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             pointer.Int32(3),
@@ -424,13 +427,14 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 						Labels: getLabels("controller"),
 						Annotations: map[string]string{
 							// TODO(rfranzke): Remove in a future release.
-							"security.gardener.cloud/trigger": "rollout",
+							"security.gardener.cloud/trigger":                                  "rollout",
+							references.AnnotationKey(references.KindConfigMap, configMap.Name): configMap.Name,
 						},
 					},
 					Spec: corev1.PodSpec{
 						PriorityClassName: v1beta1constants.PriorityClassNameShootControlPlane,
 						Affinity: &corev1.Affinity{
-							PodAffinity: &corev1.PodAffinity{
+							PodAntiAffinity: &corev1.PodAntiAffinity{
 								PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{{
 									Weight: 100,
 									PodAffinityTerm: corev1.PodAffinityTerm{
@@ -476,7 +480,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 									Name: "POD_NAME",
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
-											FieldPath: containerNameController,
+											FieldPath: "metadata.name",
 										},
 									},
 								},
@@ -484,7 +488,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 									Name: "POD_NAMESPACE",
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
-											FieldPath: n.namespace,
+											FieldPath: "metadata.namespace",
 										},
 									},
 								},
@@ -540,7 +544,6 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 								},
 							},
 						}},
-						HostNetwork:                   false,
 						ServiceAccountName:            serviceAccount.Name,
 						TerminationGracePeriodSeconds: pointer.Int64(60),
 					},
@@ -580,19 +583,17 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		ingressClass *networkingv1.IngressClass
 	)
 
-	utilruntime.Must(references.InjectAnnotations(deploymentController))
-
 	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
 		ingressClass = &networkingv1.IngressClass{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "seed-nginx",
+				Name: ingressClassName,
 				Labels: map[string]string{
 					v1beta1constants.LabelApp: labelAppValue,
 					labelKeyComponent:         labelValueController,
 				},
 			},
 			Spec: networkingv1.IngressClassSpec{
-				Controller: ingressClassName,
+				Controller: "k8s.io/" + ingressClassName,
 			},
 		}
 	}
@@ -629,16 +630,19 @@ func getLabels(resourceType string) map[string]string {
 }
 
 func (n *nginxIngress) getArgs(configMap *corev1.ConfigMap) []string {
-
-	return []string{
+	out := []string{
 		"/nginx-ingress-controller",
 		"--default-backend-service=garden/nginx-ingress-k8s-backend",
 		"--enable-ssl-passthrough=true",
 		"--publish-service=garden/nginx-ingress-controller",
 		"--election-id=ingress-controller-seed-leader",
-		`--ingress-class=` + ingressClassName,
 		"--update-status=true",
 		"--annotations-prefix=nginx.ingress.kubernetes.io",
-		`--configmap=garden/` + configMap.Name,
+		"--configmap=garden/" + configMap.Name,
+		"--ingress-class=" + ingressClassName,
 	}
+	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
+		out = append(out, "--controller-class=k8s.io/"+ingressClassName)
+	}
+	return out
 }
