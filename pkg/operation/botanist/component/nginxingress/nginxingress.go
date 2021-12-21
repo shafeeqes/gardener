@@ -30,6 +30,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -68,6 +69,10 @@ const (
 
 	servicePortBackend   int32 = 80
 	containerPortBackend int32 = 8080
+)
+
+var (
+	ingressClassName = "seed-nginx"
 )
 
 // Values is a set of configuration values for the nginxIngress component.
@@ -130,6 +135,10 @@ func (n *nginxIngress) WaitCleanup(ctx context.Context) error {
 }
 
 func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
+	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
+		ingressClassName = "k8s.io/seed-nginx"
+	}
+
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: controllerName,
@@ -162,6 +171,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				Namespace: n.namespace,
 				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
 			},
+			AutomountServiceAccountToken: pointer.Bool(false),
 		}
 
 		serviceController = &corev1.Service{
@@ -261,7 +271,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: n.namespace,
-				Labels:    map[string]string{v1beta1constants.LabelApp: labelAppValue},
+				Labels:    map[string]string{v1beta1constants.LabelApp: "nginx-ingress-backend"},
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -297,7 +307,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 					Verbs:     []string{"get", "list", "update", "watch"},
 				},
 				{
-					APIGroups: []string{"extensions", "\"networking.k8s.io\""},
+					APIGroups: []string{"extensions", "networking.k8s.io"},
 					Resources: []string{"ingresses"},
 					Verbs:     []string{"get", "list", "watch"},
 				},
@@ -307,12 +317,12 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 					Verbs:     []string{"create", "patch"},
 				},
 				{
-					APIGroups: []string{"extensions", "\"networking.k8s.io\""},
+					APIGroups: []string{"extensions", "networking.k8s.io"},
 					Resources: []string{"ingresses/status"},
 					Verbs:     []string{"update"},
 				},
 				{
-					APIGroups: []string{"\"networking.k8s.io\""},
+					APIGroups: []string{"networking.k8s.io"},
 					Resources: []string{"ingressclasses"},
 					Verbs:     []string{"get", "list", "watch"},
 				},
@@ -394,35 +404,6 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 
-		updateMode = autoscalingv1beta2.UpdateModeAuto
-		vpa        = &autoscalingv1beta2.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      controllerName,
-				Namespace: n.namespace,
-			},
-			Spec: autoscalingv1beta2.VerticalPodAutoscalerSpec{
-				TargetRef: &autoscalingv1.CrossVersionObjectReference{
-					APIVersion: appsv1.SchemeGroupVersion.String(),
-					Kind:       "Deployment",
-					Name:       deploymentController.Name,
-				},
-				UpdatePolicy: &autoscalingv1beta2.PodUpdatePolicy{
-					UpdateMode: &updateMode,
-				},
-				ResourcePolicy: &autoscalingv1beta2.PodResourcePolicy{
-					ContainerPolicies: []autoscalingv1beta2.ContainerResourcePolicy{
-						{
-							ContainerName: autoscalingv1beta2.DefaultContainerResourcePolicy,
-							MinAllowed: corev1.ResourceList{
-								corev1.ResourceCPU:    resource.MustParse("25m"),
-								corev1.ResourceMemory: resource.MustParse("100Mi"),
-							},
-						},
-					},
-				},
-			},
-		}
-
 		deploymentController = &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      depoloymentNameController,
@@ -441,6 +422,10 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: getLabels("controller"),
+						Annotations: map[string]string{
+							// TODO(rfranzke): Remove in a future release.
+							"security.gardener.cloud/trigger": "rollout",
+						},
 					},
 					Spec: corev1.PodSpec{
 						PriorityClassName: v1beta1constants.PriorityClassNameShootControlPlane,
@@ -562,9 +547,55 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 				},
 			},
 		}
+
+		updateMode = autoscalingv1beta2.UpdateModeAuto
+		vpa        = &autoscalingv1beta2.VerticalPodAutoscaler{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      controllerName,
+				Namespace: n.namespace,
+			},
+			Spec: autoscalingv1beta2.VerticalPodAutoscalerSpec{
+				TargetRef: &autoscalingv1.CrossVersionObjectReference{
+					APIVersion: appsv1.SchemeGroupVersion.String(),
+					Kind:       "Deployment",
+					Name:       deploymentController.Name,
+				},
+				UpdatePolicy: &autoscalingv1beta2.PodUpdatePolicy{
+					UpdateMode: &updateMode,
+				},
+				ResourcePolicy: &autoscalingv1beta2.PodResourcePolicy{
+					ContainerPolicies: []autoscalingv1beta2.ContainerResourcePolicy{
+						{
+							ContainerName: autoscalingv1beta2.DefaultContainerResourcePolicy,
+							MinAllowed: corev1.ResourceList{
+								corev1.ResourceCPU:    resource.MustParse("25m"),
+								corev1.ResourceMemory: resource.MustParse("100Mi"),
+							},
+						},
+					},
+				},
+			},
+		}
+
+		ingressClass *networkingv1.IngressClass
 	)
 
 	utilruntime.Must(references.InjectAnnotations(deploymentController))
+
+	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
+		ingressClass = &networkingv1.IngressClass{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "seed-nginx",
+				Labels: map[string]string{
+					v1beta1constants.LabelApp: labelAppValue,
+					labelKeyComponent:         labelValueController,
+				},
+			},
+			Spec: networkingv1.IngressClassSpec{
+				Controller: ingressClassName,
+			},
+		}
+	}
 
 	return registry.AddAllAndSerialize(
 		serviceAccount,
@@ -579,6 +610,7 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		podDisruptionBudgetController,
 		roleBackend,
 		roleBindingBackend,
+		ingressClass,
 	)
 }
 
@@ -597,10 +629,6 @@ func getLabels(resourceType string) map[string]string {
 }
 
 func (n *nginxIngress) getArgs(configMap *corev1.ConfigMap) []string {
-	ingressClass := "seed-nginx"
-	if version.ConstraintK8sGreaterEqual122.Check(n.values.KubernetesVersion) {
-		ingressClass = "k8s.io/seed-nginx"
-	}
 
 	return []string{
 		"/nginx-ingress-controller",
@@ -608,7 +636,7 @@ func (n *nginxIngress) getArgs(configMap *corev1.ConfigMap) []string {
 		"--enable-ssl-passthrough=true",
 		"--publish-service=garden/nginx-ingress-controller",
 		"--election-id=ingress-controller-seed-leader",
-		`--ingress-class=` + ingressClass,
+		`--ingress-class=` + ingressClassName,
 		"--update-status=true",
 		"--annotations-prefix=nginx.ingress.kubernetes.io",
 		`--configmap=garden/` + configMap.Name,
