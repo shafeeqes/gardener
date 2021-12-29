@@ -22,7 +22,10 @@ import (
 type ErrorCode string
 
 const (
-	// ErrorInfraUnauthorized indicates that the last error occurred due to infrastructure credentials lacking proper authorization.
+	// ErrorInfraUnauthenticated indicates that the last error occurred due to invalid authentication credentials for the requested resource.
+	// It is classified as a non-retryable error code.
+	ErrorInfraUnauthenticated ErrorCode = "ERR_INFRA_UNAUTHENTICATED"
+	// ErrorInfraUnauthorized indicates that the last error occurred due to lack of authorization to perform the requested operation on the given resource..
 	// It is classified as a non-retryable error code.
 	ErrorInfraUnauthorized ErrorCode = "ERR_INFRA_UNAUTHORIZED"
 	// ErrorInfraQuotaExceeded indicates that the last error occurred due to infrastructure quota limits.

@@ -384,7 +384,7 @@ var _ = Describe("health check", func() {
 				etcdEvents,
 			},
 			nil,
-			PointTo(beConditionWithStatusAndCodes(gardencorev1beta1.ConditionFalse, gardencorev1beta1.ErrorInfraUnauthorized))),
+			PointTo(beConditionWithStatusAndCodes(gardencorev1beta1.ConditionFalse, gardencorev1beta1.ErrorInfraUnauthenticated))),
 		Entry("possibly rolling update ongoing (with autoscaler)",
 			shootThatNeedsAutoscaler,
 			[]*appsv1.Deployment{
