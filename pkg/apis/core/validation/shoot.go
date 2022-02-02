@@ -180,7 +180,7 @@ func ValidateShootSpec(meta metav1.ObjectMeta, spec *core.ShootSpec, fldPath *fi
 	allErrs = append(allErrs, validateMaintenance(spec.Maintenance, fldPath.Child("maintenance"))...)
 	allErrs = append(allErrs, validateMonitoring(spec.Monitoring, fldPath.Child("monitoring"))...)
 	allErrs = append(allErrs, ValidateHibernation(spec.Hibernation, fldPath.Child("hibernation"))...)
-	allErrs = append(allErrs, validateProvider(spec.Provider, spec.Kubernetes, fldPath.Child("provider"), inTemplate)...)
+	allErrs = append(allErrs, validateProvider(spec.Provider, spec.Kubernetes, spec.Networking, fldPath.Child("provider"), inTemplate)...)
 
 	if len(spec.Region) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("region"), "must specify a region"))
@@ -402,6 +402,20 @@ func ValidateNodeCIDRMaskWithMaxPod(maxPod int32, nodeCIDRMaskSize int32) field.
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("kubernetes").Child("kubeControllerManager").Child("nodeCIDRMaskSize"), nodeCIDRMaskSize, fmt.Sprintf("kubelet or kube-controller configuration incorrect. Please adjust the NodeCIDRMaskSize of the kube-controller to support the highest maxPod on any worker pool. The NodeCIDRMaskSize of '%d (default: 24)' of the kube-controller only supports '%d' ip adresses. Highest maxPod setting on kubelet is '%d (default: 110)'. Please choose a NodeCIDRMaskSize that at least supports %d ip adresses", nodeCIDRMaskSize, ipAdressesAvailable, maxPod, maxPod)))
 	}
 
+	return allErrs
+}
+
+// validateTotalNodeCountWithPodCIDR validates if the Pod Network has enough ip addresses (configured via PodCIDR on the network config and the NodeCIDRMask on the kube controller manager) to support the total number of nodes from the worker pools of the shoot
+func validateTotalNodeCountWithPodCIDR(totalNodes int32, nodeCIDRMaskSize int32, podNetworkCIDR string) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	CIDR, _ := strconv.Atoi(podNetworkCIDR[len(podNetworkCIDR)-2:])
+	// first and last IPs are reserved
+	maxNodeCount := int32(math.Pow(2, float64(nodeCIDRMaskSize-int32(CIDR))) - 2)
+
+	if totalNodes > maxNodeCount {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("provider").Child("workers"), totalNodes, fmt.Sprintf("worker configuration incorrect. The spec.networking.pod only supports %d IP addresses. The total of all the nodes specified by the worker pool should be less than %d ", maxNodeCount, maxNodeCount)))
+	}
 	return allErrs
 }
 
@@ -1003,16 +1017,24 @@ func validateMaintenance(maintenance *core.Maintenance, fldPath *field.Path) fie
 	return allErrs
 }
 
-func validateProvider(provider core.Provider, kubernetes core.Kubernetes, fldPath *field.Path, inTemplate bool) field.ErrorList {
+func validateProvider(provider core.Provider, kubernetes core.Kubernetes, networking core.Networking, fldPath *field.Path, inTemplate bool) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if len(provider.Type) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("type"), "must specify a provider type"))
 	}
 
-	var maxPod int32
+	var (
+		maxPod           int32
+		totalNodes       int32
+		nodeCIDRMaskSize int32 = 24
+		podNetworkCIDR         = core.DefaultPodNetworkCIDR
+	)
 	if kubernetes.Kubelet != nil && kubernetes.Kubelet.MaxPods != nil {
 		maxPod = *kubernetes.Kubelet.MaxPods
+	}
+	if networking.Pods != nil {
+		podNetworkCIDR = *networking.Pods
 	}
 
 	for i, worker := range provider.Workers {
@@ -1021,6 +1043,7 @@ func validateProvider(provider core.Provider, kubernetes core.Kubernetes, fldPat
 		if worker.Kubernetes != nil && worker.Kubernetes.Kubelet != nil && worker.Kubernetes.Kubelet.MaxPods != nil && *worker.Kubernetes.Kubelet.MaxPods > maxPod {
 			maxPod = *worker.Kubernetes.Kubelet.MaxPods
 		}
+		totalNodes += worker.Maximum
 	}
 
 	allErrs = append(allErrs, ValidateWorkers(provider.Workers, fldPath.Child("workers"))...)
@@ -1030,8 +1053,12 @@ func validateProvider(provider core.Provider, kubernetes core.Kubernetes, fldPat
 			// default maxPod setting on kubelet
 			maxPod = 110
 		}
+		nodeCIDRMaskSize = *kubernetes.KubeControllerManager.NodeCIDRMaskSize
+
 		allErrs = append(allErrs, ValidateNodeCIDRMaskWithMaxPod(maxPod, *kubernetes.KubeControllerManager.NodeCIDRMaskSize)...)
 	}
+
+	allErrs = append(allErrs, validateTotalNodeCountWithPodCIDR(totalNodes, nodeCIDRMaskSize, podNetworkCIDR)...)
 
 	return allErrs
 }
