@@ -44,7 +44,6 @@ var (
 		v1beta1constants.DeploymentNameGardenerResourceManager,
 		v1beta1constants.DeploymentNameKubeAPIServer,
 		v1beta1constants.DeploymentNameKubeControllerManager,
-		v1beta1constants.DeploymentNameKubeScheduler,
 	)
 
 	requiredControlPlaneEtcds = sets.New(
@@ -341,19 +340,24 @@ func shootControlPlaneNotRunningMessage(lastOperation *gardencorev1beta1.LastOpe
 
 // This is a hack to quickly do a cloud provider specific check for the required control plane deployments.
 func computeRequiredControlPlaneDeployments(shoot *gardencorev1beta1.Shoot) (sets.Set[string], error) {
-	shootWantsClusterAutoscaler, err := v1beta1helper.ShootWantsClusterAutoscaler(shoot)
-	if err != nil {
-		return nil, err
-	}
-
 	requiredControlPlaneDeployments := sets.New(requiredControlPlaneDeployments.UnsortedList()...)
-	if shootWantsClusterAutoscaler {
-		requiredControlPlaneDeployments.Insert(v1beta1constants.DeploymentNameClusterAutoscaler)
-	}
 
-	if v1beta1helper.ShootWantsVerticalPodAutoscaler(shoot) {
-		for _, vpaDeployment := range v1beta1constants.GetShootVPADeploymentNames() {
-			requiredControlPlaneDeployments.Insert(vpaDeployment)
+	if !shoot.IsWorkerless() {
+		requiredControlPlaneDeployments.Insert(v1beta1constants.DeploymentNameKubeScheduler)
+
+		shootWantsClusterAutoscaler, err := v1beta1helper.ShootWantsClusterAutoscaler(shoot)
+		if err != nil {
+			return nil, err
+		}
+
+		if shootWantsClusterAutoscaler {
+			requiredControlPlaneDeployments.Insert(v1beta1constants.DeploymentNameClusterAutoscaler)
+		}
+
+		if v1beta1helper.ShootWantsVerticalPodAutoscaler(shoot) {
+			for _, vpaDeployment := range v1beta1constants.GetShootVPADeploymentNames() {
+				requiredControlPlaneDeployments.Insert(vpaDeployment)
+			}
 		}
 	}
 

@@ -161,8 +161,27 @@ var _ = Describe("health check", func() {
 		fakeClient client.Client
 		fakeClock  = testclock.NewFakeClock(time.Now())
 
-		condition                gardencorev1beta1.Condition
-		shoot                    = &gardencorev1beta1.Shoot{}
+		condition gardencorev1beta1.Condition
+		shoot     = &gardencorev1beta1.Shoot{
+			Spec: gardencorev1beta1.ShootSpec{
+				Provider: gardencorev1beta1.Provider{
+					Workers: []gardencorev1beta1.Worker{
+						{
+							Name: "worker",
+						},
+					},
+				},
+			},
+		}
+
+		workerlessShoot = &gardencorev1beta1.Shoot{
+			Spec: gardencorev1beta1.ShootSpec{
+				Provider: gardencorev1beta1.Provider{
+					Workers: []gardencorev1beta1.Worker{},
+				},
+			},
+		}
+
 		shootThatNeedsAutoscaler = &gardencorev1beta1.Shoot{
 			Spec: gardencorev1beta1.ShootSpec{
 				Provider: gardencorev1beta1.Provider{
@@ -182,6 +201,13 @@ var _ = Describe("health check", func() {
 				Kubernetes: gardencorev1beta1.Kubernetes{
 					VerticalPodAutoscaler: &gardencorev1beta1.VerticalPodAutoscaler{
 						Enabled: true,
+					},
+				},
+				Provider: gardencorev1beta1.Provider{
+					Workers: []gardencorev1beta1.Worker{
+						{
+							Name: "foo",
+						},
 					},
 				},
 			},
@@ -291,6 +317,16 @@ var _ = Describe("health check", func() {
 			requiredControlPlaneEtcds,
 			nil,
 			BeNil()),
+		Entry("all healthy (workerless)",
+			workerlessShoot,
+			[]*appsv1.Deployment{
+				gardenerResourceManagerDeployment,
+				kubeAPIServerDeployment,
+				kubeControllerManagerDeployment,
+			},
+			requiredControlPlaneEtcds,
+			nil,
+			BeNil()),
 		Entry("all healthy (needs autoscaler)",
 			shootThatNeedsAutoscaler,
 			[]*appsv1.Deployment{
@@ -334,6 +370,14 @@ var _ = Describe("health check", func() {
 			requiredControlPlaneEtcds,
 			nil,
 			PointTo(beConditionWithMissingRequiredDeployment(withVpaDeployments(gardenerResourceManagerDeployment)))),
+		Entry("missing required deployments (workerless)",
+			workerlessShoot,
+			[]*appsv1.Deployment{
+				kubeAPIServerDeployment,
+			},
+			requiredControlPlaneEtcds,
+			nil,
+			PointTo(beConditionWithMissingRequiredDeployment([]*appsv1.Deployment{gardenerResourceManagerDeployment, kubeControllerManagerDeployment}))),
 		Entry("required deployment unhealthy",
 			shoot,
 			[]*appsv1.Deployment{

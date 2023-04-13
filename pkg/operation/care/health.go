@@ -91,7 +91,14 @@ func (h *Health) Check(
 	healthCheckOutdatedThreshold *metav1.Duration,
 	conditions []gardencorev1beta1.Condition,
 ) []gardencorev1beta1.Condition {
-	updatedConditions := h.healthChecks(ctx, thresholdMappings, healthCheckOutdatedThreshold, conditions)
+	var updatedConditions []gardencorev1beta1.Condition
+
+	if h.shoot.IsWorkerless {
+		updatedConditions = h.healthChecksWorkerLessShoot(ctx, thresholdMappings, healthCheckOutdatedThreshold, conditions)
+	} else {
+		updatedConditions = h.healthChecks(ctx, thresholdMappings, healthCheckOutdatedThreshold, conditions)
+	}
+
 	lastOp := h.shoot.GetInfo().Status.LastOperation
 	lastErrors := h.shoot.GetInfo().Status.LastErrors
 	return PardonConditions(h.clock, updatedConditions, lastOp, lastErrors)
@@ -333,6 +340,66 @@ func (h *Health) healthChecks(
 	})(ctx)
 
 	return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents, nodes, systemComponents}
+}
+
+func (h *Health) healthChecksWorkerLessShoot(
+	ctx context.Context,
+	thresholdMappings map[gardencorev1beta1.ConditionType]time.Duration,
+	healthCheckOutdatedThreshold *metav1.Duration,
+	conditions []gardencorev1beta1.Condition,
+) []gardencorev1beta1.Condition {
+	if h.shoot.HibernationEnabled || h.shoot.GetInfo().Status.IsHibernated {
+		return shootHibernatedConditions(h.clock, conditions)
+	}
+
+	var apiserverAvailability, controlPlane, observabilityComponents gardencorev1beta1.Condition
+	for _, cond := range conditions {
+		switch cond.Type {
+		case gardencorev1beta1.ShootAPIServerAvailable:
+			apiserverAvailability = cond
+		case gardencorev1beta1.ShootControlPlaneHealthy:
+			controlPlane = cond
+		case gardencorev1beta1.ShootObservabilityComponentsHealthy:
+			observabilityComponents = cond
+		}
+	}
+
+	extensionConditionsControlPlaneHealthy, _, _, err := h.getAllExtensionConditions(ctx)
+	if err != nil {
+		h.log.Error(err, "Error getting extension conditions")
+	}
+
+	checker := NewHealthChecker(h.seedClient.Client(), h.clock, thresholdMappings, healthCheckOutdatedThreshold, gardenlethelper.GetManagedResourceProgressingThreshold(h.gardenletConfiguration), h.shoot.GetInfo().Status.LastOperation, h.shoot.KubernetesVersion, h.shoot.GardenerVersion)
+
+	shootClient, apiServerRunning, err := h.initializeShootClients()
+	if err != nil || !apiServerRunning {
+		apiserverAvailability = checker.FailedCondition(apiserverAvailability, "APIServerDown", "Could not reach API server during client initialization.")
+
+		newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
+		controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
+
+		newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
+		observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
+
+		return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents}
+	}
+
+	h.shootClient = shootClient
+
+	_ = flow.Parallel(func(ctx context.Context) error {
+		apiserverAvailability = h.checkAPIServerAvailability(ctx, checker, apiserverAvailability)
+		return nil
+	}, func(ctx context.Context) error {
+		newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
+		controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
+		return nil
+	}, func(ctx context.Context) error {
+		newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
+		observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
+		return nil
+	})(ctx)
+
+	return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents}
 }
 
 // checkAPIServerAvailability checks if the API server of a Shoot cluster is reachable and measure the response time.
