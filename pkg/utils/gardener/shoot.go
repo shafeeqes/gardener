@@ -625,7 +625,7 @@ func ComputeRequiredExtensions(shoot *gardencorev1beta1.Shoot, seed *gardencorev
 	// does not reflect this today.
 	requiredExtensions.Insert(ExtensionsID(extensionsv1alpha1.ControlPlaneResource, seed.Spec.Provider.Type))
 
-	if !v1beta1helper.IsWorkerlessShoot(shoot) {
+	if !shoot.IsWorkerless() {
 		requiredExtensions.Insert(ExtensionsID(extensionsv1alpha1.ControlPlaneResource, shoot.Spec.Provider.Type))
 		requiredExtensions.Insert(ExtensionsID(extensionsv1alpha1.InfrastructureResource, shoot.Spec.Provider.Type))
 		requiredExtensions.Insert(ExtensionsID(extensionsv1alpha1.WorkerResource, shoot.Spec.Provider.Type))
@@ -676,6 +676,9 @@ func ComputeRequiredExtensions(shoot *gardencorev1beta1.Shoot, seed *gardencorev
 		for _, resource := range controllerRegistration.Spec.Resources {
 			id := ExtensionsID(extensionsv1alpha1.ExtensionResource, resource.Type)
 			if resource.Kind == extensionsv1alpha1.ExtensionResource && resource.GloballyEnabled != nil && *resource.GloballyEnabled && !disabledExtensions.Has(id) {
+				if shoot.IsWorkerless() && !pointer.BoolDeref(resource.WorkerlessSupported, false) {
+					continue
+				}
 				requiredExtensions.Insert(id)
 			}
 		}
