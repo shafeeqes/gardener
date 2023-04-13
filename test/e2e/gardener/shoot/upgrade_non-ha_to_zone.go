@@ -27,9 +27,13 @@ import (
 	"github.com/gardener/gardener/test/utils/shoots/update/highavailability"
 )
 
-var _ = Describe("Shoot Tests", Label("Shoot", "high-availability", "upgrade-to-zone"), func() {
-	f := defaultShootCreationFramework()
-	f.Shoot = e2e.DefaultShoot("e2e-update-zone")
+var _ = Describe("Shoot Tests", Label("Shoot", "high-availability", "upgrade-to-zone", "workerless"), func() {
+	var (
+		f          = defaultShootCreationFramework()
+		workerless = e2e.IsTestForWorkerlessShoot()
+	)
+
+	f.Shoot = e2e.DefaultShoot("e2e-upd-zone", workerless)
 	f.Shoot.Spec.ControlPlane = nil
 
 	It("Create, Upgrade (non-HA to HA with failure tolerance type 'zone') and Delete Shoot", func() {

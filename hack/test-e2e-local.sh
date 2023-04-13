@@ -44,25 +44,32 @@ if [[ "$1" != "operator" ]]; then
 
   shoot_names=(
     e2e-managedseed.garden
-    e2e-hibernated.local
+    e2e-hib.local
+    e2e-hib-wl.local
     e2e-unpriv.local
     e2e-wake-up.local
+    e2e-wake-up-wl.local
     e2e-migrate.local
+    e2e-migrate-wl.local
     e2e-rotate.local
+    e2e-rotate-wl.local
     e2e-default.local
-    e2e-update-node.local
-    e2e-update-zone.local
+    e2e-default-wl.local
+    e2e-upd-node.local
+    e2e-upd-node-wl.local
+    e2e-upd-zone.local
+    e2e-upd-zone-wl.local
     e2e-upgrade.local
   )
 
   if [ -n "${CI:-}" -a -n "${ARTIFACTS:-}" ]; then
     for shoot in "${shoot_names[@]}" ; do
-      if [ "${SHOOT_FAILURE_TOLERANCE_TYPE:-}" = "zone" -a "$shoot" = "e2e-update-zone.local" ]; then
-        # Do not add the entry for the e2e-update-zone test as the target ip is dynamic.
-        # The shoot cluster in e2e-update-zone is created as single-zone control plane and afterwards updated to a multi-zone control plane.
+      if [ "${SHOOT_FAILURE_TOLERANCE_TYPE:-}" = "zone" -a "$shoot" = "e2e-upd-zone.local" ]; then
+        # Do not add the entry for the e2e-upd-zone test as the target ip is dynamic.
+        # The shoot cluster in e2e-upd-zone is created as single-zone control plane and afterwards updated to a multi-zone control plane.
         # This means that the external loadbalancer IP will change from a zone-specific istio ingress gateway to the default istio ingress gateway.
         # A static mapping (to the default istio ingress gateway) as done here will not work in this scenario.
-        # The e2e-update-zone test uses the in-cluster coredns for name resolution and can therefore resolve the api endpoint.
+        # The e2e-upd-zone test uses the in-cluster coredns for name resolution and can therefore resolve the api endpoint.
         continue
       fi
       printf "\n127.0.0.1 api.%s.external.local.gardener.cloud\n127.0.0.1 api.%s.internal.local.gardener.cloud\n" $shoot $shoot >>/etc/hosts

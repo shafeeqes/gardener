@@ -27,9 +27,13 @@ import (
 	. "github.com/gardener/gardener/test/framework"
 )
 
-var _ = Describe("Shoot Tests", Label("Shoot", "control-plane-migration"), func() {
-	f := defaultShootCreationFramework()
-	f.Shoot = e2e.DefaultShoot("e2e-migrate")
+var _ = Describe("Shoot Tests", Label("Shoot", "control-plane-migration", "workerless"), func() {
+	var (
+		f          = defaultShootCreationFramework()
+		workerless = e2e.IsTestForWorkerlessShoot()
+	)
+
+	f.Shoot = e2e.DefaultShoot("e2e-migrate", workerless)
 	// Assign seedName so that shoot does not get scheduled to the seed that will be used as target.
 	f.Shoot.Spec.SeedName = pointer.String("local")
 

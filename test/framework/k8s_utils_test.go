@@ -42,6 +42,13 @@ var _ = Describe("Kubernetes Utils", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Generation: 1,
 				},
+				Spec: gardencorev1beta1.ShootSpec{
+					Provider: gardencorev1beta1.Provider{
+						Workers: []gardencorev1beta1.Worker{
+							{Name: "worker"},
+						},
+					},
+				},
 				Status: gardencorev1beta1.ShootStatus{
 					ObservedGeneration: 1,
 				},
@@ -57,6 +64,13 @@ var _ = Describe("Kubernetes Utils", func() {
 			})
 
 			It("should return true if shoot is reconciled successfully", func() {
+				appendShootConditionsToShoot(shoot)
+
+				testShootReconcilationSuccessful(BeEmpty(), BeTrue())
+			})
+
+			It("should return true if workerless shoot is reconciled successfully", func() {
+				shoot.Spec.Provider.Workers = nil
 				appendShootConditionsToShoot(shoot)
 
 				testShootReconcilationSuccessful(BeEmpty(), BeTrue())
@@ -92,6 +106,14 @@ var _ = Describe("Kubernetes Utils", func() {
 				setConditionToFalse(shoot, gardencorev1beta1.ShootSystemComponentsHealthy)
 
 				testShootReconcilationSuccessful(ContainSubstring("condition type SystemComponentsHealthy is not true yet"), BeFalse())
+			})
+
+			It("should return false and appropriate message if not all conditions are True for workerless shoot", func() {
+				shoot.Spec.Provider.Workers = nil
+				appendShootConditionsToShoot(shoot)
+				setConditionToFalse(shoot, gardencorev1beta1.ShootControlPlaneHealthy)
+
+				testShootReconcilationSuccessful(ContainSubstring("condition type ControlPlaneHealthy is not true yet"), BeFalse())
 			})
 
 			It("should return false and appropriate message if shoot acts as seed and a seed condition is not True", func() {
@@ -196,16 +218,22 @@ func appendShootConditionsToShoot(shoot *gardencorev1beta1.Shoot) {
 			Type:   gardencorev1beta1.ShootObservabilityComponentsHealthy,
 			Status: gardencorev1beta1.ConditionTrue,
 		},
-		{
-			Type:   gardencorev1beta1.ShootEveryNodeReady,
-			Status: gardencorev1beta1.ConditionTrue,
-		},
-		{
-			Type:   gardencorev1beta1.ShootSystemComponentsHealthy,
-			Status: gardencorev1beta1.ConditionTrue,
-		},
 	}...,
 	)
+
+	if !shoot.IsWorkerless() {
+		shoot.Status.Conditions = append(shoot.Status.Conditions, []gardencorev1beta1.Condition{
+			{
+				Type:   gardencorev1beta1.ShootEveryNodeReady,
+				Status: gardencorev1beta1.ConditionTrue,
+			},
+			{
+				Type:   gardencorev1beta1.ShootSystemComponentsHealthy,
+				Status: gardencorev1beta1.ConditionTrue,
+			},
+		}...,
+		)
+	}
 }
 
 func appendSeedConditionsToShoot(shoot *gardencorev1beta1.Shoot) {

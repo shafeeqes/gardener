@@ -35,22 +35,28 @@ import (
 	shootupdatesuite "github.com/gardener/gardener/test/utils/shoots/update"
 )
 
-var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
-	f := defaultShootCreationFramework()
-	f.Shoot = e2e.DefaultShoot("e2e-default")
+var _ = Describe("Shoot Tests", Label("Shoot", "default", "workerless"), func() {
+	var (
+		f          = defaultShootCreationFramework()
+		workerless = e2e.IsTestForWorkerlessShoot()
+	)
+
+	f.Shoot = e2e.DefaultShoot("e2e-default", workerless)
 
 	// explicitly use one version below the latest supported minor version so that Kubernetes version update test can be
 	// performed
 	f.Shoot.Spec.Kubernetes.Version = "1.25.4"
 
-	// create two additional worker pools which explicitly specify the kubernetes version
-	pool1 := f.Shoot.Spec.Provider.Workers[0]
-	pool2, pool3 := pool1.DeepCopy(), pool1.DeepCopy()
-	pool2.Name += "2"
-	pool2.Kubernetes = &gardencorev1beta1.WorkerKubernetes{Version: &f.Shoot.Spec.Kubernetes.Version}
-	pool3.Name += "3"
-	pool3.Kubernetes = &gardencorev1beta1.WorkerKubernetes{Version: pointer.String("1.24.8")}
-	f.Shoot.Spec.Provider.Workers = append(f.Shoot.Spec.Provider.Workers, *pool2, *pool3)
+	if !workerless {
+		// create two additional worker pools which explicitly specify the kubernetes version
+		pool1 := f.Shoot.Spec.Provider.Workers[0]
+		pool2, pool3 := pool1.DeepCopy(), pool1.DeepCopy()
+		pool2.Name += "2"
+		pool2.Kubernetes = &gardencorev1beta1.WorkerKubernetes{Version: &f.Shoot.Spec.Kubernetes.Version}
+		pool3.Name += "3"
+		pool3.Kubernetes = &gardencorev1beta1.WorkerKubernetes{Version: pointer.String("1.24.8")}
+		f.Shoot.Spec.Provider.Workers = append(f.Shoot.Spec.Provider.Workers, *pool2, *pool3)
+	}
 
 	It("Create, Update, Delete", Label("simple"), func() {
 		By("Create Shoot")
@@ -71,35 +77,37 @@ var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
 			g.Expect(shootClient.Client().List(ctx, &corev1.NamespaceList{})).To(Succeed())
 		}).Should(Succeed())
 
-		By("Verify worker node labels")
-		commonNodeLabels := utils.MergeStringMaps(f.Shoot.Spec.Provider.Workers[0].Labels)
-		commonNodeLabels["networking.gardener.cloud/node-local-dns-enabled"] = "false"
-		commonNodeLabels["node.kubernetes.io/role"] = "node"
+		if !workerless {
+			By("Verify worker node labels")
+			commonNodeLabels := utils.MergeStringMaps(f.Shoot.Spec.Provider.Workers[0].Labels)
+			commonNodeLabels["networking.gardener.cloud/node-local-dns-enabled"] = "false"
+			commonNodeLabels["node.kubernetes.io/role"] = "node"
 
-		Eventually(func(g Gomega) {
-			for _, workerPool := range f.Shoot.Spec.Provider.Workers {
-				expectedNodeLabels := utils.MergeStringMaps(commonNodeLabels)
-				expectedNodeLabels["worker.gardener.cloud/pool"] = workerPool.Name
-				expectedNodeLabels["worker.gardener.cloud/cri-name"] = string(workerPool.CRI.Name)
-				expectedNodeLabels["worker.gardener.cloud/system-components"] = strconv.FormatBool(workerPool.SystemComponents.Allow)
+			Eventually(func(g Gomega) {
+				for _, workerPool := range f.Shoot.Spec.Provider.Workers {
+					expectedNodeLabels := utils.MergeStringMaps(commonNodeLabels)
+					expectedNodeLabels["worker.gardener.cloud/pool"] = workerPool.Name
+					expectedNodeLabels["worker.gardener.cloud/cri-name"] = string(workerPool.CRI.Name)
+					expectedNodeLabels["worker.gardener.cloud/system-components"] = strconv.FormatBool(workerPool.SystemComponents.Allow)
 
-				kubernetesVersion := f.Shoot.Spec.Kubernetes.Version
-				if workerPool.Kubernetes != nil && workerPool.Kubernetes.Version != nil {
-					kubernetesVersion = *workerPool.Kubernetes.Version
+					kubernetesVersion := f.Shoot.Spec.Kubernetes.Version
+					if workerPool.Kubernetes != nil && workerPool.Kubernetes.Version != nil {
+						kubernetesVersion = *workerPool.Kubernetes.Version
+					}
+					expectedNodeLabels["worker.gardener.cloud/kubernetes-version"] = kubernetesVersion
+
+					nodeList := &corev1.NodeList{}
+					g.Expect(shootClient.Client().List(ctx, nodeList, client.MatchingLabels{
+						"worker.gardener.cloud/pool": workerPool.Name,
+					})).To(Succeed())
+					g.Expect(nodeList.Items).To(HaveLen(1), "worker pool %s should have exactly one Node", workerPool.Name)
+
+					for key, value := range expectedNodeLabels {
+						g.Expect(nodeList.Items[0].Labels).To(HaveKeyWithValue(key, value), "worker pool %s should have expected labels", workerPool.Name)
+					}
 				}
-				expectedNodeLabels["worker.gardener.cloud/kubernetes-version"] = kubernetesVersion
-
-				nodeList := &corev1.NodeList{}
-				g.Expect(shootClient.Client().List(ctx, nodeList, client.MatchingLabels{
-					"worker.gardener.cloud/pool": workerPool.Name,
-				})).To(Succeed())
-				g.Expect(nodeList.Items).To(HaveLen(1), "worker pool %s should have exactly one Node", workerPool.Name)
-
-				for key, value := range expectedNodeLabels {
-					g.Expect(nodeList.Items[0].Labels).To(HaveKeyWithValue(key, value), "worker pool %s should have expected labels", workerPool.Name)
-				}
-			}
-		}).Should(Succeed())
+			}).Should(Succeed())
+		}
 
 		By("Update Shoot")
 		ctx, cancel = context.WithTimeout(parentCtx, 20*time.Minute)

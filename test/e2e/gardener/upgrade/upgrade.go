@@ -45,7 +45,7 @@ var _ = Describe("Gardener upgrade Tests for", func() {
 			parentCtx = context.Background()
 			job       *batchv1.Job
 			err       error
-			shootTest = e2e.DefaultShoot("e2e-upgrade")
+			shootTest = e2e.DefaultShoot("e2e-upgrade", false)
 			f         = framework.NewShootCreationFramework(&framework.ShootCreationConfig{GardenerConfig: e2e.DefaultGardenConfig(projectNamespace)})
 		)
 

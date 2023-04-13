@@ -33,9 +33,13 @@ import (
 	"github.com/gardener/gardener/test/utils/shoots/access"
 )
 
-var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
-	f := defaultShootCreationFramework()
-	f.Shoot = e2e.DefaultShoot("e2e-rotate")
+var _ = Describe("Shoot Tests", Label("Shoot", "default", "workerless"), func() {
+	var (
+		f          = defaultShootCreationFramework()
+		workerless = e2e.IsTestForWorkerlessShoot()
+	)
+
+	f.Shoot = e2e.DefaultShoot("e2e-rotate", workerless)
 
 	// Explicitly enable the static token kubeconfig to test the kubeconfig rotation.
 	f.Shoot.Spec.Kubernetes.EnableStaticTokenKubeconfig = pointer.Bool(true)
@@ -53,7 +57,6 @@ var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
 			&rotation.CAVerifier{ShootCreationFramework: f},
 			&rotation.KubeconfigVerifier{ShootCreationFramework: f},
 			&rotation.ObservabilityVerifier{ShootCreationFramework: f},
-			&rotation.SSHKeypairVerifier{ShootCreationFramework: f},
 			&rotationutils.ETCDEncryptionKeyVerifier{
 				RuntimeClient:               f.ShootFramework.SeedClient.Client(),
 				Namespace:                   f.Shoot.Status.TechnicalID,
@@ -76,6 +79,10 @@ var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
 				return access.CreateShootClientFromAdminKubeconfig(ctx, f.GardenClient, f.Shoot)
 			}},
 			&rotation.ShootAccessVerifier{ShootCreationFramework: f},
+		}
+
+		if !workerless {
+			v = append(v, &rotation.SSHKeypairVerifier{ShootCreationFramework: f})
 		}
 
 		DeferCleanup(func() {

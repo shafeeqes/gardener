@@ -30,9 +30,13 @@ import (
 	"github.com/gardener/gardener/test/framework"
 )
 
-var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
-	f := defaultShootCreationFramework()
-	f.Shoot = e2e.DefaultShoot("e2e-hibernated")
+var _ = Describe("Shoot Tests", Label("Shoot", "default", "workerless"), func() {
+	var (
+		f          = defaultShootCreationFramework()
+		workerless = e2e.IsTestForWorkerlessShoot()
+	)
+
+	f.Shoot = e2e.DefaultShoot("e2e-hib", workerless)
 	f.Shoot.Spec.Hibernation = &gardencorev1beta1.Hibernation{
 		Enabled: pointer.Bool(true),
 	}
@@ -44,7 +48,9 @@ var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
 		Expect(f.CreateShootAndWaitForCreation(ctx, false)).To(Succeed())
 		f.Verify()
 
-		verifyNoPodsRunning(ctx, f)
+		if !workerless {
+			verifyNoPodsRunning(ctx, f)
+		}
 
 		By("Delete Shoot")
 		ctx, cancel = context.WithTimeout(parentCtx, 15*time.Minute)

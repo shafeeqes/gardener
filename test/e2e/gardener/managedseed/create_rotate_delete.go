@@ -55,7 +55,7 @@ var _ = Describe("ManagedSeed Tests", Label("ManagedSeed", "default"), func() {
 	f := framework.NewShootCreationFramework(&framework.ShootCreationConfig{
 		GardenerConfig: e2e.DefaultGardenConfig("garden"),
 	})
-	f.Shoot = e2e.DefaultShoot("e2e-managedseed")
+	f.Shoot = e2e.DefaultShoot("e2e-managedseed", false)
 	// TODO(shafeeqes): Remove this once v1.25 seeds are supported
 	f.Shoot.Spec.Kubernetes.Version = "1.24.8"
 
