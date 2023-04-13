@@ -70,7 +70,9 @@ func defaultKubeStateMetrics(
 		ClusterType: component.ClusterTypeSeed,
 		Image:       image.String(),
 		Replicas:    1,
-	}), nil
+	},
+		false,
+	), nil
 }
 
 func defaultIstio(

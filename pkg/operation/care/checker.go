@@ -54,7 +54,6 @@ var (
 
 	requiredMonitoringSeedDeployments = sets.New(
 		v1beta1constants.DeploymentNameGrafana,
-		v1beta1constants.DeploymentNameKubeStateMetrics,
 	)
 
 	requiredLoggingStatefulSets = sets.New(
@@ -361,6 +360,15 @@ func computeRequiredControlPlaneDeployments(shoot *gardencorev1beta1.Shoot) (set
 	return requiredControlPlaneDeployments, nil
 }
 
+func computeRequiredMonitoringSeedDeployments(shoot *gardencorev1beta1.Shoot) sets.Set[string] {
+	requiredMonitoringSeedDeployments := sets.New(requiredMonitoringSeedDeployments.UnsortedList()...)
+
+	if !shoot.IsWorkerless() {
+		requiredMonitoringSeedDeployments.Insert(v1beta1constants.DeploymentNameKubeStateMetrics)
+	}
+	return requiredMonitoringSeedDeployments
+}
+
 // computeRequiredMonitoringStatefulSets determine the required monitoring statefulsets
 // which should exist next to the control plane.
 func computeRequiredMonitoringStatefulSets(wantsAlertmanager bool) sets.Set[string] {
@@ -497,6 +505,7 @@ func (b *HealthChecker) CheckClusterNodes(
 // CheckMonitoringControlPlane checks whether the monitoring in the given listers are complete and healthy.
 func (b *HealthChecker) CheckMonitoringControlPlane(
 	ctx context.Context,
+	shoot *gardencorev1beta1.Shoot,
 	namespace string,
 	shootMonitoringEnabled bool,
 	wantsAlertmanager bool,
@@ -519,7 +528,7 @@ func (b *HealthChecker) CheckMonitoringControlPlane(
 		return nil, err
 	}
 
-	if exitCondition := b.checkRequiredDeployments(condition, requiredMonitoringSeedDeployments, deploymentList.Items); exitCondition != nil {
+	if exitCondition := b.checkRequiredDeployments(condition, computeRequiredMonitoringSeedDeployments(shoot), deploymentList.Items); exitCondition != nil {
 		return exitCondition, nil
 	}
 	if exitCondition := b.checkDeployments(condition, deploymentList.Items); exitCondition != nil {

@@ -824,7 +824,7 @@ var _ = Describe("health check", func() {
 	})
 
 	DescribeTable("#CheckMonitoringControlPlane",
-		func(deployments []*appsv1.Deployment, statefulSets []*appsv1.StatefulSet, wantsShootMonitoring, wantsAlertmanager bool, conditionMatcher types.GomegaMatcher) {
+		func(deployments []*appsv1.Deployment, statefulSets []*appsv1.StatefulSet, workerless, wantsShootMonitoring, wantsAlertmanager bool, conditionMatcher types.GomegaMatcher) {
 			for _, obj := range deployments {
 				Expect(fakeClient.Create(ctx, obj.DeepCopy())).To(Succeed(), "creating deployment "+client.ObjectKeyFromObject(obj).String())
 			}
@@ -834,29 +834,62 @@ var _ = Describe("health check", func() {
 
 			checker := care.NewHealthChecker(fakeClient, fakeClock, map[gardencorev1beta1.ConditionType]time.Duration{}, nil, nil, nil, kubernetesVersion, gardenerVersion)
 
-			exitCondition, err := checker.CheckMonitoringControlPlane(ctx, seedNamespace, wantsShootMonitoring, wantsAlertmanager, condition)
+			shoot := &gardencorev1beta1.Shoot{
+				Spec: gardencorev1beta1.ShootSpec{
+					Provider: gardencorev1beta1.Provider{
+						Workers: []gardencorev1beta1.Worker{
+							{
+								Name: "worker",
+							},
+						},
+					},
+				},
+			}
+			if workerless {
+				shoot.Spec.Provider.Workers = nil
+			}
+			exitCondition, err := checker.CheckMonitoringControlPlane(ctx, shoot, seedNamespace, wantsShootMonitoring, wantsAlertmanager, condition)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(exitCondition).To(conditionMatcher)
 		},
 		Entry("all healthy",
 			requiredMonitoringControlPlaneDeployments,
 			requiredMonitoringControlPlaneStatefulSets,
+			false,
+			true,
+			true,
+			BeNil()),
+		Entry("all healthy (workerless Shoot)",
+			[]*appsv1.Deployment{
+				grafanaDeployment,
+			},
+			requiredMonitoringControlPlaneStatefulSets,
+			true,
 			true,
 			true,
 			BeNil()),
 		Entry("required deployment missing",
 			[]*appsv1.Deployment{
-				kubeStateMetricsShootDeployment,
+				grafanaDeployment,
 			},
+			requiredMonitoringControlPlaneStatefulSets,
+			false,
+			true,
+			true,
+			PointTo(beConditionWithMissingRequiredDeployment([]*appsv1.Deployment{kubeStateMetricsShootDeployment}))),
+		Entry("required deployment missing (workerless Shoot)",
+			[]*appsv1.Deployment{},
 			requiredMonitoringControlPlaneStatefulSets,
 			true,
 			true,
-			PointTo(beConditionWithStatus(gardencorev1beta1.ConditionFalse))),
+			true,
+			PointTo(beConditionWithMissingRequiredDeployment([]*appsv1.Deployment{grafanaDeployment}))),
 		Entry("required stateful set set missing",
 			requiredMonitoringControlPlaneDeployments,
 			[]*appsv1.StatefulSet{
 				prometheusStatefulSet,
 			},
+			false,
 			true,
 			true,
 			PointTo(beConditionWithStatus(gardencorev1beta1.ConditionFalse))),
@@ -866,6 +899,7 @@ var _ = Describe("health check", func() {
 				kubeStateMetricsShootDeployment,
 			},
 			requiredMonitoringControlPlaneStatefulSets,
+			false,
 			true,
 			true,
 			PointTo(beConditionWithStatus(gardencorev1beta1.ConditionFalse))),
@@ -875,12 +909,14 @@ var _ = Describe("health check", func() {
 				newStatefulSet(alertManagerStatefulSet.Namespace, alertManagerStatefulSet.Name, roleOf(alertManagerStatefulSet), false),
 				prometheusStatefulSet,
 			},
+			false,
 			true,
 			true,
 			PointTo(beConditionWithStatus(gardencorev1beta1.ConditionFalse))),
 		Entry("shoot has monitoring disabled, omit all checks",
 			[]*appsv1.Deployment{},
 			[]*appsv1.StatefulSet{},
+			false,
 			false,
 			true,
 			BeNil()),

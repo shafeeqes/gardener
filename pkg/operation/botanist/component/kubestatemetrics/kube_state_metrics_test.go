@@ -397,7 +397,7 @@ var _ = Describe("KubeStateMetrics", func() {
 		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 		sm = fakesecretsmanager.New(c, namespace)
 
-		ksm = New(c, namespace, sm, values)
+		ksm = New(c, namespace, sm, values, false)
 		managedResourceName = ""
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
@@ -488,7 +488,9 @@ var _ = Describe("KubeStateMetrics", func() {
 				ksm = New(c, namespace, nil, Values{
 					ClusterType: component.ClusterTypeSeed,
 					Image:       image,
-				})
+				},
+					false,
+				)
 				managedResourceName = "kube-state-metrics"
 			})
 
@@ -537,7 +539,9 @@ var _ = Describe("KubeStateMetrics", func() {
 				ksm = New(c, namespace, sm, Values{
 					ClusterType: component.ClusterTypeShoot,
 					Image:       image,
-				})
+				},
+					false,
+				)
 				managedResourceName = "shoot-core-kube-state-metrics"
 			})
 
@@ -605,7 +609,7 @@ var _ = Describe("KubeStateMetrics", func() {
 	Describe("#Destroy", func() {
 		Context("cluster type seed", func() {
 			BeforeEach(func() {
-				ksm = New(c, namespace, nil, Values{ClusterType: component.ClusterTypeSeed})
+				ksm = New(c, namespace, nil, Values{ClusterType: component.ClusterTypeSeed}, false)
 				managedResourceName = "kube-state-metrics"
 			})
 
@@ -622,7 +626,7 @@ var _ = Describe("KubeStateMetrics", func() {
 
 		Context("cluster type shoot", func() {
 			BeforeEach(func() {
-				ksm = New(c, namespace, sm, Values{ClusterType: component.ClusterTypeShoot})
+				ksm = New(c, namespace, sm, Values{ClusterType: component.ClusterTypeShoot}, false)
 				managedResourceName = "shoot-core-kube-state-metrics"
 			})
 
@@ -720,7 +724,7 @@ var _ = Describe("KubeStateMetrics", func() {
 
 			Context("cluster type seed", func() {
 				BeforeEach(func() {
-					ksm = New(c, namespace, nil, Values{ClusterType: component.ClusterTypeSeed})
+					ksm = New(c, namespace, nil, Values{ClusterType: component.ClusterTypeSeed}, false)
 				})
 
 				tests("kube-state-metrics")
@@ -728,7 +732,7 @@ var _ = Describe("KubeStateMetrics", func() {
 
 			Context("cluster type shoot", func() {
 				BeforeEach(func() {
-					ksm = New(c, namespace, sm, Values{ClusterType: component.ClusterTypeShoot})
+					ksm = New(c, namespace, sm, Values{ClusterType: component.ClusterTypeShoot}, false)
 				})
 
 				tests("shoot-core-kube-state-metrics")
@@ -759,7 +763,7 @@ var _ = Describe("KubeStateMetrics", func() {
 
 			Context("cluster type seed", func() {
 				BeforeEach(func() {
-					ksm = New(c, namespace, nil, Values{ClusterType: component.ClusterTypeSeed})
+					ksm = New(c, namespace, nil, Values{ClusterType: component.ClusterTypeSeed}, false)
 				})
 
 				tests("kube-state-metrics")
@@ -767,7 +771,7 @@ var _ = Describe("KubeStateMetrics", func() {
 
 			Context("cluster type shoot", func() {
 				BeforeEach(func() {
-					ksm = New(c, namespace, sm, Values{ClusterType: component.ClusterTypeShoot})
+					ksm = New(c, namespace, sm, Values{ClusterType: component.ClusterTypeShoot}, false)
 				})
 
 				tests("shoot-core-kube-state-metrics")

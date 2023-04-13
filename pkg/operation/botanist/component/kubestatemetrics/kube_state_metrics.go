@@ -55,12 +55,14 @@ func New(
 	namespace string,
 	secretsManager secretsmanager.Interface,
 	values Values,
+	isWorkerless bool,
 ) Interface {
 	k := &kubeStateMetrics{
 		client:         client,
 		secretsManager: secretsManager,
 		namespace:      namespace,
 		values:         values,
+		isWorkerless:   isWorkerless,
 	}
 
 	if values.ClusterType == component.ClusterTypeSeed {
@@ -78,6 +80,7 @@ type kubeStateMetrics struct {
 	namespace      string
 	values         Values
 	registry       *managedresources.Registry
+	isWorkerless   bool
 }
 
 // Values is a set of configuration values for the kube-state-metrics.

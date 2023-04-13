@@ -39,6 +39,7 @@ func (b *Botanist) DefaultKubeStateMetrics() (kubestatemetrics.Interface, error)
 			Image:       image.String(),
 			Replicas:    b.Shoot.GetReplicas(1),
 		},
+		b.Shoot.IsWorkerless,
 	), nil
 }
 
