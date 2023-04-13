@@ -176,8 +176,8 @@ var _ = Describe("Shoot Maintenance controller tests", func() {
 				},
 				Maintenance: &gardencorev1beta1.Maintenance{
 					AutoUpdate: &gardencorev1beta1.MaintenanceAutoUpdate{
-						KubernetesVersion:   false,
-						MachineImageVersion: false,
+						KubernetesVersion:   pointer.Bool(false),
+						MachineImageVersion: pointer.Bool(false),
 					},
 					TimeWindow: &gardencorev1beta1.MaintenanceTimeWindow{
 						Begin: timewindow.NewMaintenanceTime(time.Now().Add(2*time.Hour).Hour(), 0, 0).Formatted(),
@@ -335,7 +335,7 @@ var _ = Describe("Shoot Maintenance controller tests", func() {
 		It("Shoot machine image must be updated in maintenance time: AutoUpdate.MachineImageVersion == true && expirationDate does not apply", func() {
 			// set test specific shoot settings
 			patch := client.MergeFrom(shoot.DeepCopy())
-			shoot.Spec.Maintenance.AutoUpdate.MachineImageVersion = true
+			shoot.Spec.Maintenance.AutoUpdate.MachineImageVersion = pointer.Bool(true)
 			Expect(testClient.Patch(ctx, shoot, patch)).To(Succeed())
 
 			Expect(kubernetesutils.SetAnnotationAndUpdate(ctx, testClient, shoot, v1beta1constants.GardenerOperation, v1beta1constants.ShootOperationMaintain)).To(Succeed())
@@ -391,7 +391,7 @@ var _ = Describe("Shoot Maintenance controller tests", func() {
 		It("Kubernetes version should be updated: auto update enabled", func() {
 			// set test specific shoot settings
 			patch := client.MergeFrom(shoot.DeepCopy())
-			shoot.Spec.Maintenance.AutoUpdate.KubernetesVersion = true
+			shoot.Spec.Maintenance.AutoUpdate.KubernetesVersion = pointer.Bool(true)
 			Expect(testClient.Patch(ctx, shoot, patch)).To(Succeed())
 
 			Expect(kubernetesutils.SetAnnotationAndUpdate(ctx, testClient, shoot, v1beta1constants.GardenerOperation, v1beta1constants.ShootOperationMaintain)).To(Succeed())
@@ -470,7 +470,7 @@ var _ = Describe("Shoot Maintenance controller tests", func() {
 		It("Kubernetes version should be updated: auto update enabled", func() {
 			// set test specific shoot settings
 			patch := client.MergeFrom(shoot.DeepCopy())
-			shoot.Spec.Maintenance.AutoUpdate.KubernetesVersion = true
+			shoot.Spec.Maintenance.AutoUpdate.KubernetesVersion = pointer.Bool(true)
 			shoot.Spec.Provider.Workers[0].Kubernetes = &gardencorev1beta1.WorkerKubernetes{Version: pointer.String(testKubernetesVersionLowPatchLowMinor.Version)}
 			Expect(testClient.Patch(ctx, shoot, patch)).To(Succeed())
 
