@@ -66,6 +66,43 @@ var _ = Describe("utils", func() {
 		})
 	})
 
+	Describe("#MergeBoolMaps", func() {
+		It("should return nil", func() {
+			result := MergeBoolMaps(nil, nil)
+
+			Expect(result).To(BeNil())
+		})
+
+		It("should return an empty map", func() {
+			emptyMap := map[string]bool{}
+
+			result := MergeBoolMaps(emptyMap, nil)
+
+			Expect(result).To(Equal(emptyMap))
+		})
+
+		It("should return a merged map", func() {
+			var (
+				a = map[string]bool{
+					"p": true,
+					"q": false,
+				}
+				b = map[string]bool{
+					"q": true,
+					"r": false,
+				}
+			)
+
+			result := MergeBoolMaps(a, b)
+
+			Expect(result).To(Equal(map[string]bool{
+				"p": true,
+				"q": true,
+				"r": false,
+			}))
+		})
+	})
+
 	DescribeTable("#IDForKeyWithOptionalValue",
 		func(key string, value *string, expectation string) {
 			Expect(IDForKeyWithOptionalValue(key, value)).To(Equal(expectation))

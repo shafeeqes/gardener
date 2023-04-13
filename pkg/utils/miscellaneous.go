@@ -92,6 +92,28 @@ func MergeStringMaps(oldMap map[string]string, newMaps ...map[string]string) map
 	return out
 }
 
+// MergeBoolMaps takes two maps <a>, <b> and merges them. If <b> defines a value with a key
+// already existing in the <a> map, the <a> value for that key will be overwritten.
+func MergeBoolMaps(a, b map[string]bool) map[string]bool {
+	var out map[string]bool
+
+	if a != nil {
+		out = make(map[string]bool)
+	}
+	for k, v := range a {
+		out[k] = v
+	}
+
+	if b != nil && a == nil {
+		out = make(map[string]bool)
+	}
+	for k, v := range b {
+		out[k] = v
+	}
+
+	return out
+}
+
 // TimeElapsed takes a <timestamp> and a <duration> checks whether the elapsed time until now is less than the <duration>.
 // If yes, it returns true, otherwise it returns false.
 func TimeElapsed(timestamp *metav1.Time, duration time.Duration) bool {
