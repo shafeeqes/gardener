@@ -629,6 +629,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 			shoot.Spec.Addons = nil
 			shoot.Spec.SecretBindingName = nil
 			shoot.Spec.Networking = nil
+			shoot.Spec.Kubernetes.KubeControllerManager = nil
 
 			errorList := ValidateShoot(shoot)
 
