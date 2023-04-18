@@ -213,7 +213,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 					Namespace: "test-namespace",
 				},
 				Spec: core.ShootSpec{
-					Networking: core.Networking{Type: networkingType},
+					Networking: &core.Networking{Type: pointer.String(networkingType)},
 					DNS: &core.DNS{
 						Providers: []core.DNSProvider{
 							{Type: &dnsProviderType1},
