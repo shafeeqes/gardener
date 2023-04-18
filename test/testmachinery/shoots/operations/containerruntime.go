@@ -37,7 +37,7 @@ var _ = Describe("Shoot container runtime testing", func() {
 			workerImage = worker.Machine.Image
 		)
 
-		if len(shoot.Spec.Provider.Workers) == 0 {
+		if shoot.IsWorkerless() {
 			Skip("at least one worker pool is required in the test shoot")
 		}
 
