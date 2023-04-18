@@ -36,3 +36,10 @@ patches:
         kind: Extension
         type: local-ext-shoot
         workerlessSupported: true
+    - op: add
+      path: /spec/resources/-
+      value:
+        kind: Extension
+        type: networkpolicy
+        globallyEnabled: true
+        workerlessSupported: true
