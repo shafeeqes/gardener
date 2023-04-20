@@ -93,11 +93,7 @@ func (h *Health) Check(
 ) []gardencorev1beta1.Condition {
 	var updatedConditions []gardencorev1beta1.Condition
 
-	if h.shoot.IsWorkerless {
-		updatedConditions = h.healthChecksWorkerLessShoot(ctx, thresholdMappings, healthCheckOutdatedThreshold, conditions)
-	} else {
-		updatedConditions = h.healthChecks(ctx, thresholdMappings, healthCheckOutdatedThreshold, conditions)
-	}
+	updatedConditions = h.healthChecks(ctx, thresholdMappings, healthCheckOutdatedThreshold, conditions)
 
 	lastOp := h.shoot.GetInfo().Status.LastOperation
 	lastErrors := h.shoot.GetInfo().Status.LastErrors
@@ -172,17 +168,25 @@ func (h *Health) getAllExtensionConditions(ctx context.Context) ([]ExtensionCond
 }
 
 func (h *Health) retrieveExtensions(ctx context.Context) ([]runtime.Object, error) {
-	var allExtensions []runtime.Object
+	var (
+		allExtensions       []runtime.Object
+		extensionObjectList = []client.ObjectList{
+			&extensionsv1alpha1.ExtensionList{},
+		}
+	)
 
-	for _, listObj := range []client.ObjectList{
-		&extensionsv1alpha1.ContainerRuntimeList{},
-		&extensionsv1alpha1.ControlPlaneList{},
-		&extensionsv1alpha1.ExtensionList{},
-		&extensionsv1alpha1.InfrastructureList{},
-		&extensionsv1alpha1.NetworkList{},
-		&extensionsv1alpha1.OperatingSystemConfigList{},
-		&extensionsv1alpha1.WorkerList{},
-	} {
+	if !h.shoot.IsWorkerless {
+		extensionObjectList = append(extensionObjectList,
+			&extensionsv1alpha1.ControlPlaneList{},
+			&extensionsv1alpha1.ContainerRuntimeList{},
+			&extensionsv1alpha1.InfrastructureList{},
+			&extensionsv1alpha1.NetworkList{},
+			&extensionsv1alpha1.OperatingSystemConfigList{},
+			&extensionsv1alpha1.WorkerList{},
+		)
+	}
+
+	for _, listObj := range extensionObjectList {
 		if err := h.seedClient.Client().List(ctx, listObj, client.InNamespace(h.shoot.SeedNamespace)); err != nil {
 			return nil, err
 		}
@@ -304,102 +308,60 @@ func (h *Health) healthChecks(
 		}
 
 		apiserverAvailability = checker.FailedCondition(apiserverAvailability, "APIServerDown", "Could not reach API server during client initialization.")
-		nodes = v1beta1helper.UpdatedConditionUnknownErrorMessageWithClock(h.clock, nodes, message)
-		systemComponents = v1beta1helper.UpdatedConditionUnknownErrorMessageWithClock(h.clock, systemComponents, message)
 
 		newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
 		controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
 
 		newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
 		observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
+
+		if h.shoot.IsWorkerless {
+			return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents}
+		}
+
+		nodes = v1beta1helper.UpdatedConditionUnknownErrorMessageWithClock(h.clock, nodes, message)
+		systemComponents = v1beta1helper.UpdatedConditionUnknownErrorMessageWithClock(h.clock, systemComponents, message)
 
 		return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents, nodes, systemComponents}
 	}
 
 	h.shootClient = shootClient
-
-	_ = flow.Parallel(func(ctx context.Context) error {
-		apiserverAvailability = h.checkAPIServerAvailability(ctx, checker, apiserverAvailability)
-		return nil
-	}, func(ctx context.Context) error {
-		newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
-		controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
-		return nil
-	}, func(ctx context.Context) error {
-		newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
-		observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
-		return nil
-	}, func(ctx context.Context) error {
-		newNodes, err := h.checkClusterNodes(ctx, h.shootClient.Client(), checker, nodes, extensionConditionsEveryNodeReady)
-		nodes = NewConditionOrError(h.clock, nodes, newNodes, err)
-		return nil
-	}, func(ctx context.Context) error {
-		newSystemComponents, err := h.checkSystemComponents(ctx, checker, systemComponents, extensionConditionsSystemComponentsHealthy)
-		systemComponents = NewConditionOrError(h.clock, systemComponents, newSystemComponents, err)
-		return nil
-	})(ctx)
-
-	return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents, nodes, systemComponents}
-}
-
-func (h *Health) healthChecksWorkerLessShoot(
-	ctx context.Context,
-	thresholdMappings map[gardencorev1beta1.ConditionType]time.Duration,
-	healthCheckOutdatedThreshold *metav1.Duration,
-	conditions []gardencorev1beta1.Condition,
-) []gardencorev1beta1.Condition {
-	if h.shoot.HibernationEnabled || h.shoot.GetInfo().Status.IsHibernated {
-		return shootHibernatedConditions(h.clock, conditions)
+	taskFns := []flow.TaskFn{
+		func(ctx context.Context) error {
+			apiserverAvailability = h.checkAPIServerAvailability(ctx, checker, apiserverAvailability)
+			return nil
+		}, func(ctx context.Context) error {
+			newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
+			controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
+			return nil
+		}, func(ctx context.Context) error {
+			newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
+			observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
+			return nil
+		},
 	}
 
-	var apiserverAvailability, controlPlane, observabilityComponents gardencorev1beta1.Condition
-	for _, cond := range conditions {
-		switch cond.Type {
-		case gardencorev1beta1.ShootAPIServerAvailable:
-			apiserverAvailability = cond
-		case gardencorev1beta1.ShootControlPlaneHealthy:
-			controlPlane = cond
-		case gardencorev1beta1.ShootObservabilityComponentsHealthy:
-			observabilityComponents = cond
-		}
-	}
-
-	extensionConditionsControlPlaneHealthy, _, _, err := h.getAllExtensionConditions(ctx)
-	if err != nil {
-		h.log.Error(err, "Error getting extension conditions")
-	}
-
-	checker := NewHealthChecker(h.seedClient.Client(), h.clock, thresholdMappings, healthCheckOutdatedThreshold, gardenlethelper.GetManagedResourceProgressingThreshold(h.gardenletConfiguration), h.shoot.GetInfo().Status.LastOperation, h.shoot.KubernetesVersion, h.shoot.GardenerVersion)
-
-	shootClient, apiServerRunning, err := h.initializeShootClients()
-	if err != nil || !apiServerRunning {
-		apiserverAvailability = checker.FailedCondition(apiserverAvailability, "APIServerDown", "Could not reach API server during client initialization.")
-
-		newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
-		controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
-
-		newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
-		observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
+	if h.shoot.IsWorkerless {
+		_ = flow.Parallel(taskFns...)(ctx)
 
 		return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents}
 	}
 
-	h.shootClient = shootClient
+	taskFns = append(taskFns,
+		func(ctx context.Context) error {
+			newNodes, err := h.checkClusterNodes(ctx, h.shootClient.Client(), checker, nodes, extensionConditionsEveryNodeReady)
+			nodes = NewConditionOrError(h.clock, nodes, newNodes, err)
+			return nil
+		}, func(ctx context.Context) error {
+			newSystemComponents, err := h.checkSystemComponents(ctx, checker, systemComponents, extensionConditionsSystemComponentsHealthy)
+			systemComponents = NewConditionOrError(h.clock, systemComponents, newSystemComponents, err)
+			return nil
+		},
+	)
 
-	_ = flow.Parallel(func(ctx context.Context) error {
-		apiserverAvailability = h.checkAPIServerAvailability(ctx, checker, apiserverAvailability)
-		return nil
-	}, func(ctx context.Context) error {
-		newControlPlane, err := h.checkControlPlane(ctx, checker, controlPlane, extensionConditionsControlPlaneHealthy)
-		controlPlane = NewConditionOrError(h.clock, controlPlane, newControlPlane, err)
-		return nil
-	}, func(ctx context.Context) error {
-		newObservabilityComponents, err := h.checkObservabilityComponents(ctx, checker, observabilityComponents)
-		observabilityComponents = NewConditionOrError(h.clock, observabilityComponents, newObservabilityComponents, err)
-		return nil
-	})(ctx)
+	_ = flow.Parallel(taskFns...)(ctx)
 
-	return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents}
+	return []gardencorev1beta1.Condition{apiserverAvailability, controlPlane, observabilityComponents, nodes, systemComponents}
 }
 
 // checkAPIServerAvailability checks if the API server of a Shoot cluster is reachable and measure the response time.
