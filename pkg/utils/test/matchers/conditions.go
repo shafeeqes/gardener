@@ -27,6 +27,11 @@ func ContainCondition(matchers ...gomegatypes.GomegaMatcher) gomegatypes.GomegaM
 	return ContainElement(And(matchers...))
 }
 
+// ConsistOfConditions returns a matchers for checking whether the list consists of the passed conditions.
+func ConsistOfConditions(matchers ...gomegatypes.GomegaMatcher) gomegatypes.GomegaMatcher {
+	return ConsistOf(matchers)
+}
+
 // OfType returns a matcher for checking whether a condition has a certain type.
 func OfType(conditionType gardencorev1beta1.ConditionType) gomegatypes.GomegaMatcher {
 	return gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
