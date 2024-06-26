@@ -206,6 +206,12 @@ spec:
                           leadership status of corresponding etcd is checked.
                         type: string
                     type: object
+                  maxBackupsLimitBasedGC:
+                    description: |-
+                      MaxBackupsLimitBasedGC defines the maximum number of Full snapshots to retain in Limit Based GarbageCollectionPolicy
+                      All full snapshots beyond this limit will be garbage collected.
+                    format: int32
+                    type: integer
                   port:
                     description: Port define the port on which etcd-backup-restore
                       server will be exposed.
@@ -332,6 +338,10 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
+                      skipClientSANVerify:
+                        description: Skip verification of SAN field in client certificate
+                          for connections.
+                        type: boolean
                       tlsCASecretRef:
                         description: SecretReference defines a reference to a secret.
                         properties:
@@ -355,7 +365,8 @@ spec:
                     type: object
                 type: object
               etcd:
-                description: EtcdConfig defines parameters associated etcd deployed
+                description: EtcdConfig defines the configuration for the etcd cluster
+                  to be deployed.
                 properties:
                   authSecretRef:
                     description: |-
@@ -391,6 +402,10 @@ spec:
                         description: Labels specify the labels that should be added
                           to the client service
                         type: object
+                      serviceEndpoint:
+                        description: ServiceEndpoint specifies the endpoint of the
+                          client service
+                        type: string
                     type: object
                   clientUrlTls:
                     description: ClientUrlTLS contains the ca, server TLS and client
@@ -426,6 +441,10 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
+                      skipClientSANVerify:
+                        description: Skip verification of SAN field in client certificate
+                          for connections.
+                        type: boolean
                       tlsCASecretRef:
                         description: SecretReference defines a reference to a secret.
                         properties:
@@ -447,6 +466,25 @@ spec:
                     - serverTLSSecretRef
                     - tlsCASecretRef
                     type: object
+                  clientUrls:
+                    description: ClientURLs contain the client URL info for additional
+                      peers that needs to be added to the existing cluster.
+                    items:
+                      description: MemberInfo contains the name and URLs of the member.
+                      properties:
+                        name:
+                          description: Name is the name of the member.
+                          type: string
+                        urls:
+                          description: URLs contains the URLs of the member.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - name
+                      - urls
+                      type: object
+                    type: array
                   defragmentationSchedule:
                     description: DefragmentationSchedule defines the cron standard
                       schedule for defragmentation of etcd.
@@ -462,6 +500,25 @@ spec:
                   image:
                     description: Image defines the etcd container image and tag
                     type: string
+                  initialCluster:
+                    description: InitialCluster contains the info for the initial
+                      cluster members.
+                    items:
+                      description: MemberInfo contains the name and URLs of the member.
+                      properties:
+                        name:
+                          description: Name is the name of the member.
+                          type: string
+                        urls:
+                          description: URLs contains the URLs of the member.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - name
+                      - urls
+                      type: object
+                    type: array
                   metrics:
                     description: Metrics defines the level of detail for exported
                       metrics of etcd, specify 'extensive' to include histogram metrics.
@@ -504,6 +561,10 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
+                      skipClientSANVerify:
+                        description: Skip verification of SAN field in client certificate
+                          for connections.
+                        type: boolean
                       tlsCASecretRef:
                         description: SecretReference defines a reference to a secret.
                         properties:
@@ -525,6 +586,25 @@ spec:
                     - serverTLSSecretRef
                     - tlsCASecretRef
                     type: object
+                  peerUrls:
+                    description: PeerURLs contain the peer URL info for additional
+                      peers that needs to be added to the existing cluster.
+                    items:
+                      description: MemberInfo contains the name and URLs of the member.
+                      properties:
+                        name:
+                          description: Name is the name of the member.
+                          type: string
+                        urls:
+                          description: URLs contains the URLs of the member.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - name
+                      - urls
+                      type: object
+                    type: array
                   quota:
                     anyOf:
                     - type: integer
@@ -1742,7 +1822,7 @@ spec:
                 properties:
                   autoCompactionMode:
                     description: AutoCompactionMode defines the auto-compaction-mode:'periodic'
-                      mode or 'revision' mode for etcd and embedded-Etcd of backup-restore
+                      mode or 'revision' mode for etcd and embedded-etcd of backup-restore
                       sidecar.
                     enum:
                     - periodic
@@ -1750,7 +1830,7 @@ spec:
                     type: string
                   autoCompactionRetention:
                     description: AutoCompactionRetention defines the auto-compaction-retention
-                      length for etcd as well as for embedded-Etcd of backup-restore
+                      length for etcd as well as for embedded-etcd of backup-restore
                       sidecar.
                     type: string
                 type: object
@@ -1803,7 +1883,7 @@ spec:
                       format: date-time
                       type: string
                     message:
-                      description: A human readable message indicating details about
+                      description: A human-readable message indicating details about
                         the transition.
                       type: string
                     reason:
@@ -1891,12 +1971,72 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               lastError:
-                description: LastError represents the last occurred error.
+                description: |-
+                  LastError represents the last occurred error.
+                  Deprecated: Use LastErrors instead.
                 type: string
+              lastErrors:
+                description: LastErrors captures errors that occurred during the last
+                  operation.
+                items:
+                  description: LastError stores details of the most recent error encountered
+                    for a resource.
+                  properties:
+                    code:
+                      description: Code is an error code that uniquely identifies
+                        an error.
+                      type: string
+                    description:
+                      description: Description is a human-readable message indicating
+                        details of the error.
+                      type: string
+                    observedAt:
+                      description: ObservedAt is the time the error was observed.
+                      format: date-time
+                      type: string
+                  required:
+                  - code
+                  - description
+                  - observedAt
+                  type: object
+                type: array
+              lastOperation:
+                description: LastOperation indicates the last operation performed
+                  on this resource.
+                properties:
+                  description:
+                    description: Description describes the last operation.
+                    type: string
+                  lastUpdateTime:
+                    description: LastUpdateTime is the time at which the operation
+                      was last updated.
+                    format: date-time
+                    type: string
+                  runID:
+                    description: |-
+                      RunID correlates an operation with a reconciliation run.
+                      Every time an Etcd resource is reconciled (barring status reconciliation which is periodic), a unique ID is
+                      generated which can be used to correlate all actions done as part of a single reconcile run. Capturing this
+                      as part of LastOperation aids in establishing this correlation. This further helps in also easily filtering
+                      reconcile logs as all structured logs in a reconciliation run should have the `runID` referenced.
+                    type: string
+                  state:
+                    description: State is the state of the last operation.
+                    type: string
+                  type:
+                    description: Type is the type of last operation.
+                    type: string
+                required:
+                - description
+                - lastUpdateTime
+                - runID
+                - state
+                - type
+                type: object
               members:
                 description: Members represents the members of the etcd cluster
                 items:
-                  description: EtcdMemberStatus holds information about a etcd cluster
+                  description: EtcdMemberStatus holds information about etcd cluster
                     membership.
                   properties:
                     id:
@@ -1946,7 +2086,7 @@ spec:
                 format: int32
                 type: integer
               replicas:
-                description: Replicas is the replica count of the etcd resource.
+                description: Replicas is the replica count of the etcd cluster.
                 format: int32
                 type: integer
               serviceName:
@@ -1965,4 +2105,7 @@ spec:
     served: true
     storage: true
     subresources:
+      scale:
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
       status: {}

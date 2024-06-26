@@ -6,7 +6,9 @@ package botanist
 
 import (
 	"context"
+	"fmt"
 
+	druidv1alpha1 "github.com/gardener/etcd-druid/api/v1alpha1"
 	hvpav1alpha1 "github.com/gardener/hvpa-controller/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,7 +33,7 @@ import (
 var NewEtcd = etcd.New
 
 // DefaultEtcd returns a deployer for the etcd.
-func (b *Botanist) DefaultEtcd(role string, class etcd.Class) (etcd.Interface, error) {
+func (b *Botanist) DefaultEtcd(ctx context.Context, role string, class etcd.Class) (etcd.Interface, error) {
 	defragmentationSchedule, err := determineDefragmentationSchedule(b.Shoot.GetInfo(), b.ManagedSeed, class)
 	if err != nil {
 		return nil, err
@@ -47,27 +49,66 @@ func (b *Botanist) DefaultEtcd(role string, class etcd.Class) (etcd.Interface, e
 		hvpaEnabled = features.DefaultFeatureGate.Enabled(features.HVPAForShootedSeed)
 	}
 
+	values := etcd.Values{
+		Role:                        role,
+		Class:                       class,
+		Replicas:                    replicas,
+		StorageCapacity:             b.Seed.GetValidVolumeSize("10Gi"),
+		DefragmentationSchedule:     &defragmentationSchedule,
+		CARotationPhase:             v1beta1helper.GetShootCARotationPhase(b.Shoot.GetInfo().Status.Credentials),
+		RuntimeKubernetesVersion:    b.Seed.KubernetesVersion,
+		HVPAEnabled:                 hvpaEnabled,
+		MaintenanceTimeWindow:       *b.Shoot.GetInfo().Spec.Maintenance.TimeWindow,
+		ScaleDownUpdateMode:         getScaleDownUpdateMode(class, b.Shoot),
+		PriorityClassName:           v1beta1constants.PriorityClassNameShootControlPlane500,
+		HighAvailabilityEnabled:     v1beta1helper.IsHAControlPlaneConfigured(b.Shoot.GetInfo()),
+		TopologyAwareRoutingEnabled: b.Shoot.TopologyAwareRoutingEnabled,
+		VPAEnabled:                  features.DefaultFeatureGate.Enabled(features.VPAForETCD),
+		ShootInLiveMigration:        v1beta1helper.ShootNeedsLiveMigrate(b.Shoot.GetInfo()),
+	}
+
+	if v1beta1helper.ShootNeedsLiveMigrate(b.Shoot.GetInfo()) {
+		var (
+			peerURLs   []druidv1alpha1.MemberInfo
+			clientURLs []druidv1alpha1.MemberInfo
+		)
+
+		for i := range ptr.Deref(replicas, 3) {
+			svc := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("etcd-main-%d", i), Namespace: b.Shoot.SeedNamespace}}
+
+			if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(svc), svc); err != nil {
+				if apierrors.IsNotFound(err) {
+					continue
+				}
+				return nil, err
+			}
+
+			peerURLs = append(peerURLs, druidv1alpha1.MemberInfo{
+				Name: fmt.Sprintf("etcd-main-%d", i),
+				URLs: []string{
+					fmt.Sprintf("https://etcd-main-%d.etcd-main-peer.%s:2380", i, b.Shoot.SeedNamespace),
+					fmt.Sprintf("https://%s:2380", svc.Status.LoadBalancer.Ingress[0].Hostname),
+				},
+			})
+			clientURLs = append(clientURLs, druidv1alpha1.MemberInfo{
+				Name: fmt.Sprintf("etcd-main-%d", i),
+				URLs: []string{
+					fmt.Sprintf("https://etcd-main-%d.etcd-main-peer.%s:2379", i, b.Shoot.SeedNamespace),
+					fmt.Sprintf("https://%s:2379", svc.Status.LoadBalancer.Ingress[0].Hostname),
+				},
+			})
+		}
+
+		values.PeerURLs = peerURLs
+		values.ClientURLs = clientURLs
+	}
+
 	e := NewEtcd(
 		b.Logger,
 		b.SeedClientSet.Client(),
 		b.Shoot.SeedNamespace,
 		b.SecretsManager,
-		etcd.Values{
-			Role:                        role,
-			Class:                       class,
-			Replicas:                    replicas,
-			StorageCapacity:             b.Seed.GetValidVolumeSize("10Gi"),
-			DefragmentationSchedule:     &defragmentationSchedule,
-			CARotationPhase:             v1beta1helper.GetShootCARotationPhase(b.Shoot.GetInfo().Status.Credentials),
-			RuntimeKubernetesVersion:    b.Seed.KubernetesVersion,
-			HVPAEnabled:                 hvpaEnabled,
-			MaintenanceTimeWindow:       *b.Shoot.GetInfo().Spec.Maintenance.TimeWindow,
-			ScaleDownUpdateMode:         getScaleDownUpdateMode(class, b.Shoot),
-			PriorityClassName:           v1beta1constants.PriorityClassNameShootControlPlane500,
-			HighAvailabilityEnabled:     v1beta1helper.IsHAControlPlaneConfigured(b.Shoot.GetInfo()),
-			TopologyAwareRoutingEnabled: b.Shoot.TopologyAwareRoutingEnabled,
-			VPAEnabled:                  features.DefaultFeatureGate.Enabled(features.VPAForETCD),
-		},
+		values,
 	)
 
 	return e, nil

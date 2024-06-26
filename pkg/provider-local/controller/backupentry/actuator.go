@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	etcddruidutils "github.com/gardener/etcd-druid/pkg/utils"
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -35,7 +34,7 @@ func newActuator(mgr manager.Manager, containerMountPath, backupBucketPath strin
 }
 
 func (a *actuator) GetETCDSecretData(_ context.Context, _ logr.Logger, _ *extensionsv1alpha1.BackupEntry, backupSecretData map[string][]byte) (map[string][]byte, error) {
-	backupSecretData[etcddruidutils.EtcdBackupSecretHostPath] = []byte(filepath.Join(a.containerMountPath))
+	backupSecretData["hostPath"] = []byte(filepath.Join(a.containerMountPath))
 	return backupSecretData, nil
 }
 

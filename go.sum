@@ -185,8 +185,6 @@ github.com/gardener/cert-management v0.15.0 h1:ohm1eWae2rQSkwFGWXTt+lBv4rLBhtJsJ
 github.com/gardener/cert-management v0.15.0/go.mod h1:3BK2VEtGwv2ijf3bSziTLMCUvYnPzIQrQ/uPeZzL4m0=
 github.com/gardener/dependency-watchdog v1.2.3 h1:G1gihyMxHLKtkb+/iAme8v5KuN0XNt4Z2+9aNgs/Vcs=
 github.com/gardener/dependency-watchdog v1.2.3/go.mod h1:DzjPnXWcDHmboMudqNZ1VXHfHLkgHy4jxPdyab/37oQ=
-github.com/gardener/etcd-druid v0.22.0 h1:DVe+Zjrb93r9vI1uUiCTMHBffIUoMAKhNzFZNC6hsQ8=
-github.com/gardener/etcd-druid v0.22.0/go.mod h1:FROhfVKyWBo4krlPe3R6FIhJRmOmijEWBdEeUP0CJjE=
 github.com/gardener/hvpa-controller/api v0.15.0 h1:igsalL5Z6kFMn1+Kv1Eq0cRjYW+4oBA1aEY/yDO2QtI=
 github.com/gardener/hvpa-controller/api v0.15.0/go.mod h1:fqb4wNrQLESDKpm7ppXyCM2Gvx96wRlLL35aH0ge07U=
 github.com/gardener/machine-controller-manager v0.53.0 h1:g2O0F7nEYZ9LjyPY6Gew8+q0n+rU88deexNq5k8CKks=
@@ -520,8 +518,6 @@ github.com/redis/go-redis/v9 v9.1.0 h1:137FnGdk+EQdCbye1FW+qOEcY5S+SpY9T0Niuqvtf
 github.com/redis/go-redis/v9 v9.1.0/go.mod h1:urWj3He21Dj5k4TK1y59xH8Uj6ATueP8AH1cY3lZl4c=
 github.com/robfig/cron v1.2.0 h1:ZjScXvvxeQ63Dbyxy76Fj3AT3Ut0aKsyd2/tl3DTMuQ=
 github.com/robfig/cron v1.2.0/go.mod h1:JGuDeoQd7Z6yL4zQhZ3OPEVHB7fL6Ka6skscFHfmt2k=
-github.com/robfig/cron/v3 v3.0.1 h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=
-github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzGIFLtro=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/rogpeppe/go-internal v1.11.0/go.mod h1:ddIwULY96R17DhadqLgMfk9H9tvdUzkipdSkR5nkCZA=
@@ -532,6 +528,8 @@ github.com/sagikazarmark/locafero v0.4.0 h1:HApY1R9zGo4DBgr7dqsTH/JJxLTTsOt7u6ke
 github.com/sagikazarmark/locafero v0.4.0/go.mod h1:Pe1W6UlPYUk/+wc/6KFhbORCfqzgYEpgQ3O5fPuL3H4=
 github.com/sagikazarmark/slog-shim v0.1.0 h1:diDBnUNK9N/354PgrxMywXnAwEr1QZcOr6gto+ugjYE=
 github.com/sagikazarmark/slog-shim v0.1.0/go.mod h1:SrcSrq8aKtyuqEI1uvTDTK1arOWRIczQRv+GVI1AkeQ=
+github.com/shafeeqes/etcd-druid v0.7.1-0.20240625082419-a9b751c6400b h1:dpnJhJGovYPiHf3r2Fs1gPv4Od5jyqjVXPNOw4sygjs=
+github.com/shafeeqes/etcd-druid v0.7.1-0.20240625082419-a9b751c6400b/go.mod h1:vpriRtgSfuudrKAVkucawES2y7Y7gK/LwMzhy+OvTms=
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=

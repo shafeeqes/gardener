@@ -163,6 +163,10 @@ type Values struct {
 	HighAvailabilityEnabled     bool
 	TopologyAwareRoutingEnabled bool
 	VPAEnabled                  bool
+	PeerURLs                    []druidv1alpha1.MemberInfo
+	ClientURLs                  []druidv1alpha1.MemberInfo
+	InitialCluster              []druidv1alpha1.MemberInfo
+	ShootInLiveMigration        bool
 }
 
 func (e *etcd) Deploy(ctx context.Context) error {
@@ -346,6 +350,12 @@ func (e *etcd) Deploy(ctx context.Context) error {
 			},
 		}
 
+		if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
+			e.etcd.Spec.Etcd.PeerURLs = e.values.PeerURLs
+			e.etcd.Spec.Etcd.ClientURLs = e.values.ClientURLs
+			e.etcd.Spec.Etcd.InitialCluster = e.values.InitialCluster
+		}
+
 		// TODO(timuthy): Once https://github.com/gardener/etcd-backup-restore/issues/538 is resolved we can enable PeerUrlTLS for all remaining clusters as well.
 		if e.values.HighAvailabilityEnabled {
 			e.etcd.Spec.Etcd.PeerUrlTLS = &druidv1alpha1.TLSConfig{
@@ -361,6 +371,10 @@ func (e *etcd) Deploy(ctx context.Context) error {
 					Namespace: e.namespace,
 				},
 			}
+		}
+
+		if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
+			e.etcd.Spec.Etcd.PeerUrlTLS.SkipClientSANVerify = ptr.To(true)
 		}
 
 		e.etcd.Spec.Backup = druidv1alpha1.BackupSpec{
@@ -1044,6 +1058,11 @@ func (e *etcd) clientServiceDNSNames() []string {
 	var domainNames []string
 	domainNames = append(domainNames, fmt.Sprintf("%s-local", e.etcd.Name))
 	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-client", e.etcd.Name), e.namespace)...)
+	if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
+		for _, member := range e.etcd.Spec.Etcd.ClientURLs {
+			domainNames = append(domainNames, member.URLs...)
+		}
+	}
 
 	// The peer service needs to be considered here since the etcd-backup-restore side-car
 	// connects to member pods via pod domain names (e.g. for defragmentation).
@@ -1054,10 +1073,18 @@ func (e *etcd) clientServiceDNSNames() []string {
 }
 
 func (e *etcd) peerServiceDNSNames() []string {
-	return append(
-		kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-peer", e.etcd.Name), e.namespace),
-		kubernetesutils.DNSNamesForService(fmt.Sprintf("*.%s-peer", e.etcd.Name), e.namespace)...,
-	)
+	var domainNames []string
+
+	if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
+		for _, member := range e.etcd.Spec.Etcd.PeerURLs {
+			domainNames = append(domainNames, member.URLs...)
+		}
+	}
+
+	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-peer", e.etcd.Name), e.namespace)...)
+	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("*.%s-peer", e.etcd.Name), e.namespace)...)
+
+	return domainNames
 }
 
 // Get retrieves the Etcd resource

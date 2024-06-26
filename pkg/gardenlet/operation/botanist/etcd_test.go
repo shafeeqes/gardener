@@ -152,7 +152,7 @@ var _ = Describe("Etcd", func() {
 						defer func() { NewEtcd = oldNewEtcd }()
 						NewEtcd = validator.NewEtcd
 
-						etcd, err := botanist.DefaultEtcd(role, class)
+						etcd, err := botanist.DefaultEtcd(ctx, role, class)
 						Expect(etcd).NotTo(BeNil())
 						Expect(err).NotTo(HaveOccurred())
 					})
@@ -190,7 +190,7 @@ var _ = Describe("Etcd", func() {
 				defer func() { NewEtcd = oldNewEtcd }()
 				NewEtcd = validator.NewEtcd
 
-				etcd, err := botanist.DefaultEtcd(role, class)
+				etcd, err := botanist.DefaultEtcd(ctx, role, class)
 				Expect(etcd).NotTo(BeNil())
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -220,7 +220,7 @@ var _ = Describe("Etcd", func() {
 				defer func() { NewEtcd = oldNewEtcd }()
 				NewEtcd = validator.NewEtcd
 
-				etcd, err := botanist.DefaultEtcd(role, class)
+				etcd, err := botanist.DefaultEtcd(ctx, role, class)
 				Expect(etcd).NotTo(BeNil())
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -233,7 +233,7 @@ var _ = Describe("Etcd", func() {
 				End:   "barfoo",
 			}
 
-			etcd, err := botanist.DefaultEtcd(role, class)
+			etcd, err := botanist.DefaultEtcd(ctx, role, class)
 			Expect(etcd).To(BeNil())
 			Expect(err).To(HaveOccurred())
 		})

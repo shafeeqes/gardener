@@ -120,7 +120,7 @@ generate_group () {
     # See https://github.com/gardener/gardener/pull/6850 and https://github.com/gardener/gardener/pull/8560#discussion_r1347470394
     # TODO(shreyas-s-rao): Remove this workaround as soon as the scale subresource is supported properly.
     etcd_druid_dir="$(go list -f '{{ .Dir }}' "github.com/gardener/etcd-druid")"
-    etcd_api_types_file="${etcd_druid_dir}/api/v1alpha1/types_etcd.go"
+    etcd_api_types_file="${etcd_druid_dir}/api/v1alpha1/etcd.go"
     # Create a local copy outside the mod cache path in order to patch the types file via sed.
     etcd_api_types_backup="$(mktemp -d)/types_etcd.go"
     cp "$etcd_api_types_file" "$etcd_api_types_backup"
