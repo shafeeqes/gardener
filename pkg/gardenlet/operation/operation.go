@@ -483,3 +483,17 @@ func (o *Operation) DeleteSecret(key string) {
 
 	delete(o.secrets, key)
 }
+
+func (o *Operation) WaitForShootAnnotation(ctx context.Context, annotation string) error {
+	shoot := &gardencorev1beta1.Shoot{}
+	if err := o.GardenClient.Get(ctx, client.ObjectKeyFromObject(o.Shoot.GetInfo()), shoot); err != nil {
+		return err
+	}
+
+	_, ok := shoot.GetAnnotations()[annotation]
+	if !ok {
+		return fmt.Errorf("annotation %s not present yet", annotation)
+	}
+
+	return nil
+}

@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
+	v1beta1helper "github.com/gardener/gardener/pkg/apis/core/v1beta1/helper"
 	"github.com/gardener/gardener/pkg/component"
 	kubeapiserverexposure "github.com/gardener/gardener/pkg/component/kubernetes/apiserverexposure"
 	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
@@ -74,16 +75,23 @@ func (b *Botanist) setAPIServerServiceClusterIP(clusterIP string) {
 	} else {
 		b.APIServerClusterIP = clusterIP
 	}
+
+	hosts := []string{
+		gardenerutils.GetAPIServerDomain(*b.Shoot.ExternalClusterDomain),
+		gardenerutils.GetAPIServerDomain(b.Shoot.InternalClusterDomain),
+	}
+
+	if v1beta1helper.ShootNeedsLiveMigrate(b.Shoot.GetInfo()) && !v1beta1helper.IsSourceSeed(b.Shoot.GetInfo(), b.Seed.GetInfo().Name) {
+		hosts = append(hosts, gardenerutils.GetAPIServerDomain("temp."+*b.Shoot.ExternalClusterDomain))
+	}
+
 	b.Shoot.Components.ControlPlane.KubeAPIServerSNI = kubeapiserverexposure.NewSNI(
 		b.SeedClientSet.Client(),
 		v1beta1constants.DeploymentNameKubeAPIServer,
 		b.Shoot.SeedNamespace,
 		func() *kubeapiserverexposure.SNIValues {
 			return &kubeapiserverexposure.SNIValues{
-				Hosts: []string{
-					gardenerutils.GetAPIServerDomain(*b.Shoot.ExternalClusterDomain),
-					gardenerutils.GetAPIServerDomain(b.Shoot.InternalClusterDomain),
-				},
+				Hosts: hosts,
 				APIServerProxy: &kubeapiserverexposure.APIServerProxy{
 					APIServerClusterIP: b.APIServerClusterIP,
 					NamespaceUID:       b.SeedNamespaceObject.UID,

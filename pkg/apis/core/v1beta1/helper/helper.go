@@ -387,7 +387,7 @@ func IsSourceSeed(shoot *gardencorev1beta1.Shoot, seedName string) bool {
 		return false
 	}
 
-	return ptr.Deref(shoot.Spec.SeedName, "") == seedName
+	return ptr.Deref(shoot.Status.SeedName, "") == seedName
 }
 
 // ShootSchedulingProfile returns the scheduling profile of the given Shoot.

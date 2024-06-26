@@ -25,7 +25,7 @@ import (
 	retryutils "github.com/gardener/gardener/pkg/utils/retry"
 )
 
-func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.Operation) *v1beta1helper.WrappedLastErrors {
+func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.Operation, isSourceSeed bool) *v1beta1helper.WrappedLastErrors {
 	var (
 		botanist                     *botanistpkg.Botanist
 		err                          error
@@ -105,6 +105,23 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn:     flow.TaskFn(botanist.DeploySeedNamespace).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf: !nonTerminatingNamespace,
 		})
+		createServicesAndNetpol = g.Add(flow.Task{
+			Name: "Deploying ETCD services and network policies",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.CreateServicesAndNetpol(ctx, o.Logger, botanist.Shoot.SeedNamespace, isSourceSeed); err != nil {
+					return err
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(deployNamespace),
+		})
+		waitForLBAnnotation = g.Add(flow.Task{
+			Name: "Waiting for the shoot.gardener.cloud/target-load-balancer-ips-ready annotation",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationShootTargetLoadBalancerIPsReady)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+		})
 		initializeSecretsManagement = g.Add(flow.Task{
 			Name:         "Initializing secrets management",
 			Fn:           flow.TaskFn(botanist.InitializeSecretsManagement).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -115,7 +132,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Name:         "Deploying main and events etcd",
 			Fn:           flow.TaskFn(botanist.DeployEtcd).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       !cleanupShootResources && !etcdSnapshotRequired,
-			Dependencies: flow.NewTaskIDs(initializeSecretsManagement),
+			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, waitForLBAnnotation),
 		})
 		scaleUpETCD = g.Add(flow.Task{
 			Name:         "Scaling etcd up",

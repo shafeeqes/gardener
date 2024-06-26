@@ -9,6 +9,9 @@ import (
 )
 
 const (
+	// 	AnnotationShootTargetLoadBalancerIPsReady is an annotation on a Shoot resource that indicates whether the load balancer
+	AnnotationShootTargetLoadBalancerIPsReady = "shoot.gardener.cloud/target-load-balancer-ips-ready"
+
 	// SecretManagerIdentityControllerManager is the identity for the secret manager used inside controller-manager.
 	SecretManagerIdentityControllerManager = "controller-manager"
 	// SecretManagerIdentityGardenlet is the identity for the secret manager used inside gardenlet.
@@ -177,6 +180,8 @@ const (
 	StatefulSetNameAlertManager = "alertmanager"
 	// ETCDRoleMain is a constant for the main etcd role.
 	ETCDRoleMain = "main"
+	// ETCDRoleTarget is a constant for the main etcd role.
+	ETCDRoleTarget = "target"
 	// ETCDRoleEvents is a constant for the events etcd role.
 	ETCDRoleEvents = "events"
 	// ETCDMain is a constant for the name of etcd-main Etcd object.

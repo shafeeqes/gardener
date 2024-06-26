@@ -182,13 +182,13 @@ func (r *Reconciler) migrateShoot(ctx context.Context, log logr.Logger, shoot *g
 	r.Recorder.Event(shoot, corev1.EventTypeNormal, gardencorev1beta1.EventPrepareMigration, "Preparing Shoot cluster for migration")
 	if v1beta1helper.ShootNeedsLiveMigrate(shoot) {
 		if v1beta1helper.IsSourceSeed(shoot, r.Config.SeedConfig.Name) {
-			if flowErr := r.runLiveMigrateShootFlow(ctx, o); flowErr != nil {
+			if flowErr := r.runLiveMigrateShootFlow(ctx, o, v1beta1helper.IsSourceSeed(shoot, r.Config.SeedConfig.Name)); flowErr != nil {
 				r.Recorder.Event(shoot, corev1.EventTypeWarning, gardencorev1beta1.EventMigrationPreparationFailed, flowErr.Description)
 				updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
 				return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)
 			}
 		} else {
-			if flowErr := r.runLiveRestoreShootFlow(ctx, o); flowErr != nil {
+			if flowErr := r.runLiveRestoreShootFlow(ctx, o, v1beta1helper.IsSourceSeed(shoot, r.Config.SeedConfig.Name)); flowErr != nil {
 				r.Recorder.Event(shoot, corev1.EventTypeWarning, gardencorev1beta1.EventMigrationPreparationFailed, flowErr.Description)
 				updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
 				return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)

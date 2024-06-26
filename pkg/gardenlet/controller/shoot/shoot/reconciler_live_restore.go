@@ -25,7 +25,6 @@ import (
 	"github.com/gardener/gardener/pkg/gardenlet/controller/shoot/shoot/helper"
 	"github.com/gardener/gardener/pkg/gardenlet/operation"
 	botanistpkg "github.com/gardener/gardener/pkg/gardenlet/operation/botanist"
-	"github.com/gardener/gardener/pkg/utils"
 	"github.com/gardener/gardener/pkg/utils/errors"
 	"github.com/gardener/gardener/pkg/utils/flow"
 	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
@@ -37,7 +36,7 @@ import (
 
 // runLiveRestoreShootFlow restores the Shoot cluster.
 // It receives an Operation object <o> which stores the Shoot object.
-func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.Operation) *v1beta1helper.WrappedLastErrors {
+func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.Operation, isSourceSeed bool) *v1beta1helper.WrappedLastErrors {
 	// We create the botanists (which will do the actual work).
 	var (
 		botanist                *botanistpkg.Botanist
@@ -118,7 +117,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 	}
 
 	var (
-		g               = flow.NewGraph(fmt.Sprintf("Shoot cluster restoration")))
+		g               = flow.NewGraph("Shoot cluster restoration")
 		deployNamespace = g.Add(flow.Task{
 			Name: "Deploying Shoot namespace in Seed",
 			Fn:   flow.TaskFn(botanist.DeploySeedNamespace).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -128,13 +127,13 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Fn:           flow.TaskFn(botanist.EnsureShootClusterIdentity).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(deployNamespace),
 		})
-		// // TODO(MichaelEischer) Remove after Gardener 1.99 is released.
-		// migrateOperatingSystemConfigPoolHashes = g.Add(flow.Task{
-		// 	Name:         "Applying inital rollout migration for operating system config hash calculation",
-		// 	Fn:           flow.TaskFn(botanist.MigrateOperatingSystemConfigWorkerPoolHashes).RetryUntilTimeout(defaultInterval, defaultTimeout),
-		// 	SkipIf:       o.Shoot.IsWorkerless,
-		// 	Dependencies: flow.NewTaskIDs(deployNamespace),
-		// })
+		// TODO(MichaelEischer) Remove after Gardener 1.99 is released.
+		migrateOperatingSystemConfigPoolHashes = g.Add(flow.Task{
+			Name:         "Applying inital rollout migration for operating system config hash calculation",
+			Fn:           flow.TaskFn(botanist.MigrateOperatingSystemConfigWorkerPoolHashes).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(deployNamespace),
+		})
 		deployCloudProviderSecret = g.Add(flow.Task{
 			Name:         "Deploying cloud provider account secret",
 			Fn:           flow.TaskFn(botanist.DeployCloudProviderSecret).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -156,6 +155,39 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Fn:           botanist.Shoot.Components.ControlPlane.KubeAPIServerService.Wait,
 			SkipIf:       o.Shoot.HibernationEnabled,
 			Dependencies: flow.NewTaskIDs(deployKubeAPIServerService),
+		})
+		createServicesAndNetpol = g.Add(flow.Task{
+			Name: "Deploying ETCD services and network policies",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.CreateServicesAndNetpol(ctx, o.Logger, botanist.Shoot.SeedNamespace, isSourceSeed); err != nil {
+					return err
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(deployNamespace),
+		})
+		storeLoadBalancerIPsOfETCDServices = g.Add(flow.Task{
+			Name: "Store LoadBalancer IP of ETCD services in Garden cluster",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.StoreLoadBalancerIPsOfETCDServices(ctx, o.Logger, botanist.Shoot.SeedNamespace, isSourceSeed); err != nil {
+					return err
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+		})
+		_ = g.Add(flow.Task{
+			Name: "Annotate shoot that load balancer IPs are ready",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationShootTargetLoadBalancerIPsReady, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(storeLoadBalancerIPsOfETCDServices),
 		})
 		// _ = g.Add(flow.Task{
 		// 	Name:         "Ensuring advertised addresses for the Shoot",
@@ -986,6 +1018,6 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		}
 	}
 
-	o.Logger.Info("Successfully reconciled Shoot cluster", "operation", utils.IifString(isRestoring, "restored", "reconciled"))
+	o.Logger.Info("Successfully reconciled Shoot cluster", "operation", "restored")
 	return nil
 }
