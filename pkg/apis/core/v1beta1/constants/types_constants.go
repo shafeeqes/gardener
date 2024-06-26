@@ -627,6 +627,9 @@ const (
 	// the linked cloudprofiles containing the region distances.
 	AnnotationSchedulingCloudProfiles = "scheduling.gardener.cloud/cloudprofiles"
 
+	// AnnotationShootLiveMigrate is the key for an annotation of a Shoot cluster whose value indicates
+	// if the migration of the cluster should be live
+	AnnotationShootLiveMigrate = "shoot.gardener.cloud/live-migrate"
 	// AnnotationConfirmationForceDeletion is a constant for an annotation on a Shoot resource whose value must be set to "true" in order to
 	// trigger force-deletion of the cluster. It can only be set if the Shoot has a deletion timestamp and contains an ErrorCode in the Shoot Status.
 	AnnotationConfirmationForceDeletion = "confirmation.gardener.cloud/force-deletion"

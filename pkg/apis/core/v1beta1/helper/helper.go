@@ -366,6 +366,21 @@ func ShootNeedsForceDeletion(shoot *gardencorev1beta1.Shoot) bool {
 	return forceDelete
 }
 
+// ShootNeedsLiveMigrate determines whether a Shoot migration should be live or not.
+func ShootNeedsLiveMigrate(shoot *gardencorev1beta1.Shoot) bool {
+	if shoot == nil {
+		return false
+	}
+
+	value, ok := shoot.Annotations[v1beta1constants.AnnotationShootLiveMigrate]
+	if !ok {
+		return false
+	}
+
+	liveMigrate, _ := strconv.ParseBool(value)
+	return liveMigrate
+}
+
 // ShootSchedulingProfile returns the scheduling profile of the given Shoot.
 func ShootSchedulingProfile(shoot *gardencorev1beta1.Shoot) *gardencorev1beta1.SchedulingProfile {
 	if shoot.Spec.Kubernetes.KubeScheduler != nil {

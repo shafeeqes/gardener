@@ -102,11 +102,11 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 		return nil, err
 	}
 	o.Shoot.Components.ControlPlane.EtcdCopyBackupsTask = b.DefaultEtcdCopyBackupsTask()
-	o.Shoot.Components.ControlPlane.EtcdMain, err = b.DefaultEtcd(v1beta1constants.ETCDRoleMain, etcd.ClassImportant)
+	o.Shoot.Components.ControlPlane.EtcdMain, err = b.DefaultEtcd(ctx, v1beta1constants.ETCDRoleMain, etcd.ClassImportant)
 	if err != nil {
 		return nil, err
 	}
-	o.Shoot.Components.ControlPlane.EtcdEvents, err = b.DefaultEtcd(v1beta1constants.ETCDRoleEvents, etcd.ClassNormal)
+	o.Shoot.Components.ControlPlane.EtcdEvents, err = b.DefaultEtcd(ctx, v1beta1constants.ETCDRoleEvents, etcd.ClassNormal)
 	if err != nil {
 		return nil, err
 	}
