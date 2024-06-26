@@ -81,9 +81,19 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, fmt.Errorf("error retrieving object from store: %w", err)
 	}
 
-	if responsibleSeedName := gardenerutils.GetResponsibleSeedName(shoot.Spec.SeedName, shoot.Status.SeedName); responsibleSeedName != r.Config.SeedConfig.Name {
-		log.Info("Skipping because Shoot is not managed by this gardenlet", "seedName", responsibleSeedName)
-		return reconcile.Result{}, nil
+	if v1beta1helper.ShootNeedsLiveMigrate(shoot) && helper.ShouldPrepareShootForMigration(shoot) {
+		sourceSeed := *shoot.Status.SeedName
+		destSeed := *shoot.Spec.SeedName
+
+		if r.Config.SeedConfig.Name != sourceSeed && r.Config.SeedConfig.Name != destSeed {
+			log.Info("Skipping because Shoot is not managed by this gardenlet", "seedName", r.Config.SeedConfig.Name)
+			return reconcile.Result{}, nil
+		}
+	} else {
+		if responsibleSeedName := gardenerutils.GetResponsibleSeedName(shoot.Spec.SeedName, shoot.Status.SeedName); responsibleSeedName != r.Config.SeedConfig.Name {
+			log.Info("Skipping because Shoot is not managed by this gardenlet", "seedName", responsibleSeedName)
+			return reconcile.Result{}, nil
+		}
 	}
 
 	if shoot.DeletionTimestamp != nil {
@@ -171,10 +181,18 @@ func (r *Reconciler) migrateShoot(ctx context.Context, log logr.Logger, shoot *g
 
 	r.Recorder.Event(shoot, corev1.EventTypeNormal, gardencorev1beta1.EventPrepareMigration, "Preparing Shoot cluster for migration")
 	if v1beta1helper.ShootNeedsLiveMigrate(shoot) {
-		if flowErr := r.runLiveMigrateShootFlow(ctx, o); flowErr != nil {
-			r.Recorder.Event(shoot, corev1.EventTypeWarning, gardencorev1beta1.EventMigrationPreparationFailed, flowErr.Description)
-			updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
-			return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)
+		if v1beta1helper.IsSourceSeed(shoot, r.Config.SeedConfig.Name) {
+			if flowErr := r.runLiveMigrateShootFlow(ctx, o); flowErr != nil {
+				r.Recorder.Event(shoot, corev1.EventTypeWarning, gardencorev1beta1.EventMigrationPreparationFailed, flowErr.Description)
+				updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
+				return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)
+			}
+		} else {
+			if flowErr := r.runLiveRestoreShootFlow(ctx, o); flowErr != nil {
+				r.Recorder.Event(shoot, corev1.EventTypeWarning, gardencorev1beta1.EventMigrationPreparationFailed, flowErr.Description)
+				updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
+				return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)
+			}
 		}
 	} else {
 		if flowErr := r.runMigrateShootFlow(ctx, o); flowErr != nil {

@@ -37,7 +37,7 @@ import (
 
 // runLiveRestoreShootFlow restores the Shoot cluster.
 // It receives an Operation object <o> which stores the Shoot object.
-func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.Operation, operationType gardencorev1beta1.LastOperationType) *v1beta1helper.WrappedLastErrors {
+func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.Operation) *v1beta1helper.WrappedLastErrors {
 	// We create the botanists (which will do the actual work).
 	var (
 		botanist                *botanistpkg.Botanist
@@ -45,7 +45,6 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		isCopyOfBackupsRequired bool
 		tasksWithErrors         []string
 
-		isRestoring   = operationType == gardencorev1beta1.LastOperationTypeRestore
 		skipReadiness = metav1.HasAnnotation(o.Shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationShootSkipReadiness)
 	)
 
@@ -55,7 +54,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		}
 	}
 
-	errorContext := errors.NewErrorContext(fmt.Sprintf("Shoot cluster %s", utils.IifString(isRestoring, "restoration", "reconciliation")), tasksWithErrors)
+	errorContext := errors.NewErrorContext("Shoot cluster restoration", tasksWithErrors)
 
 	err = errors.HandleErrors(errorContext,
 		func(errorID string) error {
@@ -119,7 +118,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 	}
 
 	var (
-		g               = flow.NewGraph(fmt.Sprintf("Shoot cluster %s", utils.IifString(isRestoring, "restoration", "reconciliation")))
+		g               = flow.NewGraph(fmt.Sprintf("Shoot cluster restoration")))
 		deployNamespace = g.Add(flow.Task{
 			Name: "Deploying Shoot namespace in Seed",
 			Fn:   flow.TaskFn(botanist.DeploySeedNamespace).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -129,13 +128,13 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Fn:           flow.TaskFn(botanist.EnsureShootClusterIdentity).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(deployNamespace),
 		})
-		// TODO(MichaelEischer) Remove after Gardener 1.99 is released.
-		migrateOperatingSystemConfigPoolHashes = g.Add(flow.Task{
-			Name:         "Applying inital rollout migration for operating system config hash calculation",
-			Fn:           flow.TaskFn(botanist.MigrateOperatingSystemConfigWorkerPoolHashes).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       o.Shoot.IsWorkerless,
-			Dependencies: flow.NewTaskIDs(deployNamespace),
-		})
+		// // TODO(MichaelEischer) Remove after Gardener 1.99 is released.
+		// migrateOperatingSystemConfigPoolHashes = g.Add(flow.Task{
+		// 	Name:         "Applying inital rollout migration for operating system config hash calculation",
+		// 	Fn:           flow.TaskFn(botanist.MigrateOperatingSystemConfigWorkerPoolHashes).RetryUntilTimeout(defaultInterval, defaultTimeout),
+		// 	SkipIf:       o.Shoot.IsWorkerless,
+		// 	Dependencies: flow.NewTaskIDs(deployNamespace),
+		// })
 		deployCloudProviderSecret = g.Add(flow.Task{
 			Name:         "Deploying cloud provider account secret",
 			Fn:           flow.TaskFn(botanist.DeployCloudProviderSecret).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -158,11 +157,11 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			SkipIf:       o.Shoot.HibernationEnabled,
 			Dependencies: flow.NewTaskIDs(deployKubeAPIServerService),
 		})
-		_ = g.Add(flow.Task{
-			Name:         "Ensuring advertised addresses for the Shoot",
-			Fn:           botanist.UpdateAdvertisedAddresses,
-			Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerServiceIsReady),
-		})
+		// _ = g.Add(flow.Task{
+		// 	Name:         "Ensuring advertised addresses for the Shoot",
+		// 	Fn:           botanist.UpdateAdvertisedAddresses,
+		// 	Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerServiceIsReady),
+		// })
 		initializeSecretsManagement = g.Add(flow.Task{
 			Name:         "Initializing secrets management",
 			Fn:           flow.TaskFn(botanist.InitializeSecretsManagement).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -989,22 +988,4 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 
 	o.Logger.Info("Successfully reconciled Shoot cluster", "operation", utils.IifString(isRestoring, "restored", "reconciled"))
 	return nil
-}
-
-func removeTaskAnnotation(ctx context.Context, o *operation.Operation, generation int64, tasksToRemove ...string) error {
-	// Check if shoot generation was changed mid-air, i.e., whether we need to wait for the next reconciliation until we
-	// can safely remove the task annotations to ensure all required tasks are executed.
-	shoot := &gardencorev1beta1.Shoot{}
-	if err := o.GardenClient.Get(ctx, client.ObjectKeyFromObject(o.Shoot.GetInfo()), shoot); err != nil {
-		return err
-	}
-
-	if shoot.Generation != generation {
-		return nil
-	}
-
-	return o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
-		controllerutils.RemoveTasks(shoot.Annotations, tasksToRemove...)
-		return nil
-	})
 }

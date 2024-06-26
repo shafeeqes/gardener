@@ -381,6 +381,15 @@ func ShootNeedsLiveMigrate(shoot *gardencorev1beta1.Shoot) bool {
 	return liveMigrate
 }
 
+// IsSourceSeed determines whether a seed is source seed during migration.
+func IsSourceSeed(shoot *gardencorev1beta1.Shoot, seedName string) bool {
+	if shoot == nil {
+		return false
+	}
+
+	return ptr.Deref(shoot.Spec.SeedName, "") == seedName
+}
+
 // ShootSchedulingProfile returns the scheduling profile of the given Shoot.
 func ShootSchedulingProfile(shoot *gardencorev1beta1.Shoot) *gardencorev1beta1.SchedulingProfile {
 	if shoot.Spec.Kubernetes.KubeScheduler != nil {
