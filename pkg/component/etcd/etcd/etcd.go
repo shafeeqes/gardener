@@ -94,6 +94,8 @@ type Interface interface {
 	Snapshot(context.Context, rest.HTTPClient) error
 	// SetBackupConfig sets the backup configuration.
 	SetBackupConfig(config *BackupConfig)
+	// SetPeerURLs sets the URLs for the etcd.
+	SetURLs(peerURLs, clientURLs, initialCluster []druidv1alpha1.MemberInfo)
 	// Get retrieves the Etcd resource
 	Get(context.Context) (*druidv1alpha1.Etcd, error)
 	// Scale scales the etcd resource to the given replica count.
@@ -107,6 +109,14 @@ type Interface interface {
 	GetReplicas() *int32
 	// SetReplicas sets the Replicas field in the Values.
 	SetReplicas(*int32)
+	// SetSkipClientSANVerify sets the SkipClientSANVerify field in the Values.
+	SetSkipClientSANVerify(*bool)
+	// SetServiceEndpoint sets the ServiceEndpoint field in the Values.
+	SetServiceEndpoint(*string)
+	// SetClientServiceDNSNames sets the ClientServiceDNSNames field in the Values.
+	SetClientServiceDNSNames([]string)
+	// SetPeerServiceDNSNames sets the PeerServiceDNSNames field in the Values.
+	SetPeerServiceDNSNames([]string)
 }
 
 // New creates a new instance of DeployWaiter for the Etcd.
@@ -166,7 +176,10 @@ type Values struct {
 	PeerURLs                    []druidv1alpha1.MemberInfo
 	ClientURLs                  []druidv1alpha1.MemberInfo
 	InitialCluster              []druidv1alpha1.MemberInfo
-	ShootInLiveMigration        bool
+	SkipClientSANVerify         *bool
+	ServiceEndpoint             *string
+	ClientServiceDNSNames       []string
+	PeerServiceDNSNames         []string
 }
 
 func (e *etcd) Deploy(ctx context.Context) error {
@@ -350,10 +363,8 @@ func (e *etcd) Deploy(ctx context.Context) error {
 			},
 		}
 
-		if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
-			e.etcd.Spec.Etcd.PeerURLs = e.values.PeerURLs
-			e.etcd.Spec.Etcd.ClientURLs = e.values.ClientURLs
-			e.etcd.Spec.Etcd.InitialCluster = e.values.InitialCluster
+		if e.values.ServiceEndpoint != nil {
+			e.etcd.Spec.Etcd.ClientService.ServiceEndpoint = e.values.ServiceEndpoint
 		}
 
 		// TODO(timuthy): Once https://github.com/gardener/etcd-backup-restore/issues/538 is resolved we can enable PeerUrlTLS for all remaining clusters as well.
@@ -373,8 +384,8 @@ func (e *etcd) Deploy(ctx context.Context) error {
 			}
 		}
 
-		if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
-			e.etcd.Spec.Etcd.PeerUrlTLS.SkipClientSANVerify = ptr.To(true)
+		if e.values.SkipClientSANVerify != nil {
+			e.etcd.Spec.Etcd.PeerUrlTLS.SkipClientSANVerify = e.values.SkipClientSANVerify
 		}
 
 		e.etcd.Spec.Backup = druidv1alpha1.BackupSpec{
@@ -1055,34 +1066,65 @@ func (e *etcd) Snapshot(ctx context.Context, httpClient rest.HTTPClient) error {
 }
 
 func (e *etcd) clientServiceDNSNames() []string {
-	var domainNames []string
+	var (
+		domainNames        []string
+		additionlNameToAdd string
+	)
+
+	if e.values.ClientServiceDNSNames != nil {
+		if e.values.Role == v1beta1constants.ETCDRoleMain {
+			additionlNameToAdd = v1beta1constants.ETCDRoleTarget
+		}
+
+		if e.values.Role == v1beta1constants.ETCDRoleTarget {
+			additionlNameToAdd = v1beta1constants.ETCDRoleMain
+		}
+	}
+
 	domainNames = append(domainNames, fmt.Sprintf("%s-local", e.etcd.Name))
 	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-client", e.etcd.Name), e.namespace)...)
-	if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
-		for _, member := range e.etcd.Spec.Etcd.ClientURLs {
-			domainNames = append(domainNames, member.URLs...)
-		}
+	domainNames = append(domainNames, e.values.ClientServiceDNSNames...)
+
+	if additionlNameToAdd != "" {
+		domainNames = append(domainNames, fmt.Sprintf("%s-local", additionlNameToAdd))
+		domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-client", additionlNameToAdd), e.namespace)...)
 	}
 
 	// The peer service needs to be considered here since the etcd-backup-restore side-car
 	// connects to member pods via pod domain names (e.g. for defragmentation).
 	// See https://github.com/gardener/etcd-backup-restore/issues/494
 	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("*.%s-peer", e.etcd.Name), e.namespace)...)
+	if additionlNameToAdd != "" {
+		domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("*.%s-peer", additionlNameToAdd), e.namespace)...)
+	}
 
 	return domainNames
 }
 
 func (e *etcd) peerServiceDNSNames() []string {
-	var domainNames []string
+	var (
+		domainNames        []string
+		additionlNameToAdd string
+	)
 
-	if e.values.ShootInLiveMigration && e.values.Role == v1beta1constants.ETCDRoleMain {
-		for _, member := range e.etcd.Spec.Etcd.PeerURLs {
-			domainNames = append(domainNames, member.URLs...)
+	if e.values.PeerServiceDNSNames != nil {
+		if e.values.Role == v1beta1constants.ETCDRoleMain {
+			additionlNameToAdd = v1beta1constants.ETCDRoleTarget
+		}
+
+		if e.values.Role == v1beta1constants.ETCDRoleTarget {
+			additionlNameToAdd = v1beta1constants.ETCDRoleMain
 		}
 	}
 
+	domainNames = append(domainNames, e.values.PeerServiceDNSNames...)
 	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-peer", e.etcd.Name), e.namespace)...)
 	domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("*.%s-peer", e.etcd.Name), e.namespace)...)
+
+	if additionlNameToAdd != "" {
+		domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("%s-peer", additionlNameToAdd), e.namespace)...)
+		domainNames = append(domainNames, kubernetesutils.DNSNamesForService(fmt.Sprintf("*.%s-peer", additionlNameToAdd), e.namespace)...)
+	}
 
 	return domainNames
 }
@@ -1096,6 +1138,18 @@ func (e *etcd) Get(ctx context.Context) (*druidv1alpha1.Etcd, error) {
 }
 
 func (e *etcd) SetBackupConfig(backupConfig *BackupConfig) { e.values.BackupConfig = backupConfig }
+
+func (e *etcd) SetURLs(peerURLs, clientURLs, initialCluster []druidv1alpha1.MemberInfo) {
+	if peerURLs != nil {
+		e.values.PeerURLs = peerURLs
+	}
+	if clientURLs != nil {
+		e.values.ClientURLs = clientURLs
+	}
+	if initialCluster != nil {
+		e.values.InitialCluster = initialCluster
+	}
+}
 
 func (e *etcd) Scale(ctx context.Context, replicas int32) error {
 	etcdObj := &druidv1alpha1.Etcd{}
@@ -1190,6 +1244,14 @@ func (e *etcd) GetValues() Values { return e.values }
 func (e *etcd) GetReplicas() *int32 { return e.values.Replicas }
 
 func (e *etcd) SetReplicas(replicas *int32) { e.values.Replicas = replicas }
+
+func (e *etcd) SetSkipClientSANVerify(boolean *bool) { e.values.SkipClientSANVerify = boolean }
+
+func (e *etcd) SetServiceEndpoint(endpoint *string) { e.values.ServiceEndpoint = endpoint }
+
+func (e *etcd) SetClientServiceDNSNames(dnsNames []string) { e.values.ClientServiceDNSNames = dnsNames }
+
+func (e *etcd) SetPeerServiceDNSNames(dnsNames []string) { e.values.PeerServiceDNSNames = dnsNames }
 
 func (e *etcd) computeContainerResources(existingSts *appsv1.StatefulSet) (*corev1.ResourceRequirements, *corev1.ResourceRequirements) {
 	var (

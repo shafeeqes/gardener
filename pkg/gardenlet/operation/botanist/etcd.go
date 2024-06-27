@@ -64,43 +64,6 @@ func (b *Botanist) DefaultEtcd(ctx context.Context, role string, class etcd.Clas
 		HighAvailabilityEnabled:     v1beta1helper.IsHAControlPlaneConfigured(b.Shoot.GetInfo()),
 		TopologyAwareRoutingEnabled: b.Shoot.TopologyAwareRoutingEnabled,
 		VPAEnabled:                  features.DefaultFeatureGate.Enabled(features.VPAForETCD),
-		ShootInLiveMigration:        v1beta1helper.ShootNeedsLiveMigrate(b.Shoot.GetInfo()),
-	}
-
-	if v1beta1helper.ShootNeedsLiveMigrate(b.Shoot.GetInfo()) {
-		var (
-			peerURLs   []druidv1alpha1.MemberInfo
-			clientURLs []druidv1alpha1.MemberInfo
-		)
-
-		for i := range ptr.Deref(replicas, 3) {
-			svc := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("etcd-main-%d", i), Namespace: b.Shoot.SeedNamespace}}
-
-			if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(svc), svc); err != nil {
-				if apierrors.IsNotFound(err) {
-					continue
-				}
-				return nil, err
-			}
-
-			peerURLs = append(peerURLs, druidv1alpha1.MemberInfo{
-				Name: fmt.Sprintf("etcd-main-%d", i),
-				URLs: []string{
-					fmt.Sprintf("https://etcd-main-%d.etcd-main-peer.%s:2380", i, b.Shoot.SeedNamespace),
-					fmt.Sprintf("https://%s:2380", svc.Status.LoadBalancer.Ingress[0].Hostname),
-				},
-			})
-			clientURLs = append(clientURLs, druidv1alpha1.MemberInfo{
-				Name: fmt.Sprintf("etcd-main-%d", i),
-				URLs: []string{
-					fmt.Sprintf("https://etcd-main-%d.etcd-main-peer.%s:2379", i, b.Shoot.SeedNamespace),
-					fmt.Sprintf("https://%s:2379", svc.Status.LoadBalancer.Ingress[0].Hostname),
-				},
-			})
-		}
-
-		values.PeerURLs = peerURLs
-		values.ClientURLs = clientURLs
 	}
 
 	e := NewEtcd(
@@ -167,6 +130,84 @@ func (b *Botanist) DeployEtcd(ctx context.Context) error {
 		)(ctx); err != nil {
 			return err
 		}
+	}
+
+	if b.Shoot.MigrationConfig.LiveMigrate {
+		var (
+			peerURLs, clientURLs, initialCluster       []druidv1alpha1.MemberInfo
+			gardenSecret                               = getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace)
+			roles                                      = []string{b.Shoot.Components.ControlPlane.EtcdMain.GetValues().Role}
+			clientServiceDNSNames, peerServiceDNSNames []string
+		)
+
+		if err := b.GardenClient.Get(ctx, client.ObjectKeyFromObject(gardenSecret), gardenSecret); err != nil {
+			return err
+		}
+
+		name := fmt.Sprintf("etcd-%s-client-lb", b.Shoot.Components.ControlPlane.EtcdMain.GetValues().Role)
+		serviceEndpoint, ok := gardenSecret.Data[name]
+		if !ok {
+			return fmt.Errorf("service endpoint not present in the garden secret, key: %s", name)
+		}
+
+		if !b.Shoot.MigrationConfig.IsSourceSeed {
+			roles = append(roles, v1beta1constants.ETCDRoleMain)
+		}
+
+		for i := range ptr.Deref(b.Shoot.Components.ControlPlane.EtcdMain.GetReplicas(), 0) {
+			for _, role := range roles {
+				var (
+					name            = fmt.Sprintf("etcd-%s-%d", role, i)
+					peerServiceName = fmt.Sprintf("etcd-%s-peer", role)
+				)
+
+				url, ok := gardenSecret.Data[name]
+				if !ok {
+					return fmt.Errorf("url not present in the garden secret, key: %s", name)
+				}
+
+				peerURLs = append(peerURLs, druidv1alpha1.MemberInfo{
+					Name: name,
+					URLs: []string{
+						fmt.Sprintf("https://%s.%s.%s:2380", name, peerServiceName, b.Shoot.SeedNamespace),
+						fmt.Sprintf("https://%s:2380", url),
+					},
+				})
+				clientURLs = append(clientURLs, druidv1alpha1.MemberInfo{
+					Name: name,
+					URLs: []string{
+						fmt.Sprintf("https://%s.%s.%s:2379", name, peerServiceName, b.Shoot.SeedNamespace),
+						fmt.Sprintf("https://%s:2379", url),
+					},
+				})
+			}
+
+			for _, role := range []string{v1beta1constants.ETCDRoleMain, v1beta1constants.ETCDRoleTarget} {
+				name := fmt.Sprintf("etcd-%s-%d", role, i)
+
+				url, ok := gardenSecret.Data[name]
+				if !ok {
+					return fmt.Errorf("url not present in the garden secret, key: %s", name)
+				}
+
+				clientServiceDNSNames = append(clientServiceDNSNames, string(url))
+				peerServiceDNSNames = append(peerServiceDNSNames, string(url))
+			}
+		}
+
+		clientServiceDNSNames = append(clientServiceDNSNames, string(serviceEndpoint))
+
+		b.Shoot.Components.ControlPlane.EtcdMain.SetClientServiceDNSNames(clientServiceDNSNames)
+		b.Shoot.Components.ControlPlane.EtcdMain.SetPeerServiceDNSNames(peerServiceDNSNames)
+
+		if b.Shoot.MigrationConfig.IsSourceSeed {
+			b.Shoot.Components.ControlPlane.EtcdMain.SetURLs(peerURLs, clientURLs, nil)
+		} else {
+			b.Shoot.Components.ControlPlane.EtcdMain.SetURLs(peerURLs, clientURLs, initialCluster)
+			b.Shoot.Components.ControlPlane.EtcdMain.SetServiceEndpoint(ptr.To(string(serviceEndpoint)))
+		}
+
+		b.Shoot.Components.ControlPlane.EtcdMain.SetSkipClientSANVerify(ptr.To(true))
 	}
 
 	return b.deployOrRestoreEtcd(ctx)

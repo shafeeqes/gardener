@@ -153,6 +153,30 @@ func (mr *MockInterfaceMockRecorder) SetBackupConfig(arg0 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBackupConfig", reflect.TypeOf((*MockInterface)(nil).SetBackupConfig), arg0)
 }
 
+// SetClientServiceDNSNames mocks base method.
+func (m *MockInterface) SetClientServiceDNSNames(arg0 []string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetClientServiceDNSNames", arg0)
+}
+
+// SetClientServiceDNSNames indicates an expected call of SetClientServiceDNSNames.
+func (mr *MockInterfaceMockRecorder) SetClientServiceDNSNames(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetClientServiceDNSNames", reflect.TypeOf((*MockInterface)(nil).SetClientServiceDNSNames), arg0)
+}
+
+// SetPeerServiceDNSNames mocks base method.
+func (m *MockInterface) SetPeerServiceDNSNames(arg0 []string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetPeerServiceDNSNames", arg0)
+}
+
+// SetPeerServiceDNSNames indicates an expected call of SetPeerServiceDNSNames.
+func (mr *MockInterfaceMockRecorder) SetPeerServiceDNSNames(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPeerServiceDNSNames", reflect.TypeOf((*MockInterface)(nil).SetPeerServiceDNSNames), arg0)
+}
+
 // SetReplicas mocks base method.
 func (m *MockInterface) SetReplicas(arg0 *int32) {
 	m.ctrl.T.Helper()
@@ -163,6 +187,42 @@ func (m *MockInterface) SetReplicas(arg0 *int32) {
 func (mr *MockInterfaceMockRecorder) SetReplicas(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetReplicas", reflect.TypeOf((*MockInterface)(nil).SetReplicas), arg0)
+}
+
+// SetServiceEndpoint mocks base method.
+func (m *MockInterface) SetServiceEndpoint(arg0 *string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetServiceEndpoint", arg0)
+}
+
+// SetServiceEndpoint indicates an expected call of SetServiceEndpoint.
+func (mr *MockInterfaceMockRecorder) SetServiceEndpoint(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceEndpoint", reflect.TypeOf((*MockInterface)(nil).SetServiceEndpoint), arg0)
+}
+
+// SetSkipClientSANVerify mocks base method.
+func (m *MockInterface) SetSkipClientSANVerify(arg0 *bool) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetSkipClientSANVerify", arg0)
+}
+
+// SetSkipClientSANVerify indicates an expected call of SetSkipClientSANVerify.
+func (mr *MockInterfaceMockRecorder) SetSkipClientSANVerify(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSkipClientSANVerify", reflect.TypeOf((*MockInterface)(nil).SetSkipClientSANVerify), arg0)
+}
+
+// SetURLs mocks base method.
+func (m *MockInterface) SetURLs(arg0, arg1, arg2 []v1alpha1.MemberInfo) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetURLs", arg0, arg1, arg2)
+}
+
+// SetURLs indicates an expected call of SetURLs.
+func (mr *MockInterfaceMockRecorder) SetURLs(arg0, arg1, arg2 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetURLs", reflect.TypeOf((*MockInterface)(nil).SetURLs), arg0, arg1, arg2)
 }
 
 // Snapshot mocks base method.

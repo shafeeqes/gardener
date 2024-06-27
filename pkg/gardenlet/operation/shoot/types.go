@@ -95,6 +95,7 @@ type Shoot struct {
 	ResourcesToEncrypt                      []string
 	EncryptedResources                      []string
 	ServiceAccountIssuerHostname            *string
+	MigrationConfig                         *gardenerutils.MigrationConfig
 
 	Components *Components
 }

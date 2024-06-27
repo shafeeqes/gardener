@@ -25,7 +25,7 @@ import (
 	retryutils "github.com/gardener/gardener/pkg/utils/retry"
 )
 
-func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.Operation, isSourceSeed bool) *v1beta1helper.WrappedLastErrors {
+func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.Operation) *v1beta1helper.WrappedLastErrors {
 	var (
 		botanist                     *botanistpkg.Botanist
 		err                          error
@@ -108,7 +108,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		createServicesAndNetpol = g.Add(flow.Task{
 			Name: "Deploying ETCD services and network policies",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				if err := botanist.CreateServicesAndNetpol(ctx, o.Logger, botanist.Shoot.SeedNamespace, isSourceSeed); err != nil {
+				if err := botanist.CreateServicesAndNetpol(ctx, o.Logger, botanist.Shoot.SeedNamespace); err != nil {
 					return err
 				}
 				return nil

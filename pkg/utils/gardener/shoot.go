@@ -764,3 +764,8 @@ func GetIPStackForShoot(shoot *gardencorev1beta1.Shoot) string {
 	}
 	return getIPStackForFamilies(ipFamilies)
 }
+
+type MigrationConfig struct {
+	LiveMigrate  bool
+	IsSourceSeed bool
+}

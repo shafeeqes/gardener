@@ -36,7 +36,7 @@ import (
 
 // runLiveRestoreShootFlow restores the Shoot cluster.
 // It receives an Operation object <o> which stores the Shoot object.
-func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.Operation, isSourceSeed bool) *v1beta1helper.WrappedLastErrors {
+func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.Operation) *v1beta1helper.WrappedLastErrors {
 	// We create the botanists (which will do the actual work).
 	var (
 		botanist                *botanistpkg.Botanist
@@ -159,7 +159,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		createServicesAndNetpol = g.Add(flow.Task{
 			Name: "Deploying ETCD services and network policies",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				if err := botanist.CreateServicesAndNetpol(ctx, o.Logger, botanist.Shoot.SeedNamespace, isSourceSeed); err != nil {
+				if err := botanist.CreateServicesAndNetpol(ctx, o.Logger, botanist.Shoot.SeedNamespace); err != nil {
 					return err
 				}
 				return nil
@@ -169,7 +169,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		storeLoadBalancerIPsOfETCDServices = g.Add(flow.Task{
 			Name: "Store LoadBalancer IP of ETCD services in Garden cluster",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				if err := botanist.StoreLoadBalancerIPsOfETCDServices(ctx, o.Logger, botanist.Shoot.SeedNamespace, isSourceSeed); err != nil {
+				if err := botanist.StoreLoadBalancerIPsOfETCDServices(ctx, o.Logger, botanist.Shoot.SeedNamespace); err != nil {
 					return err
 				}
 				return nil

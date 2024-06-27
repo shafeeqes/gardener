@@ -102,7 +102,12 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 		return nil, err
 	}
 	o.Shoot.Components.ControlPlane.EtcdCopyBackupsTask = b.DefaultEtcdCopyBackupsTask()
-	o.Shoot.Components.ControlPlane.EtcdMain, err = b.DefaultEtcd(ctx, v1beta1constants.ETCDRoleMain, etcd.ClassImportant)
+
+	mainRoleName := v1beta1constants.ETCDRoleMain
+	if o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed {
+		mainRoleName = v1beta1constants.ETCDRoleTarget
+	}
+	o.Shoot.Components.ControlPlane.EtcdMain, err = b.DefaultEtcd(ctx, mainRoleName, etcd.ClassImportant)
 	if err != nil {
 		return nil, err
 	}

@@ -9,12 +9,6 @@ import (
 	"fmt"
 	"time"
 
-	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
-	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
-	"github.com/gardener/gardener/pkg/controllerutils"
-	"github.com/gardener/gardener/pkg/utils"
-	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
-	kubernetesutils "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -22,11 +16,19 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
+	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
+	"github.com/gardener/gardener/pkg/controllerutils"
+	"github.com/gardener/gardener/pkg/utils"
+	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
+	kubernetesutils "github.com/gardener/gardener/pkg/utils/kubernetes"
 )
 
-func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger, namespace string, isSource bool) error {
+func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger, namespace string) error {
 	role := v1beta1constants.ETCDMain
-	if !isSource {
+	if !b.Shoot.MigrationConfig.IsSourceSeed {
 		role = v1beta1constants.ETCDRoleTarget
 	}
 
@@ -70,14 +72,6 @@ func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger,
 
 		if err != nil {
 			return err
-		}
-	}
-	for i := range 3 {
-		svc := &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      fmt.Sprintf("etcd-%s-%d", role, i),
-				Namespace: namespace,
-			},
 		}
 
 		kubernetesutils.WaitUntilLoadBalancerIsReady(ctx, log, b.SeedClientSet.Client(), svc.Namespace, svc.Name, time.Minute)
@@ -140,9 +134,9 @@ func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger,
 	return err
 }
 
-func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log logr.Logger, namespace string, isSource bool) error {
+func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log logr.Logger, namespace string) error {
 	role := v1beta1constants.ETCDMain
-	if !isSource {
+	if !b.Shoot.MigrationConfig.IsSourceSeed {
 		role = v1beta1constants.ETCDRoleTarget
 	}
 
@@ -166,13 +160,24 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 		data[fmt.Sprintf("etcd-%s-%d", role, i)] = []byte(svc.Status.LoadBalancer.Ingress[0].IP)
 	}
 
-	gardenSecret := &gardencorev1beta1.InternalSecret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, "loadbalancer-ips"),
-			Namespace: b.Shoot.GetInfo().Namespace,
-		},
+	if b.Shoot.MigrationConfig.IsSourceSeed {
+		name := fmt.Sprintf("etcd-%s-client-lb", role)
+
+		svc := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+		}
+
+		if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(svc), svc); err != nil {
+			return err
+		}
+
+		data[name] = []byte(svc.Status.LoadBalancer.Ingress[0].IP)
 	}
 
+	gardenSecret := getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace)
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.GardenClient, gardenSecret, func() error {
 		gardenSecret.OwnerReferences = []metav1.OwnerReference{
 			*metav1.NewControllerRef(b.Shoot.GetInfo(), gardencorev1beta1.SchemeGroupVersion.WithKind("Shoot")),
@@ -183,4 +188,13 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 	})
 
 	return err
+}
+
+func getGardenSecret(shootName, shootNamespace string) *gardencorev1beta1.InternalSecret {
+	return &gardencorev1beta1.InternalSecret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      gardenerutils.ComputeShootProjectResourceName(shootName, "loadbalancer-ips"),
+			Namespace: shootNamespace,
+		},
+	}
 }
