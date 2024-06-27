@@ -180,7 +180,7 @@ const (
 	StatefulSetNameAlertManager = "alertmanager"
 	// ETCDRoleMain is a constant for the main etcd role.
 	ETCDRoleMain = "main"
-	// ETCDRoleTarget is a constant for the main target role.
+	// ETCDRoleTarget is a constant for the target etcd role.
 	ETCDRoleTarget = "target"
 	// ETCDRoleEvents is a constant for the events etcd role.
 	ETCDRoleEvents = "events"
