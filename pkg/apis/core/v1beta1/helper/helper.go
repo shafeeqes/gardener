@@ -378,7 +378,10 @@ func ShootNeedsLiveMigrate(shoot *gardencorev1beta1.Shoot) bool {
 	}
 
 	liveMigrate, _ := strconv.ParseBool(value)
-	return liveMigrate
+
+	seedsAreDifferent := shoot.Spec.SeedName != nil && shoot.Status.SeedName != nil && *shoot.Spec.SeedName != *shoot.Status.SeedName
+
+	return liveMigrate && seedsAreDifferent
 }
 
 // IsSourceSeed determines whether a seed is source seed during migration.

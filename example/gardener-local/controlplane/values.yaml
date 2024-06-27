@@ -173,7 +173,7 @@ global:
     service:
       clusterIP: 10.2.2.10
     seedRestriction:
-      enabled: true
+      enabled: false
     config:
       server:
         webhooks:
@@ -269,4 +269,4 @@ global:
   # General system configuration
   rbac:
     seedAuthorizer:
-      enabled: true
+      enabled: false

@@ -11,6 +11,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -122,6 +123,16 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
 		})
+		storeLoadBalancerIPsOfETCDServices = g.Add(flow.Task{
+			Name: "Store LoadBalancer IP of ETCD services in Garden cluster",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.StoreLoadBalancerIPsOfETCDServices(ctx, o.Logger, botanist.Shoot.SeedNamespace); err != nil {
+					return err
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+		})
 		initializeSecretsManagement = g.Add(flow.Task{
 			Name:         "Initializing secrets management",
 			Fn:           flow.TaskFn(botanist.InitializeSecretsManagement).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -132,7 +143,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Name:         "Deploying main and events etcd",
 			Fn:           flow.TaskFn(botanist.DeployEtcd).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       !cleanupShootResources && !etcdSnapshotRequired,
-			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, waitForLBAnnotation),
+			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, waitForLBAnnotation, storeLoadBalancerIPsOfETCDServices),
 		})
 		scaleUpETCD = g.Add(flow.Task{
 			Name:         "Scaling etcd up",
@@ -146,11 +157,47 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			SkipIf:       !cleanupShootResources && !etcdSnapshotRequired,
 			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD),
 		})
+		persistShootState = g.Add(flow.Task{
+			Name: "Persisting ShootState in garden cluster",
+			Fn: func(ctx context.Context) error {
+				return shootstate.Deploy(ctx, r.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), false)
+			},
+			Dependencies: flow.NewTaskIDs(waitUntilEtcdReady),
+		})
+		annotationSourceEtcdIsReady = g.Add(flow.Task{
+			Name: "Annotate shoot that source etcd is ready",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationSourceEtcdIsReady, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(storeLoadBalancerIPsOfETCDServices, persistShootState),
+		})
+		// till here everthing is done for source etcd.
+		waitTargetEtcdIsReady = g.Add(flow.Task{
+			Name: "Waiting for the shoot.gardener.cloud/target-etcd-ready annotation",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationTargetEtcdIsReady)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+		})
+		waitBlock = g.Add(flow.Task{
+			Name: "Waiting for the shoot.gardener.cloud/reconcile-block annotation",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationReconcileBlock)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+		})
+
 		wakeUpKubeAPIServer = g.Add(flow.Task{
 			Name:         "Scaling Kubernetes API Server up and waiting until ready",
 			Fn:           botanist.WakeUpKubeAPIServer,
 			SkipIf:       !wakeupRequired,
-			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement),
+			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement, annotationSourceEtcdIsReady, waitTargetEtcdIsReady, waitBlock),
 		})
 		// Deploy gardener-resource-manager to re-run the bootstrap logic if needed (e.g. when the token is expired because of hibernation).
 		// This fixes https://github.com/gardener/gardener/issues/7606
@@ -218,13 +265,13 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitMigrateBeforeKubeAPIServer,
 			Dependencies: flow.NewTaskIDs(migrateExtensionsBeforeKubeAPIServer),
 		})
-		persistShootState = g.Add(flow.Task{
-			Name: "Persisting ShootState in garden cluster",
-			Fn: func(ctx context.Context) error {
-				return shootstate.Deploy(ctx, r.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), false)
-			},
-			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
-		})
+		// persistShootState = g.Add(flow.Task{
+		// 	Name: "Persisting ShootState in garden cluster",
+		// 	Fn: func(ctx context.Context) error {
+		// 		return shootstate.Deploy(ctx, r.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), false)
+		// 	},
+		// 	Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
+		// })
 		deleteExtensionResources = g.Add(flow.Task{
 			Name:         "Deleting extension resources from the Shoot namespace",
 			Fn:           botanist.DestroyExtensionResourcesInParallel,

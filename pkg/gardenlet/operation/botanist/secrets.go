@@ -39,7 +39,7 @@ func (b *Botanist) InitializeSecretsManagement(ctx context.Context) error {
 	// create corresponding secrets in the shoot namespace in the seed before initializing it. Note that this is
 	// explicitly only done in case of restoration to prevent split-brain situations as described in
 	// https://github.com/gardener/gardener/issues/5377.
-	if b.IsRestorePhase() {
+	if b.IsRestorePhase() || b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed {
 		if err := b.restoreSecretsFromShootStateForSecretsManagerAdoption(ctx); err != nil {
 			return err
 		}

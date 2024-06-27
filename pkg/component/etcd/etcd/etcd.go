@@ -363,6 +363,10 @@ func (e *etcd) Deploy(ctx context.Context) error {
 			},
 		}
 
+		e.etcd.Spec.Etcd.ClientURLs = e.values.ClientURLs
+		e.etcd.Spec.Etcd.PeerURLs = e.values.PeerURLs
+		e.etcd.Spec.Etcd.InitialCluster = e.values.InitialCluster
+
 		if e.values.ServiceEndpoint != nil {
 			e.etcd.Spec.Etcd.ClientService.ServiceEndpoint = e.values.ServiceEndpoint
 		}
@@ -1073,11 +1077,11 @@ func (e *etcd) clientServiceDNSNames() []string {
 
 	if e.values.ClientServiceDNSNames != nil {
 		if e.values.Role == v1beta1constants.ETCDRoleMain {
-			additionlNameToAdd = v1beta1constants.ETCDRoleTarget
+			additionlNameToAdd = "etcd-" + v1beta1constants.ETCDRoleTarget
 		}
 
 		if e.values.Role == v1beta1constants.ETCDRoleTarget {
-			additionlNameToAdd = v1beta1constants.ETCDRoleMain
+			additionlNameToAdd = "etcd-" + v1beta1constants.ETCDRoleMain
 		}
 	}
 
@@ -1109,11 +1113,11 @@ func (e *etcd) peerServiceDNSNames() []string {
 
 	if e.values.PeerServiceDNSNames != nil {
 		if e.values.Role == v1beta1constants.ETCDRoleMain {
-			additionlNameToAdd = v1beta1constants.ETCDRoleTarget
+			additionlNameToAdd = "etcd-" + v1beta1constants.ETCDRoleTarget
 		}
 
 		if e.values.Role == v1beta1constants.ETCDRoleTarget {
-			additionlNameToAdd = v1beta1constants.ETCDRoleMain
+			additionlNameToAdd = "etcd-" + v1beta1constants.ETCDRoleMain
 		}
 	}
 

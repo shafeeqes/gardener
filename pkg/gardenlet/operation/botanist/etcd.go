@@ -136,51 +136,47 @@ func (b *Botanist) DeployEtcd(ctx context.Context) error {
 		var (
 			peerURLs, clientURLs, initialCluster       []druidv1alpha1.MemberInfo
 			gardenSecret                               = getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace)
-			roles                                      = []string{b.Shoot.Components.ControlPlane.EtcdMain.GetValues().Role}
+			role                                       = b.Shoot.Components.ControlPlane.EtcdMain.GetValues().Role
 			clientServiceDNSNames, peerServiceDNSNames []string
+			serviceEndpoint                            []byte
+			ok                                         bool
 		)
 
 		if err := b.GardenClient.Get(ctx, client.ObjectKeyFromObject(gardenSecret), gardenSecret); err != nil {
 			return err
 		}
 
-		name := fmt.Sprintf("etcd-%s-client-lb", b.Shoot.Components.ControlPlane.EtcdMain.GetValues().Role)
-		serviceEndpoint, ok := gardenSecret.Data[name]
+		name := "etcd-main-client-lb"
+		serviceEndpoint, ok = gardenSecret.Data[name]
 		if !ok {
 			return fmt.Errorf("service endpoint not present in the garden secret, key: %s", name)
 		}
 
-		if !b.Shoot.MigrationConfig.IsSourceSeed {
-			roles = append(roles, v1beta1constants.ETCDRoleMain)
-		}
-
 		for i := range ptr.Deref(b.Shoot.Components.ControlPlane.EtcdMain.GetReplicas(), 0) {
-			for _, role := range roles {
-				var (
-					name            = fmt.Sprintf("etcd-%s-%d", role, i)
-					peerServiceName = fmt.Sprintf("etcd-%s-peer", role)
-				)
+			var (
+				name            = fmt.Sprintf("etcd-%s-%d", role, i)
+				peerServiceName = fmt.Sprintf("etcd-%s-peer", role)
+			)
 
-				url, ok := gardenSecret.Data[name]
-				if !ok {
-					return fmt.Errorf("url not present in the garden secret, key: %s", name)
-				}
-
-				peerURLs = append(peerURLs, druidv1alpha1.MemberInfo{
-					Name: name,
-					URLs: []string{
-						fmt.Sprintf("https://%s.%s.%s:2380", name, peerServiceName, b.Shoot.SeedNamespace),
-						fmt.Sprintf("https://%s:2380", url),
-					},
-				})
-				clientURLs = append(clientURLs, druidv1alpha1.MemberInfo{
-					Name: name,
-					URLs: []string{
-						fmt.Sprintf("https://%s.%s.%s:2379", name, peerServiceName, b.Shoot.SeedNamespace),
-						fmt.Sprintf("https://%s:2379", url),
-					},
-				})
+			url, ok := gardenSecret.Data[name]
+			if !ok {
+				return fmt.Errorf("url not present in the garden secret, key: %s", name)
 			}
+
+			peerURLs = append(peerURLs, druidv1alpha1.MemberInfo{
+				Name: name,
+				URLs: []string{
+					fmt.Sprintf("https://%s.%s.%s:2380", name, peerServiceName, b.Shoot.SeedNamespace),
+					fmt.Sprintf("https://%s:2380", url),
+				},
+			})
+			clientURLs = append(clientURLs, druidv1alpha1.MemberInfo{
+				Name: name,
+				URLs: []string{
+					fmt.Sprintf("https://%s.%s.%s:2379", name, peerServiceName, b.Shoot.SeedNamespace),
+					fmt.Sprintf("https://%s:2379", url),
+				},
+			})
 
 			for _, role := range []string{v1beta1constants.ETCDRoleMain, v1beta1constants.ETCDRoleTarget} {
 				name := fmt.Sprintf("etcd-%s-%d", role, i)
@@ -195,6 +191,30 @@ func (b *Botanist) DeployEtcd(ctx context.Context) error {
 			}
 		}
 
+		if !b.Shoot.MigrationConfig.IsSourceSeed {
+			initialCluster = peerURLs
+
+			for i := range ptr.Deref(b.Shoot.Components.ControlPlane.EtcdMain.GetReplicas(), 0) {
+				var (
+					name            = fmt.Sprintf("etcd-%s-%d", v1beta1constants.ETCDRoleMain, i)
+					peerServiceName = fmt.Sprintf("etcd-%s-peer", v1beta1constants.ETCDRoleMain)
+				)
+
+				url, ok := gardenSecret.Data[name]
+				if !ok {
+					return fmt.Errorf("url not present in the garden secret, key: %s", name)
+				}
+
+				initialCluster = append(initialCluster, druidv1alpha1.MemberInfo{
+					Name: name,
+					URLs: []string{
+						fmt.Sprintf("https://%s.%s.%s:2380", name, peerServiceName, b.Shoot.SeedNamespace),
+						fmt.Sprintf("https://%s:2380", url),
+					},
+				})
+			}
+		}
+
 		clientServiceDNSNames = append(clientServiceDNSNames, string(serviceEndpoint))
 
 		b.Shoot.Components.ControlPlane.EtcdMain.SetClientServiceDNSNames(clientServiceDNSNames)
@@ -204,7 +224,7 @@ func (b *Botanist) DeployEtcd(ctx context.Context) error {
 			b.Shoot.Components.ControlPlane.EtcdMain.SetURLs(peerURLs, clientURLs, nil)
 		} else {
 			b.Shoot.Components.ControlPlane.EtcdMain.SetURLs(peerURLs, clientURLs, initialCluster)
-			b.Shoot.Components.ControlPlane.EtcdMain.SetServiceEndpoint(ptr.To(string(serviceEndpoint)))
+			b.Shoot.Components.ControlPlane.EtcdMain.SetServiceEndpoint(ptr.To(string(serviceEndpoint) + ":2379"))
 		}
 
 		b.Shoot.Components.ControlPlane.EtcdMain.SetSkipClientSANVerify(ptr.To(true))

@@ -27,7 +27,7 @@ import (
 )
 
 func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger, namespace string) error {
-	role := v1beta1constants.ETCDMain
+	role := v1beta1constants.ETCDRoleMain
 	if !b.Shoot.MigrationConfig.IsSourceSeed {
 		role = v1beta1constants.ETCDRoleTarget
 	}
@@ -49,8 +49,8 @@ func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger,
 		},
 		Type: corev1.ServiceTypeLoadBalancer,
 		Selector: map[string]string{
-			"name":     "etcd",
-			"instance": fmt.Sprintf("etcd-%s", role),
+			"app":  "etcd-statefulset",
+			"role": role,
 		},
 	}
 
@@ -77,7 +77,7 @@ func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger,
 		kubernetesutils.WaitUntilLoadBalancerIsReady(ctx, log, b.SeedClientSet.Client(), svc.Namespace, svc.Name, time.Minute)
 	}
 
-	if role == v1beta1constants.ETCDMain {
+	if role == v1beta1constants.ETCDRoleMain {
 		svc := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      fmt.Sprintf("etcd-%s-client-lb", role),
@@ -135,7 +135,7 @@ func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger,
 }
 
 func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log logr.Logger, namespace string) error {
-	role := v1beta1constants.ETCDMain
+	role := v1beta1constants.ETCDRoleMain
 	if !b.Shoot.MigrationConfig.IsSourceSeed {
 		role = v1beta1constants.ETCDRoleTarget
 	}
@@ -157,7 +157,11 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 			return fmt.Errorf("no load balancer IP found for service %s/%s", svc.Namespace, svc.Name)
 		}
 
-		data[fmt.Sprintf("etcd-%s-%d", role, i)] = []byte(svc.Status.LoadBalancer.Ingress[0].IP)
+		if svc.Status.LoadBalancer.Ingress[0].Hostname == "" {
+			return fmt.Errorf("empty hostname found for service %s/%s", svc.Namespace, svc.Name)
+		}
+
+		data[fmt.Sprintf("etcd-%s-%d", role, i)] = []byte(svc.Status.LoadBalancer.Ingress[0].Hostname)
 	}
 
 	if b.Shoot.MigrationConfig.IsSourceSeed {
@@ -174,7 +178,15 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 			return err
 		}
 
-		data[name] = []byte(svc.Status.LoadBalancer.Ingress[0].IP)
+		if len(svc.Status.LoadBalancer.Ingress) == 0 {
+			return fmt.Errorf("no load balancer IP found for service %s/%s", svc.Namespace, svc.Name)
+		}
+
+		if svc.Status.LoadBalancer.Ingress[0].Hostname == "" {
+			return fmt.Errorf("empty hostname found for service %s/%s", svc.Namespace, svc.Name)
+		}
+
+		data[name] = []byte(svc.Status.LoadBalancer.Ingress[0].Hostname)
 	}
 
 	gardenSecret := getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace)
@@ -183,15 +195,15 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 			*metav1.NewControllerRef(b.Shoot.GetInfo(), gardencorev1beta1.SchemeGroupVersion.WithKind("Shoot")),
 		}
 		gardenSecret.Type = corev1.SecretTypeOpaque
-		gardenSecret.Data = data
+		gardenSecret.Data = utils.MergeStringMaps(gardenSecret.Data, data)
 		return nil
 	})
 
 	return err
 }
 
-func getGardenSecret(shootName, shootNamespace string) *gardencorev1beta1.InternalSecret {
-	return &gardencorev1beta1.InternalSecret{
+func getGardenSecret(shootName, shootNamespace string) *corev1.Secret {
+	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      gardenerutils.ComputeShootProjectResourceName(shootName, "loadbalancer-ips"),
 			Namespace: shootNamespace,

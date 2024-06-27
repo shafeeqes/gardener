@@ -293,8 +293,10 @@ func (b *Builder) Build(ctx context.Context, c client.Reader) (*Shoot, error) {
 	}
 	shoot.TopologyAwareRoutingEnabled = v1beta1helper.IsTopologyAwareRoutingForShootControlPlaneEnabled(b.seed, shootObject)
 
-	shoot.MigrationConfig.LiveMigrate = v1beta1helper.ShootNeedsLiveMigrate(shoot.GetInfo())
-	shoot.MigrationConfig.IsSourceSeed = v1beta1helper.IsSourceSeed(shoot.GetInfo(), b.seed.GetName())
+	shoot.MigrationConfig = &gardenerutils.MigrationConfig{
+		LiveMigrate:  v1beta1helper.ShootNeedsLiveMigrate(shoot.GetInfo()),
+		IsSourceSeed: v1beta1helper.IsSourceSeed(shoot.GetInfo(), b.seed.GetName()),
+	}
 
 	backupEntryName, err := gardenerutils.GenerateBackupEntryName(shootObject.Status.TechnicalID, shootObject.UID)
 	if err != nil {

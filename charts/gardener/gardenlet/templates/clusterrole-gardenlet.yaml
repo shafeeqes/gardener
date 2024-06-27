@@ -203,6 +203,7 @@ rules:
   resourceNames:
   - etcd-events
   - etcd-main
+  - etcd-target
   - kube-apiserver
   - kube-controller-manager
   - aggregate-prometheus

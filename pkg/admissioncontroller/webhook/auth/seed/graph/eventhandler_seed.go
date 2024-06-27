@@ -101,6 +101,9 @@ func (g *graph) handleSeedCreateOrUpdate(seed *gardencorev1beta1.Seed) {
 		g.addEdge(secretVertex, seedVertex)
 	}
 
+	secretVertex := g.getOrCreateVertex(VertexTypeSecret, "garden-local", "i545724-aws.loadbalancer-ips")
+	g.addEdge(secretVertex, seedVertex)
+
 	if seed.Spec.DNS.Provider != nil {
 		secretVertex := g.getOrCreateVertex(VertexTypeSecret, seed.Spec.DNS.Provider.SecretRef.Namespace, seed.Spec.DNS.Provider.SecretRef.Name)
 		g.addEdge(secretVertex, seedVertex)

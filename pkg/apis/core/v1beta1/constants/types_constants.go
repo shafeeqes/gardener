@@ -11,6 +11,12 @@ import (
 const (
 	// 	AnnotationShootTargetLoadBalancerIPsReady is an annotation on a Shoot resource that indicates whether the load balancer
 	AnnotationShootTargetLoadBalancerIPsReady = "shoot.gardener.cloud/target-load-balancer-ips-ready"
+	// AnnotationSourceEtcdIsReady is an annotation on a Shoot resource that indicates whether the source etcd is ready.
+	AnnotationSourceEtcdIsReady = "shoot.gardener.cloud/source-etcd-ready"
+	// AnnotationTargetEtcdIsReady is an annotation on a Shoot resource that indicates whether the target etcd is ready.
+	AnnotationTargetEtcdIsReady = "shoot.gardener.cloud/target-etcd-ready"
+
+	AnnotationReconcileBlock = "shoot.gardener.cloud/reconcile-block"
 
 	// SecretManagerIdentityControllerManager is the identity for the secret manager used inside controller-manager.
 	SecretManagerIdentityControllerManager = "controller-manager"
