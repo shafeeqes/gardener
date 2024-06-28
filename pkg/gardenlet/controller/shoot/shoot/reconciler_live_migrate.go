@@ -185,19 +185,11 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
 		})
-		waitBlock = g.Add(flow.Task{
-			Name: "Waiting for the shoot.gardener.cloud/reconcile-block annotation",
-			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationReconcileBlock)
-			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
-		})
-
 		wakeUpKubeAPIServer = g.Add(flow.Task{
 			Name:         "Scaling Kubernetes API Server up and waiting until ready",
 			Fn:           botanist.WakeUpKubeAPIServer,
 			SkipIf:       !wakeupRequired,
-			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement, annotationSourceEtcdIsReady, waitTargetEtcdIsReady, waitBlock),
+			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement, annotationSourceEtcdIsReady, waitTargetEtcdIsReady),
 		})
 		// Deploy gardener-resource-manager to re-run the bootstrap logic if needed (e.g. when the token is expired because of hibernation).
 		// This fixes https://github.com/gardener/gardener/issues/7606
