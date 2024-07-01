@@ -6,6 +6,7 @@ package shoot
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -336,20 +337,6 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			SkipIf:       !cleanupShootResources,
 			Dependencies: flow.NewTaskIDs(waitUntilControlPlaneDeleted),
 		})
-		// second stage is till here
-		_ = g.Add(flow.Task{
-			Name: "Annotate shoot that second stage is ready",
-			Fn: flow.TaskFn(func(ctx context.Context) error {
-				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
-					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationSourceSecondStageIsReady, "true")
-					return nil
-				}); err != nil {
-					return nil
-				}
-				return nil
-			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(waitUntilMachineResourcesDeleted, waitUntilShootManagedResourcesDeleted),
-		})
 
 		// deleteKubeAPIServer = g.Add(flow.Task{
 		// 	Name:         "Deleting kube-apiserver deployment",
@@ -387,38 +374,53 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		// 	Fn:           botanist.Shoot.Components.Extensions.Extension.WaitCleanup,
 		// 	Dependencies: flow.NewTaskIDs(waitUntilExtensionsAfterKubeAPIServerMigrated),
 		// })
-		// migrateInfrastructure = g.Add(flow.Task{
-		// 	Name: "Migrating shoot infrastructure",
-		// 	Fn: flow.TaskFn(func(ctx context.Context) error {
-		// 		return botanist.Shoot.Components.Extensions.Infrastructure.Migrate(ctx)
-		// 	}),
-		// 	SkipIf:       o.Shoot.IsWorkerless,
-		// 	Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerDeleted),
-		// })
-		// waitUntilInfrastructureMigrated = g.Add(flow.Task{
-		// 	Name: "Waiting until shoot infrastructure has been migrated",
-		// 	Fn: flow.TaskFn(func(ctx context.Context) error {
-		// 		return botanist.Shoot.Components.Extensions.Infrastructure.WaitMigrate(ctx)
-		// 	}),
-		// 	SkipIf:       o.Shoot.IsWorkerless,
-		// 	Dependencies: flow.NewTaskIDs(migrateInfrastructure),
-		// })
-		// deleteInfrastructure = g.Add(flow.Task{
-		// 	Name: "Deleting shoot infrastructure",
-		// 	Fn: flow.TaskFn(func(ctx context.Context) error {
-		// 		return botanist.Shoot.Components.Extensions.Infrastructure.Destroy(ctx)
-		// 	}),
-		// 	SkipIf:       o.Shoot.IsWorkerless,
-		// 	Dependencies: flow.NewTaskIDs(waitUntilInfrastructureMigrated),
-		// })
-		// waitUntilInfrastructureDeleted = g.Add(flow.Task{
-		// 	Name: "Waiting until shoot infrastructure has been deleted",
-		// 	Fn: flow.TaskFn(func(ctx context.Context) error {
-		// 		return botanist.Shoot.Components.Extensions.Infrastructure.WaitCleanup(ctx)
-		// 	}),
-		// 	SkipIf:       o.Shoot.IsWorkerless,
-		// 	Dependencies: flow.NewTaskIDs(deleteInfrastructure),
-		// })
+		migrateInfrastructure = g.Add(flow.Task{
+			Name: "Migrating shoot infrastructure",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.Shoot.Components.Extensions.Infrastructure.Migrate(ctx)
+			}),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(waitUntilMachineResourcesDeleted, waitUntilShootManagedResourcesDeleted),
+			// Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerDeleted),
+		})
+		waitUntilInfrastructureMigrated = g.Add(flow.Task{
+			Name: "Waiting until shoot infrastructure has been migrated",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.Shoot.Components.Extensions.Infrastructure.WaitMigrate(ctx)
+			}),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(migrateInfrastructure),
+		})
+		deleteInfrastructure = g.Add(flow.Task{
+			Name: "Deleting shoot infrastructure",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.Shoot.Components.Extensions.Infrastructure.Destroy(ctx)
+			}),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(waitUntilInfrastructureMigrated),
+		})
+		waitUntilInfrastructureDeleted = g.Add(flow.Task{
+			Name: "Waiting until shoot infrastructure has been deleted",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.Shoot.Components.Extensions.Infrastructure.WaitCleanup(ctx)
+			}),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(deleteInfrastructure),
+		})
+		// second stage is till here
+		annotationSourceSecondStageIsReady = g.Add(flow.Task{
+			Name: "Annotate shoot that second stage is ready",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationSourceSecondStageIsReady, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(waitUntilInfrastructureDeleted),
+		})
 		// migrateIngressDNSRecord = g.Add(flow.Task{
 		// 	Name:         "Migrating nginx ingress DNS record",
 		// 	Fn:           botanist.MigrateIngressDNSRecord,
@@ -482,6 +484,14 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		// 	Fn:           botanist.WaitUntilSeedNamespaceDeleted,
 		// 	Dependencies: flow.NewTaskIDs(deleteNamespace),
 		// })
+
+		_ = g.Add(flow.Task{
+			Name: "block flow",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return fmt.Errorf("you shall not pass")
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(annotationSourceSecondStageIsReady),
+		})
 
 		f = g.Compile()
 	)

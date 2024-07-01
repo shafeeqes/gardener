@@ -22,6 +22,7 @@ import (
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	"github.com/gardener/gardener/pkg/client/kubernetes/clientmap/keys"
 	"github.com/gardener/gardener/pkg/component/apiserver"
+	etcdconstants "github.com/gardener/gardener/pkg/component/etcd/etcd/constants"
 	kubeapiserver "github.com/gardener/gardener/pkg/component/kubernetes/apiserver"
 	"github.com/gardener/gardener/pkg/component/shared"
 	"github.com/gardener/gardener/pkg/features"
@@ -57,6 +58,11 @@ func (b *Botanist) DefaultKubeAPIServer(ctx context.Context) (kubeapiserver.Inte
 		vpnConfig.HighAvailabilityNumberOfShootClients = b.Shoot.VPNHighAvailabilityNumberOfShootClients
 	}
 
+	var svcName string
+	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed {
+		svcName = etcdconstants.ServiceName(v1beta1constants.ETCDRoleTarget)
+	}
+
 	return shared.NewKubeAPIServer(
 		ctx,
 		b.SeedClientSet,
@@ -78,6 +84,7 @@ func (b *Botanist) DefaultKubeAPIServer(ctx context.Context) (kubeapiserver.Inte
 		nil,
 		nil,
 		nil,
+		svcName,
 	)
 }
 

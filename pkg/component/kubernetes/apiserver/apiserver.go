@@ -117,6 +117,8 @@ type Values struct {
 	Version *semver.Version
 	// VPN contains information for configuring the VPN settings for the kube-apiserver.
 	VPN VPNConfig
+	// EtcdClientServiceName specifies the name for the etcd client service.
+	EtcdClientServiceName string
 }
 
 // AuthenticationWebhook contains configuration for the authentication webhook.

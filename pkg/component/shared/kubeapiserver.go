@@ -88,6 +88,7 @@ func NewKubeAPIServer(
 	authenticationWebhookConfig *kubeapiserver.AuthenticationWebhook,
 	authorizationWebhookConfig *kubeapiserver.AuthorizationWebhook,
 	resourcesToStoreInETCDEvents []schema.GroupResource,
+	etcdClientServiceName string,
 ) (
 	kubeapiserver.Interface,
 	error,
@@ -184,6 +185,7 @@ func NewKubeAPIServer(
 			StaticTokenKubeconfigEnabled:        staticTokenKubeconfigEnabled,
 			Version:                             targetVersion,
 			VPN:                                 vpnConfig,
+			EtcdClientServiceName:               etcdClientServiceName,
 		},
 	), nil
 }

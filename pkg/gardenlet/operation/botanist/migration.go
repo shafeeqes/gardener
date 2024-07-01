@@ -110,7 +110,7 @@ func (b *Botanist) IsCopyOfBackupsRequired(ctx context.Context) (bool, error) {
 
 // IsRestorePhase returns true when the shoot is in phase 'restore'.
 func (b *Botanist) IsRestorePhase() bool {
-	return v1beta1helper.ShootHasOperationType(b.Shoot.GetInfo().Status.LastOperation, gardencorev1beta1.LastOperationTypeRestore)
+	return v1beta1helper.ShootHasOperationType(b.Shoot.GetInfo().Status.LastOperation, gardencorev1beta1.LastOperationTypeRestore) || b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed
 }
 
 // ShallowDeleteMachineResources deletes all machine-related resources by forcefully removing their finalizers.

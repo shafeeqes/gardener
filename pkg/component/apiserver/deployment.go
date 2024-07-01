@@ -35,13 +35,19 @@ func InjectDefaultSettings(
 	secretCAETCD *corev1.Secret,
 	secretETCDClient *corev1.Secret,
 	secretServer *corev1.Secret,
+	etcdClientServiceName string,
 ) {
+	svcName := etcdconstants.ServiceName(v1beta1constants.ETCDRoleMain)
+	if etcdClientServiceName != "" {
+		svcName = etcdClientServiceName
+	}
+
 	deployment.Spec.Template.Spec.Containers[0].Args = append(deployment.Spec.Template.Spec.Containers[0].Args,
 		"--http2-max-streams-per-connection=1000",
 		fmt.Sprintf("--etcd-cafile=%s/%s", volumeMountPathCAEtcd, secrets.DataKeyCertificateBundle),
 		fmt.Sprintf("--etcd-certfile=%s/%s", volumeMountPathEtcdClient, secrets.DataKeyCertificate),
 		fmt.Sprintf("--etcd-keyfile=%s/%s", volumeMountPathEtcdClient, secrets.DataKeyPrivateKey),
-		fmt.Sprintf("--etcd-servers=https://%s%s:%d", namePrefix, etcdconstants.ServiceName(v1beta1constants.ETCDRoleMain), etcdconstants.PortEtcdClient),
+		fmt.Sprintf("--etcd-servers=https://%s%s:%d", namePrefix, svcName, etcdconstants.PortEtcdClient),
 		"--livez-grace-period=1m",
 		"--profiling=false",
 		"--shutdown-delay-duration=15s",

@@ -47,7 +47,7 @@ var _ = Describe("Deployment", func() {
 				}
 			)
 
-			InjectDefaultSettings(deployment, namePrefix, values, secretCAETCD, secretETCDClient, secretServer)
+			InjectDefaultSettings(deployment, namePrefix, values, secretCAETCD, secretETCDClient, secretServer, "")
 
 			Expect(deployment).To(Equal(&appsv1.Deployment{
 				Spec: appsv1.DeploymentSpec{
