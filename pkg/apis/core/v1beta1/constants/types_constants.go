@@ -15,6 +15,10 @@ const (
 	AnnotationSourceEtcdIsReady = "shoot.gardener.cloud/source-etcd-ready"
 	// AnnotationTargetEtcdIsReady is an annotation on a Shoot resource that indicates whether the target etcd is ready.
 	AnnotationTargetEtcdIsReady = "shoot.gardener.cloud/target-etcd-ready"
+	// AnnotationSourceSecondStageIsReady is an annotation on a Shoot resource that indicates whether the source second stage is ready.
+	AnnotationSourceSecondStageIsReady = "shoot.gardener.cloud/source-second-stage-ready"
+	// AnnotatioTargeteSecondStageIsReady is an annotation on a Shoot resource that indicates whether the target second stage is ready.
+	AnnotationTargetSecondStageIsReady = "shoot.gardener.cloud/target-second-stage-ready"
 
 	AnnotationReconcileBlock = "shoot.gardener.cloud/reconcile-block"
 
