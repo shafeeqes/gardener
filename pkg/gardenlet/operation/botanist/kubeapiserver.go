@@ -262,7 +262,7 @@ func (b *Botanist) DeployKubeAPIServer(ctx context.Context) error {
 	}
 
 	var vpnSuffix string
-	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed && !b.Shoot.MigrationConfig.DNSMigrated {
+	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed && !b.Shoot.MigrationConfig.VPNMigrated {
 		vpnSuffix = "-temp"
 	}
 

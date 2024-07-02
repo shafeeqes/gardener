@@ -24,7 +24,7 @@ const (
 	// AnnotatioTargetThirdStageIsReady is an annotation on a Shoot resource that indicates whether the target third stage is ready.
 	AnnotationTargetThirdStageIsReady = "shoot.gardener.cloud/target-third-stage-ready"
 	// AnnotatioTargetFourthStageIsReady is an annotation on a Shoot resource that indicates whether the target fourth stage is ready.
-	AnnotationTargetFourthStageIsReady = "shoot.gardener.cloud/target-fifth-stage-ready"
+	AnnotationTargetFourthStageIsReady = "shoot.gardener.cloud/target-fourth-stage-ready"
 	// AnnotatioTargetFifthStageIsReady is an annotation on a Shoot resource that indicates whether the target fourth stage is ready.
 	AnnotationTargetFifthStageIsReady = "shoot.gardener.cloud/target-fifth-stage-ready"
 	// AnnotationDNSMigrated is an annotation on a Shoot resource that indicated whether the dns has been migrated from source to destination seed.

@@ -917,7 +917,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		// 	Dependencies: flow.NewTaskIDs(nginxLBReady),
 		// })
 		waitUntilTempTunnelConnectionExists = g.Add(flow.Task{
-			Name: "Waiting until the Kubernetes API server can connect to the Shoot workers",
+			Name: "Waiting until the Kubernetes API server can connect to the Shoot workers through temp VPN",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.WaitUntilTunnelConnectionExists(ctx, "-temp")
 			}),
@@ -1052,7 +1052,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		deployVPNSeedServer = g.Add(flow.Task{
 			Name: "Deploying vpn-seed-server",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return botanist.DeployVPNServer(ctx, "-temp")
+				return botanist.DeployVPNServer(ctx, "")
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless,
 			Dependencies: flow.NewTaskIDs(annotationDNSRestored),
