@@ -37,11 +37,11 @@ func (b *Botanist) WaitUntilNginxIngressServiceIsReady(ctx context.Context) erro
 
 // WaitUntilTunnelConnectionExists waits until a port forward connection to the tunnel pod (vpn-shoot) in the kube-system
 // namespace of the Shoot cluster can be established.
-func (b *Botanist) WaitUntilTunnelConnectionExists(ctx context.Context) error {
+func (b *Botanist) WaitUntilTunnelConnectionExists(ctx context.Context, suffix string) error {
 	const timeout = 15 * time.Minute
 
 	return retry.UntilTimeout(ctx, 5*time.Second, timeout, func(ctx context.Context) (bool, error) {
-		return CheckTunnelConnection(ctx, b.Logger, b.ShootClientSet, v1beta1constants.VPNTunnel)
+		return CheckTunnelConnection(ctx, b.Logger, b.ShootClientSet, v1beta1constants.VPNTunnel+suffix)
 	})
 }
 

@@ -107,6 +107,18 @@ func (mr *MockInterfaceMockRecorder) SetSeedNamespaceObjectUID(arg0 any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSeedNamespaceObjectUID", reflect.TypeOf((*MockInterface)(nil).SetSeedNamespaceObjectUID), arg0)
 }
 
+// SetSuffix mocks base method.
+func (m *MockInterface) SetSuffix(arg0 string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetSuffix", arg0)
+}
+
+// SetSuffix indicates an expected call of SetSuffix.
+func (mr *MockInterfaceMockRecorder) SetSuffix(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSuffix", reflect.TypeOf((*MockInterface)(nil).SetSuffix), arg0)
+}
+
 // Wait mocks base method.
 func (m *MockInterface) Wait(arg0 context.Context) error {
 	m.ctrl.T.Helper()

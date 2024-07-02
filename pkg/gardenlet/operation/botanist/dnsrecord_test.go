@@ -276,7 +276,7 @@ var _ = Describe("dnsrecord", func() {
 
 	Describe("#DefaultInternalDNSRecord", func() {
 		It("should create a component with correct values", func() {
-			c := b.DefaultInternalDNSRecord()
+			c := b.DefaultInternalDNSRecord(false)
 			c.SetRecordType(extensionsv1alpha1.DNSRecordTypeA)
 			c.SetValues([]string{address})
 
@@ -303,7 +303,7 @@ var _ = Describe("dnsrecord", func() {
 			func(mutateShootFn func()) {
 				mutateShootFn()
 
-				c := b.DefaultInternalDNSRecord()
+				c := b.DefaultInternalDNSRecord(false)
 
 				Expect(c.GetValues().AnnotateOperation).To(BeTrue())
 			},
@@ -330,7 +330,7 @@ var _ = Describe("dnsrecord", func() {
 			metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, "shoot.gardener.cloud/tasks", "deployDNSRecordInternal")
 			b.Shoot.SetInfo(shoot)
 
-			r := b.DefaultInternalDNSRecord()
+			r := b.DefaultInternalDNSRecord(false)
 			r.SetRecordType(extensionsv1alpha1.DNSRecordTypeA)
 			r.SetValues([]string{address})
 

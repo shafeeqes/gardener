@@ -38,4 +38,9 @@ func (b *Botanist) newDNSComponentsTargetingAPIServerAddress() {
 		b.Shoot.Components.Extensions.ExternalDNSRecord.SetRecordType(extensionsv1alpha1helper.GetDNSRecordType(b.APIServerAddress))
 		b.Shoot.Components.Extensions.ExternalDNSRecord.SetValues([]string{b.APIServerAddress})
 	}
+
+	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed && !b.Shoot.MigrationConfig.VPNMigrated {
+		b.Shoot.Components.Extensions.DNSRecordForMigration.SetRecordType(extensionsv1alpha1helper.GetDNSRecordType(b.APIServerAddress))
+		b.Shoot.Components.Extensions.DNSRecordForMigration.SetValues([]string{b.APIServerAddress})
+	}
 }

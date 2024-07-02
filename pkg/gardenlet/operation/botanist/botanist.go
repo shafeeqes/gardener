@@ -72,7 +72,10 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 
 	// extension components
 	o.Shoot.Components.Extensions.ExternalDNSRecord = b.DefaultExternalDNSRecord()
-	o.Shoot.Components.Extensions.InternalDNSRecord = b.DefaultInternalDNSRecord()
+	o.Shoot.Components.Extensions.InternalDNSRecord = b.DefaultInternalDNSRecord(false)
+	if o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed {
+		o.Shoot.Components.Extensions.DNSRecordForMigration = b.DefaultInternalDNSRecord(true)
+	}
 	o.Shoot.Components.Extensions.IngressDNSRecord = b.DefaultIngressDNSRecord()
 
 	o.Shoot.Components.Extensions.Extension, err = b.DefaultExtension(ctx)

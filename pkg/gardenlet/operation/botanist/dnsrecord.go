@@ -45,10 +45,15 @@ func (b *Botanist) DefaultExternalDNSRecord() extensionsdnsrecord.Interface {
 }
 
 // DefaultInternalDNSRecord creates the default deployer for the internal DNSRecord resource.
-func (b *Botanist) DefaultInternalDNSRecord() extensionsdnsrecord.Interface {
+func (b *Botanist) DefaultInternalDNSRecord(temporary bool) extensionsdnsrecord.Interface {
+	suffix := v1beta1constants.DNSRecordInternalName
+	if temporary {
+		suffix += "-temp"
+	}
+
 	values := &extensionsdnsrecord.Values{
-		Name:                         b.Shoot.GetInfo().Name + "-" + v1beta1constants.DNSRecordInternalName,
-		SecretName:                   DNSRecordSecretPrefix + "-" + b.Shoot.GetInfo().Name + "-" + v1beta1constants.DNSRecordInternalName,
+		Name:                         b.Shoot.GetInfo().Name + "-" + suffix,
+		SecretName:                   DNSRecordSecretPrefix + "-" + b.Shoot.GetInfo().Name + "-" + suffix,
 		Namespace:                    b.Shoot.SeedNamespace,
 		TTL:                          b.Config.Controllers.Shoot.DNSEntryTTLSeconds,
 		ReconcileOnlyOnChangeOrError: b.Shoot.GetInfo().DeletionTimestamp != nil,
@@ -65,6 +70,10 @@ func (b *Botanist) DefaultInternalDNSRecord() extensionsdnsrecord.Interface {
 		}
 		values.SecretData = b.Garden.InternalDomain.SecretData
 		values.DNSName = gardenerutils.GetAPIServerDomain(b.Shoot.InternalClusterDomain)
+
+		if temporary {
+			values.DNSName = gardenerutils.GetAPIServerDomain("temp." + b.Shoot.InternalClusterDomain)
+		}
 	}
 
 	return extensionsdnsrecord.New(

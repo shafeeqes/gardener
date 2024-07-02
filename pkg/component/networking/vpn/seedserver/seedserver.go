@@ -91,6 +91,8 @@ type Interface interface {
 	SetNodeNetworkCIDR(nodes *string)
 	// SetSeedNamespaceObjectUID sets UID for the namespace
 	SetSeedNamespaceObjectUID(namespaceUID types.UID)
+	// SetSuffix sets the suffix for deployment name.
+	SetSuffix(suffix string)
 
 	// GetValues returns the current configuration values of the deployer.
 	GetValues() Values
@@ -128,6 +130,8 @@ type Values struct {
 	HighAvailabilityNumberOfSeedServers int
 	// HighAvailabilityNumberOfShootClients is the number of VPN shoot clients used for HA
 	HighAvailabilityNumberOfShootClients int
+	// Suffix is the suffix for vpn deployment name.
+	Suffix string
 }
 
 // New creates a new instance of DeployWaiter for the vpn-seed-server.
@@ -181,9 +185,9 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 	}
 
 	secretServer, err := v.secretsManager.Generate(ctx, &secretsutils.CertificateSecretConfig{
-		Name:                        "vpn-seed-server",
-		CommonName:                  "vpn-seed-server",
-		DNSNames:                    kubernetesutils.DNSNamesForService(ServiceName, v.namespace),
+		Name:                        "vpn-seed-server" + v.values.Suffix,
+		CommonName:                  "vpn-seed-server" + v.values.Suffix,
+		DNSNames:                    kubernetesutils.DNSNamesForService(ServiceName+v.values.Suffix, v.namespace),
 		CertType:                    secretsutils.ServerCert,
 		SkipPublishingCACertificate: true,
 	}, secretsmanager.SignedByCA(v1beta1constants.SecretNameCAVPN), secretsmanager.Rotate(secretsmanager.InPlace))
@@ -203,7 +207,7 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 	}
 
 	podTemplate := v.podTemplate(configMap, secretCAVPN, secretServer, secretTLSAuth)
-	labels := getLabels()
+	labels := v.getLabels()
 
 	if v.values.HighAvailabilityEnabled {
 		if err := v.deployStatefulSet(ctx, labels, podTemplate); err != nil {
@@ -261,7 +265,7 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 
 	template := &corev1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+			Labels: utils.MergeStringMaps(v.getLabels(), map[string]string{
 				v1beta1constants.LabelNetworkPolicyToDNS:                                                                    v1beta1constants.LabelNetworkPolicyAllowed,
 				v1beta1constants.LabelNetworkPolicyToPrivateNetworks:                                                        v1beta1constants.LabelNetworkPolicyAllowed,
 				gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
@@ -583,7 +587,7 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 func (v *vpnSeedServer) deployStatefulSet(ctx context.Context, labels map[string]string, template *corev1.PodTemplateSpec) error {
 	sts := v.emptyStatefulSet()
 	podLabels := map[string]string{
-		v1beta1constants.LabelApp: deploymentName,
+		v1beta1constants.LabelApp: deploymentName + v.values.Suffix,
 	}
 	_, err := controllerutils.GetAndCreateOrMergePatch(ctx, v.client, sts, func() error {
 		sts.Labels = labels
@@ -866,7 +870,7 @@ func (v *vpnSeedServer) deployVPA(ctx context.Context) error {
 		vpa.Spec.TargetRef = &autoscalingv1.CrossVersionObjectReference{
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 			Kind:       "Deployment",
-			Name:       deploymentName,
+			Name:       deploymentName + v.values.Suffix,
 		}
 		vpa.Spec.UpdatePolicy = &vpaautoscalingv1.PodUpdatePolicy{
 			UpdateMode: &vpaUpdateMode,
@@ -922,11 +926,15 @@ func (v *vpnSeedServer) SetNodeNetworkCIDR(nodes *string) {
 	v.values.Network.NodeCIDR = ptr.Deref(nodes, "")
 }
 
+func (v *vpnSeedServer) SetSuffix(suffix string) {
+	v.values.Suffix = suffix
+}
+
 func (v *vpnSeedServer) indexedName(idx *int) string {
 	if idx == nil {
 		return deploymentName
 	}
-	return fmt.Sprintf("%s-%d", deploymentName, *idx)
+	return fmt.Sprintf("%s-%d", deploymentName+v.values.Suffix, *idx)
 }
 
 func (v *vpnSeedServer) emptyService(idx *int) *corev1.Service {
@@ -942,11 +950,11 @@ func (v *vpnSeedServer) emptyDeployment() *appsv1.Deployment {
 }
 
 func (v *vpnSeedServer) emptyStatefulSet() *appsv1.StatefulSet {
-	return &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: v.namespace}}
+	return &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: deploymentName + v.values.Suffix, Namespace: v.namespace}}
 }
 
 func (v *vpnSeedServer) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: v.namespace}}
+	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: deploymentName + v.values.Suffix, Namespace: v.namespace}}
 }
 
 func (v *vpnSeedServer) emptyDestinationRule(idx *int) *networkingv1beta1.DestinationRule {
@@ -954,17 +962,17 @@ func (v *vpnSeedServer) emptyDestinationRule(idx *int) *networkingv1beta1.Destin
 }
 
 func (v *vpnSeedServer) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: deploymentName + "-vpa", Namespace: v.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: deploymentName + v.values.Suffix + "-vpa", Namespace: v.namespace}}
 }
 
 func (v *vpnSeedServer) emptyEnvoyFilter() *networkingv1alpha3.EnvoyFilter {
 	return &networkingv1alpha3.EnvoyFilter{ObjectMeta: metav1.ObjectMeta{Name: v.namespace + "-vpn", Namespace: v.istioNamespaceFunc()}}
 }
 
-func getLabels() map[string]string {
+func (v *vpnSeedServer) getLabels() map[string]string {
 	return map[string]string{
 		v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
-		v1beta1constants.LabelApp:   deploymentName,
+		v1beta1constants.LabelApp:   deploymentName + v.values.Suffix,
 	}
 }
 

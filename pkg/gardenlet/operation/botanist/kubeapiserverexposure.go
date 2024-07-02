@@ -82,7 +82,7 @@ func (b *Botanist) setAPIServerServiceClusterIP(clusterIP string) {
 	}
 
 	if v1beta1helper.ShootNeedsLiveMigrate(b.Shoot.GetInfo()) && !v1beta1helper.IsSourceSeed(b.Shoot.GetInfo(), b.Seed.GetInfo().Name) {
-		hosts = append(hosts, gardenerutils.GetAPIServerDomain("temp."+*b.Shoot.ExternalClusterDomain))
+		hosts = append(hosts, gardenerutils.GetAPIServerDomain("temp."+b.Shoot.InternalClusterDomain))
 	}
 
 	b.Shoot.Components.ControlPlane.KubeAPIServerSNI = kubeapiserverexposure.NewSNI(

@@ -768,4 +768,6 @@ func GetIPStackForShoot(shoot *gardencorev1beta1.Shoot) string {
 type MigrationConfig struct {
 	LiveMigrate  bool
 	IsSourceSeed bool
+	DNSMigrated  bool
+	VPNMigrated  bool
 }

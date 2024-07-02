@@ -261,6 +261,11 @@ func (b *Botanist) DeployKubeAPIServer(ctx context.Context) error {
 		return err
 	}
 
+	var vpnSuffix string
+	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed && !b.Shoot.MigrationConfig.DNSMigrated {
+		vpnSuffix = "-temp"
+	}
+
 	if err := shared.DeployKubeAPIServer(
 		ctx,
 		b.SeedClientSet.Client(),
@@ -276,6 +281,7 @@ func (b *Botanist) DeployKubeAPIServer(ctx context.Context) error {
 		b.Shoot.EncryptedResources,
 		v1beta1helper.GetShootETCDEncryptionKeyRotationPhase(b.Shoot.GetInfo().Status.Credentials),
 		b.Shoot.HibernationEnabled,
+		vpnSuffix,
 	); err != nil {
 		return err
 	}

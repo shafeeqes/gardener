@@ -37,6 +37,7 @@ import (
 	"github.com/gardener/gardener/pkg/component/networking/apiserverproxy"
 	"github.com/gardener/gardener/pkg/component/networking/coredns"
 	vpnseedserver "github.com/gardener/gardener/pkg/component/networking/vpn/seedserver"
+	vpnshoot "github.com/gardener/gardener/pkg/component/networking/vpn/shoot"
 	"github.com/gardener/gardener/pkg/component/nodemanagement/machinecontrollermanager"
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/alertmanager"
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus"
@@ -145,6 +146,7 @@ type Extensions struct {
 	ExternalDNSRecord     dnsrecord.Interface
 	InternalDNSRecord     dnsrecord.Interface
 	IngressDNSRecord      dnsrecord.Interface
+	DNSRecordForMigration dnsrecord.Interface
 	Extension             extension.Interface
 	Infrastructure        infrastructure.Interface
 	Network               component.DeployMigrateWaiter
@@ -165,7 +167,7 @@ type SystemComponents struct {
 	NodeProblemDetector component.DeployWaiter
 	NodeExporter        component.DeployWaiter
 	Resources           shootsystem.Interface
-	VPNShoot            component.DeployWaiter
+	VPNShoot            vpnshoot.Interface
 }
 
 // Addons contains references for the addons.

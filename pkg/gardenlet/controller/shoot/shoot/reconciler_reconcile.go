@@ -377,8 +377,10 @@ func (r *Reconciler) runReconcileShootFlow(ctx context.Context, o *operation.Ope
 			Dependencies: flow.NewTaskIDs(waitUntilGardenerResourceManagerReady, deployShootNamespaces),
 		})
 		deployVPNSeedServer = g.Add(flow.Task{
-			Name:         "Deploying vpn-seed-server",
-			Fn:           flow.TaskFn(botanist.DeployVPNServer).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Name: "Deploying vpn-seed-server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.DeployVPNServer(ctx, "")
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless,
 			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, deployNamespace, waitUntilKubeAPIServerIsReady),
 		})
@@ -806,8 +808,10 @@ func (r *Reconciler) runReconcileShootFlow(ctx context.Context, o *operation.Ope
 			Dependencies: flow.NewTaskIDs(nginxLBReady),
 		})
 		waitUntilTunnelConnectionExists = g.Add(flow.Task{
-			Name:         "Waiting until the Kubernetes API server can connect to the Shoot workers",
-			Fn:           botanist.WaitUntilTunnelConnectionExists,
+			Name: "Waiting until the Kubernetes API server can connect to the Shoot workers",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.WaitUntilTunnelConnectionExists(ctx, "")
+			}),
 			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled || skipReadiness,
 			Dependencies: flow.NewTaskIDs(syncPointAllSystemComponentsDeployed, waitUntilNetworkIsReady, waitUntilWorkerReady),
 		})

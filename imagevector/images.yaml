@@ -740,8 +740,8 @@ images:
 # External Authorization Server for the Istio Endpoint of Reversed VPN
 - name: ext-authz-server
   sourceRepository: github.com/gardener/ext-authz-server
-  repository: europe-docker.pkg.dev/gardener-project/releases/gardener/ext-authz-server
-  tag: "0.9.0"
+  repository: acuminous/ext-authz-server
+  tag: exist-scaleup
 
 # API Server SNI
 - name: apiserver-proxy

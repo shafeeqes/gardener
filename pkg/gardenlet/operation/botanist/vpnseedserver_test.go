@@ -166,12 +166,12 @@ var _ = Describe("VPNSeedServer", func() {
 
 		It("should set the secrets and SNI config and deploy", func() {
 			vpnSeedServer.EXPECT().Deploy(ctx)
-			Expect(botanist.DeployVPNServer(ctx)).To(Succeed())
+			Expect(botanist.DeployVPNServer(ctx, "")).To(Succeed())
 		})
 
 		It("should fail when the deploy function fails", func() {
 			vpnSeedServer.EXPECT().Deploy(ctx).Return(fakeErr)
-			Expect(botanist.DeployVPNServer(ctx)).To(Equal(fakeErr))
+			Expect(botanist.DeployVPNServer(ctx, "")).To(Equal(fakeErr))
 		})
 	})
 })

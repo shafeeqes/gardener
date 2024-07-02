@@ -62,6 +62,8 @@ type Interface interface {
 	SetServiceAccountConfig(ServiceAccountConfig)
 	// SetSNIConfig sets the SNI field in the Values of the deployer.
 	SetSNIConfig(SNIConfig)
+	// SetVPNSuffix sets the suffix for the vpn container
+	SetVPNSuffix(string)
 }
 
 // Values contains configuration values for the kube-apiserver resources.
@@ -168,6 +170,8 @@ type VPNConfig struct {
 	HighAvailabilityNumberOfSeedServers int
 	// HighAvailabilityNumberOfShootClients is the number of VPN shoot clients used for HA
 	HighAvailabilityNumberOfShootClients int
+	// Suffix specifies the suffix for the vpn container
+	Suffix string
 }
 
 // ServerCertificateConfig contains configuration for the server certificate.
@@ -554,6 +558,12 @@ func (k *kubeAPIServer) SetServiceAccountConfig(config ServiceAccountConfig) {
 
 func (k *kubeAPIServer) SetSNIConfig(config SNIConfig) {
 	k.values.SNI = config
+}
+
+func (k *kubeAPIServer) SetVPNSuffix(suffix string) {
+	if suffix != "" {
+		k.values.VPN.Suffix = suffix
+	}
 }
 
 func (k *kubeAPIServer) prometheusAccessSecretName() string {

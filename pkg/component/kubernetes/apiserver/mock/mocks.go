@@ -206,6 +206,18 @@ func (mr *MockInterfaceMockRecorder) SetServiceAccountConfig(arg0 any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetServiceAccountConfig", reflect.TypeOf((*MockInterface)(nil).SetServiceAccountConfig), arg0)
 }
 
+// SetVPNSuffix mocks base method.
+func (m *MockInterface) SetVPNSuffix(arg0 string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetVPNSuffix", arg0)
+}
+
+// SetVPNSuffix indicates an expected call of SetVPNSuffix.
+func (mr *MockInterfaceMockRecorder) SetVPNSuffix(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetVPNSuffix", reflect.TypeOf((*MockInterface)(nil).SetVPNSuffix), arg0)
+}
+
 // Wait mocks base method.
 func (m *MockInterface) Wait(arg0 context.Context) error {
 	m.ctrl.T.Helper()
