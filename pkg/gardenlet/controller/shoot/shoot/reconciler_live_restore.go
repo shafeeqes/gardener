@@ -102,14 +102,14 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		deployKubeAPIServerTaskTimeout = kubeapiserver.TimeoutWaitForDeployment
 	}
 
-	// var (
-	// 	deployExtensionAfterKAPIMsg = "Deploying extension resources after kube-apiserver"
-	// 	waitExtensionAfterKAPIMsg   = "Waiting until extension resources handled after kube-apiserver are ready"
-	// )
-	// if o.Shoot.HibernationEnabled {
-	// 	deployExtensionAfterKAPIMsg = "Hibernating extension resources before kube-apiserver hibernation"
-	// 	waitExtensionAfterKAPIMsg = "Waiting until extension resources hibernated before kube-apiserver hibernation are ready"
-	// }
+	var (
+		deployExtensionAfterKAPIMsg = "Deploying extension resources after kube-apiserver"
+		waitExtensionAfterKAPIMsg   = "Waiting until extension resources handled after kube-apiserver are ready"
+	)
+	if o.Shoot.HibernationEnabled {
+		deployExtensionAfterKAPIMsg = "Hibernating extension resources before kube-apiserver hibernation"
+		waitExtensionAfterKAPIMsg = "Waiting until extension resources hibernated before kube-apiserver hibernation are ready"
+	}
 
 	var (
 		g               = flow.NewGraph("Shoot cluster restoration")
@@ -987,6 +987,141 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(annotationTargetSecondStageIsReady, waitUntilTempTunnelConnectionExists),
 		})
 
+		waitSourceDNSMigrated = g.Add(flow.Task{
+			Name: "Waiting for the shoot.gardener.cloud/dns-migrated annotation",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationDNSMigrated)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(annotationTargetThirdStageIsReady),
+		})
+		deployInternalDomainDNSRecord = g.Add(flow.Task{
+			Name: "Deploying internal domain DNS record",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.DeployOrDestroyInternalDNSRecord(ctx); err != nil {
+					return err
+				}
+				return removeTaskAnnotation(ctx, o, generation, v1beta1constants.ShootTaskDeployDNSRecordInternal)
+			}),
+			SkipIf:       o.Shoot.HibernationEnabled,
+			Dependencies: flow.NewTaskIDs(waitSourceDNSMigrated),
+		})
+		deployExternalDomainDNSRecord = g.Add(flow.Task{
+			Name: "Deploying external domain DNS record",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.DeployOrDestroyExternalDNSRecord(ctx); err != nil {
+					return err
+				}
+				return removeTaskAnnotation(ctx, o, generation, v1beta1constants.ShootTaskDeployDNSRecordExternal)
+			}),
+			SkipIf:       o.Shoot.HibernationEnabled,
+			Dependencies: flow.NewTaskIDs(waitSourceDNSMigrated),
+		})
+		nginxLBReady = g.Add(flow.Task{
+			Name:         "Waiting until nginx ingress LoadBalancer is ready",
+			Fn:           botanist.WaitUntilNginxIngressServiceIsReady,
+			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled || !v1beta1helper.NginxIngressEnabled(botanist.Shoot.GetInfo().Spec.Addons),
+			Dependencies: flow.NewTaskIDs(waitSourceDNSMigrated),
+		})
+		deployIngressDomainDNSRecord = g.Add(flow.Task{
+			Name: "Deploying nginx ingress DNS record",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.DeployOrDestroyIngressDNSRecord(ctx); err != nil {
+					return err
+				}
+				return removeTaskAnnotation(ctx, o, generation, v1beta1constants.ShootTaskDeployDNSRecordIngress)
+			}),
+			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled,
+			Dependencies: flow.NewTaskIDs(nginxLBReady),
+		})
+
+		// dns has been restored
+		annotationDNSRestored = g.Add(flow.Task{
+			Name: "Annotate shoot dns records has been restored",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationDNSRestored, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(deployInternalDomainDNSRecord, deployExternalDomainDNSRecord, deployIngressDomainDNSRecord),
+		})
+
+		deployVPNSeedServer = g.Add(flow.Task{
+			Name: "Deploying vpn-seed-server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.DeployVPNServer(ctx, "-temp")
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(annotationDNSRestored),
+		})
+		deployVPNShoot = g.Add(flow.Task{
+			Name: "Deploying vpn-shoot system component",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				botanist.Shoot.Components.SystemComponents.VPNShoot.SetSuffix("")
+				return botanist.Shoot.Components.SystemComponents.VPNShoot.Deploy(ctx)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled,
+			Dependencies: flow.NewTaskIDs(deployVPNSeedServer),
+		})
+		waitUntilTunnelConnectionExists = g.Add(flow.Task{
+			Name: "Waiting until the Kubernetes API server can connect to the Shoot workers",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.WaitUntilTunnelConnectionExists(ctx, "")
+			}),
+			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled || skipReadiness,
+			Dependencies: flow.NewTaskIDs(deployVPNShoot),
+		})
+
+		// fourth stage is till here
+		annotationTargetFourthStageIsReady = g.Add(flow.Task{
+			Name: "Annotate shoot that fourth stage is ready",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationTargetFourthStageIsReady, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(waitUntilTunnelConnectionExists),
+		})
+		waitSourceThirdStageIsReady = g.Add(flow.Task{
+			Name: "Waiting for the shoot.gardener.cloud/source-third-stage-ready annotation",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationSourceThirdStageIsReady)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(annotationTargetFourthStageIsReady),
+		})
+		deployExtensionResourcesAfterKAPI = g.Add(flow.Task{
+			Name:         deployExtensionAfterKAPIMsg,
+			Fn:           flow.TaskFn(botanist.DeployExtensionsAfterKubeAPIServer).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(waitSourceThirdStageIsReady),
+		})
+		waitUntilExtensionResourcesAfterKAPIReady = g.Add(flow.Task{
+			Name:         waitExtensionAfterKAPIMsg,
+			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitAfterKubeAPIServer,
+			SkipIf:       skipReadiness,
+			Dependencies: flow.NewTaskIDs(deployExtensionResourcesAfterKAPI),
+		})
+		// fifth stage is till here
+		annotationTargetFifthStageIsReady = g.Add(flow.Task{
+			Name: "Annotate shoot that fifth stage is ready",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationTargetFifthStageIsReady, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesAfterKAPIReady),
+		})
+
 		// hibernateControlPlane = g.Add(flow.Task{
 		// 	Name:         "Hibernating control plane",
 		// 	Fn:           flow.TaskFn(botanist.HibernateControlPlane).RetryUntilTimeout(defaultInterval, 2*time.Minute),
@@ -1084,7 +1219,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return fmt.Errorf("you shall not pass")
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(annotationTargetThirdStageIsReady),
+			Dependencies: flow.NewTaskIDs(annotationTargetFifthStageIsReady),
 		})
 	)
 

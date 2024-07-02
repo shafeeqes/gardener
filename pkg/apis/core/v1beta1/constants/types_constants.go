@@ -17,12 +17,20 @@ const (
 	AnnotationTargetEtcdIsReady = "shoot.gardener.cloud/target-etcd-ready"
 	// AnnotationSourceSecondStageIsReady is an annotation on a Shoot resource that indicates whether the source second stage is ready.
 	AnnotationSourceSecondStageIsReady = "shoot.gardener.cloud/source-second-stage-ready"
+	// AnnotationSourceThirdStageIsReady is an annotation on a Shoot resource that indicates whether the source third stage is ready.
+	AnnotationSourceThirdStageIsReady = "shoot.gardener.cloud/source-third-stage-ready"
 	// AnnotatioTargeteSecondStageIsReady is an annotation on a Shoot resource that indicates whether the target second stage is ready.
 	AnnotationTargetSecondStageIsReady = "shoot.gardener.cloud/target-second-stage-ready"
 	// AnnotatioTargetThirdStageIsReady is an annotation on a Shoot resource that indicates whether the target third stage is ready.
 	AnnotationTargetThirdStageIsReady = "shoot.gardener.cloud/target-third-stage-ready"
+	// AnnotatioTargetFourthStageIsReady is an annotation on a Shoot resource that indicates whether the target fourth stage is ready.
+	AnnotationTargetFourthStageIsReady = "shoot.gardener.cloud/target-fifth-stage-ready"
+	// AnnotatioTargetFifthStageIsReady is an annotation on a Shoot resource that indicates whether the target fourth stage is ready.
+	AnnotationTargetFifthStageIsReady = "shoot.gardener.cloud/target-fifth-stage-ready"
 	// AnnotationDNSMigrated is an annotation on a Shoot resource that indicated whether the dns has been migrated from source to destination seed.
 	AnnotationDNSMigrated = "shoot.gardener.cloud/dns-migrated"
+	// AnnotationDNSRestored is an annotation on a Shoot resource that indicated whether the dns has been restored in destination seed.
+	AnnotationDNSRestored = "shoot.gardener.cloud/dns-restored"
 
 	AnnotationReconcileBlock = "shoot.gardener.cloud/reconcile-block"
 
