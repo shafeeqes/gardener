@@ -297,6 +297,7 @@ func (b *Builder) Build(ctx context.Context, c client.Reader) (*Shoot, error) {
 		LiveMigrate:  v1beta1helper.ShootNeedsLiveMigrate(shoot.GetInfo()),
 		IsSourceSeed: v1beta1helper.IsSourceSeed(shoot.GetInfo(), b.seed.GetName()),
 		DNSMigrated:  metav1.HasAnnotation(shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationDNSMigrated),
+		VPNMigrated:  metav1.HasAnnotation(shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationVPNMigrated),
 	}
 
 	backupEntryName, err := gardenerutils.GenerateBackupEntryName(shootObject.Status.TechnicalID, shootObject.UID)

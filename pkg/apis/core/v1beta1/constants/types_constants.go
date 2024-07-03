@@ -31,8 +31,12 @@ const (
 	AnnotationDNSMigrated = "shoot.gardener.cloud/dns-migrated"
 	// AnnotationDNSRestored is an annotation on a Shoot resource that indicated whether the dns has been restored in destination seed.
 	AnnotationDNSRestored = "shoot.gardener.cloud/dns-restored"
+	// AnnotationVPNMigrated is an annotation on a Shoot resource that indicated whether the VPN has been migrated from source to destination seed.
+	AnnotationVPNMigrated = "shoot.gardener.cloud/VPN-migrated"
 
 	AnnotationReconcileBlock = "shoot.gardener.cloud/reconcile-block"
+
+	AnnotationLiveMigrated = "shoot.gardener.cloud/live-migrated"
 
 	// SecretManagerIdentityControllerManager is the identity for the secret manager used inside controller-manager.
 	SecretManagerIdentityControllerManager = "controller-manager"

@@ -37,7 +37,6 @@ import (
 	"github.com/gardener/gardener/pkg/component/networking/apiserverproxy"
 	"github.com/gardener/gardener/pkg/component/networking/coredns"
 	vpnseedserver "github.com/gardener/gardener/pkg/component/networking/vpn/seedserver"
-	vpnshoot "github.com/gardener/gardener/pkg/component/networking/vpn/shoot"
 	"github.com/gardener/gardener/pkg/component/nodemanagement/machinecontrollermanager"
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/alertmanager"
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus"
@@ -115,27 +114,28 @@ type Components struct {
 
 // ControlPlane contains references to K8S control plane components.
 type ControlPlane struct {
-	Alertmanager             alertmanager.Interface
-	BlackboxExporter         component.DeployWaiter
-	ClusterAutoscaler        clusterautoscaler.Interface
-	EtcdMain                 etcd.Interface
-	EtcdEvents               etcd.Interface
-	EtcdCopyBackupsTask      etcdcopybackupstask.Interface
-	EventLogger              component.Deployer
-	KubeAPIServerIngress     component.Deployer
-	KubeAPIServerService     component.DeployWaiter
-	KubeAPIServerSNI         component.DeployWaiter
-	KubeAPIServer            kubeapiserver.Interface
-	KubeScheduler            component.DeployWaiter
-	KubeControllerManager    kubecontrollermanager.Interface
-	KubeStateMetrics         component.DeployWaiter
-	MachineControllerManager machinecontrollermanager.Interface
-	Plutono                  plutono.Interface
-	Prometheus               prometheus.Interface
-	ResourceManager          resourcemanager.Interface
-	Vali                     component.Deployer
-	VerticalPodAutoscaler    vpa.Interface
-	VPNSeedServer            vpnseedserver.Interface
+	Alertmanager              alertmanager.Interface
+	BlackboxExporter          component.DeployWaiter
+	ClusterAutoscaler         clusterautoscaler.Interface
+	EtcdMain                  etcd.Interface
+	EtcdEvents                etcd.Interface
+	EtcdCopyBackupsTask       etcdcopybackupstask.Interface
+	EventLogger               component.Deployer
+	KubeAPIServerIngress      component.Deployer
+	KubeAPIServerService      component.DeployWaiter
+	KubeAPIServerSNI          component.DeployWaiter
+	KubeAPIServer             kubeapiserver.Interface
+	KubeScheduler             component.DeployWaiter
+	KubeControllerManager     kubecontrollermanager.Interface
+	KubeStateMetrics          component.DeployWaiter
+	MachineControllerManager  machinecontrollermanager.Interface
+	Plutono                   plutono.Interface
+	Prometheus                prometheus.Interface
+	ResourceManager           resourcemanager.Interface
+	Vali                      component.Deployer
+	VerticalPodAutoscaler     vpa.Interface
+	VPNSeedServer             vpnseedserver.Interface
+	VPNSeedServerForMigration vpnseedserver.Interface
 }
 
 // Extensions contains references to extension resources.
@@ -156,18 +156,19 @@ type Extensions struct {
 
 // SystemComponents contains references to system components.
 type SystemComponents struct {
-	APIServerProxy      apiserverproxy.Interface
-	BlackboxExporter    component.DeployWaiter
-	ClusterIdentity     clusteridentity.Interface
-	CoreDNS             coredns.Interface
-	KubeProxy           kubeproxy.Interface
-	MetricsServer       component.DeployWaiter
-	Namespaces          component.DeployWaiter
-	NodeLocalDNS        component.DeployWaiter
-	NodeProblemDetector component.DeployWaiter
-	NodeExporter        component.DeployWaiter
-	Resources           shootsystem.Interface
-	VPNShoot            vpnshoot.Interface
+	APIServerProxy       apiserverproxy.Interface
+	BlackboxExporter     component.DeployWaiter
+	ClusterIdentity      clusteridentity.Interface
+	CoreDNS              coredns.Interface
+	KubeProxy            kubeproxy.Interface
+	MetricsServer        component.DeployWaiter
+	Namespaces           component.DeployWaiter
+	NodeLocalDNS         component.DeployWaiter
+	NodeProblemDetector  component.DeployWaiter
+	NodeExporter         component.DeployWaiter
+	Resources            shootsystem.Interface
+	VPNShoot             component.DeployWaiter
+	VPNShootForMigration component.DeployWaiter
 }
 
 // Addons contains references for the addons.

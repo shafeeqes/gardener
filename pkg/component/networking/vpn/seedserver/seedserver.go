@@ -91,8 +91,6 @@ type Interface interface {
 	SetNodeNetworkCIDR(nodes *string)
 	// SetSeedNamespaceObjectUID sets UID for the namespace
 	SetSeedNamespaceObjectUID(namespaceUID types.UID)
-	// SetSuffix sets the suffix for deployment name.
-	SetSuffix(suffix string)
 
 	// GetValues returns the current configuration values of the deployer.
 	GetValues() Values
@@ -924,10 +922,6 @@ func (v *vpnSeedServer) SetSeedNamespaceObjectUID(namespaceUID types.UID) {
 
 func (v *vpnSeedServer) SetNodeNetworkCIDR(nodes *string) {
 	v.values.Network.NodeCIDR = ptr.Deref(nodes, "")
-}
-
-func (v *vpnSeedServer) SetSuffix(suffix string) {
-	v.values.Suffix = suffix
 }
 
 func (v *vpnSeedServer) indexedName(idx *int) string {

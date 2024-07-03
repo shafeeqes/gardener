@@ -15,7 +15,7 @@ import (
 )
 
 // DefaultVPNSeedServer returns a deployer for the vpn-seed-server.
-func (b *Botanist) DefaultVPNSeedServer() (vpnseedserver.Interface, error) {
+func (b *Botanist) DefaultVPNSeedServer(suffix string) (vpnseedserver.Interface, error) {
 	imageAPIServerProxy, err := imagevector.ImageVector().FindImage(imagevector.ImageNameApiserverProxy, imagevectorutils.RuntimeVersion(b.SeedVersion()), imagevectorutils.TargetVersion(b.ShootVersion()))
 	if err != nil {
 		return nil, err
@@ -40,6 +40,7 @@ func (b *Botanist) DefaultVPNSeedServer() (vpnseedserver.Interface, error) {
 		HighAvailabilityEnabled:              b.Shoot.VPNHighAvailabilityEnabled,
 		HighAvailabilityNumberOfSeedServers:  b.Shoot.VPNHighAvailabilityNumberOfSeedServers,
 		HighAvailabilityNumberOfShootClients: b.Shoot.VPNHighAvailabilityNumberOfShootClients,
+		Suffix:                               suffix,
 	}
 
 	if b.ShootUsesDNS() {
@@ -60,10 +61,17 @@ func (b *Botanist) DefaultVPNSeedServer() (vpnseedserver.Interface, error) {
 }
 
 // DeployVPNServer deploys the vpn-seed-server.
-func (b *Botanist) DeployVPNServer(ctx context.Context, suffix string) error {
+func (b *Botanist) DeployVPNServer(ctx context.Context) error {
 	b.Shoot.Components.ControlPlane.VPNSeedServer.SetNodeNetworkCIDR(b.Shoot.GetInfo().Spec.Networking.Nodes)
 	b.Shoot.Components.ControlPlane.VPNSeedServer.SetSeedNamespaceObjectUID(b.SeedNamespaceObject.UID)
-	b.Shoot.Components.ControlPlane.VPNSeedServer.SetSuffix(suffix)
 
 	return b.Shoot.Components.ControlPlane.VPNSeedServer.Deploy(ctx)
+}
+
+// DeployVPNServerForMigration deploys the vpn-seed-server for migration.
+func (b *Botanist) DeployVPNServerForMigration(ctx context.Context) error {
+	b.Shoot.Components.ControlPlane.VPNSeedServerForMigration.SetNodeNetworkCIDR(b.Shoot.GetInfo().Spec.Networking.Nodes)
+	b.Shoot.Components.ControlPlane.VPNSeedServerForMigration.SetSeedNamespaceObjectUID(b.SeedNamespaceObject.UID)
+
+	return b.Shoot.Components.ControlPlane.VPNSeedServerForMigration.Deploy(ctx)
 }

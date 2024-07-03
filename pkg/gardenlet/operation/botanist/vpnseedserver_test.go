@@ -86,7 +86,7 @@ var _ = Describe("VPNSeedServer", func() {
 			kubernetesClient.EXPECT().Client()
 			kubernetesClient.EXPECT().Version()
 
-			vpnSeedServer, err := botanist.DefaultVPNSeedServer()
+			vpnSeedServer, err := botanist.DefaultVPNSeedServer("")
 			Expect(vpnSeedServer).NotTo(BeNil())
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -101,7 +101,7 @@ var _ = Describe("VPNSeedServer", func() {
 					botanist.Shoot.VPNHighAvailabilityNumberOfSeedServers = 2
 				}
 
-				vpnSeedServer, err := botanist.DefaultVPNSeedServer()
+				vpnSeedServer, err := botanist.DefaultVPNSeedServer("")
 				Expect(vpnSeedServer).NotTo(BeNil())
 				Expect(vpnSeedServer.GetValues().Replicas).To(Equal(int32(expectedReplicas)))
 				Expect(err).NotTo(HaveOccurred())
@@ -166,12 +166,12 @@ var _ = Describe("VPNSeedServer", func() {
 
 		It("should set the secrets and SNI config and deploy", func() {
 			vpnSeedServer.EXPECT().Deploy(ctx)
-			Expect(botanist.DeployVPNServer(ctx, "")).To(Succeed())
+			Expect(botanist.DeployVPNServer(ctx)).To(Succeed())
 		})
 
 		It("should fail when the deploy function fails", func() {
 			vpnSeedServer.EXPECT().Deploy(ctx).Return(fakeErr)
-			Expect(botanist.DeployVPNServer(ctx, "")).To(Equal(fakeErr))
+			Expect(botanist.DeployVPNServer(ctx)).To(Equal(fakeErr))
 		})
 	})
 })

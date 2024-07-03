@@ -379,7 +379,7 @@ func (r *Reconciler) runReconcileShootFlow(ctx context.Context, o *operation.Ope
 		deployVPNSeedServer = g.Add(flow.Task{
 			Name: "Deploying vpn-seed-server",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return botanist.DeployVPNServer(ctx, "")
+				return botanist.DeployVPNServer(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless,
 			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, deployNamespace, waitUntilKubeAPIServerIsReady),

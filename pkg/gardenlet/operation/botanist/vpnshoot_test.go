@@ -59,7 +59,7 @@ var _ = Describe("VPNShoot", func() {
 		It("should successfully create a vpnShoot interface for ReversedVPN", func() {
 			kubernetesClient.EXPECT().Client()
 
-			vpnShoot, err := botanist.DefaultVPNShoot()
+			vpnShoot, err := botanist.DefaultVPNShoot("")
 			Expect(vpnShoot).NotTo(BeNil())
 			Expect(err).NotTo(HaveOccurred())
 		})

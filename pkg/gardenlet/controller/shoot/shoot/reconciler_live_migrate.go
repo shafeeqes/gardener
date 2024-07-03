@@ -258,17 +258,17 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitMigrateBeforeKubeAPIServer,
 			Dependencies: flow.NewTaskIDs(migrateExtensionsBeforeKubeAPIServer),
 		})
-		// persistShootState = g.Add(flow.Task{
-		// 	Name: "Persisting ShootState in garden cluster",
-		// 	Fn: func(ctx context.Context) error {
-		// 		return shootstate.Deploy(ctx, r.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), false)
-		// 	},
-		// 	Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
-		// })
+		persistShootStateAgain = g.Add(flow.Task{
+			Name: "Persisting ShootState in garden cluster again",
+			Fn: func(ctx context.Context) error {
+				return shootstate.Deploy(ctx, r.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), false)
+			},
+			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
+		})
 		deleteExtensionResources = g.Add(flow.Task{
 			Name:         "Deleting extension resources from the Shoot namespace",
 			Fn:           botanist.DestroyExtensionResourcesInParallel,
-			Dependencies: flow.NewTaskIDs(persistShootState),
+			Dependencies: flow.NewTaskIDs(persistShootStateAgain),
 		})
 		waitUntilExtensionResourcesDeleted = g.Add(flow.Task{
 			Name:         "Waiting until extension resources have been deleted",

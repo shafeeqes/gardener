@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -107,7 +108,8 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 	o.Shoot.Components.ControlPlane.EtcdCopyBackupsTask = b.DefaultEtcdCopyBackupsTask()
 
 	mainRoleName := v1beta1constants.ETCDRoleMain
-	if o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed {
+	if (o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed) ||
+		metav1.HasAnnotation(o.Shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationLiveMigrated) {
 		mainRoleName = v1beta1constants.ETCDRoleTarget
 	}
 	o.Shoot.Components.ControlPlane.EtcdMain, err = b.DefaultEtcd(ctx, mainRoleName, etcd.ClassImportant)
@@ -162,7 +164,11 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 		if err != nil {
 			return nil, err
 		}
-		o.Shoot.Components.ControlPlane.VPNSeedServer, err = b.DefaultVPNSeedServer()
+		o.Shoot.Components.ControlPlane.VPNSeedServer, err = b.DefaultVPNSeedServer("")
+		if err != nil {
+			return nil, err
+		}
+		o.Shoot.Components.ControlPlane.VPNSeedServerForMigration, err = b.DefaultVPNSeedServer("-temp")
 		if err != nil {
 			return nil, err
 		}
@@ -204,9 +210,15 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 		if err != nil {
 			return nil, err
 		}
-		o.Shoot.Components.SystemComponents.VPNShoot, err = b.DefaultVPNShoot()
+		o.Shoot.Components.SystemComponents.VPNShoot, err = b.DefaultVPNShoot("")
 		if err != nil {
 			return nil, err
+		}
+		if o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed {
+			o.Shoot.Components.SystemComponents.VPNShootForMigration, err = b.DefaultVPNShoot("-temp")
+			if err != nil {
+				return nil, err
+			}
 		}
 		o.Shoot.Components.SystemComponents.NodeProblemDetector, err = b.DefaultNodeProblemDetector()
 		if err != nil {

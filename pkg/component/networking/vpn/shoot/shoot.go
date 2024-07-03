@@ -64,14 +64,6 @@ const (
 	volumeMountPathDevNetTun = "/dev/net/tun"
 )
 
-// Interface contains functions for a vpn-shoot deployer.
-type Interface interface {
-	component.DeployWaiter
-
-	// SetSuffix sets the suffix for deployment name.
-	SetSuffix(suffix string)
-}
-
 // ReversedVPNValues contains the configuration values for the ReversedVPN.
 type ReversedVPNValues struct {
 	// Header is the header for the ReversedVPN.
@@ -112,7 +104,7 @@ func New(
 	namespace string,
 	secretsManager secretsmanager.Interface,
 	values Values,
-) Interface {
+) component.DeployWaiter {
 	return &vpnShoot{
 		client:         client,
 		namespace:      namespace,
@@ -337,10 +329,6 @@ func (v *vpnShoot) WaitCleanup(ctx context.Context) error {
 	defer cancel()
 
 	return managedresources.WaitUntilDeleted(timeoutCtx, v.client, v.namespace, managedResourceName+v.values.Suffix)
-}
-
-func (v *vpnShoot) SetSuffix(suffix string) {
-	v.values.Suffix = suffix
 }
 
 func (v *vpnShoot) emptyScrapeConfig() *monitoringv1alpha1.ScrapeConfig {
