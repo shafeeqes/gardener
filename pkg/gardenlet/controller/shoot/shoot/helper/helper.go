@@ -8,7 +8,10 @@ import (
 	"fmt"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
+	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	v1beta1helper "github.com/gardener/gardener/pkg/apis/core/v1beta1/helper"
 	"github.com/gardener/gardener/pkg/component/etcd/etcd"
 	"github.com/gardener/gardener/pkg/gardenlet/operation/shoot"
@@ -25,6 +28,11 @@ func ShouldPrepareShootForMigration(shoot *gardencorev1beta1.Shoot) bool {
 func ComputeOperationType(shoot *gardencorev1beta1.Shoot) gardencorev1beta1.LastOperationType {
 	if ShouldPrepareShootForMigration(shoot) {
 		return gardencorev1beta1.LastOperationTypeMigrate
+	}
+
+	isLiveMigrated := metav1.HasAnnotation(shoot.ObjectMeta, v1beta1constants.AnnotationLiveMigrated)
+	if isLiveMigrated {
+		return gardencorev1beta1.LastOperationTypeReconcile
 	}
 
 	lastOperation := shoot.Status.LastOperation

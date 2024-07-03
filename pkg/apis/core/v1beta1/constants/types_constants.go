@@ -34,6 +34,8 @@ const (
 	// AnnotationVPNMigrated is an annotation on a Shoot resource that indicated whether the VPN has been migrated from source to destination seed.
 	AnnotationVPNMigrated = "shoot.gardener.cloud/VPN-migrated"
 
+	AnnotationEtcdMemberRemoved = "shoot.gardener.cloud/etcd-member-removed"
+
 	AnnotationReconcileBlock = "shoot.gardener.cloud/reconcile-block"
 
 	AnnotationLiveMigrated = "shoot.gardener.cloud/live-migrated"

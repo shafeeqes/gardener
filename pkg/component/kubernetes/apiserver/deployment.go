@@ -178,6 +178,10 @@ func (k *kubeAPIServer) reconcileDeployment(
 			resourcesv1alpha1.HighAvailabilityConfigType:                        resourcesv1alpha1.HighAvailabilityConfigTypeServer,
 			v1beta1constants.LabelExtensionProviderMutatedByControlplaneWebhook: "true",
 		})
+		svcName := k.values.NamePrefix + etcdconstants.ServiceName(v1beta1constants.ETCDRoleMain)
+		if k.values.EtcdClientServiceName != "" {
+			svcName = k.values.EtcdClientServiceName
+		}
 		deployment.Spec = appsv1.DeploymentSpec{
 			MinReadySeconds:      30,
 			RevisionHistoryLimit: ptr.To[int32](2),
@@ -198,7 +202,7 @@ func (k *kubeAPIServer) reconcileDeployment(
 						v1beta1constants.LabelNetworkPolicyToPrivateNetworks:                                          v1beta1constants.LabelNetworkPolicyAllowed,
 						"networking.resources.gardener.cloud/to-" + v1beta1constants.LabelNetworkPolicyWebhookTargets: v1beta1constants.LabelNetworkPolicyAllowed,
 						"networking.resources.gardener.cloud/to-" + v1beta1constants.LabelNetworkPolicyExtensionsNamespaceAlias + "-" + v1beta1constants.LabelNetworkPolicyWebhookTargets: v1beta1constants.LabelNetworkPolicyAllowed,
-						gardenerutils.NetworkPolicyLabel(k.values.NamePrefix+etcdconstants.ServiceName(v1beta1constants.ETCDRoleMain), etcdconstants.PortEtcdClient):                      v1beta1constants.LabelNetworkPolicyAllowed,
+						gardenerutils.NetworkPolicyLabel(svcName, etcdconstants.PortEtcdClient):                                                                                           v1beta1constants.LabelNetworkPolicyAllowed,
 						gardenerutils.NetworkPolicyLabel(k.values.NamePrefix+etcdconstants.ServiceName(v1beta1constants.ETCDRoleEvents), etcdconstants.PortEtcdClient):                    v1beta1constants.LabelNetworkPolicyAllowed,
 					}),
 				},

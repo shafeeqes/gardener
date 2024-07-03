@@ -112,6 +112,7 @@ func (r *Reconciler) reconcileShoot(ctx context.Context, log logr.Logger, shoot 
 		operationType = helper.ComputeOperationType(shoot)
 		isRestoring   = operationType == gardencorev1beta1.LastOperationTypeRestore
 	)
+
 	log = log.WithValues("operation", strings.ToLower(string(operationType)))
 
 	if !controllerutil.ContainsFinalizer(shoot, gardencorev1beta1.GardenerName) {

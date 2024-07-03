@@ -189,12 +189,22 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		// 	Fn:           botanist.UpdateAdvertisedAddresses,
 		// 	Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerServiceIsReady),
 		// })
+		createEtcdBackupSecretInSeed = g.Add(flow.Task{
+			Name: "Copying ETCD backup secret in Seed",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.CreateEtcdBackupSecretInSeed(ctx, o.Logger, botanist.Shoot.SeedNamespace); err != nil {
+					return err
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(deployNamespace),
+		})
 		waitForSourceETCDReadyAnnotation = g.Add(flow.Task{
 			Name: "Waiting for the shoot.gardener.cloud/source-etcd-ready annotation",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationSourceEtcdIsReady)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol, createEtcdBackupSecretInSeed),
 		})
 		setShootState = g.Add(flow.Task{
 			Name: "Setting shoot state",
@@ -378,8 +388,13 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(deployExtensionResourcesBeforeKAPI, waitForSourceSecondStage),
 		})
 		deployKubeAPIServer = g.Add(flow.Task{
-			Name:         "Deploying Kubernetes API server",
-			Fn:           flow.TaskFn(botanist.DeployKubeAPIServer).RetryUntilTimeout(defaultInterval, deployKubeAPIServerTaskTimeout),
+			Name: "Deploying Kubernetes API server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed && !o.Shoot.MigrationConfig.VPNMigrated {
+					o.Shoot.Components.ControlPlane.KubeAPIServer.SetVPNSuffix("-temp")
+				}
+				return botanist.DeployKubeAPIServer(ctx)
+			}).RetryUntilTimeout(defaultInterval, deployKubeAPIServerTaskTimeout),
 			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, deployETCD, waitUntilEtcdReady, waitUntilKubeAPIServerServiceIsReady, waitUntilExtensionResourcesBeforeKAPIReady, waitForSourceSecondStage).InsertIf(!staticNodesCIDR, waitUntilInfrastructureReady),
 		})
 		waitUntilKubeAPIServerIsReady = g.Add(flow.Task{
@@ -455,6 +470,9 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		deployTempVPNSeedServer = g.Add(flow.Task{
 			Name: "Deploying temporary vpn-seed-server",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if o.Shoot.MigrationConfig.VPNMigrated {
+					return nil
+				}
 				return botanist.DeployVPNServerForMigration(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless, // also need to be skipped when old vpn is deployed
@@ -720,6 +738,9 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		deployTempVPNShoot = g.Add(flow.Task{
 			Name: "Deploying temporary vpn-shoot system component",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if o.Shoot.MigrationConfig.VPNMigrated {
+					return nil
+				}
 				return botanist.Shoot.Components.SystemComponents.VPNShootForMigration.Deploy(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled,
@@ -918,6 +939,9 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 		waitUntilTempTunnelConnectionExists = g.Add(flow.Task{
 			Name: "Waiting until the Kubernetes API server can connect to the Shoot workers through temp VPN",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if o.Shoot.MigrationConfig.VPNMigrated {
+					return nil
+				}
 				return botanist.WaitUntilTunnelConnectionExists(ctx, "-temp")
 			}),
 			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled || skipReadiness,
@@ -1083,15 +1107,31 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(deployVPNShoot),
 		})
 
+		deployKubeAPIServerAgain = g.Add(flow.Task{
+			Name: "Deploying Kubernetes API server again",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				o.Shoot.Components.ControlPlane.KubeAPIServer.SetVPNSuffix("")
+				return botanist.DeployKubeAPIServer(ctx)
+
+			}).RetryUntilTimeout(defaultInterval, deployKubeAPIServerTaskTimeout),
+			Dependencies: flow.NewTaskIDs(waitUntilTunnelConnectionExists),
+		})
 		destroyTemporaryVPNShoot = g.Add(flow.Task{
 			Name: "Destroying temporary vpn-shoot system component",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.SystemComponents.VPNShootForMigration.Destroy(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled,
-			Dependencies: flow.NewTaskIDs(waitUntilTunnelConnectionExists),
+			Dependencies: flow.NewTaskIDs(deployKubeAPIServerAgain),
 		})
-
+		destroyTempVPNSeedServer = g.Add(flow.Task{
+			Name: "Destroying temporary vpn-seed-server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.Shoot.Components.ControlPlane.VPNSeedServerForMigration.Destroy(ctx)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       o.Shoot.IsWorkerless, // also need to be skipped when old vpn is deployed
+			Dependencies: flow.NewTaskIDs(deployKubeAPIServerAgain),
+		})
 		// fourth stage is till here
 		annotationTargetFourthStageIsReady = g.Add(flow.Task{
 			Name: "Annotate shoot that fourth stage is ready",
@@ -1104,7 +1144,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 				}
 				return nil
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(destroyTemporaryVPNShoot),
+			Dependencies: flow.NewTaskIDs(destroyTemporaryVPNShoot, destroyTempVPNSeedServer),
 		})
 		waitSourceThirdStageIsReady = g.Add(flow.Task{
 			Name: "Waiting for the shoot.gardener.cloud/source-third-stage-ready annotation",
@@ -1231,12 +1271,26 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(deployKubeControllerManager, deployControlPlane),
 			// Dependencies: flow.NewTaskIDs(deployKubeControllerManager, deployControlPlane, deployControlPlaneExposure),
 		})
-		_ = g.Add(flow.Task{
-			Name: "block flow",
+		etcdMemberRemoved = g.Add(flow.Task{
+			Name: "wait for annotation etcd member removal",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return fmt.Errorf("you shall not pass")
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationEtcdMemberRemoved)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(annotationTargetFifthStageIsReady),
+		})
+		// fifth stage is till here
+		_ = g.Add(flow.Task{
+			Name: "complete migration",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationLiveMigrated, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(etcdMemberRemoved),
 		})
 	)
 

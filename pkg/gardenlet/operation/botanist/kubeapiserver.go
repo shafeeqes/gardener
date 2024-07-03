@@ -59,7 +59,8 @@ func (b *Botanist) DefaultKubeAPIServer(ctx context.Context) (kubeapiserver.Inte
 	}
 
 	var svcName string
-	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed {
+	if (b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed) ||
+		metav1.HasAnnotation(b.Shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationLiveMigrated) {
 		svcName = etcdconstants.ServiceName(v1beta1constants.ETCDRoleTarget)
 	}
 
@@ -261,11 +262,6 @@ func (b *Botanist) DeployKubeAPIServer(ctx context.Context) error {
 		return err
 	}
 
-	var vpnSuffix string
-	if b.Shoot.MigrationConfig.LiveMigrate && !b.Shoot.MigrationConfig.IsSourceSeed && !b.Shoot.MigrationConfig.VPNMigrated {
-		vpnSuffix = "-temp"
-	}
-
 	if err := shared.DeployKubeAPIServer(
 		ctx,
 		b.SeedClientSet.Client(),
@@ -281,7 +277,6 @@ func (b *Botanist) DeployKubeAPIServer(ctx context.Context) error {
 		b.Shoot.EncryptedResources,
 		v1beta1helper.GetShootETCDEncryptionKeyRotationPhase(b.Shoot.GetInfo().Status.Credentials),
 		b.Shoot.HibernationEnabled,
-		vpnSuffix,
 	); err != nil {
 		return err
 	}

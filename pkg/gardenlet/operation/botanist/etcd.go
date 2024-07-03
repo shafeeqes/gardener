@@ -135,7 +135,7 @@ func (b *Botanist) DeployEtcd(ctx context.Context) error {
 	if b.Shoot.MigrationConfig.LiveMigrate {
 		var (
 			peerURLs, clientURLs, initialCluster       []druidv1alpha1.MemberInfo
-			gardenSecret                               = getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace)
+			gardenSecret                               = getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace, "loadbalancer-ips")
 			role                                       = b.Shoot.Components.ControlPlane.EtcdMain.GetValues().Role
 			clientServiceDNSNames, peerServiceDNSNames []string
 			serviceEndpoint                            []byte
@@ -280,13 +280,15 @@ func (b *Botanist) scaleETCD(ctx context.Context, replicas int32) error {
 }
 
 func (b *Botanist) deployOrRestoreEtcd(ctx context.Context) error {
-	isRestoreRequired, err := b.isRestorationOfMultiNodeMainEtcdRequired(ctx)
-	if err != nil {
-		return err
-	}
+	if !b.Shoot.MigrationConfig.LiveMigrate {
+		isRestoreRequired, err := b.isRestorationOfMultiNodeMainEtcdRequired(ctx)
+		if err != nil {
+			return err
+		}
 
-	if isRestoreRequired {
-		return b.restoreMultiNodeEtcd(ctx)
+		if isRestoreRequired {
+			return b.restoreMultiNodeEtcd(ctx)
+		}
 	}
 
 	return flow.Parallel(

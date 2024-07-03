@@ -55,9 +55,10 @@ func (b *Botanist) CreateServicesAndNetpol(ctx context.Context, log logr.Logger,
 	}
 
 	for i := range 3 {
+		name := fmt.Sprintf("etcd-%s-%d", role, i)
 		svc := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      fmt.Sprintf("etcd-%s-%d", role, i),
+				Name:      name,
 				Namespace: namespace,
 			},
 		}
@@ -189,7 +190,7 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 		data[name] = []byte(svc.Status.LoadBalancer.Ingress[0].Hostname)
 	}
 
-	gardenSecret := getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace)
+	gardenSecret := getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace, "loadbalancer-ips")
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.GardenClient, gardenSecret, func() error {
 		gardenSecret.OwnerReferences = []metav1.OwnerReference{
 			*metav1.NewControllerRef(b.Shoot.GetInfo(), gardencorev1beta1.SchemeGroupVersion.WithKind("Shoot")),
@@ -202,10 +203,55 @@ func (b *Botanist) StoreLoadBalancerIPsOfETCDServices(ctx context.Context, log l
 	return err
 }
 
-func getGardenSecret(shootName, shootNamespace string) *corev1.Secret {
+func (b *Botanist) CopyEtcdBackupSecretInGarden(ctx context.Context, log logr.Logger, namespace string) error {
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "etcd-backup",
+			Namespace: namespace,
+		},
+	}
+
+	if err := b.SeedClientSet.Client().Get(ctx, types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}, secret); err != nil {
+		return err
+	}
+
+	gardenSecret := getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace, "etcd-backup")
+	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.GardenClient, gardenSecret, func() error {
+		gardenSecret.OwnerReferences = []metav1.OwnerReference{
+			*metav1.NewControllerRef(b.Shoot.GetInfo(), gardencorev1beta1.SchemeGroupVersion.WithKind("Shoot")),
+		}
+		gardenSecret.Type = corev1.SecretTypeOpaque
+		gardenSecret.Data = secret.Data
+		return nil
+	})
+
+	return err
+}
+
+func (b *Botanist) CreateEtcdBackupSecretInSeed(ctx context.Context, log logr.Logger, namespace string) error {
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "etcd-backup",
+			Namespace: namespace,
+		},
+	}
+
+	gardenSecret := getGardenSecret(b.Shoot.GetInfo().Name, b.Shoot.GetInfo().Namespace, "etcd-backup")
+	if err := b.GardenClient.Get(ctx, types.NamespacedName{Namespace: gardenSecret.Namespace, Name: gardenSecret.Name}, gardenSecret); err != nil {
+		return err
+	}
+	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.SeedClientSet.Client(), secret, func() error {
+		secret.Data = gardenSecret.Data
+		return nil
+	})
+
+	return err
+}
+
+func getGardenSecret(shootName, shootNamespace, secretName string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ComputeShootProjectResourceName(shootName, "loadbalancer-ips"),
+			Name:      gardenerutils.ComputeShootProjectResourceName(shootName, secretName),
 			Namespace: shootNamespace,
 		},
 	}

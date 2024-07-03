@@ -206,7 +206,6 @@ func DeployKubeAPIServer(
 	encryptedResources []string,
 	etcdEncryptionKeyRotationPhase gardencorev1beta1.CredentialsRotationPhase,
 	wantScaleDown bool,
-	vpnSuffix string,
 ) error {
 	var (
 		values         = kubeAPIServer.GetValues()
@@ -246,7 +245,6 @@ func DeployKubeAPIServer(
 	kubeAPIServer.SetServerCertificateConfig(serverCertificateConfig)
 	kubeAPIServer.SetServiceAccountConfig(serviceAccountConfig)
 	kubeAPIServer.SetSNIConfig(sniConfig)
-	kubeAPIServer.SetVPNSuffix(vpnSuffix)
 	kubeAPIServer.SetExternalHostname(externalHostname)
 	kubeAPIServer.SetExternalServer(externalServer)
 	kubeAPIServer.SetNodeNetworkCIDR(nodeNetworkCIDR)

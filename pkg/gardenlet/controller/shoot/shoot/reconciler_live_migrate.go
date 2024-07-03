@@ -6,7 +6,6 @@ package shoot
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -117,12 +116,22 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(deployNamespace),
 		})
+		copyEtcdBackupSecretInGarden = g.Add(flow.Task{
+			Name: "Copying ETCD backup secret in Garden",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := botanist.CopyEtcdBackupSecretInGarden(ctx, o.Logger, botanist.Shoot.SeedNamespace); err != nil {
+					return err
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(deployNamespace),
+		})
 		waitForLBAnnotation = g.Add(flow.Task{
 			Name: "Waiting for the shoot.gardener.cloud/target-load-balancer-ips-ready annotation",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationShootTargetLoadBalancerIPsReady)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
+			Dependencies: flow.NewTaskIDs(createServicesAndNetpol, copyEtcdBackupSecretInGarden),
 		})
 		storeLoadBalancerIPsOfETCDServices = g.Add(flow.Task{
 			Name: "Store LoadBalancer IP of ETCD services in Garden cluster",
@@ -141,8 +150,13 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(deployNamespace),
 		})
 		deployETCD = g.Add(flow.Task{
-			Name:         "Deploying main and events etcd",
-			Fn:           flow.TaskFn(botanist.DeployEtcd).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Name: "Deploying main and events etcd",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if metav1.HasAnnotation(o.Shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationEtcdMemberRemoved) {
+					return nil
+				}
+				return botanist.DeployEtcd(ctx)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       !cleanupShootResources && !etcdSnapshotRequired,
 			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, waitForLBAnnotation, storeLoadBalancerIPsOfETCDServices),
 		})
@@ -278,7 +292,8 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		deleteMachineResources = g.Add(flow.Task{
 			Name:         "Shallow-deleting machine resources from the Shoot namespace",
 			Fn:           botanist.ShallowDeleteMachineResources,
-			Dependencies: flow.NewTaskIDs(persistShootState),
+			Dependencies: flow.NewTaskIDs(persistShootStateAgain),
+			// Dependencies: flow.NewTaskIDs(persistShootState),
 		})
 		waitUntilMachineResourcesDeleted = g.Add(flow.Task{
 			Name: "Waiting until machine resources have been deleted",
@@ -575,12 +590,35 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		// 	Dependencies: flow.NewTaskIDs(deleteNamespace),
 		// })
 
-		_ = g.Add(flow.Task{
-			Name: "block flow",
+		etcdMemberRemoved = g.Add(flow.Task{
+			Name: "wait for annotation etcd member removal",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return fmt.Errorf("you shall not pass")
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationEtcdMemberRemoved)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(annotationSourceThirdStageIsReady),
+		})
+
+		destroyEtcd = g.Add(flow.Task{
+			Name:         "Destroying main and events etcd",
+			Fn:           flow.TaskFn(botanist.DestroyEtcd).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(syncPoint, etcdMemberRemoved),
+			// Dependencies: flow.NewTaskIDs(syncPoint, createETCDSnapshot, waitUntilBackupEntryInGardenMigrated),
+		})
+		waitUntilEtcdDeleted = g.Add(flow.Task{
+			Name:         "Waiting until main and event etcd have been destroyed",
+			Fn:           flow.TaskFn(botanist.WaitUntilEtcdsDeleted).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(destroyEtcd),
+		})
+		deleteNamespace = g.Add(flow.Task{
+			Name: "Deleting shoot namespace in Seed",
+			Fn:   flow.TaskFn(botanist.DeleteSeedNamespace).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			// Dependencies: flow.NewTaskIDs(syncPoint, waitUntilBackupEntryInGardenMigrated, deleteExtensionResources, destroyDNSRecords, waitForManagedResourcesDeletion, waitUntilEtcdDeleted),
+			Dependencies: flow.NewTaskIDs(waitUntilEtcdDeleted),
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Waiting until shoot namespace in Seed has been deleted",
+			Fn:           botanist.WaitUntilSeedNamespaceDeleted,
+			Dependencies: flow.NewTaskIDs(deleteNamespace),
 		})
 
 		f = g.Compile()
