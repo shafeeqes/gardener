@@ -188,6 +188,8 @@ func (r *Reconciler) migrateShoot(ctx context.Context, log logr.Logger, shoot *g
 				updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
 				return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)
 			}
+
+			return r.finalizeShootMigration(ctx, shoot, o)
 		} else {
 			if flowErr := r.runLiveRestoreShootFlow(ctx, o); flowErr != nil {
 				r.Recorder.Event(shoot, corev1.EventTypeWarning, gardencorev1beta1.EventMigrationPreparationFailed, flowErr.Description)
@@ -201,9 +203,10 @@ func (r *Reconciler) migrateShoot(ctx context.Context, log logr.Logger, shoot *g
 			updateErr := r.patchShootStatusOperationError(ctx, shoot, flowErr.Description, gardencorev1beta1.LastOperationTypeMigrate, flowErr.LastErrors...)
 			return reconcile.Result{}, errorsutils.WithSuppressed(errors.New(flowErr.Description), updateErr)
 		}
-	}
+		return r.finalizeShootMigration(ctx, shoot, o)
 
-	return r.finalizeShootMigration(ctx, shoot, o)
+	}
+	return reconcile.Result{}, nil
 }
 
 func (r *Reconciler) deleteShoot(ctx context.Context, log logr.Logger, shoot *gardencorev1beta1.Shoot) (reconcile.Result, error) {
