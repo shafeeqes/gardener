@@ -98,6 +98,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		wakeupRequired          = (o.Shoot.GetInfo().Status.IsHibernated || o.Shoot.HibernationEnabled) && cleanupShootResources
 		defaultTimeout          = 10 * time.Minute
 		defaultInterval         = 5 * time.Second
+		etcdMemberRemoved       = metav1.HasAnnotation(o.Shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationEtcdMemberRemoved)
 
 		g = flow.NewGraph("Shoot cluster preparation for migration")
 
@@ -114,6 +115,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 				}
 				return nil
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deployNamespace),
 		})
 		copyEtcdBackupSecretInGarden = g.Add(flow.Task{
@@ -124,6 +126,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 				}
 				return nil
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deployNamespace),
 		})
 		waitForLBAnnotation = g.Add(flow.Task{
@@ -132,6 +135,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationShootTargetLoadBalancerIPsReady)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(createServicesAndNetpol, copyEtcdBackupSecretInGarden),
+			SkipIf:       etcdMemberRemoved,
 		})
 		storeLoadBalancerIPsOfETCDServices = g.Add(flow.Task{
 			Name: "Store LoadBalancer IP of ETCD services in Garden cluster",
@@ -141,6 +145,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 				}
 				return nil
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
 		})
 		initializeSecretsManagement = g.Add(flow.Task{
@@ -152,24 +157,25 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		deployETCD = g.Add(flow.Task{
 			Name: "Deploying main and events etcd",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				if metav1.HasAnnotation(o.Shoot.GetInfo().ObjectMeta, v1beta1constants.AnnotationEtcdMemberRemoved) {
-					return nil
-				}
 				return botanist.DeployEtcd(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       !cleanupShootResources && !etcdSnapshotRequired,
+			SkipIf:       (!cleanupShootResources && !etcdSnapshotRequired) || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(initializeSecretsManagement, waitForLBAnnotation, storeLoadBalancerIPsOfETCDServices),
 		})
 		scaleUpETCD = g.Add(flow.Task{
-			Name:         "Scaling etcd up",
-			Fn:           flow.TaskFn(botanist.ScaleUpETCD).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       !wakeupRequired,
+			Name: "Scaling etcd up",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.ScaleUpETCD(ctx)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       !wakeupRequired || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deployETCD),
 		})
 		waitUntilEtcdReady = g.Add(flow.Task{
-			Name:         "Waiting until main and event etcd report readiness",
-			Fn:           botanist.WaitUntilEtcdsReady,
-			SkipIf:       !cleanupShootResources && !etcdSnapshotRequired,
+			Name: "Waiting until main and event etcd report readiness",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.WaitUntilEtcdsReady(ctx)
+			}),
+			SkipIf:       (!cleanupShootResources && !etcdSnapshotRequired) || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD),
 		})
 		persistShootState = g.Add(flow.Task{
@@ -190,6 +196,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 				}
 				return nil
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(storeLoadBalancerIPsOfETCDServices, persistShootState),
 		})
 		// till here everthing is done for source etcd.
@@ -198,12 +205,13 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationTargetEtcdIsReady)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(createServicesAndNetpol),
 		})
 		wakeUpKubeAPIServer = g.Add(flow.Task{
 			Name:         "Scaling Kubernetes API Server up and waiting until ready",
 			Fn:           botanist.WakeUpKubeAPIServer,
-			SkipIf:       !wakeupRequired,
+			SkipIf:       !wakeupRequired || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement, annotationSourceEtcdIsReady, waitTargetEtcdIsReady),
 		})
 		// Deploy gardener-resource-manager to re-run the bootstrap logic if needed (e.g. when the token is expired because of hibernation).
@@ -211,29 +219,31 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		deployGardenerResourceManager = g.Add(flow.Task{
 			Name:         "Deploying gardener-resource-manager",
 			Fn:           botanist.DeployGardenerResourceManager,
-			SkipIf:       !cleanupShootResources,
+			SkipIf:       !cleanupShootResources || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(wakeUpKubeAPIServer),
 		})
 		ensureResourceManagerScaledUp = g.Add(flow.Task{
 			Name:         "Ensuring that the gardener-resource-manager is scaled to 1",
 			Fn:           botanist.ScaleGardenerResourceManagerToOne,
-			SkipIf:       !cleanupShootResources,
+			SkipIf:       !cleanupShootResources || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deployGardenerResourceManager),
 		})
 		keepManagedResourcesObjectsInShoot = g.Add(flow.Task{
 			Name:         "Configuring Managed Resources objects to be kept in the Shoot",
 			Fn:           botanist.KeepObjectsForManagedResources,
-			SkipIf:       !cleanupShootResources,
+			SkipIf:       !cleanupShootResources || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(ensureResourceManagerScaledUp),
 		})
 		deleteManagedResources = g.Add(flow.Task{
 			Name:         "Deleting all Managed Resources from the Shoot's namespace",
 			Fn:           botanist.DeleteManagedResources,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(keepManagedResourcesObjectsInShoot, ensureResourceManagerScaledUp),
 		})
 		waitForManagedResourcesDeletion = g.Add(flow.Task{
 			Name:         "Waiting until ManagedResources are deleted",
 			Fn:           flow.TaskFn(botanist.WaitUntilManagedResourcesDeleted).Timeout(10 * time.Minute),
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteManagedResources),
 		})
 		deleteMachineControllerManager = g.Add(flow.Task{
@@ -241,7 +251,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.ControlPlane.MachineControllerManager.Destroy(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitForManagedResourcesDeletion),
 		})
 		waitUntilMachineControllerManagerDeleted = g.Add(flow.Task{
@@ -249,27 +259,31 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.ControlPlane.MachineControllerManager.WaitCleanup(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteMachineControllerManager),
 		})
 		migrateExtensionResources = g.Add(flow.Task{
 			Name:         "Migrating extension resources",
 			Fn:           botanist.MigrateExtensionResourcesInParallel,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilMachineControllerManagerDeleted),
 		})
 		waitUntilExtensionResourcesMigrated = g.Add(flow.Task{
 			Name:         "Waiting until extension resources have been migrated",
 			Fn:           botanist.WaitUntilExtensionResourcesMigrated,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(migrateExtensionResources),
 		})
 		migrateExtensionsBeforeKubeAPIServer = g.Add(flow.Task{
 			Name:         "Migrating extensions before kube-apiserver",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.MigrateBeforeKubeAPIServer,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitForManagedResourcesDeletion),
 		})
 		waitUntilExtensionsBeforeKubeAPIServerMigrated = g.Add(flow.Task{
 			Name:         "Waiting until extensions that should be handled before kube-apiserver have been migrated",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitMigrateBeforeKubeAPIServer,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(migrateExtensionsBeforeKubeAPIServer),
 		})
 		persistShootStateAgain = g.Add(flow.Task{
@@ -277,21 +291,25 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: func(ctx context.Context) error {
 				return shootstate.Deploy(ctx, r.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), false)
 			},
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
 		})
 		deleteExtensionResources = g.Add(flow.Task{
 			Name:         "Deleting extension resources from the Shoot namespace",
 			Fn:           botanist.DestroyExtensionResourcesInParallel,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(persistShootStateAgain),
 		})
 		waitUntilExtensionResourcesDeleted = g.Add(flow.Task{
 			Name:         "Waiting until extension resources have been deleted",
 			Fn:           botanist.WaitUntilExtensionResourcesDeleted,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteExtensionResources),
 		})
 		deleteMachineResources = g.Add(flow.Task{
 			Name:         "Shallow-deleting machine resources from the Shoot namespace",
 			Fn:           botanist.ShallowDeleteMachineResources,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(persistShootStateAgain),
 			// Dependencies: flow.NewTaskIDs(persistShootState),
 		})
@@ -300,26 +318,31 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: func(ctx context.Context) error {
 				return gardenerutils.WaitUntilMachineResourcesDeleted(ctx, botanist.Logger, botanist.SeedClientSet.Client(), botanist.Shoot.SeedNamespace)
 			},
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteMachineResources),
 		})
 		deleteExtensionsBeforeKubeAPIServer = g.Add(flow.Task{
 			Name:         "Deleting extensions before kube-apiserver",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.DestroyBeforeKubeAPIServer,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesDeleted, waitUntilExtensionsBeforeKubeAPIServerMigrated),
 		})
 		waitUntilExtensionsBeforeKubeAPIServerDeleted = g.Add(flow.Task{
 			Name:         "Waiting until extensions that should be handled before kube-apiserver have been deleted",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitCleanupBeforeKubeAPIServer,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteExtensionsBeforeKubeAPIServer),
 		})
 		deleteStaleExtensionResources = g.Add(flow.Task{
 			Name:         "Deleting stale extensions",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.DeleteStaleResources,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
 		})
 		waitUntilStaleExtensionResourcesDeleted = g.Add(flow.Task{
 			Name:         "Waiting until all stale extensions have been deleted",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitCleanupStaleResources,
+			SkipIf:       etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteStaleExtensionResources),
 		})
 		migrateControlPlane = g.Add(flow.Task{
@@ -327,7 +350,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.ControlPlane.Migrate(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesDeleted, waitUntilExtensionsBeforeKubeAPIServerDeleted, waitUntilStaleExtensionResourcesDeleted),
 		})
 		deleteControlPlane = g.Add(flow.Task{
@@ -335,7 +358,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.ControlPlane.Destroy(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(migrateControlPlane),
 		})
 		waitUntilControlPlaneDeleted = g.Add(flow.Task{
@@ -343,13 +366,13 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.ControlPlane.WaitCleanup(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteControlPlane),
 		})
 		waitUntilShootManagedResourcesDeleted = g.Add(flow.Task{
 			Name:         "Waiting until shoot managed resources have been deleted",
 			Fn:           flow.TaskFn(botanist.WaitUntilShootManagedResourcesDeleted).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       !cleanupShootResources,
+			SkipIf:       !cleanupShootResources || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilControlPlaneDeleted),
 		})
 
@@ -394,7 +417,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.Infrastructure.Migrate(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilMachineResourcesDeleted, waitUntilShootManagedResourcesDeleted),
 			// Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerDeleted),
 		})
@@ -403,7 +426,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.Infrastructure.WaitMigrate(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(migrateInfrastructure),
 		})
 		deleteInfrastructure = g.Add(flow.Task{
@@ -411,7 +434,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.Infrastructure.Destroy(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(waitUntilInfrastructureMigrated),
 		})
 		waitUntilInfrastructureDeleted = g.Add(flow.Task{
@@ -419,7 +442,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.Shoot.Components.Extensions.Infrastructure.WaitCleanup(ctx)
 			}),
-			SkipIf:       o.Shoot.IsWorkerless,
+			SkipIf:       o.Shoot.IsWorkerless || etcdMemberRemoved,
 			Dependencies: flow.NewTaskIDs(deleteInfrastructure),
 		})
 		// second stage is till here
@@ -553,22 +576,24 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(syncPointKapiDeleted),
 		})
-		// createETCDSnapshot = g.Add(flow.Task{
-		// 	Name:         "Creating ETCD Snapshot",
-		// 	Fn:           botanist.SnapshotEtcd,
-		// 	SkipIf:       !etcdSnapshotRequired,
-		// 	Dependencies: flow.NewTaskIDs(syncPoint, waitUntilKubeAPIServerDeleted),
-		// })
-		// migrateBackupEntryInGarden = g.Add(flow.Task{
-		// 	Name:         "Migrating BackupEntry to new seed",
-		// 	Fn:           botanist.Shoot.Components.BackupEntry.Migrate,
-		// 	Dependencies: flow.NewTaskIDs(syncPoint, createETCDSnapshot),
-		// })
-		// waitUntilBackupEntryInGardenMigrated = g.Add(flow.Task{
-		// 	Name:         "Waiting for BackupEntry to be migrated to new seed",
-		// 	Fn:           botanist.Shoot.Components.BackupEntry.WaitMigrate,
-		// 	Dependencies: flow.NewTaskIDs(migrateBackupEntryInGarden),
-		// })
+		createETCDSnapshot = g.Add(flow.Task{
+			Name:         "Creating ETCD Snapshot",
+			Fn:           botanist.SnapshotEtcd,
+			SkipIf:       !etcdSnapshotRequired || etcdMemberRemoved,
+			Dependencies: flow.NewTaskIDs(syncPoint, waitUntilKubeAPIServerDeleted),
+		})
+		migrateBackupEntryInGarden = g.Add(flow.Task{
+			Name:         "Migrating BackupEntry to new seed",
+			Fn:           botanist.Shoot.Components.BackupEntry.Migrate,
+			SkipIf:       etcdMemberRemoved,
+			Dependencies: flow.NewTaskIDs(syncPoint, createETCDSnapshot),
+		})
+		waitUntilBackupEntryInGardenMigrated = g.Add(flow.Task{
+			Name:         "Waiting for BackupEntry to be migrated to new seed",
+			Fn:           botanist.Shoot.Components.BackupEntry.WaitMigrate,
+			SkipIf:       etcdMemberRemoved,
+			Dependencies: flow.NewTaskIDs(migrateBackupEntryInGarden),
+		})
 		// destroyEtcd = g.Add(flow.Task{
 		// 	Name:         "Destroying main and events etcd",
 		// 	Fn:           flow.TaskFn(botanist.DestroyEtcd).RetryUntilTimeout(defaultInterval, defaultTimeout),
@@ -590,18 +615,18 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		// 	Dependencies: flow.NewTaskIDs(deleteNamespace),
 		// })
 
-		etcdMemberRemoved = g.Add(flow.Task{
+		etcdMemberRemovedTask = g.Add(flow.Task{
 			Name: "wait for annotation etcd member removal",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationEtcdMemberRemoved)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(annotationSourceThirdStageIsReady),
+			Dependencies: flow.NewTaskIDs(annotationSourceThirdStageIsReady, waitUntilBackupEntryInGardenMigrated),
 		})
 
 		destroyEtcd = g.Add(flow.Task{
 			Name:         "Destroying main and events etcd",
 			Fn:           flow.TaskFn(botanist.DestroyEtcd).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(syncPoint, etcdMemberRemoved),
+			Dependencies: flow.NewTaskIDs(syncPoint, etcdMemberRemovedTask),
 			// Dependencies: flow.NewTaskIDs(syncPoint, createETCDSnapshot, waitUntilBackupEntryInGardenMigrated),
 		})
 		waitUntilEtcdDeleted = g.Add(flow.Task{
