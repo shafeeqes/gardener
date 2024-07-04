@@ -31,6 +31,8 @@ const (
 	AnnotationDNSMigrated = "shoot.gardener.cloud/dns-migrated"
 	// AnnotationDNSRestored is an annotation on a Shoot resource that indicated whether the dns has been restored in destination seed.
 	AnnotationDNSRestored = "shoot.gardener.cloud/dns-restored"
+	// AnnotationSourceVPNDestroyed is an annotation on a Shoot resource that indicated whether the VPN has been destroyed in source seed.
+	AnnotationSourceVPNDestroyed = "shoot.gardener.cloud/source-VPN-destroyed"
 	// AnnotationVPNMigrated is an annotation on a Shoot resource that indicated whether the VPN has been migrated from source to destination seed.
 	AnnotationVPNMigrated = "shoot.gardener.cloud/VPN-migrated"
 

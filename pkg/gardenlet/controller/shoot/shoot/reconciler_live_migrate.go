@@ -509,12 +509,33 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(annotationDNSMigrated),
 		})
+		destroyVPNSeedServer = g.Add(flow.Task{
+			Name: "Destroying vpn-seed-server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return botanist.Shoot.Components.ControlPlane.VPNSeedServer.Destroy(ctx)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       o.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(waitTargetDNSRestored),
+		})
+		annotationVPNSeedServerDestroyed = g.Add(flow.Task{
+			Name: "Annotate vpn-seed-server has been destroyed",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
+					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationSourceVPNDestroyed, "true")
+					return nil
+				}); err != nil {
+					return nil
+				}
+				return nil
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(destroyVPNSeedServer),
+		})
 		waitTargetFourthStageIsReady = g.Add(flow.Task{
 			Name: "Waiting for the shoot.gardener.cloud/target-fourth-stage-ready annotation",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationTargetFourthStageIsReady)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(waitTargetDNSRestored),
+			Dependencies: flow.NewTaskIDs(annotationVPNSeedServerDestroyed, waitTargetDNSRestored),
 		})
 		destroyDNSRecords = g.Add(flow.Task{
 			Name:         "Deleting DNSRecords from the Shoot namespace",

@@ -392,7 +392,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Name: "Deploying Kubernetes API server",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				if o.Shoot.MigrationConfig.LiveMigrate && !o.Shoot.MigrationConfig.IsSourceSeed && !o.Shoot.MigrationConfig.VPNMigrated {
-					o.Shoot.Components.ControlPlane.KubeAPIServer.SetVPNSuffix("-temp")
+					botanist.Shoot.Components.ControlPlane.KubeAPIServer.SetVPNSuffix("-temp")
 				}
 				return botanist.DeployKubeAPIServer(ctx)
 			}).RetryUntilTimeout(defaultInterval, deployKubeAPIServerTaskTimeout),
@@ -1072,20 +1072,26 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(deployInternalDomainDNSRecord, deployExternalDomainDNSRecord, deployIngressDomainDNSRecord),
 		})
-
+		waitSourceVPNDestroyed = g.Add(flow.Task{
+			Name: "Waiting for the shoot.gardener.cloud/source-VPN-destroyed annotation",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationSourceVPNDestroyed)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(annotationDNSRestored),
+		})
 		deployVPNSeedServer = g.Add(flow.Task{
 			Name: "Deploying vpn-seed-server",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return botanist.DeployVPNServer(ctx)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless,
-			Dependencies: flow.NewTaskIDs(annotationDNSRestored),
+			Dependencies: flow.NewTaskIDs(annotationDNSRestored, waitSourceVPNDestroyed),
 		})
 		deployVPNShoot = g.Add(flow.Task{
 			Name:         "Deploying vpn-shoot system component",
 			Fn:           flow.TaskFn(botanist.Shoot.Components.SystemComponents.VPNShoot.Deploy).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled,
-			Dependencies: flow.NewTaskIDs(deployVPNSeedServer),
+			Dependencies: flow.NewTaskIDs(deployVPNSeedServer, waitSourceVPNDestroyed),
 		})
 		waitUntilTunnelConnectionExists = g.Add(flow.Task{
 			Name: "Waiting until the Kubernetes API server can connect to the Shoot workers",
@@ -1105,13 +1111,13 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 				return nil
 			}),
 			SkipIf:       o.Shoot.IsWorkerless || o.Shoot.HibernationEnabled || skipReadiness,
-			Dependencies: flow.NewTaskIDs(deployVPNShoot),
+			Dependencies: flow.NewTaskIDs(deployVPNShoot, waitSourceVPNDestroyed),
 		})
 
 		deployKubeAPIServerAgain = g.Add(flow.Task{
 			Name: "Deploying Kubernetes API server again",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
-				o.Shoot.Components.ControlPlane.KubeAPIServer.SetVPNSuffix("")
+				botanist.Shoot.Components.ControlPlane.KubeAPIServer.SetVPNSuffix("")
 				return botanist.DeployKubeAPIServer(ctx)
 
 			}).RetryUntilTimeout(defaultInterval, deployKubeAPIServerTaskTimeout),
