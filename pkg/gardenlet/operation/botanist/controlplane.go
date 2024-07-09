@@ -30,7 +30,7 @@ import (
 func (b *Botanist) determineControllerReplicas(ctx context.Context, deploymentName string, defaultReplicas int32, controlledByDependencyWatchdog bool) (int32, error) {
 	isCreateOrRestoreOperation := b.Shoot.GetInfo().Status.LastOperation != nil &&
 		(b.Shoot.GetInfo().Status.LastOperation.Type == gardencorev1beta1.LastOperationTypeCreate ||
-			b.Shoot.GetInfo().Status.LastOperation.Type == gardencorev1beta1.LastOperationTypeRestore)
+			b.Shoot.GetInfo().Status.LastOperation.Type == gardencorev1beta1.LastOperationTypeRestore) || b.Shoot.MigrationConfig.LiveMigrate
 
 	if (isCreateOrRestoreOperation && b.Shoot.HibernationEnabled) ||
 		(!isCreateOrRestoreOperation && b.Shoot.HibernationEnabled && b.Shoot.GetInfo().Status.IsHibernated) {

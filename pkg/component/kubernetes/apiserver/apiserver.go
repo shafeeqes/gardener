@@ -561,9 +561,7 @@ func (k *kubeAPIServer) SetSNIConfig(config SNIConfig) {
 }
 
 func (k *kubeAPIServer) SetVPNSuffix(suffix string) {
-	if suffix != "" {
-		k.values.VPN.Suffix = suffix
-	}
+	k.values.VPN.Suffix = suffix
 }
 
 func (k *kubeAPIServer) prometheusAccessSecretName() string {

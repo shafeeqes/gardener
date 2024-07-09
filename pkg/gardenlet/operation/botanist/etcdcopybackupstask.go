@@ -75,10 +75,14 @@ func (b *Botanist) DeployEtcdCopyBackupsTask(ctx context.Context) error {
 		Prefix:    fmt.Sprintf("%s/etcd-%s", b.Shoot.BackupEntryName, v1beta1constants.ETCDRoleMain),
 		Container: &sourceContainer,
 	})
+	etcdRole := v1beta1constants.ETCDRoleMain
+	if b.Shoot.MigrationConfig.LiveMigrate {
+		etcdRole = v1beta1constants.ETCDRoleTarget
+	}
 	b.Shoot.Components.ControlPlane.EtcdCopyBackupsTask.SetTargetStore(druidv1alpha1.StoreSpec{
 		Provider:  &provider,
 		SecretRef: &corev1.SecretReference{Name: secret.Name},
-		Prefix:    fmt.Sprintf("%s/etcd-%s", b.Shoot.BackupEntryName, v1beta1constants.ETCDRoleMain),
+		Prefix:    fmt.Sprintf("%s/etcd-%s", b.Shoot.BackupEntryName, etcdRole),
 		Container: &container,
 	})
 

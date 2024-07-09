@@ -25,18 +25,17 @@ const (
 	AnnotationTargetThirdStageIsReady = "shoot.gardener.cloud/target-third-stage-ready"
 	// AnnotatioTargetFourthStageIsReady is an annotation on a Shoot resource that indicates whether the target fourth stage is ready.
 	AnnotationTargetFourthStageIsReady = "shoot.gardener.cloud/target-fourth-stage-ready"
-	// AnnotatioTargetFifthStageIsReady is an annotation on a Shoot resource that indicates whether the target fourth stage is ready.
-	AnnotationTargetFifthStageIsReady = "shoot.gardener.cloud/target-fifth-stage-ready"
+
 	// AnnotationDNSMigrated is an annotation on a Shoot resource that indicated whether the dns has been migrated from source to destination seed.
 	AnnotationDNSMigrated = "shoot.gardener.cloud/dns-migrated"
 	// AnnotationDNSRestored is an annotation on a Shoot resource that indicated whether the dns has been restored in destination seed.
 	AnnotationDNSRestored = "shoot.gardener.cloud/dns-restored"
 	// AnnotationSourceVPNDestroyed is an annotation on a Shoot resource that indicated whether the VPN has been destroyed in source seed.
-	AnnotationSourceVPNDestroyed = "shoot.gardener.cloud/source-VPN-destroyed"
+	AnnotationSourceVPNDestroyed = "shoot.gardener.cloud/source-vpn-destroyed"
 	// AnnotationVPNMigrated is an annotation on a Shoot resource that indicated whether the VPN has been migrated from source to destination seed.
 	AnnotationVPNMigrated = "shoot.gardener.cloud/VPN-migrated"
 
-	AnnotationBackupEntryMigrated = "shoot.gardener.cloud/BackupEntry-migrated"
+	AnnotationBackupEntryMigrated = "shoot.gardener.cloud/backupentry-migrated"
 
 	AnnotationEtcdMemberRemoved = "shoot.gardener.cloud/etcd-member-removed"
 

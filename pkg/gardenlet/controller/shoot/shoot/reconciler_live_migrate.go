@@ -597,17 +597,18 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(syncPointKapiDeleted),
 		})
-		createETCDSnapshot = g.Add(flow.Task{
-			Name:         "Creating ETCD Snapshot",
-			Fn:           botanist.SnapshotEtcd,
-			SkipIf:       !etcdSnapshotRequired || etcdMemberRemoved,
-			Dependencies: flow.NewTaskIDs(syncPoint, waitUntilKubeAPIServerDeleted),
-		})
+		// createETCDSnapshot = g.Add(flow.Task{
+		// 	Name:         "Creating ETCD Snapshot",
+		// 	Fn:           botanist.SnapshotEtcd,
+		// 	SkipIf:       !etcdSnapshotRequired || etcdMemberRemoved,
+		// 	Dependencies: flow.NewTaskIDs(syncPoint, waitUntilKubeAPIServerDeleted),
+		// })
 		migrateBackupEntryInGarden = g.Add(flow.Task{
 			Name:         "Migrating BackupEntry to new seed",
 			Fn:           botanist.Shoot.Components.BackupEntry.Migrate,
 			SkipIf:       etcdMemberRemoved,
-			Dependencies: flow.NewTaskIDs(syncPoint, createETCDSnapshot),
+			Dependencies: flow.NewTaskIDs(syncPoint, annotationSourceThirdStageIsReady),
+			// Dependencies: flow.NewTaskIDs(syncPoint, createETCDSnapshot),
 		})
 		waitUntilBackupEntryInGardenMigrated = g.Add(flow.Task{
 			Name:         "Waiting for BackupEntry to be migrated to new seed",

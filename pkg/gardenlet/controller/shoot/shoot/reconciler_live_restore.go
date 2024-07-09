@@ -78,7 +78,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 	}
 
 	const (
-		defaultTimeout  = 30 * time.Second
+		defaultTimeout  = 10 * time.Minute
 		defaultInterval = 5 * time.Second
 	)
 
@@ -1183,20 +1183,6 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			SkipIf:       skipReadiness,
 			Dependencies: flow.NewTaskIDs(deployExtensionResourcesAfterKAPI),
 		})
-		// fifth stage is till here
-		annotationTargetFifthStageIsReady = g.Add(flow.Task{
-			Name: "Annotate shoot that fifth stage is ready",
-			Fn: flow.TaskFn(func(ctx context.Context) error {
-				if err := o.Shoot.UpdateInfo(ctx, o.GardenClient, false, func(shoot *gardencorev1beta1.Shoot) error {
-					metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationTargetFifthStageIsReady, "true")
-					return nil
-				}); err != nil {
-					return nil
-				}
-				return nil
-			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesAfterKAPIReady),
-		})
 
 		// hibernateControlPlane = g.Add(flow.Task{
 		// 	Name:         "Hibernating control plane",
@@ -1296,7 +1282,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationBackupEntryMigrated)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(annotationTargetFifthStageIsReady),
+			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesAfterKAPIReady),
 		})
 
 		deploySourceBackupEntry = g.Add(flow.Task{
@@ -1365,7 +1351,7 @@ func (r *Reconciler) runLiveRestoreShootFlow(ctx context.Context, o *operation.O
 			Fn: flow.TaskFn(func(ctx context.Context) error {
 				return o.WaitForShootAnnotation(ctx, v1beta1constants.AnnotationEtcdMemberRemoved)
 			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			Dependencies: flow.NewTaskIDs(annotationTargetFifthStageIsReady),
+			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesAfterKAPIReady),
 		})
 
 		// fifth stage is till here
