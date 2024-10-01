@@ -48,8 +48,10 @@ func (r *Reconciler) NodePredicate() predicate.Predicate {
 			return e.Object.GetAnnotations()[annotationRestartSystemdServices] != ""
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			return e.ObjectOld.GetAnnotations()[annotationRestartSystemdServices] != e.ObjectNew.GetAnnotations()[annotationRestartSystemdServices] &&
-				e.ObjectNew.GetAnnotations()[annotationRestartSystemdServices] != ""
+			return (e.ObjectOld.GetAnnotations()[annotationRestartSystemdServices] != e.ObjectNew.GetAnnotations()[annotationRestartSystemdServices] &&
+				e.ObjectNew.GetAnnotations()[annotationRestartSystemdServices] != "") ||
+				(e.ObjectOld.GetAnnotations()[annotationUpdateOSVersion] != e.ObjectNew.GetAnnotations()[annotationUpdateOSVersion] &&
+					e.ObjectNew.GetAnnotations()[annotationUpdateOSVersion] != "")
 		},
 		DeleteFunc:  func(_ event.DeleteEvent) bool { return false },
 		GenericFunc: func(_ event.GenericEvent) bool { return false },

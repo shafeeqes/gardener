@@ -65,12 +65,6 @@ config:
       labels:
         base: kind
     spec:
-      backup:
-        provider: local
-        region: local
-        secretRef:
-          name: backup-local
-          namespace: garden
       provider:
         type: local
         region: local

@@ -19,10 +19,12 @@ import (
 
 	"github.com/gardener/gardener/pkg/controllerutils"
 	nodeagentv1alpha1 "github.com/gardener/gardener/pkg/nodeagent/apis/config/v1alpha1"
+	"github.com/gardener/gardener/pkg/nodeagent/controller/operatingsystemconfig"
 	"github.com/gardener/gardener/pkg/nodeagent/dbus"
 )
 
 const annotationRestartSystemdServices = "worker.gardener.cloud/restart-systemd-services"
+const annotationUpdateOSVersion = "worker.gardener.cloud/update-os-version"
 
 // Reconciler checks for node annotation changes and restarts the specified systemd services.
 type Reconciler struct {
@@ -38,6 +40,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	ctx, cancel := controllerutils.GetMainReconciliationContext(ctx, controllerutils.DefaultReconciliationTimeout)
 	defer cancel()
 
+	log.Info("Inside the node reconciler")
+
 	node := &corev1.Node{}
 	if err := r.Client.Get(ctx, request.NamespacedName, node); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -48,8 +52,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, fmt.Errorf("error retrieving object from store: %w", err)
 	}
 
-	services, ok := node.Annotations[annotationRestartSystemdServices]
-	if !ok {
+	services, ok1 := node.Annotations[annotationRestartSystemdServices]
+	_, ok2 := node.Annotations[annotationUpdateOSVersion]
+	if !ok1 && !ok2 {
 		return reconcile.Result{}, nil
 	}
 
@@ -78,6 +83,28 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	if restartGardenerNodeAgent {
 		r.restartService(ctx, log, node, nodeagentv1alpha1.UnitName)
+	}
+
+	if version, ok := node.Annotations[annotationUpdateOSVersion]; ok {
+		log.Info("Removing annotation from node", "annotation", annotationUpdateOSVersion)
+		patch := client.MergeFrom(node.DeepCopy())
+		delete(node.Annotations, annotationUpdateOSVersion)
+		if err := r.Client.Patch(ctx, node, patch); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		output, err := operatingsystemconfig.Exec(ctx, "sudo", "gardenlinux-update", version)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		log.Info("Output of gardenlinux-update", "output", output)
+
+		output, err = operatingsystemconfig.Exec(ctx, "sudo", "reboot")
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		log.Info("Output of reboot", "output", output)
 	}
 
 	return reconcile.Result{}, nil
