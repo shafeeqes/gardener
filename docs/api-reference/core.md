@@ -7864,6 +7864,14 @@ This overrides any other common minimum size configuration from <code>spec.volum
 </tr>
 </tbody>
 </table>
+<h3 id="core.gardener.cloud/v1beta1.MachineUpdateStrategy">MachineUpdateStrategy
+(<code>string</code> alias)</p></h3>
+<p>
+(<em>Appears on:</em>
+<a href="#core.gardener.cloud/v1beta1.Worker">Worker</a>)
+</p>
+<p>
+</p>
 <h3 id="core.gardener.cloud/v1beta1.Maintenance">Maintenance
 </h3>
 <p>
@@ -13495,6 +13503,20 @@ ClusterAutoscalerOptions
 <td>
 <em>(Optional)</em>
 <p>ClusterAutoscaler contains the cluster autoscaler configurations for the worker pool.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>updateStrategy</code></br>
+<em>
+<a href="#core.gardener.cloud/v1beta1.MachineUpdateStrategy">
+MachineUpdateStrategy
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>UpdateStrategy contains the update strategy for the worker pool.</p>
 </td>
 </tr>
 </tbody>

@@ -3377,6 +3377,10 @@ message Worker {
   // ClusterAutoscaler contains the cluster autoscaler configurations for the worker pool.
   // +optional
   optional ClusterAutoscalerOptions clusterAutoscaler = 21;
+
+  // UpdateStrategy contains the update strategy for the worker pool.
+  // +optional
+  optional string updateStrategy = 22;
 }
 
 // WorkerKubernetes contains configuration for Kubernetes components related to this worker pool.
