@@ -23,6 +23,7 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	extensionsworkercontroller "github.com/gardener/gardener/extensions/pkg/controller/worker"
 	extensionsworkerhelper "github.com/gardener/gardener/extensions/pkg/controller/worker/helper"
+	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	v1beta1helper "github.com/gardener/gardener/pkg/apis/core/v1beta1/helper"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
@@ -236,6 +237,26 @@ func deployMachineDeployments(
 			},
 		}
 
+		machineDeploymentStrategy := machinev1alpha1.MachineDeploymentStrategy{
+			Type: machinev1alpha1.RollingUpdateMachineDeploymentStrategyType,
+			RollingUpdate: &machinev1alpha1.RollingUpdateMachineDeployment{
+				MaxSurge:       &deployment.MaxSurge,
+				MaxUnavailable: &deployment.MaxUnavailable,
+			},
+		}
+
+		if deployment.UpdateStrategy == v1beta1.InPlaceUpdate || deployment.UpdateStrategy == v1beta1.OnLabelUpdate {
+			machineDeploymentStrategy = machinev1alpha1.MachineDeploymentStrategy{
+				Type: machinev1alpha1.InPlaceUpdateMachineDeploymentStrategyType,
+				InPlaceUpdate: &machinev1alpha1.InPlaceUpdateMachineDeployment{
+					MaxUnavailable: deployment.MaxUnavailable,
+				},
+			}
+		}
+		if deployment.UpdateStrategy == v1beta1.OnLabelUpdate {
+			machineDeploymentStrategy.InPlaceUpdate.OnLabel = true
+		}
+
 		if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, cl, machineDeployment, func() error {
 			for k, v := range deployment.ClusterAutoscalerAnnotations {
 				metav1.SetMetaDataAnnotation(&machineDeployment.ObjectMeta, k, v)
@@ -243,13 +264,7 @@ func deployMachineDeployments(
 			machineDeployment.Spec = machinev1alpha1.MachineDeploymentSpec{
 				Replicas:        replicas,
 				MinReadySeconds: 500,
-				Strategy: machinev1alpha1.MachineDeploymentStrategy{
-					Type: machinev1alpha1.RollingUpdateMachineDeploymentStrategyType,
-					RollingUpdate: &machinev1alpha1.RollingUpdateMachineDeployment{
-						MaxSurge:       &deployment.MaxSurge,
-						MaxUnavailable: &deployment.MaxUnavailable,
-					},
-				},
+				Strategy:        machineDeploymentStrategy,
 				Selector: &metav1.LabelSelector{
 					MatchLabels: labels,
 				},

@@ -19,6 +19,7 @@ import (
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	"github.com/gardener/gardener/extensions/pkg/util"
+	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1/helper"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 	"github.com/gardener/gardener/pkg/utils"
@@ -43,6 +44,7 @@ type MachineDeployment struct {
 	State                        *shootstate.MachineDeploymentState
 	MachineConfiguration         *machinev1alpha1.MachineConfiguration
 	ClusterAutoscalerAnnotations map[string]string
+	UpdateStrategy               gardencorev1beta1.MachineUpdateStrategy
 }
 
 // MachineDeployments is a list of machine deployments.

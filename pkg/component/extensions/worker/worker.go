@@ -224,6 +224,11 @@ func (w *worker) deploy(ctx context.Context, operation string) (extensionsv1alph
 			}
 		}
 
+		updateStrategy := gardencorev1beta1.RollingUpdate
+		if workerPool.UpdateStrategy != nil {
+			updateStrategy = *workerPool.UpdateStrategy
+		}
+
 		pools = append(pools, extensionsv1alpha1.WorkerPool{
 			Name:           workerPool.Name,
 			Minimum:        workerPool.Minimum,
@@ -253,6 +258,7 @@ func (w *worker) deploy(ctx context.Context, operation string) (extensionsv1alph
 			MachineControllerManagerSettings: workerPool.MachineControllerManagerSettings,
 			Architecture:                     workerPool.Machine.Architecture,
 			ClusterAutoscaler:                autoscalerOptions,
+			UpdateStrategy:                   ptr.To(updateStrategy),
 		})
 	}
 
