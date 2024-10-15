@@ -135,8 +135,8 @@ images:
   repository: registry.k8s.io/kube-proxy
 - name: machine-controller-manager
   sourceRepository: github.com/gardener/machine-controller-manager
-  repository: europe-docker.pkg.dev/gardener-project/releases/gardener/machine-controller-manager
-  tag: "v0.54.0"
+  repository: acuminous/mcm
+  tag: support-inplace
   labels:
   - name: gardener.cloud/cve-categorisation
     value:

@@ -5,6 +5,7 @@
 package operatingsystemconfig
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -13,6 +14,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -39,9 +42,12 @@ import (
 	filespkg "github.com/gardener/gardener/pkg/nodeagent/files"
 	"github.com/gardener/gardener/pkg/nodeagent/registry"
 	"github.com/gardener/gardener/pkg/utils/flow"
+	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 )
 
 const lastAppliedOperatingSystemConfigFilePath = nodeagentv1alpha1.BaseDir + "/last-applied-osc.yaml"
+
+const annotationUpdateOSVersion = "worker.gardener.cloud/updating-os-version"
 
 // Reconciler decodes the OperatingSystemConfig resources from secrets and applies the systemd units and files to the
 // node.
@@ -84,9 +90,57 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, fmt.Errorf("failed extracting OSC from secret: %w", err)
 	}
 
+	// If node is successfully updated with the new OS version, we must label the node with MCM label.
+	if node != nil {
+		if _, ok := node.Annotations[annotationUpdateOSVersion]; ok {
+			version, err := getOSVersion()
+			if err != nil {
+				return reconcile.Result{}, fmt.Errorf("failed getting OS version: %w", err)
+			}
+
+			if version == ptr.Deref(osc.Spec.Version, "") {
+				log.Info("Labeling node with MCM label", "label", machinev1alpha1.LabelKeyMachineUpdateSuccessful)
+				patch := client.MergeFrom(node.DeepCopy())
+				metav1.SetMetaDataLabel(&node.ObjectMeta, machinev1alpha1.LabelKeyMachineUpdateSuccessful, "true")
+				if err := r.Client.Patch(ctx, node, patch); err != nil {
+					return reconcile.Result{}, fmt.Errorf("failed patching node with MCM label: %w", err)
+				}
+			} else {
+				log.Info("OS version mismatch, not labeling node with MCM label", "version", version, "expectedVersion", ptr.Deref(osc.Spec.Version, ""))
+			}
+		}
+	} else {
+		log.Info("Node is nil")
+	}
+
 	oscChanges, err := computeOperatingSystemConfigChanges(r.FS, osc)
 	if err != nil {
 		return reconcile.Result{}, fmt.Errorf("failed calculating the OSC changes: %w", err)
+	}
+
+	// If version has changed, trigger the update script.
+	if oscChanges.osVersion.changed {
+		// Check for MCM label
+		if _, ok := node.Labels[machinev1alpha1.LabelKeyMachineIsReadyForUpdate]; !ok {
+			log.Info("Node is not ready for OS update, requeuing")
+			return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
+		}
+
+		log.Info("Adding annotation on node for OS update", "annotation", annotationUpdateOSVersion)
+		patch := client.MergeFrom(node.DeepCopy())
+		metav1.SetMetaDataAnnotation(&node.ObjectMeta, annotationUpdateOSVersion, oscChanges.osVersion.version)
+		if err := r.Client.Patch(ctx, node, patch); err != nil {
+			log.Error(err, "Failed to patch node with annotation for OS update")
+			return reconcile.Result{}, err
+		}
+
+		updateFilePath := filepath.Join(extensionsv1alpha1.PathForInPlaceOSUpdate, extensionsv1alpha1.ScriptName)
+		output, err := Exec(ctx, "/bin/bash", updateFilePath, oscChanges.osVersion.version)
+		log.Info("Output of update script", "output", output)
+		if err != nil {
+			log.Error(err, "Failed to execute update script")
+			return reconcile.Result{}, err
+		}
 	}
 
 	if node != nil && node.Annotations[nodeagentv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig] == oscChecksum {
@@ -392,7 +446,7 @@ func (r *Reconciler) removeDeletedUnits(ctx context.Context, log logr.Logger, no
 	return nil
 }
 
-func (r *Reconciler) executeUnitCommands(ctx context.Context, log logr.Logger, node client.Object, oscChanges *operatingSystemConfigChanges) (bool, error) {
+func (r *Reconciler) executeUnitCommands(ctx context.Context, log logr.Logger, node *corev1.Node, oscChanges *operatingSystemConfigChanges) (bool, error) {
 	var (
 		mustRestartGardenerNodeAgent bool
 		fns                          []flow.TaskFn
@@ -441,4 +495,40 @@ func (r *Reconciler) executeUnitCommands(ctx context.Context, log logr.Logger, n
 	}
 
 	return mustRestartGardenerNodeAgent, flow.Parallel(fns...)(ctx)
+}
+
+func getOSVersion() (string, error) {
+	// Open the /etc/os-release file
+	file, err := os.Open("/etc/os-release")
+	if err != nil {
+		return "", fmt.Errorf("Error reading /etc/os-release:", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var prettyName string
+
+	// Look for the PRETTY_NAME line
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "PRETTY_NAME=") {
+			prettyName = strings.Trim(line, `PRETTY_NAME="`)
+			break
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("Error scanning /etc/os-release:", err)
+
+	}
+
+	// Extract the version using a regular expression
+	re := regexp.MustCompile(`\d+\.\d+`)
+	version := re.FindString(prettyName)
+
+	if version == "" {
+		return "", errors.New("Version not found")
+	} else {
+		return version, nil
+	}
 }
