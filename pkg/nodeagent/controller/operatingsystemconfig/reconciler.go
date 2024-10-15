@@ -99,6 +99,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 			}
 
 			if version == ptr.Deref(osc.Spec.Version, "") {
+				log.Info("Updating OS version successful, version matches", "version", version)
 				log.Info("Labeling node with MCM label", "label", machinev1alpha1.LabelKeyMachineUpdateSuccessful)
 				patch := client.MergeFrom(node.DeepCopy())
 				metav1.SetMetaDataLabel(&node.ObjectMeta, machinev1alpha1.LabelKeyMachineUpdateSuccessful, "true")
@@ -467,6 +468,15 @@ func (r *Reconciler) executeUnitCommands(ctx context.Context, log logr.Logger, n
 			return nil
 		}
 	)
+
+	if oscChanges.osVersion.changed {
+		updateFilePath := filepath.Join(extensionsv1alpha1.PathForInPlaceOSUpdate, extensionsv1alpha1.ScriptName)
+		output, err := Exec(ctx, "/bin/bash", updateFilePath, oscChanges.osVersion.version)
+		log.Info("Output of update script", "output", output)
+		if err != nil {
+			return false, err
+		}
+	}
 
 	var containerdChanged bool
 	for _, u := range oscChanges.units.changed {

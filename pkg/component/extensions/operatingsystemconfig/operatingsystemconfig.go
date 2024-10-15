@@ -900,6 +900,7 @@ func (d *deployer) deploy(ctx context.Context, operation string) (extensionsv1al
 		d.osc.Spec.Purpose = d.purpose
 		d.osc.Spec.Units = units
 		d.osc.Spec.Files = files
+		d.osc.Spec.Version = d.worker.Machine.Image.Version
 
 		if d.worker.CRI != nil {
 			d.osc.Spec.CRIConfig = &extensionsv1alpha1.CRIConfig{
@@ -998,8 +999,15 @@ func KeyV2(
 	data := []string{
 		kubernetesMajorMinorVersion,
 		worker.Machine.Type,
-		worker.Machine.Image.Name + *worker.Machine.Image.Version,
+		// adapt this
+		worker.Machine.Image.Name,
 	}
+
+	// machineImageString := worker.Machine.Image.Name + *worker.Machine.Image.Version
+	// if worker.UpdateStrategy != nil && *worker.UpdateStrategy != gardencorev1beta1.InPlaceUpdate {
+	// 	machineImageString = worker.Machine.Image.Name
+	// }
+	// data = append(data, machineImageString)
 
 	if worker.Volume != nil {
 		data = append(data, worker.Volume.VolumeSize)

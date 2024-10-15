@@ -136,7 +136,7 @@ images:
 - name: machine-controller-manager
   sourceRepository: github.com/gardener/machine-controller-manager
   repository: acuminous/mcm
-  tag: support-inplace
+  tag: support-inplace-4
   labels:
   - name: gardener.cloud/cve-categorisation
     value:
