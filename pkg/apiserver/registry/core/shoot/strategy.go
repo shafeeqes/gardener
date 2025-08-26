@@ -11,6 +11,7 @@ import (
 	"time"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -149,6 +150,10 @@ func mustIncreaseGeneration(oldShoot, newShoot *core.Shoot) bool {
 				// We don't want to remove the annotation so that the gardenlet can pick it up and perform
 				// the rotation. It has to remove the annotation after it is done.
 				mustIncrease, mustRemoveOperationAnnotation = true, false
+			}
+
+			if metav1.HasAnnotation(newShoot.ObjectMeta, v1beta1constants.GardenerMaintenanceCredentialsAutoRotation) {
+				mustIncrease = true
 			}
 		}
 
