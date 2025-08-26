@@ -47,6 +47,7 @@ import (
 	securityv1alpha1listers "github.com/gardener/gardener/pkg/client/security/listers/security/v1alpha1"
 	"github.com/gardener/gardener/pkg/controllerutils"
 	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
+	kubernetesutils "github.com/gardener/gardener/pkg/utils/kubernetes"
 	cidrvalidation "github.com/gardener/gardener/pkg/utils/validation/cidr"
 	versionutils "github.com/gardener/gardener/pkg/utils/version"
 	plugin "github.com/gardener/gardener/plugin/pkg"
@@ -795,6 +796,10 @@ func (c *validationContext) addMetadataAnnotations(a admission.Attributes) {
 		v1beta1constants.OperationRotateCredentialsStart,
 		v1beta1constants.OperationRotateCredentialsStartWithoutWorkersRollout,
 	).Has(c.shoot.Annotations[v1beta1constants.GardenerOperation]) {
+		addInfrastructureDeploymentTask(c.shoot)
+	}
+
+	if kubernetesutils.HasMetaDataAnnotation(&c.shoot.ObjectMeta, v1beta1constants.GardenerMaintenanceCredentialsAutoRotation, v1beta1constants.ShootOperationRotateSSHKeypair) {
 		addInfrastructureDeploymentTask(c.shoot)
 	}
 
