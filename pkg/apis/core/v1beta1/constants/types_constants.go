@@ -209,6 +209,8 @@ const (
 	// GardenerMaintenanceOperation is a constant for an annotation on a Shoot that describes a desired operation which
 	// will be performed during maintenance.
 	GardenerMaintenanceOperation = "maintenance.gardener.cloud/operation"
+	// GardenerMaintenanceCredentialsAutoRotation is a constant for auto rotation of certain credentials during maintenance.
+	GardenerMaintenanceCredentialsAutoRotation = "maintenance.gardener.cloud/credentials-auto-rotation"
 	// GardenerOperationReconcile is a constant for the value of the operation annotation describing a reconcile
 	// operation.
 	GardenerOperationReconcile = "reconcile"

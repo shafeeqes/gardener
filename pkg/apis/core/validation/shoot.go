@@ -75,6 +75,10 @@ var (
 		v1beta1constants.ShootOperationRotateSSHKeypair,
 		v1beta1constants.OperationRotateRolloutWorkers,
 	).Union(forbiddenShootOperationsWhenHibernated)
+	availableShootAutoRotationOperations = sets.New(
+		v1beta1constants.OperationRotateObservabilityCredentials,
+		v1beta1constants.ShootOperationRotateSSHKeypair,
+	)
 	forbiddenShootOperationsWhenHibernated = sets.New(
 		v1beta1constants.OperationRotateCredentialsStart,
 		v1beta1constants.OperationRotateCredentialsStartWithoutWorkersRollout,
@@ -149,7 +153,7 @@ func ValidateShoot(shoot *core.Shoot) field.ErrorList {
 
 	allErrs = append(allErrs, apivalidation.ValidateObjectMeta(&shoot.ObjectMeta, true, apivalidation.NameIsDNSLabel, field.NewPath("metadata"))...)
 	allErrs = append(allErrs, validateNameConsecutiveHyphens(shoot.Name, field.NewPath("metadata", "name"))...)
-	allErrs = append(allErrs, validateShootOperation(shoot.Annotations[v1beta1constants.GardenerOperation], shoot.Annotations[v1beta1constants.GardenerMaintenanceOperation], shoot, field.NewPath("metadata", "annotations"))...)
+	allErrs = append(allErrs, validateShootOperation(shoot.Annotations[v1beta1constants.GardenerOperation], shoot.Annotations[v1beta1constants.GardenerMaintenanceOperation], shoot.Annotations[v1beta1constants.GardenerMaintenanceCredentialsAutoRotation], shoot, field.NewPath("metadata", "annotations"))...)
 	allErrs = append(allErrs, ValidateShootSpec(shoot.ObjectMeta, &shoot.Spec, field.NewPath("spec"), false)...)
 	allErrs = append(allErrs, ValidateShootHAConfig(shoot)...)
 
@@ -2718,7 +2722,7 @@ func ValidateCoreDNSRewritingCommonSuffixes(commonSuffixes []string, fldPath *fi
 	return allErrs
 }
 
-func validateShootOperation(operation, maintenanceOperation string, shoot *core.Shoot, fldPath *field.Path) field.ErrorList {
+func validateShootOperation(operation, maintenanceOperation, autoRotationOperation string, shoot *core.Shoot, fldPath *field.Path) field.ErrorList {
 	var (
 		allErrs            = field.ErrorList{}
 		encryptedResources = sets.New[schema.GroupResource]()
@@ -2734,6 +2738,7 @@ func validateShootOperation(operation, maintenanceOperation string, shoot *core.
 
 	fldPathOp := fldPath.Key(v1beta1constants.GardenerOperation)
 	fldPathMaintOp := fldPath.Key(v1beta1constants.GardenerMaintenanceOperation)
+	fldPathAutoRotationOp := fldPath.Key(v1beta1constants.GardenerMaintenanceCredentialsAutoRotation)
 
 	if operation == maintenanceOperation {
 		allErrs = append(allErrs, field.Forbidden(fldPath, fmt.Sprintf("annotations %s and %s must not be equal", fldPathOp, fldPathMaintOp)))
@@ -2801,6 +2806,16 @@ func validateShootOperation(operation, maintenanceOperation string, shoot *core.
 	case v1beta1constants.OperationRotateCredentialsComplete:
 		if sets.New(v1beta1constants.OperationRotateCAComplete, v1beta1constants.OperationRotateServiceAccountKeyComplete, v1beta1constants.OperationRotateETCDEncryptionKeyComplete).Has(maintenanceOperation) {
 			allErrs = append(allErrs, field.Forbidden(fldPathOp, fmt.Sprintf("operation '%s' is not permitted when maintenance operation is '%s'", operation, maintenanceOperation)))
+		}
+	}
+
+	if autoRotationOperation != "" {
+		operations := strings.Split(autoRotationOperation, ",")
+		for _, op := range operations {
+			op = strings.TrimSpace(op)
+			if !availableShootAutoRotationOperations.Has(op) {
+				allErrs = append(allErrs, field.NotSupported(fldPathAutoRotationOp, op, sets.List(availableShootAutoRotationOperations)))
+			}
 		}
 	}
 
