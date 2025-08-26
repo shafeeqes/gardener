@@ -678,15 +678,37 @@ func (r *Reconciler) updateShootStatusOperationStart(
 		}
 	}
 
+	autoRotationOperations, autoRotationAnnotationExists := shoot.Annotations[v1beta1constants.GardenerMaintenanceCredentialsAutoRotation]
+	if autoRotationAnnotationExists {
+		rotationOperations := strings.Split(autoRotationOperations, ",")
+		for _, op := range rotationOperations {
+			op = strings.TrimSpace(op)
+
+			switch op {
+			case v1beta1constants.ShootOperationRotateSSHKeypair:
+				if !sets.New(v1beta1constants.OperationRotateCredentialsStart, v1beta1constants.OperationRotateCredentialsStartWithoutWorkersRollout, v1beta1constants.ShootOperationRotateSSHKeypair).Has(shoot.Annotations[v1beta1constants.GardenerOperation]) {
+					if v1beta1helper.ShootEnablesSSHAccess(shoot) {
+						startRotationSSHKeypair(shoot, &now)
+					}
+				}
+			case v1beta1constants.OperationRotateObservabilityCredentials:
+				if !sets.New(v1beta1constants.OperationRotateCredentialsStart, v1beta1constants.OperationRotateCredentialsStartWithoutWorkersRollout, v1beta1constants.OperationRotateObservabilityCredentials).Has(shoot.Annotations[v1beta1constants.GardenerOperation]) {
+					startRotationObservability(shoot, &now)
+				}
+			}
+		}
+	}
+
 	removeNonExistentPoolsFromPendingWorkersRollouts(shoot, v1beta1helper.HibernationIsEnabled(shoot))
 
 	if err := r.GardenClient.Status().Update(ctx, shoot); err != nil {
 		return err
 	}
 
-	if mustRemoveOperationAnnotation {
+	if mustRemoveOperationAnnotation || autoRotationAnnotationExists {
 		patch := client.MergeFrom(shoot.DeepCopy())
 		delete(shoot.Annotations, v1beta1constants.GardenerOperation)
+		delete(shoot.Annotations, v1beta1constants.GardenerMaintenanceCredentialsAutoRotation)
 		return r.GardenClient.Patch(ctx, shoot, patch)
 	}
 
