@@ -230,12 +230,12 @@ sast-report: $(GOSEC)
 	@./hack/sast.sh --gosec-report true
 
 .PHONY: test
-test: $(REPORT_COLLECTOR) $(PROMTOOL) $(HELM) logcheck-symlinks
+test: $(REPORT_COLLECTOR) $(PROMTOOL) $(HELM) $(GOBUILDCACHE) logcheck-symlinks
 	@./hack/test.sh ./charts/... ./cmd/... ./extensions/pkg/... ./pkg/... ./plugin/...
 	@cd $(LOGCHECK_DIR); go test -race -timeout=2m ./... | grep -v 'no test files'
 
 .PHONY: test-integration
-test-integration: $(REPORT_COLLECTOR) $(SETUP_ENVTEST) $(HELM)
+test-integration: $(REPORT_COLLECTOR) $(SETUP_ENVTEST) $(HELM) $(GOBUILDCACHE)
 	@./hack/test-integration.sh ./test/integration/...
 
 .PHONY: test-cov
