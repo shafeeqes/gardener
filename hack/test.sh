@@ -16,8 +16,8 @@ test_flags=
 if [ -n "${CI:-}" -a -n "${ARTIFACTS:-}" ] ; then
   if which report-collector &>/dev/null; then
     mkdir -p "$ARTIFACTS"
-    trap "report-collector \"$ARTIFACTS/junit.xml\"" EXIT
-    test_flags="--ginkgo.junit-report=junit.xml"
+    # trap "report-collector \"$ARTIFACTS/junit.xml\"" EXIT
+    # test_flags="--ginkgo.junit-report=junit.xml"
   else
     echo "report-collector not found in PATH, not generating machine-readable test report"
   fi

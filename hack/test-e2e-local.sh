@@ -28,10 +28,10 @@ ginkgo_flags=
 # This will add a JUnit view above the build log that shows an overview over successful and failed test cases.
 if [ -n "${CI:-}" -a -n "${ARTIFACTS:-}" ]; then
   mkdir -p "$ARTIFACTS"
-  ginkgo_flags="--output-dir=$ARTIFACTS --junit-report=junit.xml"
-  if [ "${JOB_TYPE:-}" != "periodic" ]; then
-    ginkgo_flags+=" --fail-fast"
-  fi
+  # ginkgo_flags="--output-dir=$ARTIFACTS --junit-report=junit.xml"
+  # if [ "${JOB_TYPE:-}" != "periodic" ]; then
+  #   ginkgo_flags+=" --fail-fast"
+  # fi
 fi
 
 local_address="172.18.255.1"
