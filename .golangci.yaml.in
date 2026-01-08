@@ -13,6 +13,7 @@ linters:
     - unconvert
     - unparam
     - whitespace
+    - modernize
   settings:
     embeddedstructfieldcheck:
       # Checks that sync.Mutex and sync.RWMutex are not used as embedded fields.
