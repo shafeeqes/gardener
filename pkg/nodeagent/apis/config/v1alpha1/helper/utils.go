@@ -7,8 +7,6 @@ package helper
 import (
 	"fmt"
 
-	"k8s.io/component-base/version"
-
 	nodeagentconfigv1alpha1 "github.com/gardener/gardener/pkg/nodeagent/apis/config/v1alpha1"
 )
 
@@ -19,5 +17,5 @@ func GetDefaultConfigFilePath() string {
 
 // GetConfigFilePath generates the file path on the worker node that contains the configuration of the gardener-node-agent with a baseDir.
 func GetConfigFilePath(baseDir string) string {
-	return fmt.Sprintf("%s/config-%s.yaml", baseDir, version.Get().GitVersion)
+	return fmt.Sprintf("%s/config-%s.yaml", baseDir, "v1.135.0")
 }

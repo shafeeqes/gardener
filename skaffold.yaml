@@ -1521,131 +1521,131 @@ build:
               - dev-setup/gardenlet/base/generate-patch-gardenlet.sh
               - image
               - gardener-resource-manager
-    - image: local-skaffold/gardener-node-agent
-      ko:
-        dependencies:
-          paths:
-            - cmd/gardener-node-agent
-            - cmd/gardener-node-agent/app
-            - cmd/utils
-            - cmd/utils/initrun
-            - imagevector
-            - imagevector/charts.yaml
-            - imagevector/containers.yaml
-            - pkg/api
-            - pkg/api/extensions
-            - pkg/api/indexer
-            - pkg/apis/authentication
-            - pkg/apis/authentication/install
-            - pkg/apis/authentication/v1alpha1
-            - pkg/apis/core
-            - pkg/apis/core/helper
-            - pkg/apis/core/install
-            - pkg/apis/core/v1
-            - pkg/apis/core/v1beta1
-            - pkg/apis/core/v1beta1/constants
-            - pkg/apis/core/v1beta1/helper
-            - pkg/apis/extensions
-            - pkg/apis/extensions/v1alpha1
-            - pkg/apis/extensions/v1alpha1/helper
-            - pkg/apis/operations
-            - pkg/apis/operations/install
-            - pkg/apis/operations/v1alpha1
-            - pkg/apis/operator
-            - pkg/apis/operator/v1alpha1
-            - pkg/apis/resources
-            - pkg/apis/resources/v1alpha1
-            - pkg/apis/security
-            - pkg/apis/security/install
-            - pkg/apis/security/v1alpha1
-            - pkg/apis/security/v1alpha1/constants
-            - pkg/apis/seedmanagement
-            - pkg/apis/seedmanagement/encoding
-            - pkg/apis/seedmanagement/install
-            - pkg/apis/seedmanagement/v1alpha1
-            - pkg/apis/settings
-            - pkg/apis/settings/install
-            - pkg/apis/settings/v1alpha1
-            - pkg/chartrenderer
-            - pkg/client/core/listers/core/v1beta1
-            - pkg/client/kubernetes
-            - pkg/client/kubernetes/cache
-            - pkg/component
-            - pkg/component/extensions/operatingsystemconfig/original/components
-            - pkg/component/extensions/operatingsystemconfig/original/components/containerd
-            - pkg/component/extensions/operatingsystemconfig/original/components/containerd/logrotate
-            - pkg/component/extensions/operatingsystemconfig/original/components/kubelet
-            - pkg/component/extensions/operatingsystemconfig/original/components/nodeagent
-            - pkg/component/extensions/operatingsystemconfig/original/components/opentelemetrycollector
-            - pkg/component/extensions/operatingsystemconfig/original/components/opentelemetrycollector/templates/opentelemetry-collector-config.yaml.tpl
-            - pkg/component/extensions/operatingsystemconfig/original/components/rootcertificates
-            - pkg/component/extensions/operatingsystemconfig/original/components/rootcertificates/templates/scripts/update-local-ca-certificates.tpl.sh
-            - pkg/component/extensions/operatingsystemconfig/original/components/valitail
-            - pkg/component/extensions/operatingsystemconfig/original/components/valitail/templates/valitail-config.tpl.yaml
-            - pkg/component/extensions/operatingsystemconfig/utils
-            - pkg/component/observability/logging/vali/constants
-            - pkg/component/observability/opentelemetry/collector/constants
-            - pkg/controllerutils
-            - pkg/controllerutils/predicate
-            - pkg/controllerutils/routes
-            - pkg/features
-            - pkg/gardenlet/apis/config/v1alpha1
-            - pkg/healthz
-            - pkg/logger
-            - pkg/nodeagent
-            - pkg/nodeagent/apis/config/v1alpha1
-            - pkg/nodeagent/apis/config/v1alpha1/helper
-            - pkg/nodeagent/apis/config/v1alpha1/validation
-            - pkg/nodeagent/bootstrap
-            - pkg/nodeagent/bootstrap/templates/scripts/format-kubelet-data-volume.tpl.sh
-            - pkg/nodeagent/bootstrappers
-            - pkg/nodeagent/containerd
-            - pkg/nodeagent/controller
-            - pkg/nodeagent/controller/certificate
-            - pkg/nodeagent/controller/healthcheck
-            - pkg/nodeagent/controller/hostnamecheck
-            - pkg/nodeagent/controller/lease
-            - pkg/nodeagent/controller/node
-            - pkg/nodeagent/controller/operatingsystemconfig
-            - pkg/nodeagent/controller/operatingsystemconfig/templates/containerd-hosts.toml.tpl
-            - pkg/nodeagent/controller/token
-            - pkg/nodeagent/dbus
-            - pkg/nodeagent/features
-            - pkg/nodeagent/files
-            - pkg/nodeagent/registry
-            - pkg/resourcemanager/controller/garbagecollector/references
-            - pkg/utils
-            - pkg/utils/chart
-            - pkg/utils/context
-            - pkg/utils/errors
-            - pkg/utils/flow
-            - pkg/utils/gardener
-            - pkg/utils/imagevector
-            - pkg/utils/kubernetes
-            - pkg/utils/kubernetes/certificatesigningrequest
-            - pkg/utils/kubernetes/health
-            - pkg/utils/kubernetes/unstructured
-            - pkg/utils/managedresources
-            - pkg/utils/managedresources/builder
-            - pkg/utils/retry
-            - pkg/utils/secrets
-            - pkg/utils/structuredmap
-            - pkg/utils/timewindow
-            - pkg/utils/validation
-            - pkg/utils/validation/kubernetesversion
-            - pkg/utils/version
-            - pkg/utils/workloadidentity
-            - VERSION
-        ldflags:
-          - '{{.LD_FLAGS}}'
-        main: ./cmd/gardener-node-agent
-      hooks:
-        after:
-          - command:
-              - bash
-              - dev-setup/gardenlet/base/generate-patch-gardenlet.sh
-              - image
-              - gardener-node-agent
+    # - image: local-skaffold/gardener-node-agent
+    #   ko:
+    #     dependencies:
+    #       paths:
+    #         - cmd/gardener-node-agent
+    #         - cmd/gardener-node-agent/app
+    #         - cmd/utils
+    #         - cmd/utils/initrun
+    #         - imagevector
+    #         - imagevector/charts.yaml
+    #         - imagevector/containers.yaml
+    #         - pkg/api
+    #         - pkg/api/extensions
+    #         - pkg/api/indexer
+    #         - pkg/apis/authentication
+    #         - pkg/apis/authentication/install
+    #         - pkg/apis/authentication/v1alpha1
+    #         - pkg/apis/core
+    #         - pkg/apis/core/helper
+    #         - pkg/apis/core/install
+    #         - pkg/apis/core/v1
+    #         - pkg/apis/core/v1beta1
+    #         - pkg/apis/core/v1beta1/constants
+    #         - pkg/apis/core/v1beta1/helper
+    #         - pkg/apis/extensions
+    #         - pkg/apis/extensions/v1alpha1
+    #         - pkg/apis/extensions/v1alpha1/helper
+    #         - pkg/apis/operations
+    #         - pkg/apis/operations/install
+    #         - pkg/apis/operations/v1alpha1
+    #         - pkg/apis/operator
+    #         - pkg/apis/operator/v1alpha1
+    #         - pkg/apis/resources
+    #         - pkg/apis/resources/v1alpha1
+    #         - pkg/apis/security
+    #         - pkg/apis/security/install
+    #         - pkg/apis/security/v1alpha1
+    #         - pkg/apis/security/v1alpha1/constants
+    #         - pkg/apis/seedmanagement
+    #         - pkg/apis/seedmanagement/encoding
+    #         - pkg/apis/seedmanagement/install
+    #         - pkg/apis/seedmanagement/v1alpha1
+    #         - pkg/apis/settings
+    #         - pkg/apis/settings/install
+    #         - pkg/apis/settings/v1alpha1
+    #         - pkg/chartrenderer
+    #         - pkg/client/core/listers/core/v1beta1
+    #         - pkg/client/kubernetes
+    #         - pkg/client/kubernetes/cache
+    #         - pkg/component
+    #         - pkg/component/extensions/operatingsystemconfig/original/components
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/containerd
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/containerd/logrotate
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/kubelet
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/nodeagent
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/opentelemetrycollector
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/opentelemetrycollector/templates/opentelemetry-collector-config.yaml.tpl
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/rootcertificates
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/rootcertificates/templates/scripts/update-local-ca-certificates.tpl.sh
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/valitail
+    #         - pkg/component/extensions/operatingsystemconfig/original/components/valitail/templates/valitail-config.tpl.yaml
+    #         - pkg/component/extensions/operatingsystemconfig/utils
+    #         - pkg/component/observability/logging/vali/constants
+    #         - pkg/component/observability/opentelemetry/collector/constants
+    #         - pkg/controllerutils
+    #         - pkg/controllerutils/predicate
+    #         - pkg/controllerutils/routes
+    #         - pkg/features
+    #         - pkg/gardenlet/apis/config/v1alpha1
+    #         - pkg/healthz
+    #         - pkg/logger
+    #         - pkg/nodeagent
+    #         - pkg/nodeagent/apis/config/v1alpha1
+    #         - pkg/nodeagent/apis/config/v1alpha1/helper
+    #         - pkg/nodeagent/apis/config/v1alpha1/validation
+    #         - pkg/nodeagent/bootstrap
+    #         - pkg/nodeagent/bootstrap/templates/scripts/format-kubelet-data-volume.tpl.sh
+    #         - pkg/nodeagent/bootstrappers
+    #         - pkg/nodeagent/containerd
+    #         - pkg/nodeagent/controller
+    #         - pkg/nodeagent/controller/certificate
+    #         - pkg/nodeagent/controller/healthcheck
+    #         - pkg/nodeagent/controller/hostnamecheck
+    #         - pkg/nodeagent/controller/lease
+    #         - pkg/nodeagent/controller/node
+    #         - pkg/nodeagent/controller/operatingsystemconfig
+    #         - pkg/nodeagent/controller/operatingsystemconfig/templates/containerd-hosts.toml.tpl
+    #         - pkg/nodeagent/controller/token
+    #         - pkg/nodeagent/dbus
+    #         - pkg/nodeagent/features
+    #         - pkg/nodeagent/files
+    #         - pkg/nodeagent/registry
+    #         - pkg/resourcemanager/controller/garbagecollector/references
+    #         - pkg/utils
+    #         - pkg/utils/chart
+    #         - pkg/utils/context
+    #         - pkg/utils/errors
+    #         - pkg/utils/flow
+    #         - pkg/utils/gardener
+    #         - pkg/utils/imagevector
+    #         - pkg/utils/kubernetes
+    #         - pkg/utils/kubernetes/certificatesigningrequest
+    #         - pkg/utils/kubernetes/health
+    #         - pkg/utils/kubernetes/unstructured
+    #         - pkg/utils/managedresources
+    #         - pkg/utils/managedresources/builder
+    #         - pkg/utils/retry
+    #         - pkg/utils/secrets
+    #         - pkg/utils/structuredmap
+    #         - pkg/utils/timewindow
+    #         - pkg/utils/validation
+    #         - pkg/utils/validation/kubernetesversion
+    #         - pkg/utils/version
+    #         - pkg/utils/workloadidentity
+    #         - VERSION
+    #     ldflags:
+    #       - '{{.LD_FLAGS}}'
+    #     main: ./cmd/gardener-node-agent
+    #   hooks:
+    #     after:
+    #       - command:
+    #           - bash
+    #           - dev-setup/gardenlet/base/generate-patch-gardenlet.sh
+    #           - image
+    #           - gardener-node-agent
   insecureRegistries:
     - registry.local.gardener.cloud:5001
   tagPolicy:
@@ -1681,8 +1681,8 @@ deploy:
               repository: '{{.IMAGE_REPO_local_skaffold_gardener_resource_manager}}'
               tag: '{{.IMAGE_TAG_local_skaffold_gardener_resource_manager}}@{{.IMAGE_DIGEST_local_skaffold_gardener_resource_manager}}'
             - name: gardener-node-agent
-              repository: '{{.IMAGE_REPO_local_skaffold_gardener_node_agent}}'
-              tag: '{{.IMAGE_TAG_local_skaffold_gardener_node_agent}}@{{.IMAGE_DIGEST_local_skaffold_gardener_node_agent}}'
+              repository: harbour.i545724.shoot.dev.k8s-hana.ondemand.com/public-library/node-agent
+              tag: v1.135.0
         createNamespace: true
         wait: true
     hooks:

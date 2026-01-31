@@ -38,7 +38,8 @@ images:
       name: resource-manager
   - name: gardener-node-agent
     sourceRepository: github.com/gardener/gardener
-    repository: europe-docker.pkg.dev/gardener-project/releases/gardener/node-agent
+    repository: harbour.i545724.shoot.dev.k8s-hana.ondemand.com/public-library/node-agent
+    tag: v1.135.0
     resourceId:
       name: node-agent
   - name: gardenadm
