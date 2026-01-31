@@ -110,23 +110,32 @@ mkdir -p "` + unitDropInsDirectoryPath + `"`)
 // It also compresses the entire script to reduce size for cloud provider userdata limits.
 // The unencodedScript parameter contains commands that must not be compressed (e.g., files with placeholders like <<BOOTSTRAP_TOKEN>>).
 func WrapProvisionOSCIntoOneshotScript(script, unencodedScript string) string {
-	var (
-		wrappedLines []string
-		nextLine     int
-	)
-
 	lines := strings.Split(script, "\n")
 
-	for _, line := range lines {
-		if !strings.HasPrefix(line, "#") {
+	// Separate header lines (shebang, comments) from the body
+	var headerLines, bodyLines []string
+	headerEnd := 0
+	for i, line := range lines {
+		if strings.HasPrefix(line, "#") {
+			headerLines = append(headerLines, line)
+			headerEnd = i + 1
+		} else {
 			break
 		}
-
-		wrappedLines = append(wrappedLines, line)
-		nextLine++
 	}
+	bodyLines = lines[headerEnd:]
 
-	wrappedLines = append(wrappedLines,
+	// Compress only the body
+	compressedScript := compressScript([]byte(strings.Join(bodyLines, "\n")))
+
+	// Build the final script
+	var finalLines []string
+
+	// 1. Headers (shebang, comments)
+	finalLines = append(finalLines, headerLines...)
+
+	// 2. Already-applied check (exits early if already done)
+	finalLines = append(finalLines,
 		`if [ -f "/var/lib/osc/provision-osc-applied" ]; then`,
 		`  echo "Provision OSC already applied, exiting..."`,
 		`  exit 0`,
@@ -134,41 +143,23 @@ func WrapProvisionOSCIntoOneshotScript(script, unencodedScript string) string {
 		``,
 	)
 
-	wrappedLines = append(wrappedLines, lines[nextLine:]...)
-
-	wrappedLines = append(wrappedLines,
-		``,
-		`mkdir -p /var/lib/osc`,
-		`touch /var/lib/osc/provision-osc-applied`,
-		``,
-	)
-
-	// Compress the entire wrapped script
-	fullScript := strings.Join(wrappedLines, "\n")
-	compressedScript := compressScript([]byte(fullScript))
-
-	// Extract just the shebang
-	var headerLines []string
-	for _, line := range wrappedLines {
-		if !strings.HasPrefix(line, "#") {
-			break
-		}
-		headerLines = append(headerLines, line)
-	}
-
-	// Create minimal wrapper that decompresses and executes
-	var finalLines []string
-	finalLines = append(finalLines, headerLines...)
-
-	// Add unencoded script first (before decompression) so placeholders are available for MCM
+	// 3. Unencoded script (MCM placeholders)
 	if unencodedScript != "" {
 		finalLines = append(finalLines, unencodedScript)
 	}
 
-	finalLines = append(finalLines, "\n",
+	// 4. Decompress and execute main script
+	finalLines = append(finalLines, "",
 		`base64 -d <<'COMPRESSED_SCRIPT_EOF' | gunzip | bash`,
 		utils.EncodeBase64(compressedScript),
 		`COMPRESSED_SCRIPT_EOF`,
+	)
+
+	// 5. Create marker file (only after successful execution)
+	finalLines = append(finalLines,
+		``,
+		`mkdir -p /var/lib/osc`,
+		`touch /var/lib/osc/provision-osc-applied`,
 	)
 
 	return strings.Join(finalLines, "\n")

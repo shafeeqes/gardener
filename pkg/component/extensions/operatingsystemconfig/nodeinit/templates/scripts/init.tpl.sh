@@ -5,6 +5,7 @@ set -o nounset
 set -o pipefail
 
 {{- if .hasCustomCA }}
+
 echo "> Configure containerd registry CA certificates"
 # Extract registry host from image
 registry_host=$(echo "{{ .image }}" | cut -d'/' -f1)
@@ -14,7 +15,7 @@ if [ -n "$registry_host" ] && [ "$registry_host" != "{{ .image }}" ]; then
   mkdir -p "$registry_certs_dir"
   
   # Copy CA certificate to containerd registry directory
-  cp /var/lib/gardener-node-agent/gardener-ca-bundle.crt "$registry_certs_dir/ca.crt"
+  cp "{{ .caBundlePath }}" "$registry_certs_dir/ca.crt"
   
   # Create hosts.toml for the registry
   cat > "$registry_certs_dir/hosts.toml" <<EOF

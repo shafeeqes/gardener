@@ -23,6 +23,8 @@ import (
 const (
 	// PathInitScript is the path to the init script.
 	PathInitScript = nodeagentconfigv1alpha1.BaseDir + "/init.sh"
+	// pathCABundle is the path to the custom CA bundle file.
+	pathCABundle = nodeagentconfigv1alpha1.BaseDir + "/gardener-ca-bundle.crt"
 )
 
 // Config returns the init units and the files for the OperatingSystemConfig for bootstrapping the gardener-node-agent.
@@ -88,7 +90,7 @@ func Config(
 	// Add custom CA bundle file if provided
 	if caBundle != "" {
 		nodeInitFiles = append(nodeInitFiles, extensionsv1alpha1.File{
-			Path:        "/var/lib/gardener-node-agent/gardener-ca-bundle.crt",
+			Path:        pathCABundle,
 			Permissions: ptr.To[uint32](0644),
 			Content: extensionsv1alpha1.FileContent{
 				Inline: &extensionsv1alpha1.FileContentInline{
@@ -136,6 +138,7 @@ func generateInitScript(nodeAgentImage string, hasCustomCA bool) ([]byte, error)
 		"binaryDirectory": nodeagentconfigv1alpha1.BinaryDir,
 		"configDir":       nodeagentconfigv1alpha1.BaseDir,
 		"hasCustomCA":     hasCustomCA,
+		"caBundlePath":    pathCABundle,
 	}); err != nil {
 		return nil, err
 	}
