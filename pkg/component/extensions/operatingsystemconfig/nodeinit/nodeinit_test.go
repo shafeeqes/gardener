@@ -44,7 +44,7 @@ var _ = Describe("Init", func() {
 
 		When("kubelet data volume is not configured", func() {
 			It("should return the expected units and files", func() {
-				units, files, err := Config(worker, image, config)
+				units, files, err := Config(worker, image, config, "")
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(units).To(ConsistOf(extensionsv1alpha1.Unit{
@@ -172,14 +172,14 @@ exec "/opt/bin/gardener-node-agent" bootstrap --config-dir="/var/lib/gardener-no
 			It("should return an error when the data volume cannot be found", func() {
 				*worker.KubeletDataVolumeName = "not-found"
 
-				units, files, err := Config(worker, image, config)
+				units, files, err := Config(worker, image, config, "")
 				Expect(err).To(MatchError(ContainSubstring("failed finding data volume for kubelet in worker with name")))
 				Expect(units).To(BeNil())
 				Expect(files).To(BeNil())
 			})
 
 			It("should correctly configure the bootstrap configuration", func() {
-				_, files, err := Config(worker, image, config)
+				_, files, err := Config(worker, image, config, "")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(files).To(ContainElement(extensionsv1alpha1.File{
 					Path:        fmt.Sprintf("/var/lib/gardener-node-agent/config-%s.yaml", version.Get().GitVersion),
@@ -211,7 +211,7 @@ server: {}
 			})
 
 			It("should ensure the size of the configuration is not exceeding a certain limit", func() {
-				units, files, err := Config(worker, image, config)
+				units, files, err := Config(worker, image, config, "")
 				Expect(err).NotTo(HaveOccurred())
 
 				writeFilesToDiskScript, err := operatingsystemconfig.FilesToDiskScript(context.Background(), nil, "", files)

@@ -8,7 +8,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"html/template"
+	"text/template"
 
 	machinecontroller "github.com/gardener/machine-controller-manager/pkg/util/provider/machinecontroller"
 	"k8s.io/utils/ptr"
@@ -20,8 +20,10 @@ import (
 	"github.com/gardener/gardener/pkg/utils"
 )
 
-// PathInitScript is the path to the init script.
-const PathInitScript = nodeagentconfigv1alpha1.BaseDir + "/init.sh"
+const (
+	// PathInitScript is the path to the init script.
+	PathInitScript = nodeagentconfigv1alpha1.BaseDir + "/init.sh"
+)
 
 // Config returns the init units and the files for the OperatingSystemConfig for bootstrapping the gardener-node-agent.
 // ### !CAUTION! ###
@@ -33,12 +35,13 @@ func Config(
 	worker gardencorev1beta1.Worker,
 	nodeAgentImage string,
 	config *nodeagentconfigv1alpha1.NodeAgentConfiguration,
+	caBundle string,
 ) (
 	[]extensionsv1alpha1.Unit,
 	[]extensionsv1alpha1.File,
 	error,
 ) {
-	initScript, err := generateInitScript(nodeAgentImage)
+	initScript, err := generateInitScript(nodeAgentImage, caBundle != "")
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed generating init script: %w", err)
 	}
@@ -82,6 +85,20 @@ func Config(
 		}
 	)
 
+	// Add custom CA bundle file if provided
+	if caBundle != "" {
+		nodeInitFiles = append(nodeInitFiles, extensionsv1alpha1.File{
+			Path:        "/var/lib/gardener-node-agent/gardener-ca-bundle.crt",
+			Permissions: ptr.To[uint32](0644),
+			Content: extensionsv1alpha1.FileContent{
+				Inline: &extensionsv1alpha1.FileContentInline{
+					Encoding: "b64",
+					Data:     utils.EncodeBase64([]byte(caBundle)),
+				},
+			},
+		})
+	}
+
 	// The gardener-node-init script above will bootstrap the gardener-node-agent. This means that the unit file for
 	// the gardener-node-agent unit will be written and eventually started (whilst gardener-node-init disables and stops
 	// itself). Hence, the files for gardener-node-agent (component configuration and kubeconfig) must be present on the
@@ -111,13 +128,14 @@ func init() {
 	initScriptTpl = template.Must(template.New("init-script").Parse(initScriptTplContent))
 }
 
-func generateInitScript(nodeAgentImage string) ([]byte, error) {
+func generateInitScript(nodeAgentImage string, hasCustomCA bool) ([]byte, error) {
 	var initScript bytes.Buffer
 	if err := initScriptTpl.Execute(&initScript, map[string]any{
 		"image":           nodeAgentImage,
 		"binaryName":      "gardener-node-agent",
 		"binaryDirectory": nodeagentconfigv1alpha1.BinaryDir,
 		"configDir":       nodeagentconfigv1alpha1.BaseDir,
+		"hasCustomCA":     hasCustomCA,
 	}); err != nil {
 		return nil, err
 	}

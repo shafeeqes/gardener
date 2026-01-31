@@ -22,10 +22,12 @@ import (
 
 const (
 	// PathLocalSSLRootCerts is the path to the Gardener CAs. It can be used as trigger for other components to reload the CAs.
-	PathLocalSSLRootCerts = pathLocalSSLCerts + "/ROOTcerts.crt"
+	PathLocalSSLRootCerts = PathLocalSSLCerts + "/ROOTcerts.crt"
 
-	pathLocalSSLCerts             = "/var/lib/ca-certificates-local"
-	pathUpdateLocalCaCertificates = "/var/lib/ssl/update-local-ca-certificates.sh"
+	// PathLocalSSLCerts is the path to the local CA certificates directory.
+	PathLocalSSLCerts = "/var/lib/ca-certificates-local"
+	// PathUpdateLocalCaCertificates is the path to the update-local-ca-certificates script.
+	PathUpdateLocalCaCertificates = "/var/lib/ssl/update-local-ca-certificates.sh"
 )
 
 var (
@@ -56,7 +58,7 @@ func (component) Name() string {
 }
 
 func (component) Config(ctx components.Context) ([]extensionsv1alpha1.Unit, []extensionsv1alpha1.File, error) {
-	updateLocalCaCertificatesScriptFile, err := updateLocalCACertificatesScriptFile()
+	updateLocalCaCertificatesScriptFile, err := UpdateLocalCACertificatesScriptFile()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -101,10 +103,10 @@ Wants=systemd-tmpfiles-setup.service clean-ca-certificates.service
 After=systemd-tmpfiles-setup.service clean-ca-certificates.service
 Before=sysinit.target ` + v1beta1constants.OperatingSystemConfigUnitNameKubeletService + `
 ConditionPathIsReadWrite=` + pathEtcSSLCerts + `
-ConditionPathIsReadWrite=` + pathLocalSSLCerts + `
+ConditionPathIsReadWrite=` + PathLocalSSLCerts + `
 [Service]
 Type=oneshot
-ExecStart=` + pathUpdateLocalCaCertificates + `
+ExecStart=` + PathUpdateLocalCaCertificates + `
 [Install]
 WantedBy=multi-user.target`),
 		FilePaths: extensionsv1alpha1helper.FilePathsFrom(updateCACertsFiles),
@@ -113,16 +115,17 @@ WantedBy=multi-user.target`),
 	return []extensionsv1alpha1.Unit{updateCACertsUnit}, updateCACertsFiles, nil
 }
 
-func updateLocalCACertificatesScriptFile() (extensionsv1alpha1.File, error) {
+// UpdateLocalCACertificatesScriptFile returns the file for the update-local-ca-certificates script.
+func UpdateLocalCACertificatesScriptFile() (extensionsv1alpha1.File, error) {
 	var script bytes.Buffer
 	if err := tplUpdateLocalCaCertificates.Execute(&script, map[string]any{
-		"pathLocalSSLCerts": pathLocalSSLCerts,
+		"pathLocalSSLCerts": PathLocalSSLCerts,
 	}); err != nil {
 		return extensionsv1alpha1.File{}, err
 	}
 
 	return extensionsv1alpha1.File{
-		Path:        pathUpdateLocalCaCertificates,
+		Path:        PathUpdateLocalCaCertificates,
 		Permissions: ptr.To[uint32](0744),
 		Content: extensionsv1alpha1.FileContent{
 			Inline: &extensionsv1alpha1.FileContentInline{

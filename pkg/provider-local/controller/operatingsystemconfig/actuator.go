@@ -64,6 +64,10 @@ func (a *actuator) handleProvisionOSC(ctx context.Context, osc *extensionsv1alph
 	if err != nil {
 		return "", err
 	}
+	writeUnencodedFilesToDiskScript, err := operatingsystemconfig.UnencodedFilesToDiskScript(ctx, a.client, osc.Namespace, osc.Spec.Files)
+	if err != nil {
+		return "", err
+	}
 	writeUnitsToDiskScript := operatingsystemconfig.UnitsToDiskScript(osc.Spec.Units)
 
 	var script strings.Builder
@@ -77,7 +81,7 @@ systemctl daemon-reload
 `, unit.Name, unit.Name))
 	}
 
-	return operatingsystemconfig.WrapProvisionOSCIntoOneshotScript(script.String()), nil
+	return operatingsystemconfig.WrapProvisionOSCIntoOneshotScript(script.String(), writeUnencodedFilesToDiskScript), nil
 }
 
 func (a *actuator) handleReconcileOSC(osc *extensionsv1alpha1.OperatingSystemConfig) ([]extensionsv1alpha1.Unit, *extensionsv1alpha1.InPlaceUpdatesStatus) {

@@ -447,7 +447,7 @@ var _ = Describe("OperatingSystemConfig", func() {
 					APIServerURL: apiServerURL,
 				},
 				OriginalValues: OriginalValues{
-					CABundle:                                caBundle,
+					AdditionalCABundle:                      caBundle,
 					ClusterDNSAddresses:                     clusterDNSAddresses,
 					ClusterDomain:                           clusterDomain,
 					Images:                                  images,
@@ -704,7 +704,7 @@ var _ = Describe("OperatingSystemConfig", func() {
 							APIServerURL: apiServerURL,
 						},
 						OriginalValues: OriginalValues{
-							CABundle:                                caBundle,
+							AdditionalCABundle:                      caBundle,
 							ClusterDNSAddresses:                     clusterDNSAddresses,
 							ClusterDomain:                           clusterDomain,
 							Images:                                  images,

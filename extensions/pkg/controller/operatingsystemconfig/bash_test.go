@@ -132,7 +132,12 @@ mkdir -p "` + folder3 + `"
 
 cat << EOF | base64 -d > "` + file3 + `"
 YmFzZTY0
-EOF
+EOF`))
+
+			By("Ensure UnencodedFilesToDiskScript generates the expected bash script")
+			unencodedScript, err := UnencodedFilesToDiskScript(ctx, fakeClient, namespace, files)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(unencodedScript).To(Equal(`
 mkdir -p "` + folder4 + `"
 
 cat << EOF > "` + file4 + `"
@@ -148,9 +153,10 @@ chmod "0777" "` + file4 + `"`))
 			script = strings.ReplaceAll(script, `"`+folder1, `"`+tempDir+folder1)
 			script = strings.ReplaceAll(script, `"`+folder2, `"`+tempDir+folder2)
 			script = strings.ReplaceAll(script, `"`+folder3, `"`+tempDir+folder3)
-			script = strings.ReplaceAll(script, `"`+folder4, `"`+tempDir+folder4)
+			unencodedScript = strings.ReplaceAll(unencodedScript, `"`+folder4, `"`+tempDir+folder4)
 
-			runScriptAndCheckFiles(script,
+			combinedScript := script + unencodedScript
+			runScriptAndCheckFiles(combinedScript,
 				tempDir+file1,
 				tempDir+file2,
 				tempDir+file3,
@@ -224,40 +230,42 @@ EOF`))
 	})
 
 	Describe("#WrapProvisionOSCIntoOneshotScript", func() {
-		It("should wrap the script into an oneshot script", func() {
+		It("should wrap and compress the script", func() {
 			script := `echo "Hello, World!"
 `
-			Expect(WrapProvisionOSCIntoOneshotScript(script)).To(Equal(`if [ -f "/var/lib/osc/provision-osc-applied" ]; then
-  echo "Provision OSC already applied, exiting..."
-  exit 0
-fi
-
-echo "Hello, World!"
-
-
-mkdir -p /var/lib/osc
-touch /var/lib/osc/provision-osc-applied
-`))
+			result := WrapProvisionOSCIntoOneshotScript(script, "")
+			// Should contain compressed script format
+			Expect(result).To(ContainSubstring("base64 -d <<'COMPRESSED_SCRIPT_EOF' | gunzip | bash"))
+			Expect(result).To(ContainSubstring("COMPRESSED_SCRIPT_EOF"))
 		})
 
-		It("should wrap the script with shebang and comments into an oneshot script", func() {
+		It("should preserve shebang when wrapping and compressing", func() {
 			script := `#/bin/bash
 # This is a hello world script
 echo "Hello, World!"
 `
-			Expect(WrapProvisionOSCIntoOneshotScript(script)).To(Equal(`#/bin/bash
-# This is a hello world script
-if [ -f "/var/lib/osc/provision-osc-applied" ]; then
-  echo "Provision OSC already applied, exiting..."
-  exit 0
-fi
+			result := WrapProvisionOSCIntoOneshotScript(script, "")
+			// Should preserve shebang
+			Expect(result).To(HavePrefix("#/bin/bash\n# This is a hello world script\n"))
+			// Should contain compressed script format
+			Expect(result).To(ContainSubstring("base64 -d <<'COMPRESSED_SCRIPT_EOF' | gunzip | bash"))
+		})
 
-echo "Hello, World!"
-
-
-mkdir -p /var/lib/osc
-touch /var/lib/osc/provision-osc-applied
-`))
+		It("should place unencoded script before compressed script", func() {
+			script := `echo "Hello, World!"
+`
+			unencodedScript := `cat <<EOF > /var/lib/gardener-node-agent/credentials/bootstrap-token
+<<BOOTSTRAP_TOKEN>>
+EOF
+`
+			result := WrapProvisionOSCIntoOneshotScript(script, unencodedScript)
+			// Unencoded script should come before compressed section
+			Expect(result).To(ContainSubstring("<<BOOTSTRAP_TOKEN>>"))
+			Expect(result).To(ContainSubstring("base64 -d <<'COMPRESSED_SCRIPT_EOF' | gunzip | bash"))
+			// Verify unencoded comes before compression
+			bootstrapIdx := strings.Index(result, "<<BOOTSTRAP_TOKEN>>")
+			compressedIdx := strings.Index(result, "COMPRESSED_SCRIPT_EOF")
+			Expect(bootstrapIdx).To(BeNumerically("<", compressedIdx))
 		})
 	})
 })

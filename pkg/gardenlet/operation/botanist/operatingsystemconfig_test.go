@@ -137,7 +137,7 @@ var _ = Describe("operatingsystemconfig", func() {
 
 			It("should deploy successfully (only CloudProfile CA)", func() {
 				botanist.Shoot.CloudProfile.Spec.CABundle = &caCloudProfile
-				operatingSystemConfig.EXPECT().SetCABundle(fmt.Sprintf("%s\n%s", caCloudProfile, caBundle))
+				operatingSystemConfig.EXPECT().SetAdditionalCABundle(fmt.Sprintf("%s\n%s", caCloudProfile, caBundle))
 
 				operatingSystemConfig.EXPECT().Deploy(ctx)
 				Expect(botanist.DeployOperatingSystemConfig(ctx)).To(Succeed())
@@ -153,7 +153,7 @@ var _ = Describe("operatingsystemconfig", func() {
 						},
 					},
 				}
-				operatingSystemConfig.EXPECT().SetCABundle(caBundle)
+				operatingSystemConfig.EXPECT().SetAdditionalCABundle(caBundle)
 
 				operatingSystemConfig.EXPECT().Deploy(ctx)
 				Expect(botanist.DeployOperatingSystemConfig(ctx)).To(Succeed())
@@ -177,14 +177,14 @@ var _ = Describe("operatingsystemconfig", func() {
 					},
 				})
 				botanist.Shoot.Purpose = "development"
-				operatingSystemConfig.EXPECT().SetCABundle(caBundle)
+				operatingSystemConfig.EXPECT().SetAdditionalCABundle(caBundle)
 
 				operatingSystemConfig.EXPECT().Deploy(ctx)
 				Expect(botanist.DeployOperatingSystemConfig(ctx)).To(Succeed())
 			})
 
 			It("should return the error during deployment", func() {
-				operatingSystemConfig.EXPECT().SetCABundle(caBundle)
+				operatingSystemConfig.EXPECT().SetAdditionalCABundle(caBundle)
 
 				operatingSystemConfig.EXPECT().Deploy(ctx).Return(fakeErr)
 				Expect(botanist.DeployOperatingSystemConfig(ctx)).To(MatchError(fakeErr))
@@ -205,7 +205,7 @@ var _ = Describe("operatingsystemconfig", func() {
 				}
 				botanist.Shoot.SetInfo(shoot)
 
-				operatingSystemConfig.EXPECT().SetCABundle(caBundle)
+				operatingSystemConfig.EXPECT().SetAdditionalCABundle(caBundle)
 			})
 
 			It("should restore successfully", func() {

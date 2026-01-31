@@ -124,16 +124,16 @@ func (mr *MockInterfaceMockRecorder) SetAPIServerURL(arg0 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAPIServerURL", reflect.TypeOf((*MockInterface)(nil).SetAPIServerURL), arg0)
 }
 
-// SetCABundle mocks base method.
-func (m *MockInterface) SetCABundle(arg0 string) {
+// SetAdditionalCABundle mocks base method.
+func (m *MockInterface) SetAdditionalCABundle(arg0 string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetCABundle", arg0)
+	m.ctrl.Call(m, "SetAdditionalCABundle", arg0)
 }
 
-// SetCABundle indicates an expected call of SetCABundle.
-func (mr *MockInterfaceMockRecorder) SetCABundle(arg0 any) *gomock.Call {
+// SetAdditionalCABundle indicates an expected call of SetAdditionalCABundle.
+func (mr *MockInterfaceMockRecorder) SetAdditionalCABundle(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCABundle", reflect.TypeOf((*MockInterface)(nil).SetCABundle), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAdditionalCABundle", reflect.TypeOf((*MockInterface)(nil).SetAdditionalCABundle), arg0)
 }
 
 // SetClusterDNSAddresses mocks base method.

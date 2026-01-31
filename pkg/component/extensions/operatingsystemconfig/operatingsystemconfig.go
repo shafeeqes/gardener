@@ -84,8 +84,8 @@ type Interface interface {
 	WaitCleanupStaleResources(context.Context) error
 	// SetAPIServerURL sets the APIServerURL value.
 	SetAPIServerURL(string)
-	// SetCABundle sets the CABundle value.
-	SetCABundle(string)
+	// SetAdditionalCABundle sets the additional CABundle value.
+	SetAdditionalCABundle(string)
 	// SetCredentialsRotationStatus sets the credentials rotation status
 	SetCredentialsRotationStatus(*gardencorev1beta1.ShootCredentialsRotation)
 	// SetSSHPublicKeys sets the SSHPublicKeys value.
@@ -123,8 +123,8 @@ type InitValues struct {
 
 // OriginalValues are configuration values required for the 'reconcile' OperatingSystemConfigPurpose.
 type OriginalValues struct {
-	// CABundle is the bundle of certificate authorities that will be added as root certificates.
-	CABundle string
+	// AdditionalCABundle is the additional bundle of certificate authorities that will be added as root certificates.
+	AdditionalCABundle string
 	// ClusterDNSAddresses are the addresses for in-cluster DNS.
 	ClusterDNSAddresses []string
 	// ClusterDomain is the Kubernetes cluster domain.
@@ -651,9 +651,9 @@ func (o *operatingSystemConfig) SetAPIServerURL(apiServerURL string) {
 	o.values.APIServerURL = apiServerURL
 }
 
-// SetCABundle sets the CABundle value.
-func (o *operatingSystemConfig) SetCABundle(val string) {
-	o.values.CABundle = val
+// SetAdditionalCABundle sets the AdditionalCABundle value.
+func (o *operatingSystemConfig) SetAdditionalCABundle(val string) {
+	o.values.AdditionalCABundle = val
 }
 
 func (o *operatingSystemConfig) SetCredentialsRotationStatus(status *gardencorev1beta1.ShootCredentialsRotation) {
@@ -681,9 +681,9 @@ func (o *operatingSystemConfig) newDeployer(version int, osc *extensionsv1alpha1
 		criName = extensionsv1alpha1.CRIName(worker.CRI.Name)
 	}
 
-	caBundle := o.values.CABundle
+	additionalCABundle := o.values.AdditionalCABundle
 	if worker.CABundle != nil {
-		caBundle = fmt.Sprintf("%s\n%s", caBundle, *worker.CABundle)
+		additionalCABundle = fmt.Sprintf("%s\n%s", additionalCABundle, *worker.CABundle)
 	}
 
 	clusterCASecret, found := o.secretsManager.Get(v1beta1constants.SecretNameCACluster)
@@ -752,7 +752,7 @@ func (o *operatingSystemConfig) newDeployer(version int, osc *extensionsv1alpha1
 		purpose:                                 purpose,
 		key:                                     oscKey,
 		apiServerURL:                            o.values.APIServerURL,
-		caBundle:                                caBundle,
+		additionalCABundle:                      additionalCABundle,
 		clusterCASecretName:                     clusterCASecret.Name,
 		clusterCABundle:                         clusterCASecret.Data[secretsutils.DataKeyCertificateBundle],
 		clusterDNSAddresses:                     o.values.ClusterDNSAddresses,
@@ -824,7 +824,7 @@ type deployer struct {
 	apiServerURL string
 
 	// original values
-	caBundle                                    string
+	additionalCABundle                          string
 	clusterCASecretName                         string
 	clusterCABundle                             []byte
 	clusterDNSAddresses                         []string
@@ -868,9 +868,10 @@ func (d *deployer) deploy(ctx context.Context, operation string) (extensionsv1al
 		err   error
 	)
 
+	caBundle := fmt.Sprintf("%s\n%s", d.clusterCABundle, d.additionalCABundle)
 	componentsContext := components.Context{
 		Key:                                     d.key,
-		CABundle:                                d.caBundle,
+		CABundle:                                caBundle,
 		ClusterDNSAddresses:                     d.clusterDNSAddresses,
 		ClusterDomain:                           d.clusterDomain,
 		CRIName:                                 d.criName,
@@ -901,6 +902,7 @@ func (d *deployer) deploy(ctx context.Context, operation string) (extensionsv1al
 			d.worker,
 			d.images[imagevector.ContainerImageNameGardenerNodeAgent].String(),
 			nodeagent.ComponentConfig(d.key, d.kubernetesVersion, d.apiServerURL, d.clusterCABundle, nil),
+			d.additionalCABundle,
 		)
 		if err != nil {
 			return nil, err

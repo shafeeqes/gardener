@@ -112,17 +112,8 @@ func (b *Botanist) OperatingSystemConfigValues() (*operatingsystemconfig.Values,
 // DeployOperatingSystemConfig deploys the OperatingSystemConfig custom resource and triggers the restore operation in
 // case the Shoot is in the restore phase of the control plane migration.
 func (b *Botanist) DeployOperatingSystemConfig(ctx context.Context) error {
-	clusterCASecret, found := b.SecretsManager.Get(v1beta1constants.SecretNameCACluster)
-	if !found {
-		return fmt.Errorf("secret %q not found", v1beta1constants.SecretNameCACluster)
-	}
-	clusterCABundle, found := clusterCASecret.Data[secretsutils.DataKeyCertificateBundle]
-	if !found {
-		return fmt.Errorf("key %q not found in secret %q", secretsutils.DataKeyCertificateBundle, v1beta1constants.SecretNameCACluster)
-	}
-
 	b.Shoot.Components.Extensions.OperatingSystemConfig.SetAPIServerURL(fmt.Sprintf("https://%s", b.Shoot.ComputeOutOfClusterAPIServerAddress(true)))
-	b.Shoot.Components.Extensions.OperatingSystemConfig.SetCABundle(b.getOperatingSystemConfigCABundle(clusterCABundle))
+	b.Shoot.Components.Extensions.OperatingSystemConfig.SetAdditionalCABundle(b.getOperatingSystemConfigCABundle())
 
 	shoot := b.Shoot.GetInfo()
 	if shoot.Status.Credentials != nil {
@@ -176,8 +167,8 @@ func (b *Botanist) DeployOperatingSystemConfig(ctx context.Context) error {
 	return b.Shoot.Components.Extensions.OperatingSystemConfig.Deploy(ctx)
 }
 
-func (b *Botanist) getOperatingSystemConfigCABundle(clusterCABundle []byte) string {
-	caBundle := string(clusterCABundle)
+func (b *Botanist) getOperatingSystemConfigCABundle() string {
+	var caBundle string
 
 	if cloudProfileCaBundle := b.Shoot.CloudProfile.Spec.CABundle; cloudProfileCaBundle != nil {
 		caBundle = fmt.Sprintf("%s\n%s", *cloudProfileCaBundle, caBundle)
