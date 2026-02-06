@@ -6,6 +6,7 @@ package imagevector
 
 import (
 	"github.com/Masterminds/semver/v3"
+	"github.com/gardener/gardener/pkg/utils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -90,9 +91,40 @@ func validateComponentImageVector(componentImageVector *ComponentImageVector, fl
 	}
 
 	// Read (and validate) imageVectorOverwrite as image vector
-	imageVector, err := Read([]byte(componentImageVector.ImageVectorOverwrite))
+	_, _, err := Read([]byte(componentImageVector.ImageVectorOverwrite))
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(fldPath.Child("imageVectorOverwrite"), imageVector, err.Error()))
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("imageVectorOverwrite"), componentImageVector.ImageVectorOverwrite, err.Error()))
+	}
+
+	return allErrs
+}
+
+// ValidateCABundle validates the given CABundle.
+func ValidateCABundle(source *CABundle, fldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if source == nil {
+		return allErrs
+	}
+
+	if source.SecretRef != nil && source.Inline != nil {
+		allErrs = append(allErrs, field.Forbidden(fldPath, "cannot specify both secretRef and inline"))
+	}
+
+	if source.SecretRef == nil && source.Inline == nil {
+		allErrs = append(allErrs, field.Required(fldPath, "must specify either secretRef or inline"))
+	}
+
+	// Validate secretRef if set
+	if source.SecretRef != nil && source.SecretRef.Name == "" {
+		allErrs = append(allErrs, field.Required(fldPath.Child("secretRef").Child("name"), "secret name is required"))
+	}
+
+	// Validate inline if set
+	if len(source.Inline) == 0 {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("inline"), source.Inline, "CA bundle must not be empty if specified"))
+	} else if _, err := utils.DecodeCertificate(source.Inline); err != nil {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("inline"), source.Inline, "provided CA bundle is not a valid PEM-encoded certificate"))
 	}
 
 	return allErrs

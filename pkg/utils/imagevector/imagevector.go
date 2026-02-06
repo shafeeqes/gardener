@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/yaml"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
@@ -29,27 +30,31 @@ const (
 )
 
 // Read reads an ImageVector from the given io.Reader.
-func Read(buf []byte) (ImageVector, error) {
+func Read(buf []byte) (ImageVector, *CABundle, error) {
 	vector := struct {
-		Images ImageVector `json:"images" yaml:"images"`
+		Images   ImageVector `json:"images" yaml:"images"`
+		CABundle CABundle    `json:"caBundle" yaml:"caBundle"`
 	}{}
 
 	if err := yaml.Unmarshal(buf, &vector); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if errs := ValidateImageVector(vector.Images, field.NewPath("images")); len(errs) > 0 {
-		return nil, errs.ToAggregate()
+		return nil, nil, errs.ToAggregate()
+	}
+	if errs := ValidateCABundle(&vector.CABundle, field.NewPath("caBundle")); len(errs) > 0 {
+		return nil, nil, errs.ToAggregate()
 	}
 
-	return vector.Images, nil
+	return vector.Images, ptr.To(vector.CABundle), nil
 }
 
 // ReadFile reads an ImageVector from the file with the given name.
-func ReadFile(name string) (ImageVector, error) {
+func ReadFile(name string) (ImageVector, *CABundle, error) {
 	buf, err := os.ReadFile(name) // #nosec: G304 -- ImageVectorOverwrite is a feature. In reality files can be read from the Pod's file system only.
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	return Read(buf)
@@ -145,11 +150,11 @@ func computeKey(source *ImageSource) imageSourceKey {
 	}
 }
 
-// Merge merges the given ImageVectors into one.
+// MergeImageVectors merges the given ImageVectors into one.
 //
 // Images of ImageVectors that are later in the given sequence with the same name override
 // previous images.
-func Merge(vectors ...ImageVector) ImageVector {
+func MergeImageVectors(vectors ...ImageVector) ImageVector {
 	var (
 		out        ImageVector
 		keyToIndex = make(map[imageSourceKey]int)
@@ -172,21 +177,29 @@ func Merge(vectors ...ImageVector) ImageVector {
 	return out
 }
 
+func MergeCABundle(caBundle, overrideCABundle *CABundle) *CABundle {
+	if overrideCABundle != nil {
+		return overrideCABundle
+	}
+
+	return caBundle
+}
+
 // WithEnvOverride checks if an environment variable with the provided key is set.
 // If yes, it reads the ImageVector at the value of the variable and merges it with the given one.
 // Otherwise, it returns the unmodified ImageVector.
-func WithEnvOverride(vector ImageVector, env string) (ImageVector, error) {
+func WithEnvOverride(vector ImageVector, caBundle *CABundle, env string) (ImageVector, *CABundle, error) {
 	overwritePath := os.Getenv(env)
 	if len(overwritePath) == 0 {
-		return vector, nil
+		return vector, caBundle, nil
 	}
 
-	override, err := ReadFile(overwritePath)
+	overrideImageVector, overrideCABundle, err := ReadFile(overwritePath)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return Merge(vector, override), nil
+	return MergeImageVectors(vector, overrideImageVector), MergeCABundle(caBundle, overrideCABundle), nil
 }
 
 // String implements Stringer.

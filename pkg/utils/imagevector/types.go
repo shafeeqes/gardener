@@ -4,6 +4,8 @@
 
 package imagevector
 
+import corev1 "k8s.io/api/core/v1"
+
 // ImageSource contains the repository and the tag of a Docker container image. If the respective
 // image is only valid for a specific Kubernetes runtime version, then it must also contain the
 // 'runtimeVersion' field describing for which versions it can be used. Similarly, if it is only
@@ -35,6 +37,17 @@ type Image struct {
 	Repository *string
 	Tag        *string
 	Version    *string
+}
+
+type CABundle struct {
+	// SecretRef references a secret containing the CA bundle.
+	// Mutually exclusive with Inline.
+	// +optional
+	SecretRef *corev1.LocalObjectReference `json:"secretRef,omitempty" yaml:"secretRef,omitempty"`
+
+	// Inline contains the CA bundle in base64 encoded format.
+	// The decoded value must be a valid PEM-encoded certificate.
+	Inline []byte `json:"inline,omitempty" yaml:"inline,omitempty"`
 }
 
 // ImageVector is a list of image sources.
