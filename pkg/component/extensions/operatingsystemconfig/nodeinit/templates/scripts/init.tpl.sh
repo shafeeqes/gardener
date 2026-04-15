@@ -21,6 +21,28 @@ unmount() {
 }
 trap unmount EXIT
 
+{{- if .registryCAEnabled }}
+
+echo "> Configure registry CA from instance metadata"
+FETCH_METADATA="{{ .metadataFetchScriptPath }}"
+if [ -x "$FETCH_METADATA" ]; then
+  CA_BUNDLE=$("$FETCH_METADATA" "gardener.cloud/registry-ca-bundle" 2>/dev/null || true)
+  if [ -n "$CA_BUNDLE" ]; then
+    mkdir -p "{{ .localCACertsDir }}"
+    echo "$CA_BUNDLE" > "{{ .localCACertsDir }}/ROOTcerts.crt"
+    if [[ -f "/etc/debian_version" ]]; then
+      /usr/sbin/update-ca-certificates --fresh --localcertsdir "{{ .localCACertsDir }}"
+    elif grep -q flatcar "/etc/os-release"; then
+      cp "{{ .localCACertsDir }}/ROOTcerts.crt" /etc/ssl/certs/ROOTcerts.pem
+      /usr/sbin/update-ca-certificates
+    else
+      /usr/sbin/update-ca-certificates --fresh
+    fi
+    echo "  Registry CA configured"
+  fi
+fi
+{{- end }}
+
 echo "> Pull {{ .binaryName }} image and mount it to the temporary directory"
 {{- /*
 ctr v2 pulls manifests for all platforms of a multi-arch image by default. Mirror registries

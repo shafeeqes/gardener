@@ -8,15 +8,17 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"html/template"
+	"text/template"
 
 	machinecontroller "github.com/gardener/machine-controller-manager/pkg/util/provider/machinecontroller"
 	"k8s.io/utils/ptr"
 
+	"github.com/gardener/gardener/extensions/pkg/webhook/controlplane/metadatafetch"
 	nodeagentconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/nodeagent/v1alpha1"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 	"github.com/gardener/gardener/pkg/component/extensions/operatingsystemconfig/original/components/nodeagent"
+	"github.com/gardener/gardener/pkg/component/extensions/operatingsystemconfig/original/components/rootcertificates"
 	"github.com/gardener/gardener/pkg/utils"
 )
 
@@ -33,12 +35,13 @@ func Config(
 	worker gardencorev1beta1.Worker,
 	nodeAgentImage string,
 	config *nodeagentconfigv1alpha1.NodeAgentConfiguration,
+	registryCAEnabled bool,
 ) (
 	[]extensionsv1alpha1.Unit,
 	[]extensionsv1alpha1.File,
 	error,
 ) {
-	initScript, err := generateInitScript(nodeAgentImage)
+	initScript, err := generateInitScript(nodeAgentImage, registryCAEnabled)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed generating init script: %w", err)
 	}
@@ -111,13 +114,16 @@ func init() {
 	initScriptTpl = template.Must(template.New("init-script").Parse(initScriptTplContent))
 }
 
-func generateInitScript(nodeAgentImage string) ([]byte, error) {
+func generateInitScript(nodeAgentImage string, registryCAEnabled bool) ([]byte, error) {
 	var initScript bytes.Buffer
 	if err := initScriptTpl.Execute(&initScript, map[string]any{
-		"image":           nodeAgentImage,
-		"binaryName":      "gardener-node-agent",
-		"binaryDirectory": nodeagentconfigv1alpha1.BinaryDir,
-		"configDir":       nodeagentconfigv1alpha1.BaseDir,
+		"image":                   nodeAgentImage,
+		"binaryName":              "gardener-node-agent",
+		"binaryDirectory":         nodeagentconfigv1alpha1.BinaryDir,
+		"configDir":               nodeagentconfigv1alpha1.BaseDir,
+		"registryCAEnabled":       registryCAEnabled,
+		"metadataFetchScriptPath": metadatafetch.PathFetchMetadataScript,
+		"localCACertsDir":         rootcertificates.PathLocalSSLCerts,
 	}); err != nil {
 		return nil, err
 	}

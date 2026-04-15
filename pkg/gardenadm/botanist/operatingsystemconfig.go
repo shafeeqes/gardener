@@ -196,6 +196,7 @@ func (b *GardenadmBotanist) generateGardenerNodeInitOperatingSystemConfig(secret
 		gardencorev1beta1.Worker{},
 		image.String(),
 		nodeagentcomponent.ComponentConfig(secretName, b.Shoot.KubernetesVersion, controlPlaneAddress, caBundle, nil),
+		false, // gardenadm always uses the default registry, no custom CA needed
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed computing units and files for gardener-node-init: %w", err)

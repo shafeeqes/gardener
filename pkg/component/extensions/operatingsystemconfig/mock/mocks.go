@@ -160,6 +160,18 @@ func (mr *MockInterfaceMockRecorder) SetCredentialsRotationStatus(arg0 any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCredentialsRotationStatus", reflect.TypeOf((*MockInterface)(nil).SetCredentialsRotationStatus), arg0)
 }
 
+// SetRegistryCAEnabled mocks base method.
+func (m *MockInterface) SetRegistryCAEnabled(arg0 bool) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetRegistryCAEnabled", arg0)
+}
+
+// SetRegistryCAEnabled indicates an expected call of SetRegistryCAEnabled.
+func (mr *MockInterfaceMockRecorder) SetRegistryCAEnabled(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetRegistryCAEnabled", reflect.TypeOf((*MockInterface)(nil).SetRegistryCAEnabled), arg0)
+}
+
 // SetSSHPublicKeys mocks base method.
 func (m *MockInterface) SetSSHPublicKeys(arg0 []string) {
 	m.ctrl.T.Helper()

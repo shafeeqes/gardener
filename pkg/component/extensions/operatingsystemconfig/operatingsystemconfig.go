@@ -77,6 +77,8 @@ type Interface interface {
 	WaitCleanupStaleResources(context.Context) error
 	// SetAPIServerURL sets the APIServerURL value.
 	SetAPIServerURL(string)
+	// SetRegistryCAEnabled sets whether the node-agent image registry requires a custom CA.
+	SetRegistryCAEnabled(bool)
 	// SetCABundle sets the CABundle value.
 	SetCABundle(string)
 	// SetCredentialsRotationStatus sets the credentials rotation status
@@ -112,6 +114,10 @@ type InitValues struct {
 	// APIServerURL is the address (including https:// protocol prefix) to the kube-apiserver (from which the original
 	// cloud-config user data will be downloaded).
 	APIServerURL string
+	// RegistryCAEnabled indicates that the gardener-node-agent image is served from a registry that uses a custom CA.
+	// When true, the provision init script will attempt to fetch the CA from cloud provider instance metadata before
+	// pulling the image. The CA must be delivered by the provider extension via ImageRegistryCABundle in the Worker resource.
+	RegistryCAEnabled bool
 }
 
 // OriginalValues are configuration values required for the 'reconcile' OperatingSystemConfigPurpose.
@@ -666,6 +672,11 @@ func (o *operatingSystemConfig) SetAPIServerURL(apiServerURL string) {
 	o.values.APIServerURL = apiServerURL
 }
 
+// SetRegistryCAEnabled sets whether the node-agent image registry requires a custom CA.
+func (o *operatingSystemConfig) SetRegistryCAEnabled(enabled bool) {
+	o.values.RegistryCAEnabled = enabled
+}
+
 // SetCABundle sets the CABundle value.
 func (o *operatingSystemConfig) SetCABundle(val string) {
 	o.values.CABundle = val
@@ -767,6 +778,7 @@ func (o *operatingSystemConfig) newDeployer(version int, osc *extensionsv1alpha1
 		purpose:                                 purpose,
 		key:                                     oscKey,
 		apiServerURL:                            o.values.APIServerURL,
+		registryCAEnabled:                       o.values.RegistryCAEnabled,
 		caBundle:                                caBundle,
 		clusterCASecretName:                     clusterCASecret.Name,
 		clusterCABundle:                         clusterCASecret.Data[secretsutils.DataKeyCertificateBundle],
@@ -836,7 +848,8 @@ type deployer struct {
 	purpose extensionsv1alpha1.OperatingSystemConfigPurpose
 
 	// init values
-	apiServerURL string
+	apiServerURL      string
+	registryCAEnabled bool
 
 	// original values
 	caBundle                                    string
@@ -916,6 +929,7 @@ func (d *deployer) deploy(ctx context.Context, operation string) (extensionsv1al
 			d.worker,
 			d.images[imagevector.ContainerImageNameGardenerNodeAgent].String(),
 			nodeagent.ComponentConfig(d.key, d.kubernetesVersion, d.apiServerURL, d.clusterCABundle, nil),
+			d.registryCAEnabled,
 		)
 		if err != nil {
 			return nil, err

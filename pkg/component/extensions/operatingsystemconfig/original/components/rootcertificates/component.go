@@ -22,9 +22,10 @@ import (
 
 const (
 	// PathLocalSSLRootCerts is the path to the Gardener CAs. It can be used as trigger for other components to reload the CAs.
-	PathLocalSSLRootCerts = pathLocalSSLCerts + "/ROOTcerts.crt"
+	PathLocalSSLRootCerts = PathLocalSSLCerts + "/ROOTcerts.crt"
+	// PathLocalSSLCerts is the directory for local CA certificates.
+	PathLocalSSLCerts = "/var/lib/ca-certificates-local"
 
-	pathLocalSSLCerts             = "/var/lib/ca-certificates-local"
 	pathUpdateLocalCaCertificates = "/var/lib/ssl/update-local-ca-certificates.sh"
 )
 
@@ -101,7 +102,7 @@ Wants=systemd-tmpfiles-setup.service clean-ca-certificates.service
 After=systemd-tmpfiles-setup.service clean-ca-certificates.service
 Before=sysinit.target ` + v1beta1constants.OperatingSystemConfigUnitNameKubeletService + `
 ConditionPathIsReadWrite=` + pathEtcSSLCerts + `
-ConditionPathIsReadWrite=` + pathLocalSSLCerts + `
+ConditionPathIsReadWrite=` + PathLocalSSLCerts + `
 [Service]
 Type=oneshot
 ExecStart=` + pathUpdateLocalCaCertificates + `
@@ -116,7 +117,7 @@ WantedBy=multi-user.target`),
 func updateLocalCACertificatesScriptFile() (extensionsv1alpha1.File, error) {
 	var script bytes.Buffer
 	if err := tplUpdateLocalCaCertificates.Execute(&script, map[string]any{
-		"pathLocalSSLCerts": pathLocalSSLCerts,
+		"PathLocalSSLCerts": PathLocalSSLCerts,
 	}); err != nil {
 		return extensionsv1alpha1.File{}, err
 	}
