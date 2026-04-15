@@ -122,7 +122,12 @@ func (b *Botanist) DeployOperatingSystemConfig(ctx context.Context) error {
 	}
 
 	b.Shoot.Components.Extensions.OperatingSystemConfig.SetAPIServerURL(fmt.Sprintf("https://%s", b.Shoot.ComputeOutOfClusterAPIServerAddress(true)))
-	b.Shoot.Components.Extensions.OperatingSystemConfig.SetCABundle(b.getOperatingSystemConfigCABundle(clusterCABundle))
+	b.Shoot.Components.Extensions.OperatingSystemConfig.SetRegistryCAEnabled(imagevector.ContainersCABundle() != nil)
+	oscCABundle, err := b.getOperatingSystemConfigCABundle(ctx, clusterCABundle)
+	if err != nil {
+		return fmt.Errorf("failed computing OS config CA bundle: %w", err)
+	}
+	b.Shoot.Components.Extensions.OperatingSystemConfig.SetCABundle(oscCABundle)
 
 	shoot := b.Shoot.GetInfo()
 	if shoot.Status.Credentials != nil {
@@ -176,14 +181,25 @@ func (b *Botanist) DeployOperatingSystemConfig(ctx context.Context) error {
 	return b.Shoot.Components.Extensions.OperatingSystemConfig.Deploy(ctx)
 }
 
-func (b *Botanist) getOperatingSystemConfigCABundle(clusterCABundle []byte) string {
+func (b *Botanist) getOperatingSystemConfigCABundle(ctx context.Context, clusterCABundle []byte) (string, error) {
 	caBundle := string(clusterCABundle)
 
 	if cloudProfileCaBundle := b.Shoot.CloudProfile.Spec.CABundle; cloudProfileCaBundle != nil {
 		caBundle = fmt.Sprintf("%s\n%s", *cloudProfileCaBundle, caBundle)
 	}
 
-	return caBundle
+	// Append the registry CA bundle so that nodes trust the container registry after bootstrap.
+	// This ensures the system-wide CA store and containerd's reconcile-phase registry config
+	// include the registry CA.
+	registryCA, err := imagevectorutils.GetCABundleFromCABundleSource(ctx, b.SeedClientSet.Client(), imagevector.ContainersCABundle(), b.Shoot.ControlPlaneNamespace)
+	if err != nil {
+		return "", fmt.Errorf("failed resolving registry CA bundle: %w", err)
+	}
+	if registryCA != nil {
+		caBundle = fmt.Sprintf("%s\n%s", caBundle, *registryCA)
+	}
+
+	return caBundle, nil
 }
 
 // exposed for testing
