@@ -52,6 +52,7 @@ type Interface interface {
 	SetSSHPublicKey([]byte)
 	SetInfrastructureProviderStatus(*runtime.RawExtension)
 	SetWorkerPoolNameToOperatingSystemConfigsMap(map[string]*operatingsystemconfig.OperatingSystemConfigs)
+	SetImageRegistryCABundle(*string)
 	MachineDeployments() []extensionsv1alpha1.MachineDeployment
 	WaitUntilWorkerStatusMachineDeploymentsUpdated(ctx context.Context) error
 }
@@ -83,6 +84,11 @@ type Values struct {
 	WorkerPoolNameToOperatingSystemConfigsMap map[string]*operatingsystemconfig.OperatingSystemConfigs
 	// NodeLocalDNSEnabled indicates whether node local dns is enabled or not.
 	NodeLocalDNSEnabled bool
+	// ImageRegistryCABundle is the PEM-encoded CA bundle for the registry hosting the
+	// gardener-node-agent image. Delivered to nodes during provisioning via cloud provider
+	// instance metadata.
+	// +optional
+	ImageRegistryCABundle *string
 }
 
 // New creates a new instance of Interface.
@@ -300,6 +306,7 @@ func (w *worker) deploy(ctx context.Context, operation string) (extensionsv1alph
 			},
 			SSHPublicKey:                 w.values.SSHPublicKey,
 			InfrastructureProviderStatus: w.values.InfrastructureProviderStatus,
+			ImageRegistryCABundle:        w.values.ImageRegistryCABundle,
 			Pools:                        pools,
 		}
 
@@ -435,6 +442,12 @@ func (w *worker) SetInfrastructureProviderStatus(status *runtime.RawExtension) {
 // SetWorkerPoolNameToOperatingSystemConfigsMap sets the operating system config maps in the values.
 func (w *worker) SetWorkerPoolNameToOperatingSystemConfigsMap(maps map[string]*operatingsystemconfig.OperatingSystemConfigs) {
 	w.values.WorkerPoolNameToOperatingSystemConfigsMap = maps
+}
+
+// SetImageRegistryCABundle sets the PEM-encoded CA bundle for the registry hosting the
+// gardener-node-agent image.
+func (w *worker) SetImageRegistryCABundle(bundle *string) {
+	w.values.ImageRegistryCABundle = bundle
 }
 
 // MachineDeployments returns the generated machine deployments of the Worker.

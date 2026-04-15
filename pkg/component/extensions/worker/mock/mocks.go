@@ -141,6 +141,18 @@ func (mr *MockInterfaceMockRecorder) SetInfrastructureProviderStatus(arg0 any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInfrastructureProviderStatus", reflect.TypeOf((*MockInterface)(nil).SetInfrastructureProviderStatus), arg0)
 }
 
+// SetImageRegistryCABundle mocks base method.
+func (m *MockInterface) SetImageRegistryCABundle(arg0 *string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetImageRegistryCABundle", arg0)
+}
+
+// SetImageRegistryCABundle indicates an expected call of SetImageRegistryCABundle.
+func (mr *MockInterfaceMockRecorder) SetImageRegistryCABundle(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetImageRegistryCABundle", reflect.TypeOf((*MockInterface)(nil).SetImageRegistryCABundle), arg0)
+}
+
 // SetSSHPublicKey mocks base method.
 func (m *MockInterface) SetSSHPublicKey(arg0 []byte) {
 	m.ctrl.T.Helper()

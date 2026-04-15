@@ -14,6 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	imagevector "github.com/gardener/gardener/imagevector"
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
 	nodeagentconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/nodeagent/v1alpha1"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -21,6 +22,7 @@ import (
 	"github.com/gardener/gardener/pkg/component/extensions/worker"
 	"github.com/gardener/gardener/pkg/controllerutils"
 	shootpkg "github.com/gardener/gardener/pkg/gardenlet/operation/shoot"
+	imagevectorutils "github.com/gardener/gardener/pkg/utils/imagevector"
 	"github.com/gardener/gardener/pkg/utils/managedresources"
 	"github.com/gardener/gardener/pkg/utils/retry"
 	"github.com/gardener/gardener/pkg/utils/secrets"
@@ -55,6 +57,12 @@ func (b *Botanist) DefaultWorker() worker.Interface {
 	)
 }
 
+// resolveImageRegistryCABundle resolves the CA bundle for the registry hosting the
+// gardener-node-agent image, or returns nil if no CA bundle is configured.
+func resolveImageRegistryCABundle(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	return imagevectorutils.GetCABundleFromCABundleSource(ctx, c, imagevector.ContainersCABundle(), namespace)
+}
+
 // DeployWorker deploys the Worker custom resource and triggers the restore operation in case
 // the Shoot is in the restore phase of the control plane migration
 func (b *Botanist) DeployWorker(ctx context.Context) error {
@@ -68,6 +76,12 @@ func (b *Botanist) DeployWorker(ctx context.Context) error {
 
 	b.Shoot.Components.Extensions.Worker.SetInfrastructureProviderStatus(b.Shoot.Components.Extensions.Infrastructure.ProviderStatus())
 	b.Shoot.Components.Extensions.Worker.SetWorkerPoolNameToOperatingSystemConfigsMap(b.Shoot.Components.Extensions.OperatingSystemConfig.WorkerPoolNameToOperatingSystemConfigsMap())
+
+	caBundle, err := resolveImageRegistryCABundle(ctx, b.SeedClientSet.Client(), b.Shoot.ControlPlaneNamespace)
+	if err != nil {
+		return fmt.Errorf("failed resolving image registry CA bundle: %w", err)
+	}
+	b.Shoot.Components.Extensions.Worker.SetImageRegistryCABundle(caBundle)
 
 	if b.IsRestorePhase() {
 		return b.Shoot.Components.Extensions.Worker.Restore(ctx, b.Shoot.GetShootState())
