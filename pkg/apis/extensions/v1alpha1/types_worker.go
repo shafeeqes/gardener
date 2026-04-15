@@ -93,6 +93,12 @@ type WorkerSpec struct {
 	// SSHPublicKey is the public SSH key that should be used with these workers.
 	// +optional
 	SSHPublicKey []byte `json:"sshPublicKey,omitempty"`
+	// ImageRegistryCABundle is the PEM-encoded CA certificate bundle for the registry that hosts the
+	// gardener-node-agent image. When set, provider extensions must deliver this CA to nodes during
+	// provisioning via cloud provider instance metadata (key: "gardener.cloud/registry-ca-bundle"),
+	// so the node-init script can trust the registry before pulling the node-agent image.
+	// +optional
+	ImageRegistryCABundle *string `json:"imageRegistryCABundle,omitempty"`
 	// Pools is a list of worker pools.
 	// +patchMergeKey=name
 	// +patchStrategy=merge

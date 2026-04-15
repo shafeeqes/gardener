@@ -555,6 +555,18 @@ spec:
                         NodeAgentSecretName is uniquely identifying selected aspects of the OperatingSystemConfig. If it changes, then the
                         worker pool must be rolled.
                       type: string
+                    nodeInitData:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        NodeInitData contains key-value pairs that should be made available to nodes during
+                        provisioning via cloud provider instance metadata (not via user-data).
+                        Provider extensions must deliver this data through the provider's native metadata
+                        mechanism (e.g., GCP instance metadata attributes, AWS MIME multipart user-data).
+                        Well-known keys:
+                          - "gardener.cloud/registry-ca-bundle": PEM-encoded CA certificate(s)
+                          - "gardener.cloud/registry-host": registry hostname for CA configuration
+                      type: object
                     nodeTemplate:
                       description: NodeTemplate contains resource information of the
                         machine which is used by Cluster Autoscaler to generate nodeTemplate

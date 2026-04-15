@@ -2310,6 +2310,11 @@ func (in *WorkerSpec) DeepCopyInto(out *WorkerSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.ImageRegistryCABundle != nil {
+		in, out := &in.ImageRegistryCABundle, &out.ImageRegistryCABundle
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 
