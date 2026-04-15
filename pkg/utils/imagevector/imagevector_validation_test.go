@@ -8,10 +8,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/yaml"
 
 	. "github.com/gardener/gardener/pkg/utils/imagevector"
+	secretsutils "github.com/gardener/gardener/pkg/utils/secrets"
 )
 
 var _ = Describe("validation", func() {
@@ -140,6 +142,80 @@ var _ = Describe("validation", func() {
 					"Field": Equal("components[].imageVectorOverwrite"),
 				})),
 			))
+		})
+	})
+
+	Describe("#ValidateCABundle", func() {
+		var (
+			fldPath      *field.Path
+			validCertPEM string
+		)
+
+		BeforeEach(func() {
+			fldPath = field.NewPath("caBundle")
+
+			ca, err := (&secretsutils.CertificateSecretConfig{
+				Name:       "test-ca",
+				CommonName: "TestCA",
+				CertType:   secretsutils.CACert,
+			}).GenerateCertificate()
+			Expect(err).NotTo(HaveOccurred())
+			validCertPEM = string(ca.SecretData()[secretsutils.DataKeyCertificateCA])
+		})
+
+		It("should allow nil", func() {
+			Expect(ValidateCABundle(nil, fldPath)).To(BeEmpty())
+		})
+
+		It("should forbid both secretRef and inline set", func() {
+			errs := ValidateCABundle(&CABundle{
+				SecretRef: &corev1.LocalObjectReference{Name: "my-secret"},
+				Inline:    new(validCertPEM),
+			}, fldPath)
+			Expect(errs).To(ConsistOf(PointTo(MatchFields(IgnoreExtras, Fields{
+				"Type":  Equal(field.ErrorTypeForbidden),
+				"Field": Equal("caBundle"),
+			}))))
+		})
+
+		It("should forbid neither secretRef nor inline set", func() {
+			errs := ValidateCABundle(&CABundle{}, fldPath)
+			Expect(errs).To(ConsistOf(PointTo(MatchFields(IgnoreExtras, Fields{
+				"Type":  Equal(field.ErrorTypeRequired),
+				"Field": Equal("caBundle"),
+			}))))
+		})
+
+		It("should forbid secretRef with empty name", func() {
+			errs := ValidateCABundle(&CABundle{SecretRef: &corev1.LocalObjectReference{Name: ""}}, fldPath)
+			Expect(errs).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
+				"Type":  Equal(field.ErrorTypeRequired),
+				"Field": Equal("caBundle.secretRef.name"),
+			}))))
+		})
+
+		It("should allow a valid secretRef", func() {
+			Expect(ValidateCABundle(&CABundle{SecretRef: &corev1.LocalObjectReference{Name: "my-ca-secret"}}, fldPath)).To(BeEmpty())
+		})
+
+		It("should forbid empty inline", func() {
+			errs := ValidateCABundle(&CABundle{Inline: new("")}, fldPath)
+			Expect(errs).To(ConsistOf(PointTo(MatchFields(IgnoreExtras, Fields{
+				"Type":  Equal(field.ErrorTypeInvalid),
+				"Field": Equal("caBundle.inline"),
+			}))))
+		})
+
+		It("should forbid non-PEM inline", func() {
+			errs := ValidateCABundle(&CABundle{Inline: new("not-a-certificate")}, fldPath)
+			Expect(errs).To(ConsistOf(PointTo(MatchFields(IgnoreExtras, Fields{
+				"Type":  Equal(field.ErrorTypeInvalid),
+				"Field": Equal("caBundle.inline"),
+			}))))
+		})
+
+		It("should allow a valid inline PEM", func() {
+			Expect(ValidateCABundle(&CABundle{Inline: new(validCertPEM)}, fldPath)).To(BeEmpty())
 		})
 	})
 })
