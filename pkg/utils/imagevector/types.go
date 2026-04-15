@@ -4,6 +4,22 @@
 
 package imagevector
 
+import corev1 "k8s.io/api/core/v1"
+
+// CABundle specifies a bundle of CA certificates that should be used when pulling images from
+// a registry. Either SecretRef or Inline must be set, but not both.
+type CABundle struct {
+	// SecretRef references a secret in the gardenlet's namespace containing the CA bundle under
+	// the key "bundle.crt". Mutually exclusive with Inline.
+	// +optional
+	SecretRef *corev1.LocalObjectReference `json:"secretRef,omitempty" yaml:"secretRef,omitempty"`
+
+	// Inline contains the CA bundle in plain text (PEM-encoded certificates).
+	// Mutually exclusive with SecretRef.
+	// +optional
+	Inline *string `json:"inline,omitempty" yaml:"inline,omitempty"`
+}
+
 // ImageSource contains the repository and the tag of a Docker container image. If the respective
 // image is only valid for a specific Kubernetes runtime version, then it must also contain the
 // 'runtimeVersion' field describing for which versions it can be used. Similarly, if it is only
