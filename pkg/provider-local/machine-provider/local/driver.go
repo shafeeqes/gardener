@@ -89,6 +89,22 @@ func userDataSecretForMachine(machine *machinev1alpha1.Machine, machineClass *ma
 	}
 }
 
+// registryCABundleConfigMapForMachine returns a ConfigMap that holds the registry CA bundle for a
+// machine pod, mounted at /var/lib/gardener-node-agent/metadata/ so the fetch-metadata.sh script
+// can read the CA certificate during node bootstrapping.
+func nodeInitDataConfigMapForMachine(machine *machinev1alpha1.Machine, machineClass *machinev1alpha1.MachineClass, providerSpec *apiv1alpha1.ProviderSpec) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "ConfigMap",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      podName(machine.Name) + "-metadata",
+			Namespace: getNamespaceForMachine(machine, machineClass, providerSpec),
+		},
+	}
+}
+
 func podName(machineName string) string {
 	return machinePrefix + machineName
 }

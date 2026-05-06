@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"strings"
 	"time"
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
@@ -24,6 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
+	"github.com/gardener/gardener/extensions/pkg/webhook/controlplane/metadatafetch"
 	"github.com/gardener/gardener/pkg/provider-local/local"
 	apiv1alpha1 "github.com/gardener/gardener/pkg/provider-local/machine-provider/api/v1alpha1"
 	"github.com/gardener/gardener/pkg/provider-local/machine-provider/api/validation"
@@ -53,7 +55,23 @@ func (d *localDriver) CreateMachine(ctx context.Context, req *driver.CreateMachi
 	userDataSecret := userDataSecretForMachine(req.Machine, req.MachineClass, providerSpec)
 	userDataSecret.Data = map[string][]byte{"userdata": req.Secret.Data["userData"]}
 
-	pod, err := d.applyPod(ctx, providerClient, req, providerSpec, userDataSecret)
+	// If ImageRegistryCABundle is configured, create a ConfigMap to deliver it to the node pod.
+	var nodeInitDataConfigMap *corev1.ConfigMap
+	if providerSpec.ImageRegistryCABundle != nil {
+		nodeInitDataConfigMap = nodeInitDataConfigMapForMachine(req.Machine, req.MachineClass, providerSpec)
+		// Store the CA bundle under the sanitized well-known key so fetch-metadata.sh (which does
+		// "tr './' '__'" on its argument) finds it at the right path.
+		cmKey := strings.NewReplacer(".", "_", "/", "_").Replace(metadatafetch.KeyRegistryCABundle)
+		nodeInitDataConfigMap.Data = map[string]string{cmKey: *providerSpec.ImageRegistryCABundle}
+	}
+
+	if nodeInitDataConfigMap != nil {
+		if err := providerClient.Patch(ctx, nodeInitDataConfigMap, client.Apply, fieldOwner, client.ForceOwnership); err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("error applying nodeInitData configmap: %s", err.Error()))
+		}
+	}
+
+	pod, err := d.applyPod(ctx, providerClient, req, providerSpec, userDataSecret, nodeInitDataConfigMap)
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +146,7 @@ func (d *localDriver) applyPod(
 	req *driver.CreateMachineRequest,
 	providerSpec *apiv1alpha1.ProviderSpec,
 	userDataSecret *corev1.Secret,
+	nodeInitDataConfigMap *corev1.ConfigMap,
 ) (
 	*corev1.Pod,
 	error,
@@ -262,6 +281,25 @@ func (d *localDriver) applyPod(
 				},
 			},
 		},
+	}
+
+	// If a registry CA bundle is configured, mount it at the well-known metadata path so the
+	// fetch-metadata.sh script (injected by the webhook) can read it.
+	if nodeInitDataConfigMap != nil {
+		pod.Spec.Containers[0].VolumeMounts = append(pod.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
+			Name:      "nodeinitdata",
+			MountPath: "/var/lib/gardener-node-agent/metadata",
+			ReadOnly:  true,
+		})
+		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+			Name: "nodeinitdata",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: nodeInitDataConfigMap.Name},
+					DefaultMode:          ptr.To[int32](0444),
+				},
+			},
+		})
 	}
 
 	if err := providerClient.Patch(ctx, pod, client.Apply, fieldOwner, client.ForceOwnership); err != nil {

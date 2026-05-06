@@ -25,4 +25,10 @@ type ProviderSpec struct {
 	// IPPoolNameV6 is the name of the crd.projectcalico.org/v1.IPPool that should be used for machine pods for IPv6
 	// addresses.
 	IPPoolNameV6 string `json:"ipPoolNameV6,omitempty"`
+	// ImageRegistryCABundle is the PEM-encoded CA bundle for the registry hosting the
+	// gardener-node-agent image. When set, it is delivered to the node pod as a file at
+	// /var/lib/gardener-node-agent/metadata/gardener_cloud_registry-ca-bundle so the
+	// fetch-metadata.sh script can serve it to the node-init service.
+	// +optional
+	ImageRegistryCABundle *string `json:"imageRegistryCABundle,omitempty"`
 }

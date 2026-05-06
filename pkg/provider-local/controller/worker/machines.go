@@ -128,6 +128,12 @@ func (w *workerDelegate) generateMachineConfig(ctx context.Context) error {
 				providerConfig[key] = infrastructure.IPPoolName(w.cluster.Shoot.Status.TechnicalID, string(ipFamily))
 			}
 
+			// Pass ImageRegistryCABundle through the ProviderSpec so the MCM local provider
+			// can populate /var/lib/gardener-node-agent/metadata/ in the machine pod.
+			if w.worker.Spec.ImageRegistryCABundle != nil {
+				providerConfig["imageRegistryCABundle"] = *w.worker.Spec.ImageRegistryCABundle
+			}
+
 			providerConfigBytes, err := json.Marshal(providerConfig)
 			if err != nil {
 				return err
@@ -246,6 +252,11 @@ func (w *workerDelegate) PreReconcileHook(ctx context.Context) error {
 			{
 				APIGroups: []string{""},
 				Resources: []string{"services"},
+				Verbs:     []string{"create", "patch", "delete"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"configmaps"},
 				Verbs:     []string{"create", "patch", "delete"},
 			},
 			{

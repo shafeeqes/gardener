@@ -18,10 +18,25 @@ import (
 	"github.com/gardener/gardener/extensions/pkg/webhook"
 	extensionscontextwebhook "github.com/gardener/gardener/extensions/pkg/webhook/context"
 	"github.com/gardener/gardener/extensions/pkg/webhook/controlplane/genericmutator"
+	"github.com/gardener/gardener/extensions/pkg/webhook/controlplane/metadatafetch"
+	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 	"github.com/gardener/gardener/pkg/component/nodemanagement/machinecontrollermanager"
 	"github.com/gardener/gardener/pkg/provider-local/imagevector"
 	"github.com/gardener/gardener/pkg/provider-local/local"
 )
+
+// localFetchMetadataScript is the provider-local metadata fetch script.
+// It reads the registry CA bundle from files written by the MCM local provider under
+// /var/lib/gardener-node-agent/metadata/. Keys are sanitized (. and / replaced with _)
+// to produce valid filenames, consistent with how the MCM local provider writes them.
+const localFetchMetadataScript = `#!/bin/bash
+META_DIR="/var/lib/gardener-node-agent/metadata"
+KEY=$(echo "$1" | tr './' '__')
+META_FILE="${META_DIR}/${KEY}"
+if [ -f "$META_FILE" ]; then
+  cat "$META_FILE"
+fi
+`
 
 // NewEnsurer creates a new controlplane ensurer.
 func NewEnsurer(logger logr.Logger) genericmutator.Ensurer {
@@ -72,5 +87,17 @@ func (e *ensurer) EnsureKubeletConfiguration(_ context.Context, _ extensionscont
 // EnsureKubeSchedulerDeployment ensures that the kube-scheduler deployment conforms to the provider requirements.
 func (e *ensurer) EnsureKubeSchedulerDeployment(_ context.Context, _ extensionscontextwebhook.GardenContext, newObj, _ *appsv1.Deployment) error {
 	newObj.Spec.Template.Labels["injected-by"] = "provider-local"
+	return nil
+}
+
+// EnsureAdditionalProvisionFiles injects the metadata fetch script into provision-purpose OSCs.
+// The script reads the registry CA bundle from files written by the MCM local provider at
+// /var/lib/gardener-node-agent/metadata/<key>.
+func (e *ensurer) EnsureAdditionalProvisionFiles(
+	_ context.Context,
+	_ extensionscontextwebhook.GardenContext,
+	new, _ *[]extensionsv1alpha1.File,
+) error {
+	*new = webhook.EnsureFileWithPath(*new, metadatafetch.InjectMetadataScript(localFetchMetadataScript))
 	return nil
 }
