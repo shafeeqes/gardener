@@ -25,7 +25,7 @@ const (
 	PathFetchMetadataScript = "/opt/gardener/bin/fetch-metadata.sh"
 
 	// KeyRegistryCABundle is the metadata key for the PEM-encoded registry CA certificate(s).
-	KeyRegistryCABundle = "gardener.cloud/registry-ca-bundle"
+	KeyRegistryCABundle = "gardener-cloud-registry-ca-bundle"
 )
 
 // InjectMetadataScript returns an extensionsv1alpha1.File that places the given fetch script
@@ -33,12 +33,9 @@ const (
 // EnsureAdditionalProvisionFiles() webhook implementation.
 //
 // The fetchScriptContent must be a shell script that:
-//   - Accepts a single argument: the metadata key name (e.g. "gardener.cloud/registry-ca-bundle")
+//   - Accepts a single argument: the metadata key name (e.g. "gardener-cloud-registry-ca-bundle")
 //   - Prints the corresponding value to stdout
 //   - Exits silently (exit 0) when the key is not found or metadata is unavailable
-//
-// This follows the same pattern as machinecontrollermanager.ProviderSidecarContainer() —
-// a generic helper in the extensions library that providers call with provider-specific content.
 func InjectMetadataScript(fetchScriptContent string) extensionsv1alpha1.File {
 	return extensionsv1alpha1.File{
 		Path:        PathFetchMetadataScript,

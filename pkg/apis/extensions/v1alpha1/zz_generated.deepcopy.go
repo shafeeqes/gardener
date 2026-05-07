@@ -2303,17 +2303,17 @@ func (in *WorkerSpec) DeepCopyInto(out *WorkerSpec) {
 		*out = make([]byte, len(*in))
 		copy(*out, *in)
 	}
+	if in.ImageRegistryCABundle != nil {
+		in, out := &in.ImageRegistryCABundle, &out.ImageRegistryCABundle
+		*out = new(string)
+		**out = **in
+	}
 	if in.Pools != nil {
 		in, out := &in.Pools, &out.Pools
 		*out = make([]WorkerPool, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
-	}
-	if in.ImageRegistryCABundle != nil {
-		in, out := &in.ImageRegistryCABundle, &out.ImageRegistryCABundle
-		*out = new(string)
-		**out = **in
 	}
 	return
 }

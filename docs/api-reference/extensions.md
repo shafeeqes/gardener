@@ -5545,18 +5545,6 @@ integer
 <p>UpdateStrategy specifies the machine update strategy for the worker pool.</p>
 </td>
 </tr>
-<tr>
-<td>
-<code>nodeInitData</code></br>
-<em>
-object (keys:string, values:string)
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>NodeInitData contains key-value pairs that should be made available to nodes during<br />provisioning via cloud provider instance metadata (not via user-data).<br />Provider extensions must deliver this data through the provider's native metadata<br />mechanism (e.g., GCP instance metadata attributes, AWS MIME multipart user-data).<br />Well-known keys:<br />  - "gardener.cloud/registry-ca-bundle": PEM-encoded CA certificate(s)<br />  - "gardener.cloud/registry-host": registry hostname for CA configuration</p>
-</td>
-</tr>
 
 </tbody>
 </table>
@@ -5662,6 +5650,18 @@ integer array
 <td>
 <em>(Optional)</em>
 <p>SSHPublicKey is the public SSH key that should be used with these workers.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>imageRegistryCABundle</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ImageRegistryCABundle is the PEM-encoded CA certificate bundle for the registry that hosts the<br />gardener-node-agent image. When set, provider extensions must deliver this CA to nodes during<br />provisioning via cloud provider instance metadata (key: "gardener.cloud/registry-ca-bundle"),<br />so the node-init script can trust the registry before pulling the node-agent image.</p>
 </td>
 </tr>
 <tr>
