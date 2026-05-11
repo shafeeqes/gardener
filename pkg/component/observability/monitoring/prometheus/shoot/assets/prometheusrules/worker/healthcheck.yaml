@@ -7,9 +7,13 @@ spec:
     - name: healthcheck
       interval: 5s
       rules:
-        # healthcheck{task="target:down"} is present for each scrape job target that is down.
+        # healthcheck{task="target:down"} is present for each scrape job target that has been continuously
+        # down for at least 2 minutes. The 2-minute lookback (`max_over_time`) ensures that freshly
+        # discovered targets do not trigger the healthcheck immediately, preventing false positives during
+        # initial shoot creation or control plane migration, when data plane scrape targets are discovered
+        # before network connectivity (VPN) to the worker nodes is fully established.
         - record: healthcheck
-          expr: up == 0
+          expr: max_over_time(up[2m]) == 0
           labels:
             task: target:down
 
@@ -51,26 +55,30 @@ spec:
             task: rule_evaluation:first_cycle
 
         # healthcheck{task="cadvisor:data_plane:absent"} is present when the cAdvisor metrics from the data plane are missing.
+        # The `and on() count(up{job="..."}) > 0` clause ensures the check only fires after the relevant
+        # scrape job has been discovered and scraped at least once. This prevents false positives after a fresh
+        # Prometheus deployment or control plane migration, where it can take time for the scrape targets to be
+        # discovered and metrics to become available.
         - record: healthcheck
-          expr: absent(container_cpu_usage_seconds_total{pod=~"apiserver-proxy-.+"})
+          expr: absent(container_cpu_usage_seconds_total{pod=~"apiserver-proxy-.+"}) and on() count(up{job="cadvisor"}) > 0
           labels:
             task: cadvisor:data_plane:absent
 
         # healthcheck{task="cadvisor:control_plane:absent"} is present when the cAdvisor metrics from the control plane are missing.
         - record: healthcheck
-          expr: absent(container_cpu_usage_seconds_total{pod="prometheus-shoot-0"})
+          expr: absent(container_cpu_usage_seconds_total{pod="prometheus-shoot-0"}) and on() count(up{job="kube-kubelet-seed"}) > 0
           labels:
             task: cadvisor:control_plane:absent
 
         # healthcheck{task="kube_state_metrics:data_plane:absent"} is present when the kube-state-metrics metrics from the data plane are missing.
         - record: healthcheck
-          expr: absent(kube_pod_container_resource_requests{pod=~"apiserver-proxy-.+"})
+          expr: absent(kube_pod_container_resource_requests{pod=~"apiserver-proxy-.+"}) and on() count(up{job="kube-kubelet-seed"}) > 0
           labels:
             task: kube_state_metrics:data_plane:absent
 
         # healthcheck{task="kube_state_metrics:control_plane:absent"} is present when the kube-state-metrics metrics from the control plane are missing.
         - record: healthcheck
-          expr: absent(kube_pod_container_resource_requests{pod="prometheus-shoot-0"})
+          expr: absent(kube_pod_container_resource_requests{pod="prometheus-shoot-0"}) and on() count(up{job="kube-kubelet-seed"}) > 0
           labels:
             task: kube_state_metrics:control_plane:absent
 

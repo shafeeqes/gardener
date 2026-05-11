@@ -55,6 +55,10 @@ tests:
         values: 1x10
       - series: metering:cpu_requests:sum_by_namespace
         values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
+        values: 1x10
     promql_expr_test: &promql_expr_test
       - expr: &expr |2
             healthcheck:up          !=     expected_healthcheck:up
@@ -87,6 +91,9 @@ tests:
   # The focus of this test is the `up` time series.
   #
   # This test shows that the healthcheck:up tracks the up status of the existing targets.
+  # The target:down check requires the target to have been continuously down for at least 2 minutes
+  # (max_over_time(up[2m]) == 0), so a brief blip at t=3 does not trigger it, but a sustained
+  # outage starting at t=8 does.
   - input_series:
       - series: indentation
         values: stale stale stale stale stale stale stale stale stale stale stale
@@ -96,10 +103,10 @@ tests:
       - series: up
         values: 1     1     1     0     1     stale _     _     0     0     1
       - series: expected_healthcheck:up{task="target:down"}
-        values: stale stale stale 0     stale stale stale stale 0     0     stale
+        values: stale stale stale stale stale stale stale stale 0     0     stale
 
       - series: expected_healthcheck:up
-        values: 1     1     1     stale 1     1     1     1     stale stale 1
+        values: 1     1     1     1     1     1     1     1     stale stale 1
 
       - series: container_cpu_usage_seconds_total{pod="apiserver-proxy-abc"}
         values: 100x10
@@ -112,6 +119,10 @@ tests:
       - series: apiserver_request_total
         values: 1x10
       - series: metering:cpu_requests:sum_by_namespace
+        values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
         values: 1x10
       - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
         values: 1+1x10
@@ -150,6 +161,10 @@ tests:
         values: 1x10
       - series: metering:cpu_requests:sum_by_namespace
         values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
+        values: 1x10
       - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
         values: 1+1x10
     promql_expr_test: *promql_expr_test
@@ -184,6 +199,10 @@ tests:
       - series: apiserver_request_total
         values: 1x10
       - series: metering:cpu_requests:sum_by_namespace
+        values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
         values: 1x10
       - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
         values: 1+1x10
@@ -220,6 +239,10 @@ tests:
         values: 1x10
       - series: metering:cpu_requests:sum_by_namespace
         values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
+        values: 1x10
       - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
         values: 1+1x10
     promql_expr_test: *promql_expr_test
@@ -251,6 +274,35 @@ tests:
         values: 100x10
       - series: kube_pod_container_resource_requests{pod="apiserver-proxy-abc"}
         values: 100x10
+      - series: apiserver_request_total
+        values: 1x10
+      - series: metering:cpu_requests:sum_by_namespace
+        values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
+        values: 1x10
+      - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
+        values: 1+1x10
+    promql_expr_test: *promql_expr_test
+
+  # The focus of this test is the fresh deployment / migration scenario.
+  #
+  # This test shows that healthcheck:up will NOT report an unhealthy state
+  # when cAdvisor and kube-state-metrics data is absent because the scrape jobs
+  # have not been discovered yet (e.g. after a fresh Prometheus deployment or control plane migration).
+  - input_series:
+      - series: indentation
+        values: stale stale stale stale stale stale stale stale stale stale stale
+      - series: eval_time
+        values: 0     1     2     3     4     5     6     7     8     9     10
+
+      # No container_cpu_usage_seconds_total or kube_pod_container_resource_requests series exist,
+      # but the cadvisor and kube-kubelet-seed scrape jobs are also not discovered yet.
+      # The absent checks should NOT fire, so healthcheck:up remains healthy.
+      - series: expected_healthcheck:up
+        values: 1     1     1     1     1     1     1     1     1     1     1
+
       - series: apiserver_request_total
         values: 1x10
       - series: metering:cpu_requests:sum_by_namespace
@@ -287,6 +339,10 @@ tests:
         values: 100x10
       - series: metering:cpu_requests:sum_by_namespace
         values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
+        values: 1x10
       - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
         values: 1+1x10
     promql_expr_test: *promql_expr_test
@@ -318,6 +374,10 @@ tests:
       - series: kube_pod_container_resource_requests{pod="prometheus-shoot-0"}
         values: 100x10
       - series: apiserver_request_total
+        values: 1x10
+      - series: up{job="cadvisor"}
+        values: 1x10
+      - series: up{job="kube-kubelet-seed"}
         values: 1x10
       - series: prometheus_rule_group_iterations_total{rule_group="x;healthcheck"}
         values: 1+1x10
