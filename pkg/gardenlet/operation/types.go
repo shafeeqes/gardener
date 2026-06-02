@@ -65,4 +65,6 @@ type Operation struct {
 
 	// ControlPlaneWildcardCert is a wildcard TLS certificate which is issued for the seed's ingress domain.
 	ControlPlaneWildcardCert *corev1.Secret
+	// RegistryCABundle is the CA bundle for the container registry, resolved once and reused across the reconciliation.
+	RegistryCABundle *string
 }

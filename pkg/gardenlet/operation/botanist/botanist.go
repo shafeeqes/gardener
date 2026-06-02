@@ -17,6 +17,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/gardener/gardener/imagevector"
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
@@ -24,6 +25,7 @@ import (
 	"github.com/gardener/gardener/pkg/component/etcd/etcd"
 	"github.com/gardener/gardener/pkg/gardenlet/operation"
 	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
+	imagevectorutils "github.com/gardener/gardener/pkg/utils/imagevector"
 	secretsmanager "github.com/gardener/gardener/pkg/utils/secrets/manager"
 )
 
@@ -61,6 +63,13 @@ func New(ctx context.Context, o *operation.Operation) (*Botanist, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if imagevector.ContainersCABundle() != nil {
+		b.RegistryCABundle, err = imagevectorutils.GetCABundleFromCABundleSource(ctx, b.SeedClientSet.Client(), imagevector.ContainersCABundle(), v1beta1constants.GardenNamespace)
+		if err != nil {
+			return nil, fmt.Errorf("failed resolving registry CA bundle: %w", err)
+		}
 	}
 
 	// extension components
