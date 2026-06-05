@@ -23,6 +23,7 @@ import (
 	securityv1alpha1 "github.com/gardener/gardener/pkg/apis/security/v1alpha1"
 	seedmanagementv1alpha1 "github.com/gardener/gardener/pkg/apis/seedmanagement/v1alpha1"
 	gardenletutils "github.com/gardener/gardener/pkg/utils/gardener/gardenlet"
+	"github.com/gardener/gardener/pkg/utils/imagevector"
 	"github.com/gardener/gardener/pkg/utils/kubernetes/bootstraptoken"
 )
 
@@ -147,6 +148,13 @@ func (g *graph) handleGardenletCreateOrUpdateForSeeds(ctx context.Context, garde
 	if gardenlet.Spec.Deployment.Helm.OCIRepository.PullSecretRef != nil {
 		pullSecretVertex := g.getOrCreateVertex(VertexTypeSecret, gardenlet.Namespace, gardenlet.Spec.Deployment.Helm.OCIRepository.PullSecretRef.Name)
 		g.addEdge(pullSecretVertex, gardenletVertex)
+	}
+
+	if gardenlet.Spec.Deployment.ImageVectorOverwrite != nil {
+		if _, caBundle, err := imagevector.Read([]byte(*gardenlet.Spec.Deployment.ImageVectorOverwrite)); err == nil && caBundle != nil && caBundle.SecretRef != nil {
+			secretVertex := g.getOrCreateVertex(VertexTypeSecret, gardenlet.Namespace, caBundle.SecretRef.Name)
+			g.addEdge(secretVertex, gardenletVertex)
+		}
 	}
 }
 

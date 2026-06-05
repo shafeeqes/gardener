@@ -139,8 +139,9 @@ var _ = Describe("graph for seeds", func() {
 		serviceAccount1Secret2 = "sa1secret2"
 		serviceAccount1        *corev1.ServiceAccount
 
-		pullSecret1     = "pull-secret"
-		caBundleSecret1 = "ca-bundle-secret"
+		pullSecret1                         = "pull-secret"
+		caBundleSecret1                     = "ca-bundle-secret"
+		imageVectorOverwriteCABundleSecret1 = "imagevector-ca-bundle-secret"
 	)
 
 	BeforeEach(func() {
@@ -389,6 +390,10 @@ var _ = Describe("graph for seeds", func() {
 							CABundleSecretRef: &corev1.LocalObjectReference{Name: caBundleSecret1},
 						},
 					},
+					ImageVectorOverwrite: func() *string {
+						s := fmt.Sprintf(`{"caBundle":{"secretRef":{"name":"%s"}}}`, imageVectorOverwriteCABundleSecret1)
+						return &s
+					}(),
 				},
 			},
 		}
@@ -1876,21 +1881,41 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 	It("should behave as expected for seedmanagementv1alpha1.Gardenlet", func() {
 		By("Add")
 		fakeInformerGardenlet.Add(gardenlet1)
-		Expect(graph.graph.Nodes().Len()).To(Equal(5))
-		Expect(graph.graph.Edges().Len()).To(Equal(4))
+		Expect(graph.graph.Nodes().Len()).To(Equal(6))
+		Expect(graph.graph.Edges().Len()).To(Equal(5))
 		Expect(graph.HasPathFrom(VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, VertexTypeSeed, "", seed1.Name)).To(BeTrue())
 		Expect(graph.HasPathFrom(VertexTypeSecret, backupSecretCredentialsRef.Namespace, backupSecretCredentialsRef.Name, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
 		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, caBundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
 		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, pullSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
+		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
 
 		By("Update (irrelevant change)")
 		gardenlet1Copy := gardenlet1.DeepCopy()
 		seedConfig2.Labels = map[string]string{"new": "labels"}
 		fakeInformerGardenlet.Update(gardenlet1Copy, gardenlet1)
-		Expect(graph.graph.Nodes().Len()).To(Equal(5))
-		Expect(graph.graph.Edges().Len()).To(Equal(4))
+		Expect(graph.graph.Nodes().Len()).To(Equal(6))
+		Expect(graph.graph.Edges().Len()).To(Equal(5))
 		Expect(graph.HasPathFrom(VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, VertexTypeSeed, "", seed1.Name)).To(BeTrue())
 		Expect(graph.HasPathFrom(VertexTypeSecret, backupSecretCredentialsRef.Namespace, backupSecretCredentialsRef.Name, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
+		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
+
+		By("Update (imagevector overwrite caBundle secretRef changed)")
+		gardenlet1Copy = gardenlet1.DeepCopy()
+		newImageVectorOverwrite := `{"caBundle":{"secretRef":{"name":"new-imagevector-ca-bundle-secret"}}}`
+		gardenlet1.Spec.Deployment.ImageVectorOverwrite = &newImageVectorOverwrite
+		fakeInformerGardenlet.Update(gardenlet1Copy, gardenlet1)
+		Expect(graph.graph.Nodes().Len()).To(Equal(6))
+		Expect(graph.graph.Edges().Len()).To(Equal(5))
+		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeFalse())
+		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, "new-imagevector-ca-bundle-secret", VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeTrue())
+
+		By("Update (imagevector overwrite removed)")
+		gardenlet1Copy = gardenlet1.DeepCopy()
+		gardenlet1.Spec.Deployment.ImageVectorOverwrite = nil
+		fakeInformerGardenlet.Update(gardenlet1Copy, gardenlet1)
+		Expect(graph.graph.Nodes().Len()).To(Equal(5))
+		Expect(graph.graph.Edges().Len()).To(Equal(4))
+		Expect(graph.HasPathFrom(VertexTypeSecret, gardenlet1.Namespace, "new-imagevector-ca-bundle-secret", VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name)).To(BeFalse())
 
 		By("Update (backup credentials ref to new secret)")
 		gardenlet1Copy = gardenlet1.DeepCopy()
@@ -2138,11 +2163,12 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 			fakeInformerGardenlet.Add(gardenlet1)
 			lock.Lock()
 			defer lock.Unlock()
-			nodes, edges = nodes+3, edges+4
+			nodes, edges = nodes+4, edges+5
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, VertexTypeSeed, "", seed1.Name, BeTrue()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, backupSecretCredentialsRef.Namespace, backupSecretCredentialsRef.Name, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, caBundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, pullSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
+			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 		})
 		wg.Go(func() {
 			fakeInformerCertificateSigningRequest.Add(csr1)
@@ -2300,6 +2326,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, backupSecretCredentialsRef.Namespace, backupSecretCredentialsRef.Name, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeFalse()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, caBundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, pullSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
+			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 		})
 		wg.Go(func() {
 			fakeInformerCertificateSigningRequest.Delete(csr1)
@@ -2465,6 +2492,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, "newsecretnamespace", "newsecretname", VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, caBundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, pullSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
+			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeTrue()})
 		})
 		wg.Go(func() {
 			fakeInformerCertificateSigningRequest.Add(csr1)
@@ -2591,6 +2619,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, backupSecretCredentialsRef.Namespace, backupSecretCredentialsRef.Name, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeFalse()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, caBundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeFalse()})
 			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, pullSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeFalse()})
+			paths[VertexTypeGardenlet] = append(paths[VertexTypeGardenlet], pathExpectation{VertexTypeSecret, gardenlet1.Namespace, imageVectorOverwriteCABundleSecret1, VertexTypeGardenlet, gardenlet1.Namespace, gardenlet1.Name, BeFalse()})
 		})
 		wg.Go(func() {
 			fakeInformerCertificateSigningRequest.Delete(csr1)
