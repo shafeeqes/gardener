@@ -111,6 +111,12 @@ func (a *Actuator) Reconcile(
 		return updateCondition(a.Clock, conditions, gardencorev1beta1.ConditionFalse, gardencorev1beta1.EventReconcileError, err.Error()), fmt.Errorf("could not create or update garden namespace in target cluster: %w", err)
 	}
 
+	// Copy registry CA bundle secret to target cluster if configured
+	if err := CopyCABundleSecret(ctx, a.GardenClient, v1beta1constants.GardenNamespace, targetClient.Client(), a.GardenletNamespaceTarget); err != nil {
+		a.Recorder.Eventf(obj, nil, corev1.EventTypeWarning, gardencorev1beta1.EventReconcileError, gardencorev1beta1.EventActionReconcile, err.Error())
+		return updateCondition(a.Clock, conditions, gardencorev1beta1.ConditionFalse, gardencorev1beta1.EventReconcileError, err.Error()), fmt.Errorf("could not copy registry CA bundle secret to target cluster: %w", err)
+	}
+
 	// Extract seed template and gardenlet config
 	seedTemplate, componentConfig, err := helper.ExtractSeedTemplateAndGardenletConfig(obj.GetName(), rawComponentConfig)
 	if err != nil {
@@ -305,6 +311,32 @@ func (a *Actuator) ensureGardenNamespace(ctx context.Context, targetClient clien
 		return targetClient.Create(ctx, gardenNamespace)
 	}
 	return nil
+}
+
+// CopyCABundleSecret copies the registry CA bundle secret from the source cluster to the target cluster if configured.
+func CopyCABundleSecret(ctx context.Context, sourceClient client.Client, sourceNamespace string, targetClient client.Client, targetNamespace string) error {
+	caBundle := imagevector.ContainersCABundle()
+	if caBundle == nil || caBundle.SecretRef == nil {
+		return nil
+	}
+
+	sourceSecret := &corev1.Secret{}
+	if err := sourceClient.Get(ctx, client.ObjectKey{Namespace: sourceNamespace, Name: caBundle.SecretRef.Name}, sourceSecret); err != nil {
+		return fmt.Errorf("failed getting registry CA bundle secret %s/%s: %w", sourceNamespace, caBundle.SecretRef.Name, err)
+	}
+
+	targetSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      caBundle.SecretRef.Name,
+			Namespace: targetNamespace,
+		},
+	}
+	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, targetClient, targetSecret, func() error {
+		targetSecret.Labels = sourceSecret.Labels
+		targetSecret.Data = sourceSecret.Data
+		return nil
+	})
+	return err
 }
 
 func (a *Actuator) deleteGardenNamespace(ctx context.Context, targetClient kubernetes.Interface) error {

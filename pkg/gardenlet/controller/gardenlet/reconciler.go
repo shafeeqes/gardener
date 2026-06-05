@@ -85,6 +85,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		}
 	}
 
+	log.Info("Syncing registry CA bundle secret")
+	if err := gardenletdeployer.CopyCABundleSecret(ctx, r.GardenClient, v1beta1constants.GardenNamespace, r.SeedClientSet.Client(), r.GardenNamespace); err != nil {
+		r.Recorder.Eventf(gardenlet, nil, corev1.EventTypeWarning, gardencorev1beta1.EventReconcileError, gardencorev1beta1.EventActionReconcile, err.Error())
+		updateCondition(r.Clock, status, gardencorev1beta1.ConditionFalse, gardencorev1beta1.EventReconcileError, err.Error())
+		if updateErr := r.updateStatus(ctx, gardenlet, status); updateErr != nil {
+			log.Error(updateErr, "Could not update status")
+		}
+		return reconcile.Result{}, fmt.Errorf("error syncing registry CA bundle secret: %w", err)
+	}
+
 	log.Info("Deploying gardenlet")
 	r.Recorder.Eventf(gardenlet, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Deploying gardenlet")
 	if err := r.deployGardenlet(ctx, log, gardenlet, seed, gardenletConfig); err != nil {
