@@ -108,6 +108,7 @@ var _ = Describe("OperatingSystemConfig", func() {
 						})),
 					}),
 				}),
+				MatchFields(IgnoreExtras, Fields{"Path": Equal("/var/lib/gardener-node-agent/cluster-ca.crt")}),
 				MatchFields(IgnoreExtras, Fields{"Path": Equal(fmt.Sprintf("/var/lib/gardener-node-agent/config-%s.yaml", version.Get().GitVersion))}),
 			))
 		})

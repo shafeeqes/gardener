@@ -62,6 +62,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ reconcile.Request) (reconc
 		if err != nil {
 			return reconcile.Result{}, fmt.Errorf("failed reading the API server config: %w", err)
 		}
+		r.Config.CAFile = apiServerConfig.CAFile
 		r.Config.CAData = apiServerConfig.CABundle
 
 		if err := nodeagent.RequestAndStoreKubeconfig(ctx, log, r.FS, r.Config, r.MachineName); err != nil {

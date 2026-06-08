@@ -78,6 +78,19 @@ func (component) Config(ctx components.Context) ([]extensionsv1alpha1.Unit, []ex
 		return nil, nil, fmt.Errorf("failed generating files: %w", err)
 	}
 
+	if len(caBundle) > 0 {
+		files = append(files, extensionsv1alpha1.File{
+			Path:        nodeagentconfigv1alpha1.ClusterCAFilePath,
+			Permissions: new(uint32(0640)),
+			Content: extensionsv1alpha1.FileContent{
+				Inline: &extensionsv1alpha1.FileContentInline{
+					Encoding: "b64",
+					Data:     utils.EncodeBase64(caBundle),
+				},
+			},
+		})
+	}
+
 	files = append(files, extensionsv1alpha1.File{
 		Path:        PathBinary,
 		Permissions: new(uint32(0755)),
@@ -129,6 +142,7 @@ func ComponentConfig(
 		APIServer: nodeagentconfigv1alpha1.APIServer{
 			Server:   apiServerURL,
 			CABundle: caBundle,
+			CAFile:   nodeagentconfigv1alpha1.ClusterCAFilePath,
 		},
 		Controllers: nodeagentconfigv1alpha1.ControllerConfiguration{
 			OperatingSystemConfig: nodeagentconfigv1alpha1.OperatingSystemConfigControllerConfig{

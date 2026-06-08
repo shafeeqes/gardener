@@ -992,6 +992,7 @@ func (r *Reconciler) rebootstrapKubelet(ctx context.Context, log logr.Logger, ap
 
 		kubeConfig.Clusters = map[string]*clientcmdapi.Cluster{
 			"default-cluster": {
+				CertificateAuthority:     apiServerConfig.CAFile,
 				CertificateAuthorityData: apiServerConfig.CABundle,
 				Server:                   apiServerConfig.Server,
 			},
@@ -1054,7 +1055,8 @@ func (r *Reconciler) requestNewKubeConfigForNodeAgent(ctx context.Context, log l
 		return fmt.Errorf("failed creating REST config from kubeconfig file %q: %w", nodeagentconfigv1alpha1.KubeconfigFilePath, err)
 	}
 
-	// Use the updated CA Bundle
+	// Use the updated CA bundle (CAData takes precedence over CAFile in rest.Config).
+	restConfig.CAFile = apiServerConfig.CAFile
 	restConfig.CAData = apiServerConfig.CABundle
 
 	return RequestAndStoreKubeconfig(ctx, log, r.FS, restConfig, r.MachineName)

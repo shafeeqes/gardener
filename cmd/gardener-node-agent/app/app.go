@@ -264,8 +264,11 @@ func getRESTConfigNodeAgentAuthorizer(ctx context.Context, log logr.Logger, fs a
 				AcceptContentTypes: cfg.ClientConnection.AcceptContentTypes,
 				ContentType:        cfg.ClientConnection.ContentType,
 			},
-			Host:            cfg.APIServer.Server,
-			TLSClientConfig: rest.TLSClientConfig{CAData: cfg.APIServer.CABundle},
+			Host: cfg.APIServer.Server,
+			TLSClientConfig: rest.TLSClientConfig{
+				CAData: cfg.APIServer.CABundle,
+				CAFile: nodeagentconfigv1alpha1.ClusterCAFilePath,
+			},
 			BearerTokenFile: nodeagentconfigv1alpha1.BootstrapTokenFilePath,
 		}
 

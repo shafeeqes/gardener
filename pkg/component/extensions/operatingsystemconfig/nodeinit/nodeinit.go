@@ -8,7 +8,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"html/template"
+	"text/template"
 
 	machinecontroller "github.com/gardener/machine-controller-manager/pkg/util/provider/machinecontroller"
 
@@ -81,6 +81,19 @@ func Config(
 		}
 	)
 
+	if len(config.APIServer.CABundle) > 0 {
+		nodeInitFiles = append(nodeInitFiles, extensionsv1alpha1.File{
+			Path:        nodeagentconfigv1alpha1.ClusterCAFilePath,
+			Permissions: new(uint32(0640)),
+			Content: extensionsv1alpha1.FileContent{
+				Inline: &extensionsv1alpha1.FileContentInline{
+					Encoding: "b64",
+					Data:     utils.EncodeBase64(config.APIServer.CABundle),
+				},
+			},
+		})
+	}
+
 	// The gardener-node-init script above will bootstrap the gardener-node-agent. This means that the unit file for
 	// the gardener-node-agent unit will be written and eventually started (whilst gardener-node-init disables and stops
 	// itself). Hence, the files for gardener-node-agent (component configuration and kubeconfig) must be present on the
@@ -90,6 +103,8 @@ func Config(
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed computing bootstrap configuration: %w", err)
 	}
+	// Unset CA bundle and use the CA file instead to avoid sending the CA bundle twice via user-data
+	config.APIServer.CABundle = nil
 
 	nodeAgentFiles, err := nodeagent.Files(config)
 	if err != nil {
@@ -112,6 +127,7 @@ func init() {
 
 func generateInitScript(nodeAgentImage string) ([]byte, error) {
 	var initScript bytes.Buffer
+
 	if err := initScriptTpl.Execute(&initScript, map[string]any{
 		"image":           nodeAgentImage,
 		"binaryName":      "gardener-node-agent",

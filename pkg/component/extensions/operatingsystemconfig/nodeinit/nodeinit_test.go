@@ -69,6 +69,7 @@ StandardError=journal+console
 WantedBy=multi-user.target`),
 					FilePaths: []string{"/var/lib/gardener-node-agent/init.sh"},
 				}))
+
 				Expect(files).To(ConsistOf(
 					extensionsv1alpha1.File{
 						Path:        "/var/lib/gardener-node-agent/credentials/bootstrap-token",
@@ -84,7 +85,7 @@ WantedBy=multi-user.target`),
 						Path:        fmt.Sprintf("/var/lib/gardener-node-agent/config-%s.yaml", version.Get().GitVersion),
 						Permissions: new(uint32(0600)),
 						Content: extensionsv1alpha1.FileContent{Inline: &extensionsv1alpha1.FileContentInline{Encoding: "b64", Data: utils.EncodeBase64([]byte(`apiServer:
-  caBundle: ` + utils.EncodeBase64(caBundle) + `
+  caFile: ` + nodeagentconfigv1alpha1.ClusterCAFilePath + `
   server: ` + apiServerURL + `
 apiVersion: nodeagent.config.gardener.cloud/v1alpha1
 bootstrap: {}
@@ -158,6 +159,16 @@ exec "/opt/bin/gardener-node-agent" bootstrap --config-dir="/var/lib/gardener-no
 							TransmitUnencoded: new(true),
 						},
 					},
+					extensionsv1alpha1.File{
+						Path:        "/var/lib/gardener-node-agent/cluster-ca.crt",
+						Permissions: new(uint32(0640)),
+						Content: extensionsv1alpha1.FileContent{
+							Inline: &extensionsv1alpha1.FileContentInline{
+								Encoding: "b64",
+								Data:     utils.EncodeBase64(caBundle),
+							},
+						},
+					},
 				))
 			})
 		})
@@ -187,7 +198,7 @@ exec "/opt/bin/gardener-node-agent" bootstrap --config-dir="/var/lib/gardener-no
 					Path:        fmt.Sprintf("/var/lib/gardener-node-agent/config-%s.yaml", version.Get().GitVersion),
 					Permissions: new(uint32(0600)),
 					Content: extensionsv1alpha1.FileContent{Inline: &extensionsv1alpha1.FileContentInline{Encoding: "b64", Data: utils.EncodeBase64([]byte(`apiServer:
-  caBundle: ` + utils.EncodeBase64(caBundle) + `
+  caFile: ` + nodeagentconfigv1alpha1.ClusterCAFilePath + `
   server: ` + apiServerURL + `
 apiVersion: nodeagent.config.gardener.cloud/v1alpha1
 bootstrap:
