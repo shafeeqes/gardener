@@ -119,6 +119,8 @@ type InitValues struct {
 type OriginalValues struct {
 	// CABundle is the bundle of certificate authorities that will be added as root certificates.
 	CABundle string
+	// RegistryCABundle is the bundle of certificate authorities for the private container registry.
+	RegistryCABundle *string
 	// ClusterDNSAddresses are the addresses for in-cluster DNS.
 	ClusterDNSAddresses []string
 	// ClusterDomain is the Kubernetes cluster domain.
@@ -775,6 +777,7 @@ func (o *operatingSystemConfig) newDeployer(version int, osc *extensionsv1alpha1
 		key:                                     oscKey,
 		apiServerURL:                            apiServerURL,
 		caBundle:                                caBundle,
+		registryCABundle:                        o.values.RegistryCABundle,
 		clusterCASecretName:                     clusterCASecret.Name,
 		clusterCABundle:                         clusterCASecret.Data[secretsutils.DataKeyCertificateBundle],
 		clusterDNSAddresses:                     o.values.ClusterDNSAddresses,
@@ -847,6 +850,7 @@ type deployer struct {
 
 	// original values
 	caBundle                                    string
+	registryCABundle                            *string
 	clusterCASecretName                         string
 	clusterCABundle                             []byte
 	clusterDNSAddresses                         []string
@@ -893,6 +897,7 @@ func (d *deployer) deploy(ctx context.Context, operation string) (extensionsv1al
 	componentsContext := components.Context{
 		Key:                                     d.key,
 		CABundle:                                d.caBundle,
+		RegistryCABundle:                        d.registryCABundle,
 		ClusterDNSAddresses:                     d.clusterDNSAddresses,
 		ClusterDomain:                           d.clusterDomain,
 		CRIName:                                 d.criName,
