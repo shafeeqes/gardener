@@ -878,6 +878,7 @@ build:
             - pkg/utils/gardener
             - pkg/utils/gardener/gardenlet
             - pkg/utils/graph
+            - pkg/utils/imagevector
             - pkg/utils/kubernetes
             - pkg/utils/kubernetes/bootstraptoken
             - pkg/utils/kubernetes/health
