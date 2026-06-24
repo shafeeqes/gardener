@@ -28,10 +28,7 @@ might not copy manifests for unused architectures, which causes the default pull
 Ref: https://github.com/containerd/containerd/pull/9029#issuecomment-1706963854
 */}}
 CTR_MAJOR=$(ctr version | grep Version | tail -n1 | awk '{print $2}' | cut -d '.' -f 1 | sed 's/[a-zA-Z]//g')
-CTR_EXTRA_ARGS=""
-if [ "$CTR_MAJOR" -gt 1 ]; then
-    CTR_EXTRA_ARGS="--skip-metadata"
-fi
+CTR_EXTRA_ARGS=$([ "$CTR_MAJOR" -gt 1 ] && echo "--skip-metadata" || true)
 ctr images pull $CTR_EXTRA_ARGS --hosts-dir "/etc/containerd/certs.d" "$image"
 ctr images mount "$image" "$tmp_dir"
 
