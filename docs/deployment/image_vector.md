@@ -150,3 +150,41 @@ The respective component is responsible for using the overwritten images instead
 Some Gardener components might also deploy [packaged Helm charts](https://helm.sh/docs/helm/helm_package/) which are pulled from an OCI repository.
 The concepts are the very same as for the container images.
 The only difference is that the environment variable for overwriting this chart image vector is called `IMAGEVECTOR_OVERWRITE_CHARTS`.
+
+## Registry CA Bundle
+
+When Gardener pulls container images from a private registry that uses a custom (self-signed or corporate) certificate authority, containerd on the worker nodes must trust that CA before it can pull images.
+The `caBundle` field in the image vector covers this: once configured, Gardener automatically distributes the CA certificate to every worker node during bootstrap, before the `gardener-node-agent` image is pulled.
+
+### Configuration
+
+Add a top-level `caBundle` section to your image vector (or image vector overwrite file).
+Exactly one of `inline` or `secretRef` must be set:
+
+**Inline PEM certificate:**
+
+```yaml
+caBundle:
+  inline: |
+    -----BEGIN CERTIFICATE-----
+    MIIBxTCCAW...
+    -----END CERTIFICATE-----
+images:
+- name: gardener-node-agent
+  ...
+```
+
+**Reference to a Secret:**
+
+```yaml
+caBundle:
+  secretRef:
+    name: my-registry-ca
+images:
+- name: gardener-node-agent
+  ...
+```
+
+The referenced Secret must exist in the gardenlet's namespace and contain the PEM-encoded CA bundle under the key `bundle.crt`.
+
+The `caBundle` can also be provided via the `IMAGEVECTOR_OVERWRITE` environment variable using the same file format, which takes precedence over the base image vector.
