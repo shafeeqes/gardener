@@ -13,6 +13,7 @@ import (
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
+	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/gardenlet/operation"
 	botanistpkg "github.com/gardener/gardener/pkg/gardenlet/operation/botanist"
 	errorsutils "github.com/gardener/gardener/pkg/utils/errors"
@@ -92,7 +93,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			)),
 		})
 
-		_ = g.Add(flow.Task{
+		destinationEtcdJoined = g.Add(flow.Task{
 			Name: "Joining destination etcd to the source cluster",
 			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined, flow.Sequential(
 				botanist.DeployControlPlaneNamespace,
@@ -112,7 +113,71 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(sourceEtcdReadyForPeerJoin),
 		})
 
-		// TODO(GEP-39): Future PRs will add other steps as the topic progresses.
+		destinationKubeAPIServerReady = g.Add(flow.Task{
+			Name: "Deploying destination control plane and temporary VPN",
+			Fn: r.exectuteStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, func(ctx context.Context, b *botanistpkg.Botanist) error {
+				// The destination deploys its control plane against the (already replicated) etcd and waits for the
+				// kube-apiserver to become ready. The etcd data is already present via the joint cluster, so no data
+				// copy is required.
+				if err := b.DeployControlPlaneNamespace(ctx); err != nil {
+					return fmt.Errorf("failed to deploy control plane namespace: %w", err)
+				}
+				if err := b.DeployGardenerResourceManager(ctx); err != nil {
+					return fmt.Errorf("failed to deploy gardener-resource-manager: %w", err)
+				}
+				if err := b.DeployExtensionsBeforeKubeAPIServer(ctx); err != nil {
+					return fmt.Errorf("failed to deploy extensions before kube-apiserver: %w", err)
+				}
+				if err := b.DeployKubeAPIServer(ctx); err != nil {
+					return fmt.Errorf("failed to deploy kube-apiserver: %w", err)
+				}
+				if err := b.Shoot.Components.ControlPlane.KubeAPIServer.Wait(ctx); err != nil {
+					return fmt.Errorf("failed to wait until kube-apiserver is ready: %w", err)
+				}
+				if err := b.DeployKubeControllerManager(ctx); err != nil {
+					return fmt.Errorf("failed to deploy kube-controller-manager: %w", err)
+				}
+				// Deploy the temporary VPN so admission webhooks can reach the destination from the shoot cluster
+				// before the DNS cutover.
+				if err := b.DeployVPNServer(ctx); err != nil {
+					return fmt.Errorf("failed to deploy destination VPN server: %w", err)
+				}
+				if err := b.DeployTemporaryVPNExposure(ctx); err != nil {
+					return fmt.Errorf("failed to deploy temporary VPN exposure: %w", err)
+				}
+				if err := b.DeployLiveMigrationVPNDNSRecord(ctx); err != nil {
+					return fmt.Errorf("failed to deploy live migration VPN DNS record: %w", err)
+				}
+				return b.DeployTemporaryVPNShoot(ctx)
+			}),
+			Dependencies: flow.NewTaskIDs(destinationEtcdJoined),
+		})
+
+		_ = g.Add(flow.Task{
+			Name: "Completing live migration",
+			Fn: r.exectuteStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted, func(ctx context.Context, b *botanistpkg.Botanist) error {
+				// Deploy the regular vpn-shoot first so the permanent tunnel to the destination is established before
+				// the temporary one is torn down, ensuring uninterrupted connectivity.
+				if err := b.DeployVPNShoot(ctx); err != nil {
+					return fmt.Errorf("failed to redeploy VPN shoot to destination: %w", err)
+				}
+				if err := b.DestroyTemporaryVPNShoot(ctx); err != nil {
+					return fmt.Errorf("failed to destroy temporary VPN shoot client: %w", err)
+				}
+				if err := b.DestroyLiveMigrationVPNDNSRecord(ctx); err != nil {
+					return fmt.Errorf("failed to destroy live migration VPN DNS record: %w", err)
+				}
+				if err := b.DestroyTemporaryVPNExposure(ctx); err != nil {
+					return fmt.Errorf("failed to destroy temporary VPN Istio exposure: %w", err)
+				}
+				// Finalize the migration: set status.seedName to the destination and clear the live-migration state
+				// and the intent annotation so the shoot returns to normal reconciliation on the destination seed.
+				return r.finalizeLiveMigration(ctx, b.Shoot.GetInfo())
+			}),
+			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
+		})
+
+		// TODO(GEP-39): Future PRs will add the remaining steps (extension migration, DNS cutover, source cleanup) as the topic progresses.
 	)
 
 	f := g.Compile()
@@ -176,6 +241,22 @@ func (r *Reconciler) setLiveMigrationStepConditionError(ctx context.Context, sho
 	condition := v1beta1helper.GetOrInitConditionWithClock(r.Clock, v1beta1helper.GetLiveMigrationConditions(shoot), conditionType)
 	condition = v1beta1helper.UpdatedConditionWithClock(r.Clock, condition, gardencorev1beta1.ConditionFalse, "StepFailed", err.Error())
 	return r.patchLiveMigrationConditions(ctx, shoot, condition)
+}
+
+// finalizeLiveMigration switches the shoot's status.seedName to the destination seed and clears the live-migration
+// state and intent annotation, returning the shoot to normal reconciliation on the destination seed.
+func (r *Reconciler) finalizeLiveMigration(ctx context.Context, shoot *gardencorev1beta1.Shoot) error {
+	patch := client.MergeFrom(shoot.DeepCopy())
+	delete(shoot.Annotations, v1beta1constants.AnnotationMigrationLiveMigrate)
+	if err := r.GardenClient.Patch(ctx, shoot, patch); err != nil {
+		return fmt.Errorf("failed to remove live migration annotation: %w", err)
+	}
+
+	statusPatch := client.StrategicMergeFrom(shoot.DeepCopy())
+	shoot.Status.SeedName = shoot.Spec.SeedName
+	shoot.Status.LiveMigration = nil
+	shoot.Status.MigrationStartTime = nil
+	return r.GardenClient.Status().Patch(ctx, shoot, statusPatch)
 }
 
 func (r *Reconciler) patchLiveMigrationConditions(ctx context.Context, shoot *gardencorev1beta1.Shoot, conditions ...gardencorev1beta1.Condition) error {
