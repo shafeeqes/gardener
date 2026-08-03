@@ -178,7 +178,14 @@ An in-place update of the shoot worker nodes is triggered for rolling update tri
 When a worker pool is undergoing an in-place update, applying subsequent updates to the same worker pool is restricted.
 If an in-place update fails and nodes are left in a problematic state, user intervention is required to manually fix the nodes. In cases where a subsequent update is necessary to resolve the issue, users can update the worker pool after adding the force update annotation `gardener.cloud/operation=force-in-place-update` on the Shoot. Refer to [Force-update a worker pool with InPlace update strategy](shoot_operations.md#force-update-a-worker-pool-with-inplace-update-strategy) for more details.
 
-> ⚠️ Changing the update strategy from `AutoRollingUpdate` to `AutoInPlaceUpdate`/`ManualInPlaceUpdate` (and vice versa) is not allowed. However, switching between `AutoInPlaceUpdate` and `ManualInPlaceUpdate` is permitted.
+> Switching between `AutoRollingUpdate` and `AutoInPlaceUpdate`/`ManualInPlaceUpdate` is supported in both directions. Switching between `AutoInPlaceUpdate` and `ManualInPlaceUpdate` is also permitted.
+>
+> **Pre-conditions for switching:**
+>
+> * **In-place → Rolling**: No pre-conditions. Switching triggers a one-time rolling replacement of all nodes using the new rolling MachineClass, which supersedes any pending in-place update on the pool.
+> * **Rolling → In-place**: The `InPlaceNodeUpdates` feature gate must be enabled and the machine image version must support in-place updates (as declared in the CloudProfile).
+>
+> **Behavior during the transition:** Switching strategies triggers a one-time node rollout on the next reconcile, applying the new strategy. Subsequent updates follow the new strategy from that point on.
 
 #### Automatic In-Place Updates
 
