@@ -11,7 +11,6 @@ import (
 	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -55,22 +54,18 @@ func (p *prometheus) istioResources(ctx context.Context) ([]client.Object, error
 
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	tlsSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      tlsSecretName,
-			Namespace: p.namespace,
-		},
+		Name:      tlsSecretName,
+		Namespace: p.namespace,
 	}
 	if err := p.client.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret); err != nil {
 		return nil, fmt.Errorf("failed to get TLS secret %q: %w", tlsSecretName, err)
 	}
 
 	tlsSecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", p.namespace, p.name(), tlsSecretName),
-			Namespace: p.values.Ingress.IstioIngressGatewayNamespace,
-			Labels:    p.getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      fmt.Sprintf("%s-%s-%s", p.namespace, p.name(), tlsSecretName),
+		Namespace: p.values.Ingress.IstioIngressGatewayNamespace,
+		Labels:    p.getLabels(),
+		Data:      tlsSecret.Data,
 	}
 
 	backendPort := servicePorts.Web.Port
@@ -78,7 +73,7 @@ func (p *prometheus) istioResources(ctx context.Context) ([]client.Object, error
 		backendPort = servicePorts.Cortex.Port
 	}
 
-	gateway := &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: p.namespace}}
+	gateway := &istionetworkingv1beta1.Gateway{Name: gatewayName, Namespace: p.namespace}
 	if err := istio.GatewayWithTLSTermination(
 		gateway,
 		p.getLabels(),
@@ -90,7 +85,7 @@ func (p *prometheus) istioResources(ctx context.Context) ([]client.Object, error
 	}
 
 	destinationHost := kubernetesutils.FQDNForService(p.name(), p.namespace)
-	virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: p.namespace}}
+	virtualService := &istionetworkingv1beta1.VirtualService{Name: gatewayName, Namespace: p.namespace}
 	if err := istio.VirtualServiceForTLSTermination(
 		virtualService,
 		utils.MergeStringMaps(p.getLabels(), istiobasicauthserver.BasicAuthLabels(p.values.Ingress.IsGardenCluster, p.values.Ingress.AuthSecretName, p.values.Ingress.AuthSecretManaged)),
@@ -136,7 +131,7 @@ func (p *prometheus) istioResources(ctx context.Context) ([]client.Object, error
 		}}, virtualService.Spec.Http...)
 	}
 
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: p.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: gatewayName, Namespace: p.namespace}
 	if err := istio.DestinationRuleWithLocalityPreference(destinationRule, p.getLabels(), []string{p.values.Ingress.IstioIngressGatewayNamespace}, destinationHost)(); err != nil {
 		return nil, fmt.Errorf("failed to create destination rule resource: %w", err)
 	}

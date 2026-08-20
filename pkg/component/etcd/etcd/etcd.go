@@ -127,10 +127,8 @@ func New(
 		secretsManager: secretsManager,
 		values:         values,
 		etcd: &druidcorev1alpha1.Etcd{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		},
 	}
 }
@@ -278,18 +276,16 @@ func (e *etcd) Deploy(ctx context.Context) error {
 		}
 
 		peerUrlTLS = &druidcorev1alpha1.PeerTLSConfig{
-			TLSConfig: druidcorev1alpha1.TLSConfig{
-				TLSCASecretRef: druidcorev1alpha1.SecretReference{
-					SecretReference: corev1.SecretReference{
-						Name:      etcdPeerCASecret.Name,
-						Namespace: e.namespace,
-					},
-					DataKey: new(secretsutils.DataKeyCertificateBundle),
-				},
-				ServerTLSSecretRef: corev1.SecretReference{
-					Name:      peerServerSecret.Name,
+			TLSCASecretRef: druidcorev1alpha1.SecretReference{
+				SecretReference: corev1.SecretReference{
+					Name:      etcdPeerCASecret.Name,
 					Namespace: e.namespace,
 				},
+				DataKey: new(secretsutils.DataKeyCertificateBundle),
+			},
+			ServerTLSSecretRef: corev1.SecretReference{
+				Name:      peerServerSecret.Name,
+				Namespace: e.namespace,
 			},
 		}
 	}
@@ -487,22 +483,17 @@ func (e *etcd) Deploy(ctx context.Context) error {
 				{
 					Port:   portNameClient,
 					Scheme: new(monitoringv1.SchemeHTTPS),
-					HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-						HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-							TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{
-								// This is needed because the etcd's certificates are not are generated for a specific pod IP.
-								InsecureSkipVerify: new(true),
-								Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: clientSecret.Name},
-									Key:                  secretsutils.DataKeyCertificate,
-								}},
-								KeySecret: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: clientSecret.Name},
-									Key:                  secretsutils.DataKeyPrivateKey,
-								},
-							}},
-						},
-					},
+					TLSConfig: &monitoringv1.TLSConfig{
+						// This is needed because the etcd's certificates are not are generated for a specific pod IP.
+						InsecureSkipVerify: new(true),
+						Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
+							Name: clientSecret.Name,
+							Key:  secretsutils.DataKeyCertificate,
+						}},
+						KeySecret: &corev1.SecretKeySelector{
+							Name: clientSecret.Name,
+							Key:  secretsutils.DataKeyPrivateKey,
+						}},
 					RelabelConfigs: []monitoringv1.RelabelConfig{
 						{
 							SourceLabels: []monitoringv1.LabelName{"__meta_kubernetes_service_label_app_kubernetes_io_part_of"},
@@ -522,22 +513,17 @@ func (e *etcd) Deploy(ctx context.Context) error {
 				{
 					Port:   portNameBackupRestore,
 					Scheme: new(monitoringv1.SchemeHTTPS),
-					HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-						HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-							TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{
-								// This is needed because the etcd's certificates are not are generated for a specific pod IP.
-								InsecureSkipVerify: new(true),
-								Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: clientSecret.Name},
-									Key:                  secretsutils.DataKeyCertificate,
-								}},
-								KeySecret: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: clientSecret.Name},
-									Key:                  secretsutils.DataKeyPrivateKey,
-								},
-							}},
-						},
-					},
+					TLSConfig: &monitoringv1.TLSConfig{
+						// This is needed because the etcd's certificates are not are generated for a specific pod IP.
+						InsecureSkipVerify: new(true),
+						Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
+							Name: clientSecret.Name,
+							Key:  secretsutils.DataKeyCertificate,
+						}},
+						KeySecret: &corev1.SecretKeySelector{
+							Name: clientSecret.Name,
+							Key:  secretsutils.DataKeyPrivateKey,
+						}},
 					RelabelConfigs: []monitoringv1.RelabelConfig{
 						{
 							SourceLabels: []monitoringv1.LabelName{"__meta_kubernetes_service_label_app_kubernetes_io_part_of"},
@@ -822,7 +808,7 @@ func (e *etcd) emptyScrapeConfig() *monitoringv1alpha1.ScrapeConfig {
 }
 
 func (e *etcd) emptyVerticalPodAutoscaler() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: e.etcd.Name, Namespace: e.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: e.etcd.Name, Namespace: e.namespace}
 }
 
 func (e *etcd) reconcileVerticalPodAutoscaler(ctx context.Context, vpa *vpaautoscalingv1.VerticalPodAutoscaler, minAllowedETCD corev1.ResourceList) error {
@@ -961,11 +947,9 @@ func (e *etcd) RolloutPeerCA(ctx context.Context) error {
 		}
 
 		e.etcd.Spec.Etcd.PeerUrlTLS.TLSCASecretRef = druidcorev1alpha1.SecretReference{
-			SecretReference: corev1.SecretReference{
-				Name:      etcdPeerCASecret.Name,
-				Namespace: e.etcd.Namespace,
-			},
-			DataKey: dataKey,
+			Name:      etcdPeerCASecret.Name,
+			Namespace: e.etcd.Namespace,
+			DataKey:   dataKey,
 		}
 		return nil
 	}); err != nil {

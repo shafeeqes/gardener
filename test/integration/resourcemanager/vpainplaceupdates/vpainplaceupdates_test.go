@@ -19,10 +19,8 @@ var _ = Describe("VPAInPlaceUpdates tests", func() {
 
 	BeforeEach(func() {
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					Name:       "test-deployment",

@@ -14,7 +14,6 @@ import (
 	"github.com/onsi/gomega/types"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,28 +51,22 @@ var _ = Describe("ManagedResource Object Matcher", func() {
 		resourceNamespace = "default"
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: resourceNamespace,
-			},
+			Name:      resourceName,
+			Namespace: resourceNamespace,
 			Data: map[string]string{
 				"key": "value",
 			},
 		}
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: resourceNamespace,
-			},
+			Name:      resourceName,
+			Namespace: resourceNamespace,
 			Data: map[string][]byte{
 				"key": []byte("value"),
 			},
 		}
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: resourceNamespace,
-			},
+			Name:      resourceName,
+			Namespace: resourceNamespace,
 			Spec: appsv1.DeploymentSpec{
 				Replicas: new(int32(2)),
 				Paused:   true,
@@ -88,22 +81,16 @@ var _ = Describe("ManagedResource Object Matcher", func() {
 		}
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: resourceNamespace,
-			},
+			Name:      resourceName,
+			Namespace: resourceNamespace,
 		}
 		managedResourceSecret1 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secret1",
-				Namespace: resourceNamespace,
-			},
+			Name:      "secret1",
+			Namespace: resourceNamespace,
 		}
 		managedResourceSecret2 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secret2",
-				Namespace: resourceNamespace,
-			},
+			Name:      "secret2",
+			Namespace: resourceNamespace,
 		}
 	})
 

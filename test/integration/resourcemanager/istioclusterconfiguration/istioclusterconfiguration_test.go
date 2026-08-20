@@ -12,7 +12,6 @@ import (
 	istionetworkingv1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -30,9 +29,7 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 
 	BeforeEach(func() {
 		sourceNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-source-",
-			},
+			GenerateName: testID + "-source-",
 		}
 		Expect(testClient.Create(ctx, sourceNamespace)).To(Succeed())
 		log.Info("Created source namespace", "name", sourceNamespace.Name)
@@ -45,11 +42,9 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 		})
 
 		istioIngressNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-istio-ingress-",
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-				},
+			GenerateName: testID + "-istio-ingress-",
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 			},
 		}
 		Expect(testClient.Create(ctx, istioIngressNamespace)).To(Succeed())
@@ -63,11 +58,9 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 		})
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "kube-apiserver",
-				Namespace:   sourceNamespace.Name,
-				Annotations: map[string]string{"networking.istio.io/exportTo": "*"},
-			},
+			Name:        "kube-apiserver",
+			Namespace:   sourceNamespace.Name,
+			Annotations: map[string]string{"networking.istio.io/exportTo": "*"},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
 					{Name: "https-main", Port: 443},
@@ -77,10 +70,8 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 		Expect(testClient.Create(ctx, service)).To(Succeed())
 
 		destinationRule = &istionetworkingv1beta1.DestinationRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver",
-				Namespace: sourceNamespace.Name,
-			},
+			Name:      "kube-apiserver",
+			Namespace: sourceNamespace.Name,
 			Spec: istioapinetworkingv1beta1.DestinationRule{
 				Host:     service.Name + "." + sourceNamespace.Name + ".svc.cluster.local",
 				ExportTo: []string{"*"},
@@ -167,11 +158,9 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 
 	It("should create EnvoyFilters in multiple istio-ingress namespaces", func() {
 		istioIngressNamespace2 := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-istio-ingress2-",
-				Labels: map[string]string{
-					v1beta1constants.LabelExposureClassHandlerName: "test-handler",
-				},
+			GenerateName: testID + "-istio-ingress2-",
+			Labels: map[string]string{
+				v1beta1constants.LabelExposureClassHandlerName: "test-handler",
 			},
 		}
 		Expect(testClient.Create(ctx, istioIngressNamespace2)).To(Succeed())
@@ -203,11 +192,9 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 
 	It("should respect exportTo restriction", func() {
 		istioIngressNamespace2 := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-istio-ingress2-",
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-				},
+			GenerateName: testID + "-istio-ingress2-",
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 			},
 		}
 		Expect(testClient.Create(ctx, istioIngressNamespace2)).To(Succeed())
@@ -249,11 +236,9 @@ var _ = Describe("IstioClusterConfiguration controller tests", Serial, func() {
 
 		By("Create a new istio-ingress namespace")
 		istioIngressNamespace2 := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-istio-ingress-new-",
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-				},
+			GenerateName: testID + "-istio-ingress-new-",
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 			},
 		}
 		Expect(testClient.Create(ctx, istioIngressNamespace2)).To(Succeed())

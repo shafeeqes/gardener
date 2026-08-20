@@ -174,10 +174,8 @@ func (v *vpnSeedServer) Deploy(ctx context.Context) error {
 		return err
 	}
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "vpn-seed-server-envoy-config",
-			Namespace: v.namespace,
-		},
+		Name:      "vpn-seed-server-envoy-config",
+		Namespace: v.namespace,
 		Data: map[string]string{
 			fileNameEnvoyConfig: envoyConfig,
 		},
@@ -271,13 +269,11 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 	}
 
 	template := &corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-				v1beta1constants.LabelNetworkPolicyToDNS:                                                                    v1beta1constants.LabelNetworkPolicyAllowed,
-				v1beta1constants.LabelNetworkPolicyToPrivateNetworks:                                                        v1beta1constants.LabelNetworkPolicyAllowed,
-				gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
-			}),
-		},
+		Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+			v1beta1constants.LabelNetworkPolicyToDNS:                                                                    v1beta1constants.LabelNetworkPolicyAllowed,
+			v1beta1constants.LabelNetworkPolicyToPrivateNetworks:                                                        v1beta1constants.LabelNetworkPolicyAllowed,
+			gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
+		}),
 		Spec: corev1.PodSpec{
 			AutomountServiceAccountToken: new(false),
 			PriorityClassName:            v1beta1constants.PriorityClassNameShootControlPlane300,
@@ -343,23 +339,19 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 						},
 					},
 					ReadinessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							Exec: &corev1.ExecAction{
-								Command: []string{
-									"/bin/vpn-server",
-									"readiness",
-								},
+						Exec: &corev1.ExecAction{
+							Command: []string{
+								"/bin/vpn-server",
+								"readiness",
 							},
 						},
 						InitialDelaySeconds: 15,
 					},
 					LivenessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							Exec: &corev1.ExecAction{
-								Command: []string{
-									"/bin/vpn-server",
-									"liveness",
-								},
+						Exec: &corev1.ExecAction{
+							Command: []string{
+								"/bin/vpn-server",
+								"liveness",
 							},
 						},
 						InitialDelaySeconds: 5,
@@ -403,44 +395,36 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 			Volumes: []corev1.Volume{
 				{
 					Name: volumeNameDevNetTun,
-					VolumeSource: corev1.VolumeSource{
-						HostPath: &corev1.HostPathVolumeSource{
-							Path: volumeMountPathDevNetTun,
-							Type: &hostPathCharDev,
-						},
+					HostPath: &corev1.HostPathVolumeSource{
+						Path: volumeMountPathDevNetTun,
+						Type: &hostPathCharDev,
 					},
 				},
 				{
 					Name: volumeNameCerts,
-					VolumeSource: corev1.VolumeSource{
-						Projected: &corev1.ProjectedVolumeSource{
-							DefaultMode: new(int32(420)),
-							Sources: []corev1.VolumeProjection{
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: secretCAVPN.Name,
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  secretsutils.DataKeyCertificateBundle,
-											Path: fileNameCABundle,
-										}},
-									},
+					Projected: &corev1.ProjectedVolumeSource{
+						DefaultMode: new(int32(420)),
+						Sources: []corev1.VolumeProjection{
+							{
+								Secret: &corev1.SecretProjection{
+									Name: secretCAVPN.Name,
+									Items: []corev1.KeyToPath{{
+										Key:  secretsutils.DataKeyCertificateBundle,
+										Path: fileNameCABundle,
+									}},
 								},
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: secretServer.Name,
+							},
+							{
+								Secret: &corev1.SecretProjection{
+									Name: secretServer.Name,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  secretsutils.DataKeyCertificate,
+											Path: secretsutils.DataKeyCertificate,
 										},
-										Items: []corev1.KeyToPath{
-											{
-												Key:  secretsutils.DataKeyCertificate,
-												Path: secretsutils.DataKeyCertificate,
-											},
-											{
-												Key:  secretsutils.DataKeyPrivateKey,
-												Path: secretsutils.DataKeyPrivateKey,
-											},
+										{
+											Key:  secretsutils.DataKeyPrivateKey,
+											Path: secretsutils.DataKeyPrivateKey,
 										},
 									},
 								},
@@ -450,18 +434,14 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 				},
 				{
 					Name: volumeNameTLSAuth,
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  secretTLSAuth.Name,
-							DefaultMode: new(int32(0400)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  secretTLSAuth.Name,
+						DefaultMode: new(int32(0400)),
 					},
 				},
 				{
-					Name: volumeNameStatusDir,
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
+					Name:     volumeNameStatusDir,
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
 				},
 			},
 		},
@@ -471,12 +451,8 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 		template.Spec.Containers = append(template.Spec.Containers, *envoy.GetEnvoyProxyContainer(v.values.ImageAPIServerProxy))
 		template.Spec.Volumes = append(template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameEnvoyConfig,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: configMap.Name,
-					},
-				},
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				Name: configMap.Name,
 			},
 		})
 	} else {
@@ -523,17 +499,13 @@ func (v *vpnSeedServer) podTemplate(configMap *corev1.ConfigMap, secretCAVPN, se
 				},
 			},
 			ReadinessProbe: &corev1.Probe{
-				ProbeHandler: corev1.ProbeHandler{
-					TCPSocket: &corev1.TCPSocketAction{
-						Port: intstr.FromInt32(metricsPort),
-					},
+				TCPSocket: &corev1.TCPSocketAction{
+					Port: intstr.FromInt32(metricsPort),
 				},
 			},
 			LivenessProbe: &corev1.Probe{
-				ProbeHandler: corev1.ProbeHandler{
-					TCPSocket: &corev1.TCPSocketAction{
-						Port: intstr.FromInt32(metricsPort),
-					},
+				TCPSocket: &corev1.TCPSocketAction{
+					Port: intstr.FromInt32(metricsPort),
 				},
 			},
 			Resources: corev1.ResourceRequirements{
@@ -934,7 +906,7 @@ func (v *vpnSeedServer) indexedName(idx *int) string {
 }
 
 func (v *vpnSeedServer) emptyService(idx *int) *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: v.indexedName(idx), Namespace: v.namespace}}
+	return &corev1.Service{Name: v.indexedName(idx), Namespace: v.namespace}
 }
 
 func (v *vpnSeedServer) emptyScrapeConfig() *monitoringv1alpha1.ScrapeConfig {
@@ -942,27 +914,27 @@ func (v *vpnSeedServer) emptyScrapeConfig() *monitoringv1alpha1.ScrapeConfig {
 }
 
 func (v *vpnSeedServer) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: v.namespace}}
+	return &appsv1.Deployment{Name: deploymentName, Namespace: v.namespace}
 }
 
 func (v *vpnSeedServer) emptyStatefulSet() *appsv1.StatefulSet {
-	return &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: v.namespace}}
+	return &appsv1.StatefulSet{Name: deploymentName, Namespace: v.namespace}
 }
 
 func (v *vpnSeedServer) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: v.namespace}}
+	return &policyv1.PodDisruptionBudget{Name: deploymentName, Namespace: v.namespace}
 }
 
 func (v *vpnSeedServer) emptyDestinationRule(idx *int) *networkingv1beta1.DestinationRule {
-	return &networkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: v.indexedName(idx), Namespace: v.namespace}}
+	return &networkingv1beta1.DestinationRule{Name: v.indexedName(idx), Namespace: v.namespace}
 }
 
 func (v *vpnSeedServer) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: deploymentName + "-vpa", Namespace: v.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: deploymentName + "-vpa", Namespace: v.namespace}
 }
 
 func (v *vpnSeedServer) emptyEnvoyFilter() *networkingv1alpha3.EnvoyFilter {
-	return &networkingv1alpha3.EnvoyFilter{ObjectMeta: metav1.ObjectMeta{Name: v.namespace + "-vpn", Namespace: v.istioNamespaceFunc()}}
+	return &networkingv1alpha3.EnvoyFilter{Name: v.namespace + "-vpn", Namespace: v.istioNamespaceFunc()}
 }
 
 func getLabels() map[string]string {

@@ -111,65 +111,51 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c, comptest.CmpOptsForIstio()...)
 
 		By("Create secrets managed outside of this package for which secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}, Data: map[string][]byte{"bundle.crt": []byte("ca-bundle")}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace, Data: map[string][]byte{"bundle.crt": []byte("ca-bundle")}})).To(Succeed())
 	})
 
 	JustBeforeEach(func() {
 		customResourcesManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "opentelemetry-collector",
-				Namespace: namespace,
-			},
+			Name:      "opentelemetry-collector",
+			Namespace: namespace,
 		}
 		managedResourceTarget = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameTarget,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameTarget,
+			Namespace: namespace,
 		}
 		customResourcesManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + customResourcesManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + customResourcesManagedResource.Name,
+			Namespace: namespace,
 		}
 		managedResourceSecretTarget = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceSecretNameTarget,
-				Namespace: namespace,
-			},
+			Name:      managedResourceSecretNameTarget,
+			Namespace: namespace,
 		}
 
 		volume = corev1.Volume{
 			Name: "kubeconfig",
-			VolumeSource: corev1.VolumeSource{
-				Projected: &corev1.ProjectedVolumeSource{
-					DefaultMode: new(int32(420)),
-					Sources: []corev1.VolumeProjection{
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: genericTokenKubeconfigSecretName,
-								},
-								Items: []corev1.KeyToPath{{
-									Key:  secrets.DataKeyKubeconfig,
-									Path: secrets.DataKeyKubeconfig,
-								}},
-								Optional: new(false),
-							},
+			Projected: &corev1.ProjectedVolumeSource{
+				DefaultMode: new(int32(420)),
+				Sources: []corev1.VolumeProjection{
+					{
+						Secret: &corev1.SecretProjection{
+							Name: genericTokenKubeconfigSecretName,
+							Items: []corev1.KeyToPath{{
+								Key:  secrets.DataKeyKubeconfig,
+								Path: secrets.DataKeyKubeconfig,
+							}},
+							Optional: new(false),
 						},
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: "shoot-access-rbac-proxy",
-								},
-								Items: []corev1.KeyToPath{{
-									Key:  resourcesv1alpha1.DataKeyToken,
-									Path: resourcesv1alpha1.DataKeyToken,
-								}},
-								Optional: new(false),
-							},
+					},
+					{
+						Secret: &corev1.SecretProjection{
+							Name: "shoot-access-rbac-proxy",
+							Items: []corev1.KeyToPath{{
+								Key:  resourcesv1alpha1.DataKeyToken,
+								Path: resourcesv1alpha1.DataKeyToken,
+							}},
+							Optional: new(false),
 						},
 					},
 				},
@@ -183,11 +169,9 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "opentelemetry-collector",
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:                         "opentelemetry-collector",
+			Namespace:                    namespace,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
@@ -233,11 +217,9 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		}
 
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-opentelemetry-collector",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "shoot"},
-			},
+			Name:      "shoot-opentelemetry-collector",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "shoot"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: getLabels()},
 				Endpoints: []monitoringv1.Endpoint{{
@@ -271,18 +253,16 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		}
 
 		openTelemetryCollector = &otelv1beta1.OpenTelemetryCollector{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "opentelemetry-collector",
-				Namespace: namespace,
-				Labels:    getLabels(),
-				Annotations: map[string]string{
-					resourcesv1alpha1.NetworkPolicyFromPolicyAnnotationPrefix +
-						v1beta1constants.LabelNetworkPolicyScrapeTargets +
-						resourcesv1alpha1.NetworkPolicyFromPolicyAnnotationSuffix: `[{"protocol":"TCP","port":8888}]`,
-					resourcesv1alpha1.NetworkingPodLabelSelectorNamespaceAlias: "all-shoots",
-					resourcesv1alpha1.NetworkingNamespaceSelectors:             `[{"matchLabels":{"kubernetes.io/metadata.name":"garden"}}]`,
-					"networking.istio.io/exportTo":                             "istio-ingress",
-				},
+			Name:      "opentelemetry-collector",
+			Namespace: namespace,
+			Labels:    getLabels(),
+			Annotations: map[string]string{
+				resourcesv1alpha1.NetworkPolicyFromPolicyAnnotationPrefix +
+					v1beta1constants.LabelNetworkPolicyScrapeTargets +
+					resourcesv1alpha1.NetworkPolicyFromPolicyAnnotationSuffix: `[{"protocol":"TCP","port":8888}]`,
+				resourcesv1alpha1.NetworkingPodLabelSelectorNamespaceAlias: "all-shoots",
+				resourcesv1alpha1.NetworkingNamespaceSelectors:             `[{"matchLabels":{"kubernetes.io/metadata.name":"garden"}}]`,
+				"networking.istio.io/exportTo":                             "istio-ingress",
 			},
 			Spec: otelv1beta1.OpenTelemetryCollectorSpec{
 				Observability: otelv1beta1.ObservabilitySpec{
@@ -475,11 +455,9 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "opentelemetry-collector",
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      "opentelemetry-collector",
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: otelv1beta1.GroupVersion.String(),
@@ -510,10 +488,8 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		openTelemetryCollector.Spec.AdditionalContainers = []corev1.Container{kubeRBACProxyValiContainer, kubeRBACProxyOTLPContainer}
 		openTelemetryCollector.Spec.Volumes = []corev1.Volume{volume, {
 			Name: "tls-certificate",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: "logging-tls",
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: "logging-tls",
 			},
 		}}
 		openTelemetryCollector.Spec.Ports = append(openTelemetryCollector.Spec.Ports, otelv1beta1.PortsSpec{
@@ -536,24 +512,20 @@ var _ = Describe("OpenTelemetry Collector", func() {
 			Expect(component.Deploy(ctx)).To(Succeed())
 
 			tlsSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "logging-tls",
-					Namespace: namespace,
-				},
+				Name:      "logging-tls",
+				Namespace: namespace,
 			}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)).To(Succeed())
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "opentelemetry-collector",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:          "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
-					ResourceVersion: "1",
+				Name:      "opentelemetry-collector",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:          "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -598,24 +570,20 @@ var _ = Describe("OpenTelemetry Collector", func() {
 			Expect(component.Deploy(ctx)).To(Succeed())
 
 			tlsSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "logging-tls",
-					Namespace: namespace,
-				},
+				Name:      "logging-tls",
+				Namespace: namespace,
 			}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)).To(Succeed())
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "opentelemetry-collector",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:          "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
-					ResourceVersion: "1",
+				Name:      "opentelemetry-collector",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:          "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -647,12 +615,10 @@ var _ = Describe("OpenTelemetry Collector", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceTarget), managedResourceTarget)).To(Succeed())
 			expectedTargetMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceNameTarget,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResourceNameTarget,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -682,7 +648,7 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		It("should use custom CA secret name for certificate signing", func() {
 			values.SecretNameServerCA = "custom-ca-secret"
 			values.ShootNodeLoggingEnabled = false // Disable node logging for simpler test
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "custom-ca-secret", Namespace: namespace}, Data: map[string][]byte{"bundle.crt": []byte("custom-ca-bundle")}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: "custom-ca-secret", Namespace: namespace, Data: map[string][]byte{"bundle.crt": []byte("custom-ca-bundle")}})).To(Succeed())
 
 			component = New(c, namespace, values, fakeSecretManager)
 
@@ -696,7 +662,7 @@ var _ = Describe("OpenTelemetry Collector", func() {
 		It("should use seed CA secret when SecretNameServerCA is set to SecretNameCASeed", func() {
 			values.SecretNameServerCA = v1beta1constants.SecretNameCASeed
 			values.ShootNodeLoggingEnabled = false // Disable node logging for simpler test
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.SecretNameCASeed, Namespace: namespace}, Data: map[string][]byte{"bundle.crt": []byte("seed-ca-bundle")}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: v1beta1constants.SecretNameCASeed, Namespace: namespace, Data: map[string][]byte{"bundle.crt": []byte("seed-ca-bundle")}})).To(Succeed())
 
 			component = New(c, namespace, values, fakeSecretManager)
 
@@ -714,10 +680,8 @@ var _ = Describe("OpenTelemetry Collector", func() {
 			Expect(component.Deploy(ctx)).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 			tlsSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "logging-tls",
-					Namespace: namespace,
-				},
+				Name:      "logging-tls",
+				Namespace: namespace,
 			}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKey{Name: kubeRBACProxyShootAccessSecretName, Namespace: namespace}, &corev1.Secret{})).To(Succeed())
@@ -745,10 +709,8 @@ var _ = Describe("OpenTelemetry Collector", func() {
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 
 			tlsSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "logging-tls",
-					Namespace: namespace,
-				},
+				Name:      "logging-tls",
+				Namespace: namespace,
 			}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)).To(Succeed())
 
@@ -791,23 +753,21 @@ var _ = Describe("OpenTelemetry Collector", func() {
 			// Only the kubeconfig volume — no TLS volume
 			seedCollector.Spec.Volumes = []corev1.Volume{{
 				Name: "kubeconfig",
-				VolumeSource: corev1.VolumeSource{
-					Projected: &corev1.ProjectedVolumeSource{
-						DefaultMode: new(int32(420)),
-						Sources: []corev1.VolumeProjection{
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{Name: ""},
-									Items:                []corev1.KeyToPath{{Key: secrets.DataKeyKubeconfig, Path: secrets.DataKeyKubeconfig}},
-									Optional:             new(false),
-								},
+				Projected: &corev1.ProjectedVolumeSource{
+					DefaultMode: new(int32(420)),
+					Sources: []corev1.VolumeProjection{
+						{
+							Secret: &corev1.SecretProjection{
+								Name:     "",
+								Items:    []corev1.KeyToPath{{Key: secrets.DataKeyKubeconfig, Path: secrets.DataKeyKubeconfig}},
+								Optional: new(false),
 							},
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-rbac-proxy"},
-									Items:                []corev1.KeyToPath{{Key: resourcesv1alpha1.DataKeyToken, Path: resourcesv1alpha1.DataKeyToken}},
-									Optional:             new(false),
-								},
+						},
+						{
+							Secret: &corev1.SecretProjection{
+								Name:     "shoot-access-rbac-proxy",
+								Items:    []corev1.KeyToPath{{Key: resourcesv1alpha1.DataKeyToken, Path: resourcesv1alpha1.DataKeyToken}},
+								Optional: new(false),
 							},
 						},
 					},
@@ -865,11 +825,9 @@ var _ = Describe("OpenTelemetry Collector", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -892,11 +850,9 @@ var _ = Describe("OpenTelemetry Collector", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -921,10 +877,8 @@ var _ = Describe("OpenTelemetry Collector", func() {
 				fakeOps.MaxAttempts = 2
 
 				customResourcesManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      customResourcesManagedResourceName,
-						Namespace: namespace,
-					},
+					Name:      customResourcesManagedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, customResourcesManagedResource)).To(Succeed())
 
@@ -940,11 +894,9 @@ var _ = Describe("OpenTelemetry Collector", func() {
 
 func getGateway() *istionetworkingv1beta1.Gateway {
 	return &istionetworkingv1beta1.Gateway{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "logging",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "logging",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: istioapinetworkingv1beta1.Gateway{
 			Servers: []*istioapinetworkingv1beta1.Server{{
 				Port: &istioapinetworkingv1beta1.Port{
@@ -964,11 +916,9 @@ func getGateway() *istionetworkingv1beta1.Gateway {
 
 func getVirtualService() *istionetworkingv1beta1.VirtualService {
 	return &istionetworkingv1beta1.VirtualService{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "logging",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "logging",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: istioapinetworkingv1beta1.VirtualService{
 			ExportTo: []string{"istio-ingress"},
 			Gateways: []string{"logging"},
@@ -1011,11 +961,9 @@ func getVirtualService() *istionetworkingv1beta1.VirtualService {
 
 func getDestinationRule() *istionetworkingv1beta1.DestinationRule {
 	return &istionetworkingv1beta1.DestinationRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "logging",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "logging",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: istioapinetworkingv1beta1.DestinationRule{
 			ExportTo: []string{"istio-ingress"},
 			Host:     "opentelemetry-collector-collector.some-namespace.svc.cluster.local",
@@ -1049,22 +997,18 @@ func getDestinationRule() *istionetworkingv1beta1.DestinationRule {
 
 func getTLSSecret(tlsSecret *corev1.Secret) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "some-namespace-logging-logging-tls",
-			Namespace: "istio-ingress",
-			Labels:    getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      "some-namespace-logging-logging-tls",
+		Namespace: "istio-ingress",
+		Labels:    getLabels(),
+		Data:      tlsSecret.Data,
 	}
 }
 
 func getCaBundleSecret() *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "some-namespace-logging-" + v1beta1constants.SecretNameCACluster,
-			Namespace: "istio-ingress",
-			Labels:    getLabels(),
-		},
+		Name:      "some-namespace-logging-" + v1beta1constants.SecretNameCACluster,
+		Namespace: "istio-ingress",
+		Labels:    getLabels(),
 		Data: map[string][]byte{
 			"cacert": []byte("ca-bundle"),
 		},
@@ -1073,10 +1017,8 @@ func getCaBundleSecret() *corev1.Secret {
 
 func getKubeRBACProxyClusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:logging:rbac-proxy",
-			Labels: map[string]string{"app": "rbac-proxy"},
-		},
+		Name:   "gardener.cloud:logging:rbac-proxy",
+		Labels: map[string]string{"app": "rbac-proxy"},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",
@@ -1092,10 +1034,8 @@ func getKubeRBACProxyClusterRoleBinding() *rbacv1.ClusterRoleBinding {
 
 func getValitailClusterRole(name, appName, path string) *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: map[string]string{"app": appName},
-		},
+		Name:   name,
+		Labels: map[string]string{"app": appName},
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"", "apps"},
@@ -1123,10 +1063,8 @@ func getValitailClusterRole(name, appName, path string) *rbacv1.ClusterRole {
 
 func getValitailClusterRoleBinding(name, appName, roleName, subjectName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: map[string]string{"app": appName},
-		},
+		Name:   name,
+		Labels: map[string]string{"app": appName},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",

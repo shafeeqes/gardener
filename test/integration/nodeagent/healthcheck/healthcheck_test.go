@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -103,10 +102,8 @@ var _ = Describe("Healthcheck controller tests", func() {
 		})
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   nodeName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   nodeName,
+			Labels: map[string]string{testID: testRunID},
 		}
 
 		By("Create Node")

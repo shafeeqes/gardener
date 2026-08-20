@@ -11,7 +11,6 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/component-base/version"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
@@ -28,7 +27,7 @@ var GetCurrentVersion = version.Get
 // VerifyGardenerVersion verifies that the operator's version is not lower and not more than one version higher than
 // the version last operated on a Garden.
 func VerifyGardenerVersion(ctx context.Context, log logr.Logger, reader client.Reader) error {
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "gardener-info", Namespace: gardencorev1beta1.GardenerSystemPublicNamespace}}
+	configMap := &corev1.ConfigMap{Name: "gardener-info", Namespace: gardencorev1beta1.GardenerSystemPublicNamespace}
 	if err := reader.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		return fmt.Errorf("failed reading ConfigMap %s from garden cluster: %w", client.ObjectKeyFromObject(configMap), err)
 	}

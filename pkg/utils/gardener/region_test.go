@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -27,15 +26,13 @@ var _ = Describe("Region", func() {
 
 	makeCM := func(name, cloudProfilesAnnotation string) *corev1.ConfigMap {
 		return &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					v1beta1constants.SchedulingPurpose: v1beta1constants.SchedulingPurposeRegionConfig,
-				},
-				Annotations: map[string]string{
-					v1beta1constants.AnnotationSchedulingCloudProfiles: cloudProfilesAnnotation,
-				},
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				v1beta1constants.SchedulingPurpose: v1beta1constants.SchedulingPurposeRegionConfig,
+			},
+			Annotations: map[string]string{
+				v1beta1constants.AnnotationSchedulingCloudProfiles: cloudProfilesAnnotation,
 			},
 		}
 	}

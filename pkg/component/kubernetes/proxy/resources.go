@@ -102,19 +102,15 @@ func (k *kubeProxy) computeCentralResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-proxy",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:                         "kube-proxy",
+			Namespace:                    metav1.NamespaceSystem,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		// This ClusterRoleBinding is similar to 'system:node-proxier' with the difference that it binds the kube-proxy's
 		// ServiceAccount to the 'system:node-proxier' ClusterRole.
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:node-proxier",
-			},
+			Name: "gardener.cloud:target:node-proxier",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -128,11 +124,9 @@ func (k *kubeProxy) computeCentralResourcesData() (map[string][]byte, error) {
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    GetLabels(),
-			},
+			Name:      serviceName,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    GetLabels(),
 			Spec: corev1.ServiceSpec{
 				Type:      corev1.ServiceTypeClusterIP,
 				ClusterIP: corev1.ClusterIPNone,
@@ -146,39 +140,31 @@ func (k *kubeProxy) computeCentralResourcesData() (map[string][]byte, error) {
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-proxy",
-				Namespace: metav1.NamespaceSystem,
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: map[string][]byte{dataKeyKubeconfig: k.values.Kubeconfig},
+			Name:      "kube-proxy",
+			Namespace: metav1.NamespaceSystem,
+			Type:      corev1.SecretTypeOpaque,
+			Data:      map[string][]byte{dataKeyKubeconfig: k.values.Kubeconfig},
 		}
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ConfigNamePrefix,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    utils.MergeStringMaps(GetLabels(), getSystemComponentLabels()),
-			},
-			Data: map[string]string{dataKeyConfig: componentConfigRaw},
+			Name:      ConfigNamePrefix,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    utils.MergeStringMaps(GetLabels(), getSystemComponentLabels()),
+			Data:      map[string]string{dataKeyConfig: componentConfigRaw},
 		}
 
 		configMapConntrackFixScript = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-proxy-conntrack-fix-script",
-				Namespace: metav1.NamespaceSystem,
-				Labels:    utils.MergeStringMaps(GetLabels(), getSystemComponentLabels()),
-			},
-			Data: map[string]string{dataKeyConntrackFixScript: conntrackFixScript},
+			Name:      "kube-proxy-conntrack-fix-script",
+			Namespace: metav1.NamespaceSystem,
+			Labels:    utils.MergeStringMaps(GetLabels(), getSystemComponentLabels()),
+			Data:      map[string]string{dataKeyConntrackFixScript: conntrackFixScript},
 		}
 
 		configMapCleanupScript = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-proxy-cleanup-script",
-				Namespace: metav1.NamespaceSystem,
-				Labels:    utils.MergeStringMaps(GetLabels(), getSystemComponentLabels()),
-			},
-			Data: map[string]string{dataKeyCleanupScript: cleanupScript},
+			Name:      "kube-proxy-cleanup-script",
+			Namespace: metav1.NamespaceSystem,
+			Labels:    utils.MergeStringMaps(GetLabels(), getSystemComponentLabels()),
+			Data:      map[string]string{dataKeyCleanupScript: cleanupScript},
 		}
 	)
 
@@ -212,14 +198,12 @@ func (k *kubeProxy) computePoolResourcesData(pool WorkerPool) (map[string][]byte
 		fileOrCreate      = corev1.HostPathFileOrCreate
 
 		daemonSet = &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name(pool, new(false)),
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(
-					getSystemComponentLabels(),
-					map[string]string{v1beta1constants.LabelNodeCriticalComponent: "true"},
-				),
-			},
+			Name:      name(pool, new(false)),
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(
+				getSystemComponentLabels(),
+				map[string]string{v1beta1constants.LabelNodeCriticalComponent: "true"},
+			),
 			Spec: appsv1.DaemonSetSpec{
 				UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
 					Type: appsv1.RollingUpdateDaemonSetStrategyType,
@@ -288,84 +272,60 @@ func (k *kubeProxy) computePoolResourcesData(pool WorkerPool) (map[string][]byte
 						Volumes: []corev1.Volume{
 							{
 								Name: volumeNameKubeconfig,
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: k.secret.Name,
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: k.secret.Name,
 								},
 							},
 							{
 								Name: volumeNameConfig,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: k.configMap.Name,
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: k.configMap.Name,
 								},
 							},
 							{
 								Name: volumeNameSSLCertsHosts,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: hostPathSSLCertsHosts,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: hostPathSSLCertsHosts,
 								},
 							},
 							{
 								Name: volumeNameKernelModules,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: hostPathKernelModules,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: hostPathKernelModules,
 								},
 							},
 							{
 								Name: volumeNameCleanupScript,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: k.configMapCleanupScript.Name,
-										},
-										DefaultMode: new(int32(0777)),
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name:        k.configMapCleanupScript.Name,
+									DefaultMode: new(int32(0777)),
 								},
 							},
 							{
 								Name: volumeNameDir,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: hostPathDir,
-										Type: &directoryOrCreate,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: hostPathDir,
+									Type: &directoryOrCreate,
 								},
 							},
 							{
 								Name: volumeNameMode,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: hostPathDir + "/mode",
-										Type: &fileOrCreate,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: hostPathDir + "/mode",
+									Type: &fileOrCreate,
 								},
 							},
 							{
 								Name: volumeNameConntrackFixScript,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: k.configMapConntrackFixScript.Name,
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: k.configMapConntrackFixScript.Name,
 								},
 							},
 							{
 								Name: volumeNameXtablesLock,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: hostPathXtablesLock,
-										Type: &fileOrCreate,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: hostPathXtablesLock,
+									Type: &fileOrCreate,
 								},
 							},
 						},
@@ -400,10 +360,8 @@ func (k *kubeProxy) computePoolResourcesDataForMajorMinorVersionOnly(pool Worker
 		vpaUpdateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		controlledValues := vpaautoscalingv1.ContainerControlledValuesRequestsOnly
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name(pool, new(true)),
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      name(pool, new(true)),
+			Namespace: metav1.NamespaceSystem,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -606,12 +564,10 @@ func (k *kubeProxy) getKubeProxyContainer(image string, init, controlPlaneNode b
 		}}
 
 		container.ReadinessProbe = &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path:   "/livez",
-					Port:   intstr.FromInt32(portHealthz),
-					Scheme: corev1.URISchemeHTTP,
-				},
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   "/livez",
+				Port:   intstr.FromInt32(portHealthz),
+				Scheme: corev1.URISchemeHTTP,
 			},
 			InitialDelaySeconds: 15,
 			TimeoutSeconds:      15,

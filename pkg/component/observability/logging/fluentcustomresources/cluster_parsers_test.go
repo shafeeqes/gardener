@@ -9,7 +9,6 @@ import (
 	fluentbitv1alpha2parser "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/parser"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/observability/logging/fluentcustomresources"
 )
@@ -26,10 +25,8 @@ var _ = Describe("Logging", func() {
 			Expect(fluentBitClusterParsers).To(Equal(
 				[]*fluentbitv1alpha2.ClusterParser{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "containerd-parser",
-							Labels: labels,
-						},
+						Name:   "containerd-parser",
+						Labels: labels,
 						Spec: fluentbitv1alpha2.ParserSpec{
 							Regex: &fluentbitv1alpha2parser.Regex{
 								Regex:      "^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<log>.*)$",

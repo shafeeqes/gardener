@@ -400,16 +400,16 @@ func getExtensionRoleNameFromRole(role string) string {
 }
 
 func emptyClusterRole(name string) *rbacv1.ClusterRole {
-	return &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	return &rbacv1.ClusterRole{Name: name}
 }
 
 func emptyClusterRoleBinding(name string) *rbacv1.ClusterRoleBinding {
-	return &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	return &rbacv1.ClusterRoleBinding{Name: name}
 }
 
 func emptyRoleBinding(name, namespace string) *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace}}
+		Name: name, Namespace: namespace}
 }
 
 func removeDuplicateSubjects(subjects []rbacv1.Subject) []rbacv1.Subject {

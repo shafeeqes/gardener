@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -32,10 +31,8 @@ func (w *workerDelegate) decodeWorkerProviderStatus() (*api.WorkerStatus, error)
 
 func (w *workerDelegate) updateWorkerProviderStatus(ctx context.Context, workerStatus *api.WorkerStatus) error {
 	workerStatusV1alpha1 := &v1alpha1.WorkerStatus{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "WorkerStatus",
-		},
+		APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		Kind:       "WorkerStatus",
 	}
 
 	if err := w.scheme.Convert(workerStatus, workerStatusV1alpha1, nil); err != nil {

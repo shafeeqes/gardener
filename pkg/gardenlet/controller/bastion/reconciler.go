@@ -112,9 +112,7 @@ func (r *Reconciler) reconcileBastion(
 		mustReconcileExtensionBastion = false
 		lastObservedError             error
 		extensionBastionSpec          = extensionsv1alpha1.BastionSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type: *bastion.Spec.ProviderType,
-			},
+			Type:     *bastion.Spec.ProviderType,
 			UserData: createUserData(bastion),
 			Ingress:  extensionIngress,
 		}
@@ -245,10 +243,8 @@ func (r *Reconciler) cleanupBastion(
 
 func newBastionExtension(bastion *operationsv1alpha1.Bastion, shoot *gardencorev1beta1.Shoot) *extensionsv1alpha1.Bastion {
 	return &extensionsv1alpha1.Bastion{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      bastion.Name,
-			Namespace: shoot.Status.TechnicalID,
-		},
+		Name:      bastion.Name,
+		Namespace: shoot.Status.TechnicalID,
 	}
 }
 

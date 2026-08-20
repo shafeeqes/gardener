@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
@@ -30,10 +29,8 @@ var _ = Describe("Gardenlet controller test", func() {
 
 	BeforeEach(func() {
 		gardenletConfig, err := encoding.EncodeGardenletConfiguration(&gardenletconfigv1alpha1.GardenletConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "GardenletConfiguration",
-			},
+			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "GardenletConfiguration",
 			GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
 				KubeconfigSecret: &corev1.SecretReference{
 					Name:      "gardenlet-kubeconfig",
@@ -41,33 +38,29 @@ var _ = Describe("Gardenlet controller test", func() {
 				},
 			},
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"bar": "baz",
+				Annotations: map[string]string{
+					"bar": "baz",
+				},
+				Spec: gardencorev1beta1.SeedSpec{
+					Backup: &gardencorev1beta1.Backup{
+						Provider: "test",
+						Region:   new("bar"),
+						CredentialsRef: &corev1.ObjectReference{
+							Kind:       "Secret",
+							APIVersion: "v1",
+							Name:       "backup-secret",
+							Namespace:  "garden",
 						},
 					},
-					Spec: gardencorev1beta1.SeedSpec{
-						Backup: &gardencorev1beta1.Backup{
-							Provider: "test",
-							Region:   new("bar"),
-							CredentialsRef: &corev1.ObjectReference{
-								Kind:       "Secret",
+					DNS: gardencorev1beta1.SeedDNS{
+						Internal: &gardencorev1beta1.SeedDNSProviderConfig{
+							Type:   "provider",
+							Domain: "internal.example.com",
+							CredentialsRef: corev1.ObjectReference{
 								APIVersion: "v1",
-								Name:       "backup-secret",
+								Kind:       "Secret",
+								Name:       "internal-domain-secret",
 								Namespace:  "garden",
-							},
-						},
-						DNS: gardencorev1beta1.SeedDNS{
-							Internal: &gardencorev1beta1.SeedDNSProviderConfig{
-								Type:   "provider",
-								Domain: "internal.example.com",
-								CredentialsRef: corev1.ObjectReference{
-									APIVersion: "v1",
-									Kind:       "Secret",
-									Name:       "internal-domain-secret",
-									Namespace:  "garden",
-								},
 							},
 						},
 					},
@@ -77,11 +70,9 @@ var _ = Describe("Gardenlet controller test", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		gardenlet = &seedmanagementv1alpha1.Gardenlet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      seed.Name,
-				Namespace: "garden", // must be in the garden namespace
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      seed.Name,
+			Namespace: "garden", // must be in the garden namespace
+			Labels:    map[string]string{testID: testRunID},
 			Spec: seedmanagementv1alpha1.GardenletSpec{
 				Deployment: seedmanagementv1alpha1.GardenletSelfDeployment{
 					Helm: seedmanagementv1alpha1.GardenletHelm{OCIRepository: ociRepository},
@@ -159,7 +150,7 @@ var _ = Describe("Gardenlet controller test", func() {
 
 		By("Verify that value change was rolled out")
 		Eventually(func(g Gomega) *int32 {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardenlet", Namespace: gardenNamespaceSeed.Name}}
+			deployment := &appsv1.Deployment{Name: "gardenlet", Namespace: gardenNamespaceSeed.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 			return deployment.Spec.RevisionHistoryLimit
 		}).Should(PointTo(Equal(int32(1337))))

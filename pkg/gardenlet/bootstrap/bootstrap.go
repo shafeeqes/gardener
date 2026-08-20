@@ -95,10 +95,8 @@ func RequestKubeconfigWithBootstrapClient(
 
 	log.Info("Deleting bootstrap kubeconfig secret from target cluster")
 	if err := kubernetesutils.DeleteObject(ctx, runtimeClient, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      bootstrapKubeconfigKey.Name,
-			Namespace: bootstrapKubeconfigKey.Namespace,
-		},
+		Name:      bootstrapKubeconfigKey.Name,
+		Namespace: bootstrapKubeconfigKey.Namespace,
 	}); err != nil {
 		return nil, "", err
 	}
@@ -120,10 +118,8 @@ func DeleteBootstrapAuth(ctx context.Context, reader client.Reader, writer clien
 	case strings.HasPrefix(csr.Spec.Username, bootstraptokenapi.BootstrapUserPrefix):
 		resourcesToDelete = append(resourcesToDelete,
 			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstraptokenapi.BootstrapTokenSecretPrefix + strings.TrimPrefix(csr.Spec.Username, bootstraptokenapi.BootstrapUserPrefix),
-					Namespace: metav1.NamespaceSystem,
-				},
+				Name:      bootstraptokenapi.BootstrapTokenSecretPrefix + strings.TrimPrefix(csr.Spec.Username, bootstraptokenapi.BootstrapUserPrefix),
+				Namespace: metav1.NamespaceSystem,
 			},
 		)
 
@@ -135,15 +131,11 @@ func DeleteBootstrapAuth(ctx context.Context, reader client.Reader, writer clien
 
 		resourcesToDelete = append(resourcesToDelete,
 			&corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      serviceAccountName,
-					Namespace: serviceAccountNamespace,
-				},
+				Name:      serviceAccountName,
+				Namespace: serviceAccountNamespace,
 			},
 			&rbacv1.ClusterRoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: gardenletbootstraputil.ClusterRoleBindingName(serviceAccountNamespace, serviceAccountName),
-				},
+				Name: gardenletbootstraputil.ClusterRoleBindingName(serviceAccountNamespace, serviceAccountName),
 			},
 		)
 	}

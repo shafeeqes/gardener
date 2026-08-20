@@ -72,19 +72,15 @@ var _ = Describe("OpenTelemetry Operator", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:                         name,
+			Namespace:                    namespace,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: getLabels(),
-			},
+			Name:   name,
+			Labels: getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -169,10 +165,8 @@ var _ = Describe("OpenTelemetry Operator", func() {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: getLabels(),
-			},
+			Name:   name,
+			Labels: getLabels(),
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -185,11 +179,9 @@ var _ = Describe("OpenTelemetry Operator", func() {
 			}},
 		}
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -204,11 +196,9 @@ var _ = Describe("OpenTelemetry Operator", func() {
 			},
 		}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Subjects: []rbacv1.Subject{
 				{
 					Kind:      rbacv1.ServiceAccountKind,
@@ -223,13 +213,11 @@ var _ = Describe("OpenTelemetry Operator", func() {
 			},
 		}
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.DeploymentNameOpenTelemetryOperator,
-				Namespace: namespace,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-				}),
-			},
+			Name:      v1beta1constants.DeploymentNameOpenTelemetryOperator,
+			Namespace: namespace,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+			}),
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Replicas:             new(int32(1)),
@@ -304,11 +292,9 @@ var _ = Describe("OpenTelemetry Operator", func() {
 		}
 		vpaUpdateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -338,16 +324,12 @@ var _ = Describe("OpenTelemetry Operator", func() {
 
 	JustBeforeEach(func() {
 		operatorManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      OperatorManagedResourceName,
-				Namespace: namespace,
-			},
+			Name:      OperatorManagedResourceName,
+			Namespace: namespace,
 		}
 		operatorManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + operatorManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + operatorManagedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -359,12 +341,10 @@ var _ = Describe("OpenTelemetry Operator", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(operatorManagedResource), operatorManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            OperatorManagedResourceName,
-					Namespace:       namespace,
-					Labels:          map[string]string{v1beta1constants.GardenRole: "seed-system-component"},
-					ResourceVersion: "1",
-				},
+				Name:            OperatorManagedResourceName,
+				Namespace:       namespace,
+				Labels:          map[string]string{v1beta1constants.GardenRole: "seed-system-component"},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -428,11 +408,9 @@ var _ = Describe("OpenTelemetry Operator", func() {
 
 			It("should fail because the ManagedResource doesn't become healthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       OperatorManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       OperatorManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -455,11 +433,9 @@ var _ = Describe("OpenTelemetry Operator", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       OperatorManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       OperatorManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -484,10 +460,8 @@ var _ = Describe("OpenTelemetry Operator", func() {
 				fakeOps.MaxAttempts = 2
 
 				operatorManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      OperatorManagedResourceName,
-						Namespace: namespace,
-					},
+					Name:      OperatorManagedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, operatorManagedResource)).To(Succeed())
 

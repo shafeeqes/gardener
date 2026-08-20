@@ -715,20 +715,18 @@ func (r *Reconciler) newKubeAPIServer(
 				return kubeapiserver.AuthorizationWebhook{
 					Name:       name + "-authorizer",
 					Kubeconfig: kubeconfig,
-					WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{
-						// Set TTL to a very low value since it cannot be set to 0 because of defaulting.
-						// See https://github.com/kubernetes/apiserver/blob/3658357fea9fa8b36173d072f2d548f135049e05/pkg/apis/apiserver/v1beta1/defaults.go#L29-L36
-						// TODO(rfranzke): Use `Cache{Una,A}uthorizedRequests` instead of `AuthorizedTTL` and
-						//  `UnauthorizedTTL` once Kubernetes 1.34 is the lowest supported version.
-						//  More info: https://github.com/kubernetes/kubernetes/pull/129237
-						AuthorizedTTL:                            metav1.Duration{Duration: 1 * time.Nanosecond},
-						UnauthorizedTTL:                          metav1.Duration{Duration: 1 * time.Nanosecond},
-						Timeout:                                  metav1.Duration{Duration: 10 * time.Second},
-						FailurePolicy:                            apiserverv1beta1.FailurePolicyDeny,
-						SubjectAccessReviewVersion:               "v1",
-						MatchConditionSubjectAccessReviewVersion: "v1",
-						MatchConditions:                          []apiserverv1beta1.WebhookMatchCondition{{Expression: matchExpression}},
-					},
+					// Set TTL to a very low value since it cannot be set to 0 because of defaulting.
+					// See https://github.com/kubernetes/apiserver/blob/3658357fea9fa8b36173d072f2d548f135049e05/pkg/apis/apiserver/v1beta1/defaults.go#L29-L36
+					// TODO(rfranzke): Use `Cache{Una,A}uthorizedRequests` instead of `AuthorizedTTL` and
+					//  `UnauthorizedTTL` once Kubernetes 1.34 is the lowest supported version.
+					//  More info: https://github.com/kubernetes/kubernetes/pull/129237
+					AuthorizedTTL:                            metav1.Duration{Duration: 1 * time.Nanosecond},
+					UnauthorizedTTL:                          metav1.Duration{Duration: 1 * time.Nanosecond},
+					Timeout:                                  metav1.Duration{Duration: 10 * time.Second},
+					FailurePolicy:                            apiserverv1beta1.FailurePolicyDeny,
+					SubjectAccessReviewVersion:               "v1",
+					MatchConditionSubjectAccessReviewVersion: "v1",
+					MatchConditions:                          []apiserverv1beta1.WebhookMatchCondition{{Expression: matchExpression}},
 				}
 			}
 		)
@@ -1778,15 +1776,11 @@ func (r *Reconciler) newOpenTelemetryCollector(secretsManager secretsmanager.Int
 func (r *Reconciler) newExtensions(log logr.Logger, garden *operatorv1alpha1.Garden, extensionList *operatorv1alpha1.ExtensionList) extension.Interface {
 	newDefaultExtension := func(ext operatorv1alpha1.GardenExtension) extension.Extension {
 		return extension.Extension{
-			Extension: extensionsv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: ext.Type,
-				},
-				Spec: extensionsv1alpha1.ExtensionSpec{
-					DefaultSpec: extensionsv1alpha1.DefaultSpec{
-						Type:           ext.Type,
-						ProviderConfig: ext.ProviderConfig,
-					},
+			Name: ext.Type,
+			Spec: extensionsv1alpha1.ExtensionSpec{
+				DefaultSpec: extensionsv1alpha1.DefaultSpec{
+					Type:           ext.Type,
+					ProviderConfig: ext.ProviderConfig,
 				},
 			},
 			Timeout: extension.DefaultTimeout,

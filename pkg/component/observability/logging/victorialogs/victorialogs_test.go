@@ -83,23 +83,17 @@ var _ = Describe("VictoriaLogs", func() {
 
 	JustBeforeEach(func() {
 		customResourcesManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "victoria-logs",
-				Namespace: namespace,
-			},
+			Name:      "victoria-logs",
+			Namespace: namespace,
 		}
 		customResourcesManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + customResourcesManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + customResourcesManagedResource.Name,
+			Namespace: namespace,
 		}
 
 		vlSingle = &victoriametricsv1.VLSingle{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      victorialogsconstants.VLSingleResourceName,
-				Namespace: namespace,
-			},
+			Name:      victorialogsconstants.VLSingleResourceName,
+			Namespace: namespace,
 			Spec: victoriametricsv1.VLSingleSpec{
 				PodMetadata: &victoriametricsv1beta1.EmbeddedObjectMetadata{
 					Labels: getLabels(),
@@ -136,19 +130,15 @@ var _ = Describe("VictoriaLogs", func() {
 					},
 				},
 				ServiceSpec: &victoriametricsv1beta1.AdditionalServiceSpec{
-					EmbeddedObjectMetadata: victoriametricsv1beta1.EmbeddedObjectMetadata{
-						Name: "logging-vl",
-					},
+					Name: "logging-vl",
 				},
 			},
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "victoria-logs-vpa",
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      "victoria-logs-vpa",
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					Kind:       "Deployment",
@@ -247,15 +237,13 @@ var _ = Describe("VictoriaLogs", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "victoria-logs",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:          "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
-					ResourceVersion: "1",
+				Name:      "victoria-logs",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:          "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -478,11 +466,9 @@ var _ = Describe("VictoriaLogs", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -505,11 +491,9 @@ var _ = Describe("VictoriaLogs", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -534,10 +518,8 @@ var _ = Describe("VictoriaLogs", func() {
 				fakeOps.MaxAttempts = 2
 
 				customResourcesManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      customResourcesManagedResourceName,
-						Namespace: namespace,
-					},
+					Name:      customResourcesManagedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, customResourcesManagedResource)).To(Succeed())
 
@@ -553,11 +535,9 @@ var _ = Describe("VictoriaLogs", func() {
 
 func getPVCA(maxCapacity resource.Quantity, autoscalerName string) *pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler {
 	return &pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      victorialogsconstants.VLSingleResourceName,
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      victorialogsconstants.VLSingleResourceName,
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscalerSpec{
 			AutoscalerName: autoscalerName,
 			TargetRef: autoscalingv1.CrossVersionObjectReference{
@@ -595,11 +575,9 @@ func getVictoriaLogsPrometheusRule(label string) *monitoringv1.PrometheusRule {
 	}
 
 	return &monitoringv1.PrometheusRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      label + "-victoria-logs",
-			Namespace: namespace,
-			Labels:    map[string]string{"prometheus": label},
-		},
+		Name:      label + "-victoria-logs",
+		Namespace: namespace,
+		Labels:    map[string]string{"prometheus": label},
 		Spec: monitoringv1.PrometheusRuleSpec{
 			Groups: []monitoringv1.RuleGroup{{
 				Name: "victoria-logs.rules",

@@ -240,17 +240,13 @@ func (c *coreDNS) computeResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "coredns",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:                         "coredns",
+			Namespace:                    metav1.NamespaceSystem,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:coredns",
-			},
+			Name: "system:coredns",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -271,10 +267,8 @@ func (c *coreDNS) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "system:coredns",
-				Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
-			},
+			Name:        "system:coredns",
+			Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -290,10 +284,8 @@ func (c *coreDNS) computeResourcesData() (map[string][]byte, error) {
 		// We don't need to make this ConfigMap immutable since CoreDNS provides the "reload" plugins which does an
 		// auto-reload if the config changes.
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "coredns",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "coredns",
+			Namespace: metav1.NamespaceSystem,
 			Data: map[string]string{
 				configDataKey: `.:` + strconv.Itoa(corednsconstants.PortServer) + ` {
   health {
@@ -323,11 +315,9 @@ import custom/*.server
 		}
 
 		configMapCustom = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        CustomConfigMapName,
-				Namespace:   metav1.NamespaceSystem,
-				Annotations: map[string]string{resourcesv1alpha1.Ignore: "true"},
-			},
+			Name:        CustomConfigMapName,
+			Namespace:   metav1.NamespaceSystem,
+			Annotations: map[string]string{resourcesv1alpha1.Ignore: "true"},
 			Data: map[string]string{
 				"changeme.server":   "# checkout the docs on how to use: https://github.com/gardener/gardener/blob/master/docs/usage/networking/custom-dns-config.md",
 				"changeme.override": "# checkout the docs on how to use: https://github.com/gardener/gardener/blob/master/docs/usage/networking/custom-dns-config.md",
@@ -337,14 +327,12 @@ import custom/*.server
 		ipFamilyPolicy = GetIPFamilyPolicy(c.values.IPFamilies, c.values.ClusterIPs)
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: metav1.NamespaceSystem,
-				Labels: map[string]string{
-					corednsconstants.LabelKey:       corednsconstants.LabelValue,
-					"kubernetes.io/cluster-service": "true",
-					"kubernetes.io/name":            "CoreDNS",
-				},
+			Name:      serviceName,
+			Namespace: metav1.NamespaceSystem,
+			Labels: map[string]string{
+				corednsconstants.LabelKey:       corednsconstants.LabelValue,
+				"kubernetes.io/cluster-service": "true",
+				"kubernetes.io/name":            "CoreDNS",
 			},
 			Spec: corev1.ServiceSpec{
 				ClusterIP: c.values.ClusterIPs[0].String(),
@@ -373,13 +361,11 @@ import custom/*.server
 		}
 
 		networkPolicy = &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud--allow-dns",
-				Namespace: metav1.NamespaceSystem,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerDescription: "Allows CoreDNS to lookup DNS records, talk to the API Server. " +
-						"Also allows CoreDNS to be reachable via its service and its metrics endpoint.",
-				},
+			Name:      "gardener.cloud--allow-dns",
+			Namespace: metav1.NamespaceSystem,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerDescription: "Allows CoreDNS to lookup DNS records, talk to the API Server. " +
+					"Also allows CoreDNS to be reachable via its service and its metrics endpoint.",
 			},
 			Spec: networkingv1.NetworkPolicySpec{
 				PodSelector: metav1.LabelSelector{
@@ -411,13 +397,11 @@ import custom/*.server
 		}
 
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      DeploymentName,
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
-				}),
-			},
+			Name:      DeploymentName,
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
+			}),
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(2)),
 				RevisionHistoryLimit: new(int32(2)),
@@ -475,12 +459,10 @@ import custom/*.server
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/health",
-										Scheme: corev1.URISchemeHTTP,
-										Port:   intstr.FromInt32(8080),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/health",
+									Scheme: corev1.URISchemeHTTP,
+									Port:   intstr.FromInt32(8080),
 								},
 								SuccessThreshold:    1,
 								FailureThreshold:    5,
@@ -488,12 +470,10 @@ import custom/*.server
 								TimeoutSeconds:      5,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/ready",
-										Scheme: corev1.URISchemeHTTP,
-										Port:   intstr.FromInt32(8181),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/ready",
+									Scheme: corev1.URISchemeHTTP,
+									Port:   intstr.FromInt32(8181),
 								},
 								SuccessThreshold:    1,
 								FailureThreshold:    1,
@@ -531,28 +511,20 @@ import custom/*.server
 						Volumes: []corev1.Volume{
 							{
 								Name: volumeNameConfig,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMap.Name,
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  configDataKey,
-											Path: configDataKey,
-										}},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: configMap.Name,
+									Items: []corev1.KeyToPath{{
+										Key:  configDataKey,
+										Path: configDataKey,
+									}},
 								},
 							},
 							{
 								Name: volumeNameConfigCustom,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMapCustom.Name,
-										},
-										DefaultMode: new(int32(420)),
-										Optional:    new(true),
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name:        configMapCustom.Name,
+									DefaultMode: new(int32(420)),
+									Optional:    new(true),
 								},
 							},
 						},
@@ -562,17 +534,13 @@ import custom/*.server
 		}
 
 		clusterProportionalDNSAutoscalerServiceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "coredns-autoscaler",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:                         "coredns-autoscaler",
+			Namespace:                    metav1.NamespaceSystem,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		clusterProportionalDNSAutoscalerClusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:coredns-autoscaler",
-			},
+			Name: "system:coredns-autoscaler",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -600,9 +568,7 @@ import custom/*.server
 		}
 
 		clusterProportionalDNSAutoscalerClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:coredns-autoscaler",
-			},
+			Name: "system:coredns-autoscaler",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -616,11 +582,9 @@ import custom/*.server
 		}
 
 		clusterProportionalDNSAutoscalerDeployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      clusterProportionalAutoscalerDeploymentName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getClusterProportionalDNSAutoscalerLabels(),
-			},
+			Name:      clusterProportionalAutoscalerDeploymentName,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    getClusterProportionalDNSAutoscalerLabels(),
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Selector: &metav1.LabelSelector{
@@ -678,7 +642,7 @@ import custom/*.server
 		}
 
 		clusterProportionalDNSAutoscalerVPA = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{Name: clusterProportionalAutoscalerDeploymentName, Namespace: metav1.NamespaceSystem},
+			Name: clusterProportionalAutoscalerDeploymentName, Namespace: metav1.NamespaceSystem,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -707,11 +671,9 @@ import custom/*.server
 		}
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "coredns",
-				Namespace: metav1.NamespaceSystem,
-				Labels:    map[string]string{corednsconstants.LabelKey: corednsconstants.LabelValue},
-			},
+			Name:      "coredns",
+			Namespace: metav1.NamespaceSystem,
+			Labels:    map[string]string{corednsconstants.LabelKey: corednsconstants.LabelValue},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable:             new(intstr.FromInt32(1)),
 				Selector:                   deployment.Spec.Selector,
@@ -720,12 +682,10 @@ import custom/*.server
 		}
 
 		horizontalPodAutoscaler = &autoscalingv2.HorizontalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "coredns",
-				Namespace: metav1.NamespaceSystem,
-				Labels: map[string]string{
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
-				},
+			Name:      "coredns",
+			Namespace: metav1.NamespaceSystem,
+			Labels: map[string]string{
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
 			},
 			Spec: autoscalingv2.HorizontalPodAutoscalerSpec{
 				MinReplicas: new(int32(2)),

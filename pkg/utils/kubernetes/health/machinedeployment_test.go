@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -124,7 +123,7 @@ var _ = Describe("MachineDeployment", func() {
 			}},
 		}, HaveOccurred()),
 		Entry("not observed at latest version", &machinev1alpha1.MachineDeployment{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 		}, HaveOccurred()),
 		Entry("not enough updated replicas", &machinev1alpha1.MachineDeployment{
 			Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: 1},

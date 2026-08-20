@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -72,84 +71,58 @@ var _ = Describe("cleaner", func() {
 		cleaner = NewCleaner(log, seedClient, gardenClient, namespace)
 
 		secret1 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-secret-1",
-				Namespace: namespace,
-			},
+			Name:      "test-secret-1",
+			Namespace: namespace,
 		}
 		secret2 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-secret-2",
-				Namespace: namespace,
-			},
+			Name:      "test-secret-2",
+			Namespace: namespace,
 		}
 		configMap1 = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-cm-1",
-				Namespace: namespace,
-			},
+			Name:      "test-cm-1",
+			Namespace: namespace,
 		}
 		configMap2 = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-cm-2",
-				Namespace: namespace,
-			},
+			Name:      "test-cm-2",
+			Namespace: namespace,
 		}
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
+			Name: namespace,
 		}
 		controlPlane = &extensionsv1alpha1.ControlPlane{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-obj",
-				Namespace: namespace,
-			},
+			Name:      "test-obj",
+			Namespace: namespace,
 		}
 		extension = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-obj",
-				Namespace: namespace,
-			},
+			Name:      "test-obj",
+			Namespace: namespace,
 		}
 		machineDeployment = &machinev1alpha1.MachineDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-obj",
-				Namespace: namespace,
-			},
+			Name:      "test-obj",
+			Namespace: namespace,
 		}
 		machineSet = &machinev1alpha1.MachineSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-obj",
-				Namespace: namespace,
-			},
+			Name:      "test-obj",
+			Namespace: namespace,
 		}
 		machineClass = &machinev1alpha1.MachineClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-obj",
-				Namespace: namespace,
-			},
+			Name:      "test-obj",
+			Namespace: namespace,
 		}
 		machine = &machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-obj",
-				Namespace: namespace,
-			},
+			Name:      "test-obj",
+			Namespace: namespace,
 		}
 		managedresourceShoot = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-mr-shoot",
-				Namespace: namespace,
-			},
+			Name:      "test-mr-shoot",
+			Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				KeepObjects: new(true),
 			},
 		}
 		managedresourceSeed = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-mr-seed",
-				Namespace: namespace,
-			},
+			Name:      "test-mr-seed",
+			Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class:       new("seed"),
 				KeepObjects: new(true),

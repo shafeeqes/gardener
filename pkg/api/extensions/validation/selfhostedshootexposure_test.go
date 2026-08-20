@@ -22,10 +22,8 @@ var _ = Describe("SelfHostedShootExposure validation tests", func() {
 
 	BeforeEach(func() {
 		exposure = &extensionsv1alpha1.SelfHostedShootExposure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-exposure",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-exposure",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.SelfHostedShootExposureSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           "provider",

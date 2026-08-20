@@ -44,9 +44,7 @@ var _ = Describe("Extensions", func() {
 			),
 			Entry("generation outdated",
 				&extensionsv1alpha1.Infrastructure{
-					ObjectMeta: metav1.ObjectMeta{
-						Generation: 1,
-					},
+					Generation: 1,
 					Status: extensionsv1alpha1.InfrastructureStatus{
 						DefaultStatus: extensionsv1alpha1.DefaultStatus{
 							LastOperation: &gardencorev1beta1.LastOperation{
@@ -59,10 +57,8 @@ var _ = Describe("Extensions", func() {
 			),
 			Entry("gardener operation ongoing",
 				&extensionsv1alpha1.Infrastructure{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-						},
+					Annotations: map[string]string{
+						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
 					},
 					Status: extensionsv1alpha1.InfrastructureStatus{
 						DefaultStatus: extensionsv1alpha1.DefaultStatus{
@@ -107,10 +103,8 @@ var _ = Describe("Extensions", func() {
 			),
 			Entry("timestamp is before last update time",
 				&extensionsv1alpha1.Infrastructure{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"gardener.cloud/timestamp": time.Now().UTC().Add(-5 * time.Second).Format(time.RFC3339Nano),
-						},
+					Annotations: map[string]string{
+						"gardener.cloud/timestamp": time.Now().UTC().Add(-5 * time.Second).Format(time.RFC3339Nano),
 					},
 					Status: extensionsv1alpha1.InfrastructureStatus{
 						DefaultStatus: extensionsv1alpha1.DefaultStatus{
@@ -125,10 +119,8 @@ var _ = Describe("Extensions", func() {
 			),
 			Entry("truncated timestamp equals last update time",
 				&extensionsv1alpha1.Infrastructure{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"gardener.cloud/timestamp": time.Date(2023, 05, 10, 10, 58, 28, 770312000, time.UTC).Format(time.RFC3339Nano), // 2023-05-10T10:58:28.770312Z
-						},
+					Annotations: map[string]string{
+						"gardener.cloud/timestamp": time.Date(2023, 05, 10, 10, 58, 28, 770312000, time.UTC).Format(time.RFC3339Nano), // 2023-05-10T10:58:28.770312Z
 					},
 					Status: extensionsv1alpha1.InfrastructureStatus{
 						DefaultStatus: extensionsv1alpha1.DefaultStatus{
@@ -143,10 +135,8 @@ var _ = Describe("Extensions", func() {
 			),
 			Entry("timestamp is after last update time",
 				&extensionsv1alpha1.Infrastructure{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"gardener.cloud/timestamp": time.Now().UTC().Add(5 * time.Second).Format(time.RFC3339Nano),
-						},
+					Annotations: map[string]string{
+						"gardener.cloud/timestamp": time.Now().UTC().Add(5 * time.Second).Format(time.RFC3339Nano),
 					},
 					Status: extensionsv1alpha1.InfrastructureStatus{
 						DefaultStatus: extensionsv1alpha1.DefaultStatus{
@@ -161,10 +151,8 @@ var _ = Describe("Extensions", func() {
 			),
 			Entry("invalid timestamp",
 				&extensionsv1alpha1.Infrastructure{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"gardener.cloud/timestamp": "not a valid value",
-						},
+					Annotations: map[string]string{
+						"gardener.cloud/timestamp": "not a valid value",
 					},
 					Status: extensionsv1alpha1.InfrastructureStatus{
 						DefaultStatus: extensionsv1alpha1.DefaultStatus{

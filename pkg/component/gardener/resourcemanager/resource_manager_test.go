@@ -143,8 +143,8 @@ var _ = Describe("ResourceManager", func() {
 		sm = fakesecretsmanager.New(fakeClient, deployNamespace)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "server-ca", Namespace: deployNamespace}})).To(Succeed())
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: deployNamespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "server-ca", Namespace: deployNamespace})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: deployNamespace})).To(Succeed())
 
 		secrets = Secrets{}
 		allowAll = []rbacv1.PolicyRule{{
@@ -202,16 +202,12 @@ var _ = Describe("ResourceManager", func() {
 		defaultUnreachableTolerationSeconds = new(int64(120))
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   clusterRoleName,
-				Labels: defaultLabels,
-			},
-			Rules: allowAll}
+			Name:   clusterRoleName,
+			Labels: defaultLabels,
+			Rules:  allowAll}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   clusterRoleName,
-				Labels: defaultLabels,
-			},
+			Name:   clusterRoleName,
+			Labels: defaultLabels,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -223,18 +219,14 @@ var _ = Describe("ResourceManager", func() {
 				Namespace: deployNamespace,
 			}}}
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: deployNamespace,
-				Name:      "gardener-resource-manager",
-				Labels:    defaultLabels,
-			},
-			Rules: append(allowManagedResources, allowMachines...)}
+			Namespace: deployNamespace,
+			Name:      "gardener-resource-manager",
+			Labels:    defaultLabels,
+			Rules:     append(allowManagedResources, allowMachines...)}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: deployNamespace,
-				Name:      "gardener-resource-manager",
-				Labels:    defaultLabels,
-			},
+			Namespace: deployNamespace,
+			Name:      "gardener-resource-manager",
+			Labels:    defaultLabels,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "Role",
@@ -247,32 +239,28 @@ var _ = Describe("ResourceManager", func() {
 			}}}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-gardener-resource-manager",
-				Namespace: deployNamespace,
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":                      "gardener-resource-manager",
-					"serviceaccount.resources.gardener.cloud/namespace":                 "kube-system",
-					"serviceaccount.resources.gardener.cloud/token-expiration-duration": "24h",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				ResourceVersion: "0",
+			Name:      "shoot-access-gardener-resource-manager",
+			Namespace: deployNamespace,
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":                      "gardener-resource-manager",
+				"serviceaccount.resources.gardener.cloud/namespace":                 "kube-system",
+				"serviceaccount.resources.gardener.cloud/token-expiration-duration": "24h",
 			},
-			Type: corev1.SecretTypeOpaque,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			ResourceVersion: "0",
+			Type:            corev1.SecretTypeOpaque,
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-resource-manager",
-				Namespace: deployNamespace,
-				Labels:    defaultLabels,
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports":  `[{"protocol":"TCP","port":8080}]`,
-					"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports": `[{"protocol":"TCP","port":10250}]`,
-				},
+			Name:      "gardener-resource-manager",
+			Namespace: deployNamespace,
+			Labels:    defaultLabels,
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports":  `[{"protocol":"TCP","port":8080}]`,
+				"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports": `[{"protocol":"TCP","port":10250}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Selector: map[string]string{
@@ -325,20 +313,20 @@ var _ = Describe("ResourceManager", func() {
 				{Key: "c"},
 				{Key: "node-role.kubernetes.io/control-plane", Operator: corev1.TolerationOpExists},
 			},
-			ResponsibilityMode:                        ForShootOrVirtualGarden,
-			TargetDisableCache:                        &targetDisableCache,
-			WatchedNamespace:                          &watchedNamespace,
-			SchedulingProfile:                         &binPackingSchedulingProfile,
-			DefaultSeccompProfileEnabled:              false,
-			PodTopologySpreadConstraintsEnabled:       true,
-			VPAInPlaceUpdatesEnabled:                  true,
-			LogLevel:                                  "info",
-			LogFormat:                                 "json",
-			Zones:                                     []string{"a", "b"},
-			ManagedResourceLabels:                     map[string]string{"foo": "bar"},
-			NodeAgentAuthorizerEnabled:                true,
+			ResponsibilityMode:                  ForShootOrVirtualGarden,
+			TargetDisableCache:                  &targetDisableCache,
+			WatchedNamespace:                    &watchedNamespace,
+			SchedulingProfile:                   &binPackingSchedulingProfile,
+			DefaultSeccompProfileEnabled:        false,
+			PodTopologySpreadConstraintsEnabled: true,
+			VPAInPlaceUpdatesEnabled:            true,
+			LogLevel:                            "info",
+			LogFormat:                           "json",
+			Zones:                               []string{"a", "b"},
+			ManagedResourceLabels:               map[string]string{"foo": "bar"},
+			NodeAgentAuthorizerEnabled:          true,
 			NodeAgentAuthorizerAuthorizeWithSelectors: new(true),
-			MachineNamespace:                          new(watchedNamespace),
+			MachineNamespace: new(watchedNamespace),
 			PodKubeAPIServerLoadBalancingWebhook: PodKubeAPIServerLoadBalancingWebhook{
 				Enabled: false,
 				Configs: []PodKubeAPIServerLoadBalancingWebhookConfig{
@@ -367,19 +355,16 @@ var _ = Describe("ResourceManager", func() {
 
 		matchLabelKeysInPodTopologySpreadFeatureGateDisabled = true
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager",
-				Namespace: deployNamespace,
-				Labels:    defaultLabels,
-			},
+			Name:                         "gardener-resource-manager",
+			Namespace:                    deployNamespace,
+			Labels:                       defaultLabels,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		configMapFor = func(watchedNamespace *string, responsibilityMode ResponsibilityMode, isWorkerless, bootstrapControlPlaneNode, systemComponentsConfigWebhookEnabled bool) *corev1.ConfigMap {
 			configMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-resource-manager",
-					Namespace: deployNamespace,
-				},
+				Name:      "gardener-resource-manager",
+				Namespace: deployNamespace,
 			}
 
 			config := &resourcemanagerconfigv1alpha1.ResourceManagerConfiguration{
@@ -474,9 +459,7 @@ var _ = Describe("ResourceManager", func() {
 
 			if responsibilityMode == ForShootOrVirtualGarden {
 				config.TargetClientConnection = &resourcemanagerconfigv1alpha1.ClientConnection{
-					ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-						Kubeconfig: gardenerutils.PathGenericKubeconfig,
-					},
+					Kubeconfig: gardenerutils.PathGenericKubeconfig,
 					Namespaces: targetNamespaces,
 				}
 
@@ -547,11 +530,9 @@ var _ = Describe("ResourceManager", func() {
 			bootstrapControlPlaneNode bool,
 		) *appsv1.Deployment {
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameGardenerResourceManager,
-					Namespace: deployNamespace,
-					Labels:    defaultLabels,
-				},
+				Name:      v1beta1constants.DeploymentNameGardenerResourceManager,
+				Namespace: deployNamespace,
+				Labels:    defaultLabels,
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             &replicas,
 					RevisionHistoryLimit: new(int32(2)),
@@ -591,12 +572,10 @@ var _ = Describe("ResourceManager", func() {
 									Image:           image,
 									ImagePullPolicy: corev1.PullIfNotPresent,
 									LivenessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/healthz",
-												Scheme: "HTTP",
-												Port:   intstr.FromInt32(healthPort),
-											},
+										HTTPGet: &corev1.HTTPGetAction{
+											Path:   "/healthz",
+											Scheme: "HTTP",
+											Port:   intstr.FromInt32(healthPort),
 										},
 										InitialDelaySeconds: 30,
 										FailureThreshold:    5,
@@ -618,12 +597,10 @@ var _ = Describe("ResourceManager", func() {
 										},
 									},
 									ReadinessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/readyz",
-												Scheme: "HTTP",
-												Port:   intstr.FromInt32(healthPort),
-											},
+										HTTPGet: &corev1.HTTPGetAction{
+											Path:   "/readyz",
+											Scheme: "HTTP",
+											Port:   intstr.FromInt32(healthPort),
 										},
 										InitialDelaySeconds: 10,
 									},
@@ -676,37 +653,33 @@ var _ = Describe("ResourceManager", func() {
 							Volumes: []corev1.Volume{
 								{
 									Name: "kube-api-access-gardener",
-									VolumeSource: corev1.VolumeSource{
-										Projected: &corev1.ProjectedVolumeSource{
-											DefaultMode: new(int32(420)),
-											Sources: []corev1.VolumeProjection{
-												{
-													ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
-														ExpirationSeconds: new(int64(43200)),
-														Path:              "token",
-													},
+									Projected: &corev1.ProjectedVolumeSource{
+										DefaultMode: new(int32(420)),
+										Sources: []corev1.VolumeProjection{
+											{
+												ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+													ExpirationSeconds: new(int64(43200)),
+													Path:              "token",
 												},
-												{
-													ConfigMap: &corev1.ConfigMapProjection{
-														LocalObjectReference: corev1.LocalObjectReference{
-															Name: "kube-root-ca.crt",
+											},
+											{
+												ConfigMap: &corev1.ConfigMapProjection{
+													Name: "kube-root-ca.crt",
+													Items: []corev1.KeyToPath{{
+														Key:  "ca.crt",
+														Path: "ca.crt",
+													}},
+												},
+											},
+											{
+												DownwardAPI: &corev1.DownwardAPIProjection{
+													Items: []corev1.DownwardAPIVolumeFile{{
+														FieldRef: &corev1.ObjectFieldSelector{
+															APIVersion: "v1",
+															FieldPath:  "metadata.namespace",
 														},
-														Items: []corev1.KeyToPath{{
-															Key:  "ca.crt",
-															Path: "ca.crt",
-														}},
-													},
-												},
-												{
-													DownwardAPI: &corev1.DownwardAPIProjection{
-														Items: []corev1.DownwardAPIVolumeFile{{
-															FieldRef: &corev1.ObjectFieldSelector{
-																APIVersion: "v1",
-																FieldPath:  "metadata.namespace",
-															},
-															Path: "namespace",
-														}},
-													},
+														Path: "namespace",
+													}},
 												},
 											},
 										},
@@ -714,21 +687,15 @@ var _ = Describe("ResourceManager", func() {
 								},
 								{
 									Name: "tls",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  secretNameServer,
-											DefaultMode: new(int32(420)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  secretNameServer,
+										DefaultMode: new(int32(420)),
 									},
 								},
 								{
 									Name: "config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: configMapName,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: configMapName,
 									},
 								},
 							},
@@ -757,11 +724,9 @@ var _ = Describe("ResourceManager", func() {
 				})
 				deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 					Name: "kubeconfig-bootstrap",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  *secretNameBootstrapKubeconfig,
-							DefaultMode: new(int32(420)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  *secretNameBootstrapKubeconfig,
+						DefaultMode: new(int32(420)),
 					},
 				})
 			} else if !bootstrapControlPlaneNode {
@@ -772,33 +737,27 @@ var _ = Describe("ResourceManager", func() {
 				})
 				deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 					Name: "kubeconfig",
-					VolumeSource: corev1.VolumeSource{
-						Projected: &corev1.ProjectedVolumeSource{
-							DefaultMode: new(int32(420)),
-							Sources: []corev1.VolumeProjection{
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: genericTokenKubeconfigSecretName,
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  "kubeconfig",
-											Path: "kubeconfig",
-										}},
-										Optional: new(false),
-									},
+					Projected: &corev1.ProjectedVolumeSource{
+						DefaultMode: new(int32(420)),
+						Sources: []corev1.VolumeProjection{
+							{
+								Secret: &corev1.SecretProjection{
+									Name: genericTokenKubeconfigSecretName,
+									Items: []corev1.KeyToPath{{
+										Key:  "kubeconfig",
+										Path: "kubeconfig",
+									}},
+									Optional: new(false),
 								},
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: "shoot-access-gardener-resource-manager",
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  resourcesv1alpha1.DataKeyToken,
-											Path: resourcesv1alpha1.DataKeyToken,
-										}},
-										Optional: new(false),
-									},
+							},
+							{
+								Secret: &corev1.SecretProjection{
+									Name: "shoot-access-gardener-resource-manager",
+									Items: []corev1.KeyToPath{{
+										Key:  resourcesv1alpha1.DataKeyToken,
+										Path: resourcesv1alpha1.DataKeyToken,
+									}},
+									Optional: new(false),
 								},
 							},
 						},
@@ -849,11 +808,9 @@ var _ = Describe("ResourceManager", func() {
 			return deployment
 		}
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-resource-manager-vpa",
-				Namespace: deployNamespace,
-				Labels:    defaultLabels,
-			},
+			Name:      "gardener-resource-manager-vpa",
+			Namespace: deployNamespace,
+			Labels:    defaultLabels,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -878,11 +835,9 @@ var _ = Describe("ResourceManager", func() {
 			},
 		}
 		pdb = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-resource-manager",
-				Namespace: deployNamespace,
-				Labels:    defaultLabels,
-			},
+			Name:      "gardener-resource-manager",
+			Namespace: deployNamespace,
+			Labels:    defaultLabels,
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &maxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -896,11 +851,9 @@ var _ = Describe("ResourceManager", func() {
 		}
 		serviceMonitorFor = func(prometheusLabel string) *monitoringv1.ServiceMonitor {
 			return &monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      prometheusLabel + "-gardener-resource-manager",
-					Namespace: deployNamespace,
-					Labels:    map[string]string{"prometheus": prometheusLabel},
-				},
+				Name:      prometheusLabel + "-gardener-resource-manager",
+				Namespace: deployNamespace,
+				Labels:    map[string]string{"prometheus": prometheusLabel},
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 						"app": "gardener-resource-manager",
@@ -949,24 +902,20 @@ var _ = Describe("ResourceManager", func() {
 			}
 
 			obj := &admissionregistrationv1.MutatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-resource-manager",
-					Namespace: deployNamespace,
-					Labels: map[string]string{
-						"app": "gardener-resource-manager",
-						"remediation.webhook.shoot.gardener.cloud/exclude": "true",
-					},
+				Name:      "gardener-resource-manager",
+				Namespace: deployNamespace,
+				Labels: map[string]string{
+					"app": "gardener-resource-manager",
+					"remediation.webhook.shoot.gardener.cloud/exclude": "true",
 				},
 				Webhooks: []admissionregistrationv1.MutatingWebhook{
 					{
 						Name: "projected-token-mount.resources.gardener.cloud",
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"pods"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE"},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"pods"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE"},
 						}},
 						NamespaceSelector: &metav1.LabelSelector{MatchExpressions: namespaceSelectorMatchExpressions},
 						ObjectSelector: &metav1.LabelSelector{
@@ -1003,20 +952,16 @@ var _ = Describe("ResourceManager", func() {
 					Name: "high-availability-config.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"apps"},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"deployments", "statefulsets"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"apps"},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"deployments", "statefulsets"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"autoscaling"},
-								APIVersions: []string{"v2"},
-								Resources:   []string{"horizontalpodautoscalers"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"autoscaling"},
+							APIVersions: []string{"v2"},
+							Resources:   []string{"horizontalpodautoscalers"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					NamespaceSelector: &metav1.LabelSelector{
@@ -1052,12 +997,10 @@ var _ = Describe("ResourceManager", func() {
 				admissionregistrationv1.MutatingWebhook{
 					Name: "seccomp-profile.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"pods"},
-						},
-						Operations: []admissionregistrationv1.OperationType{"CREATE"},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"pods"},
+						Operations:  []admissionregistrationv1.OperationType{"CREATE"},
 					}},
 					NamespaceSelector: &metav1.LabelSelector{MatchExpressions: namespaceSelectorMatchExpressions},
 					ObjectSelector: &metav1.LabelSelector{
@@ -1089,12 +1032,10 @@ var _ = Describe("ResourceManager", func() {
 				admissionregistrationv1.MutatingWebhook{
 					Name: "kubernetes-service-host.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"pods"},
-						},
-						Operations: []admissionregistrationv1.OperationType{"CREATE"},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"pods"},
+						Operations:  []admissionregistrationv1.OperationType{"CREATE"},
 					}},
 					NamespaceSelector: &metav1.LabelSelector{
 						MatchExpressions: []metav1.LabelSelectorRequirement{{
@@ -1134,12 +1075,10 @@ var _ = Describe("ResourceManager", func() {
 					admissionregistrationv1.MutatingWebhook{
 						Name: "pod-kube-apiserver-load-balancing.resources.gardener.cloud",
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"pods"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE"},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"pods"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE"},
 						}},
 						NamespaceSelector: &metav1.LabelSelector{
 							MatchLabels: map[string]string{"foobar": "barfoo"},
@@ -1163,12 +1102,10 @@ var _ = Describe("ResourceManager", func() {
 					admissionregistrationv1.MutatingWebhook{
 						Name: "pod-virtual-garden-kube-apiserver-load-balancing.resources.gardener.cloud",
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"pods"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE"},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"pods"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE"},
 						}},
 						NamespaceSelector: &metav1.LabelSelector{
 							MatchLabels: map[string]string{"barbaz": "bazbar"},
@@ -1201,12 +1138,10 @@ var _ = Describe("ResourceManager", func() {
 			obj.Webhooks = append(obj.Webhooks, admissionregistrationv1.MutatingWebhook{
 				Name: "pod-topology-spread-constraints.resources.gardener.cloud",
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{""},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"pods"},
-					},
-					Operations: []admissionregistrationv1.OperationType{"CREATE"},
+					APIGroups:   []string{""},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"pods"},
+					Operations:  []admissionregistrationv1.OperationType{"CREATE"},
 				}},
 				NamespaceSelector: &metav1.LabelSelector{MatchExpressions: namespaceSelectorMatchExpressions},
 				ObjectSelector: &metav1.LabelSelector{
@@ -1238,12 +1173,10 @@ var _ = Describe("ResourceManager", func() {
 				admissionregistrationv1.MutatingWebhook{
 					Name: "vpa-in-place-updates.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{"autoscaling.k8s.io"},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"verticalpodautoscalers"},
-						},
-						Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+						APIGroups:   []string{"autoscaling.k8s.io"},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"verticalpodautoscalers"},
+						Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 					}},
 					NamespaceSelector: &metav1.LabelSelector{MatchExpressions: namespaceSelectorMatchExpressions},
 					ObjectSelector: &metav1.LabelSelector{
@@ -1637,24 +1570,20 @@ subjects:
 `
 
 		validatingWebhookConfiguration = &admissionregistrationv1.ValidatingWebhookConfiguration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-resource-manager",
-				Namespace: deployNamespace,
-				Labels: map[string]string{
-					"app": "gardener-resource-manager",
-					"remediation.webhook.shoot.gardener.cloud/exclude": "true",
-				},
+			Name:      "gardener-resource-manager",
+			Namespace: deployNamespace,
+			Labels: map[string]string{
+				"app": "gardener-resource-manager",
+				"remediation.webhook.shoot.gardener.cloud/exclude": "true",
 			},
 			Webhooks: []admissionregistrationv1.ValidatingWebhook{
 				{
 					Name: "crd-deletion-protection.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{"apiextensions.k8s.io"},
-							APIVersions: []string{"v1beta1", "v1"},
-							Resources:   []string{"customresourcedefinitions"},
-						},
-						Operations: []admissionregistrationv1.OperationType{"DELETE"},
+						APIGroups:   []string{"apiextensions.k8s.io"},
+						APIVersions: []string{"v1beta1", "v1"},
+						Resources:   []string{"customresourcedefinitions"},
+						Operations:  []admissionregistrationv1.OperationType{"DELETE"},
 					}},
 					FailurePolicy:     &failurePolicyFail,
 					NamespaceSelector: &metav1.LabelSelector{},
@@ -1675,33 +1604,29 @@ subjects:
 					Name: "cr-deletion-protection.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"druid.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources: []string{
-									"etcds",
-								},
+							APIGroups:   []string{"druid.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources: []string{
+								"etcds",
 							},
 							Operations: []admissionregistrationv1.OperationType{"DELETE"},
 						},
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources: []string{
-									"backupbuckets",
-									"backupentries",
-									"bastions",
-									"containerruntimes",
-									"controlplanes",
-									"dnsrecords",
-									"extensions",
-									"infrastructures",
-									"networks",
-									"operatingsystemconfigs",
-									"selfhostedshootexposures",
-									"workers",
-								},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources: []string{
+								"backupbuckets",
+								"backupentries",
+								"bastions",
+								"containerruntimes",
+								"controlplanes",
+								"dnsrecords",
+								"extensions",
+								"infrastructures",
+								"networks",
+								"operatingsystemconfigs",
+								"selfhostedshootexposures",
+								"workers",
 							},
 							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
 						},
@@ -1724,12 +1649,10 @@ subjects:
 					Name: "validation.extensions.backupbuckets.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"backupbuckets"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"backupbuckets"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1750,12 +1673,10 @@ subjects:
 					Name: "validation.extensions.backupentries.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"backupentries"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"backupentries"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1776,12 +1697,10 @@ subjects:
 					Name: "validation.extensions.bastions.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"bastions"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"bastions"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1802,12 +1721,10 @@ subjects:
 					Name: "validation.extensions.containerruntimes.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"containerruntimes"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"containerruntimes"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1828,12 +1745,10 @@ subjects:
 					Name: "validation.extensions.controlplanes.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"controlplanes"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"controlplanes"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1854,12 +1769,10 @@ subjects:
 					Name: "validation.extensions.dnsrecords.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"dnsrecords"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"dnsrecords"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1880,12 +1793,10 @@ subjects:
 					Name: "validation.extensions.etcds.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"druid.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"etcds"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"druid.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"etcds"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1906,12 +1817,10 @@ subjects:
 					Name: "validation.extensions.extensions.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"extensions"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"extensions"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1932,12 +1841,10 @@ subjects:
 					Name: "validation.extensions.infrastructures.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"infrastructures"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"infrastructures"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1958,12 +1865,10 @@ subjects:
 					Name: "validation.extensions.networks.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"networks"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"networks"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -1984,12 +1889,10 @@ subjects:
 					Name: "validation.extensions.operatingsystemconfigs.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"operatingsystemconfigs"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"operatingsystemconfigs"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -2010,12 +1913,10 @@ subjects:
 					Name: "validation.extensions.selfhostedshootexposures.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"selfhostedshootexposures"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"selfhostedshootexposures"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -2036,12 +1937,10 @@ subjects:
 					Name: "validation.extensions.workers.resources.gardener.cloud",
 					Rules: []admissionregistrationv1.RuleWithOperations{
 						{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{"extensions.gardener.cloud"},
-								APIVersions: []string{"v1alpha1"},
-								Resources:   []string{"workers"},
-							},
-							Operations: []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
+							APIGroups:   []string{"extensions.gardener.cloud"},
+							APIVersions: []string{"v1alpha1"},
+							Resources:   []string{"workers"},
+							Operations:  []admissionregistrationv1.OperationType{"CREATE", "UPDATE"},
 						},
 					},
 					FailurePolicy:     &failurePolicyFail,
@@ -2065,11 +1964,9 @@ subjects:
 		Expect(err).NotTo(HaveOccurred())
 
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-shoot-core-gardener-resource-manager",
-				Namespace: deployNamespace,
-			},
-			Type: corev1.SecretTypeOpaque,
+			Name:      "managedresource-shoot-core-gardener-resource-manager",
+			Namespace: deployNamespace,
+			Type:      corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
 				"data.yaml.br": compressedData,
 			},
@@ -2077,13 +1974,11 @@ subjects:
 		utilruntime.Must(kubernetesutils.MakeUnique(managedResourceSecret))
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-core-gardener-resource-manager",
-				Namespace: deployNamespace,
-				Labels: map[string]string{
-					"origin": "gardener",
-					"foo":    "bar",
-				},
+			Name:      "shoot-core-gardener-resource-manager",
+			Namespace: deployNamespace,
+			Labels: map[string]string{
+				"origin": "gardener",
+				"foo":    "bar",
 			},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{
@@ -2123,11 +2018,9 @@ subjects:
 						Expect(err).NotTo(HaveOccurred())
 
 						managedResourceSecret = &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "managedresource-shoot-core-gardener-resource-manager",
-								Namespace: deployNamespace,
-							},
-							Type: corev1.SecretTypeOpaque,
+							Name:      "managedresource-shoot-core-gardener-resource-manager",
+							Namespace: deployNamespace,
+							Type:      corev1.SecretTypeOpaque,
 							Data: map[string][]byte{
 								"data.yaml.br": compressedData,
 							},
@@ -2239,11 +2132,9 @@ subjects:
 						Expect(err).NotTo(HaveOccurred())
 
 						managedResourceSecret = &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "managedresource-shoot-core-gardener-resource-manager",
-								Namespace: deployNamespace,
-							},
-							Type: corev1.SecretTypeOpaque,
+							Name:      "managedresource-shoot-core-gardener-resource-manager",
+							Namespace: deployNamespace,
+							Type:      corev1.SecretTypeOpaque,
 							Data: map[string][]byte{
 								"data.yaml.br": compressedData,
 							},
@@ -2471,8 +2362,8 @@ subjects:
 						return c.Create(ctx, obj, opts...)
 					},
 				}).Build()
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "server-ca", Namespace: deployNamespace}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: deployNamespace}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "server-ca", Namespace: deployNamespace})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: deployNamespace})).To(Succeed())
 				sm = fakesecretsmanager.New(fakeClient, deployNamespace)
 				resourceManager = New(fakeClient, deployNamespace, sm, cfg)
 				resourceManager.SetSecrets(secrets)
@@ -2489,8 +2380,8 @@ subjects:
 						return c.Create(ctx, obj, opts...)
 					},
 				}).Build()
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "server-ca", Namespace: deployNamespace}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: deployNamespace}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "server-ca", Namespace: deployNamespace})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: deployNamespace})).To(Succeed())
 				sm = fakesecretsmanager.New(fakeClient, deployNamespace)
 				resourceManager = New(fakeClient, deployNamespace, sm, cfg)
 				resourceManager.SetSecrets(secrets)
@@ -2516,11 +2407,9 @@ subjects:
 				Expect(err).NotTo(HaveOccurred())
 
 				managedResourceSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "managedresource-shoot-core-gardener-resource-manager",
-						Namespace: deployNamespace,
-					},
-					Type: corev1.SecretTypeOpaque,
+					Name:      "managedresource-shoot-core-gardener-resource-manager",
+					Namespace: deployNamespace,
+					Type:      corev1.SecretTypeOpaque,
 					Data: map[string][]byte{
 						"data.yaml.br": compressedData,
 					},
@@ -2736,17 +2625,17 @@ subjects:
 			Context("should delete all created resources", func() {
 				It("should delete all created resources", func() {
 
-					Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager-vpa"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &corev1.Service{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &monitoringv1.ServiceMonitor{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-gardener-resource-manager", Labels: map[string]string{"prometheus": "shoot"}}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: secret.Name}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &rbacv1.Role{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-					Expect(fakeClient.Create(ctx, &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &policyv1.PodDisruptionBudget{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &vpaautoscalingv1.VerticalPodAutoscaler{Namespace: deployNamespace, Name: "gardener-resource-manager-vpa"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &appsv1.Deployment{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &corev1.Service{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &corev1.ServiceAccount{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &monitoringv1.ServiceMonitor{Namespace: deployNamespace, Name: "shoot-gardener-resource-manager", Labels: map[string]string{"prometheus": "shoot"}})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &corev1.Secret{Namespace: deployNamespace, Name: secret.Name})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &rbacv1.Role{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &rbacv1.RoleBinding{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
 
 					Expect(resourceManager.Destroy(ctx)).To(Succeed())
 
@@ -2765,12 +2654,12 @@ subjects:
 			})
 
 			It("should fail because the managed resource cannot be deleted", func() {
-				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"})).To(Succeed())
 
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*resourcesv1alpha1.ManagedResource); ok {
@@ -2786,8 +2675,8 @@ subjects:
 
 			It("should fail because the managed resource secret cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if obj.GetName() == "managedresource-shoot-core-gardener-resource-manager" {
@@ -2805,8 +2694,8 @@ subjects:
 
 			It("should fail because the pdb cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*policyv1.PodDisruptionBudget); ok {
@@ -2822,8 +2711,8 @@ subjects:
 
 			It("should fail because the vpa cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*vpaautoscalingv1.VerticalPodAutoscaler); ok {
@@ -2839,8 +2728,8 @@ subjects:
 
 			It("should fail because the deployment cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*appsv1.Deployment); ok {
@@ -2856,8 +2745,8 @@ subjects:
 
 			It("should fail because the service cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*corev1.Service); ok {
@@ -2873,8 +2762,8 @@ subjects:
 
 			It("should fail because the service account cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*corev1.ServiceAccount); ok {
@@ -2890,8 +2779,8 @@ subjects:
 
 			It("should fail because the service monitor cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*monitoringv1.ServiceMonitor); ok {
@@ -2907,8 +2796,8 @@ subjects:
 
 			It("should fail because the secret cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if obj.GetName() == secret.Name {
@@ -2926,8 +2815,8 @@ subjects:
 
 			It("should fail because the role cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*rbacv1.Role); ok {
@@ -2943,8 +2832,8 @@ subjects:
 
 			It("should fail because the role binding cannot be deleted", func() {
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjects(
-					&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"}},
-					&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"}},
+					&resourcesv1alpha1.ManagedResource{Namespace: deployNamespace, Name: "shoot-core-gardener-resource-manager"},
+					&corev1.Secret{Namespace: deployNamespace, Name: "managedresource-shoot-core-gardener-resource-manager"},
 				).WithInterceptorFuncs(interceptor.Funcs{
 					Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
 						if _, ok := obj.(*rbacv1.RoleBinding); ok {
@@ -2968,17 +2857,17 @@ subjects:
 			})
 
 			It("should delete all created resources", func() {
-				Expect(fakeClient.Create(ctx, &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "managedresources.resources.gardener.cloud"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &admissionregistrationv1.MutatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &admissionregistrationv1.ValidatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{Name: clusterRoleName}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: clusterRoleName}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager-vpa"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &corev1.Service{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "gardener-resource-manager"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &monitoringv1.ServiceMonitor{ObjectMeta: metav1.ObjectMeta{Namespace: deployNamespace, Name: "seed-gardener-resource-manager", Labels: map[string]string{"prometheus": "seed"}}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &apiextensionsv1.CustomResourceDefinition{Name: "managedresources.resources.gardener.cloud"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &admissionregistrationv1.MutatingWebhookConfiguration{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &admissionregistrationv1.ValidatingWebhookConfiguration{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &rbacv1.ClusterRole{Name: clusterRoleName})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &rbacv1.ClusterRoleBinding{Name: clusterRoleName})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &policyv1.PodDisruptionBudget{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &vpaautoscalingv1.VerticalPodAutoscaler{Namespace: deployNamespace, Name: "gardener-resource-manager-vpa"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &appsv1.Deployment{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Service{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.ServiceAccount{Namespace: deployNamespace, Name: "gardener-resource-manager"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &monitoringv1.ServiceMonitor{Namespace: deployNamespace, Name: "seed-gardener-resource-manager", Labels: map[string]string{"prometheus": "seed"}})).To(Succeed())
 
 				Expect(resourceManager.Destroy(ctx)).To(Succeed())
 
@@ -3128,9 +3017,7 @@ subjects:
 
 			It("should pass because the CRD is ready", func() {
 				readyCRD := &apiextensionsv1.CustomResourceDefinition{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "managedresources.resources.gardener.cloud",
-					},
+					Name: "managedresources.resources.gardener.cloud",
 					Status: apiextensionsv1.CustomResourceDefinitionStatus{
 						Conditions: []apiextensionsv1.CustomResourceDefinitionCondition{
 							{Type: apiextensionsv1.Established, Status: apiextensionsv1.ConditionTrue},
@@ -3149,9 +3036,7 @@ subjects:
 
 			It("should fail because the CRD is not ready", func() {
 				unreadyCRD := &apiextensionsv1.CustomResourceDefinition{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "managedresources.resources.gardener.cloud",
-					},
+					Name: "managedresources.resources.gardener.cloud",
 				}
 
 				Expect(fakeClient.Create(ctx, unreadyCRD)).To(Succeed())

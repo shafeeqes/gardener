@@ -60,84 +60,74 @@ var _ = Describe("KubeProxy", func() {
 
 		managedResourceForPool = func(pool WorkerPool) *resourcesv1alpha1.ManagedResource {
 			return &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-core-kube-proxy-" + pool.Name + "-v" + pool.KubernetesVersion.String(),
-					Namespace: namespace,
-					Labels: map[string]string{
-						"component":          "kube-proxy",
-						"role":               "pool",
-						"pool-name":          pool.Name,
-						"kubernetes-version": pool.KubernetesVersion.String(),
-					},
+				Name:      "shoot-core-kube-proxy-" + pool.Name + "-v" + pool.KubernetesVersion.String(),
+				Namespace: namespace,
+				Labels: map[string]string{
+					"component":          "kube-proxy",
+					"role":               "pool",
+					"pool-name":          pool.Name,
+					"kubernetes-version": pool.KubernetesVersion.String(),
 				},
 			}
 		}
 		managedResourceSecretForPool = func(pool WorkerPool) *corev1.Secret {
 			return &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "managedresource-" + managedResourceForPool(pool).Name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"component":          "kube-proxy",
-						"role":               "pool",
-						"pool-name":          pool.Name,
-						"kubernetes-version": pool.KubernetesVersion.String(),
-					},
+				Name:      "managedresource-" + managedResourceForPool(pool).Name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"component":          "kube-proxy",
+					"role":               "pool",
+					"pool-name":          pool.Name,
+					"kubernetes-version": pool.KubernetesVersion.String(),
 				},
 			}
 		}
 
 		managedResourceForPoolForMajorMinorVersionOnly = func(pool WorkerPool) *resourcesv1alpha1.ManagedResource {
 			return &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-core-kube-proxy-" + pool.Name + "-v" + fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
-					Namespace: namespace,
-					Labels: map[string]string{
-						"component":          "kube-proxy",
-						"role":               "pool",
-						"pool-name":          pool.Name,
-						"kubernetes-version": fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
-					},
+				Name:      "shoot-core-kube-proxy-" + pool.Name + "-v" + fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
+				Namespace: namespace,
+				Labels: map[string]string{
+					"component":          "kube-proxy",
+					"role":               "pool",
+					"pool-name":          pool.Name,
+					"kubernetes-version": fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
 				},
 			}
 		}
 		managedResourceSecretForPoolForMajorMinorVersionOnly = func(pool WorkerPool) *corev1.Secret {
 			return &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "managedresource-" + managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"component":          "kube-proxy",
-						"role":               "pool",
-						"pool-name":          pool.Name,
-						"kubernetes-version": fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
-					},
+				Name:      "managedresource-" + managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"component":          "kube-proxy",
+					"role":               "pool",
+					"pool-name":          pool.Name,
+					"kubernetes-version": fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
 				},
 			}
 		}
 
 		scrapeConfig = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-kube-proxy",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-kube-proxy",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				Scheme:      new(monitoringv1.SchemeHTTPS),
 				TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-					Key:                  "token",
+					Name: "shoot-access-prometheus-shoot",
+					Key:  "token",
 				}},
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					APIServer:  new("https://kube-apiserver"),
 					Role:       "Endpoints",
 					Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				}},
@@ -188,12 +178,10 @@ var _ = Describe("KubeProxy", func() {
 		}
 
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-kube-proxy",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-kube-proxy",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "kube-proxy.rules",
@@ -255,11 +243,9 @@ var _ = Describe("KubeProxy", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 		contain = NewManagedResourceContainsObjectsMatcher(c)
 		managedResourceCentral = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-core-kube-proxy",
-				Namespace: namespace,
-				Labels:    map[string]string{"component": "kube-proxy"},
-			},
+			Name:      "shoot-core-kube-proxy",
+			Namespace: namespace,
+			Labels:    map[string]string{"component": "kube-proxy"},
 		}
 		managedResourceSecretCentral = &corev1.Secret{}
 	})
@@ -267,17 +253,13 @@ var _ = Describe("KubeProxy", func() {
 	Describe("#Deploy", func() {
 		var (
 			serviceAccount = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-proxy",
-					Namespace: "kube-system",
-				},
+				Name:                         "kube-proxy",
+				Namespace:                    "kube-system",
 				AutomountServiceAccountToken: func(b bool) *bool { return &b }(false),
 			}
 
 			clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener.cloud:target:node-proxier",
-				},
+				Name: "gardener.cloud:target:node-proxier",
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: "rbac.authorization.k8s.io",
 					Kind:     "ClusterRole",
@@ -293,13 +275,11 @@ var _ = Describe("KubeProxy", func() {
 			}
 
 			service = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-proxy",
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						"app":  "kubernetes",
-						"role": "proxy",
-					},
+				Name:      "kube-proxy",
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					"app":  "kubernetes",
+					"role": "proxy",
 				},
 				Spec: corev1.ServiceSpec{
 					ClusterIP: "None",
@@ -322,12 +302,10 @@ var _ = Describe("KubeProxy", func() {
 			secretName = "kube-proxy-e3a80e6d"
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-					},
+				Name:      secretName,
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
 				},
 				Data: map[string][]byte{
 					"kubeconfig": kubeconfig,
@@ -442,17 +420,15 @@ winkernel:
   sourceVip: ""
 `
 				return &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"app":                 "kubernetes",
-							"gardener.cloud/role": "system-component",
-							"resources.gardener.cloud/garbage-collectable-reference": "true",
-							"role":   "proxy",
-							"origin": "gardener",
-						},
-						Name:      configMapNameFor(mode),
-						Namespace: "kube-system",
+					Labels: map[string]string{
+						"app":                 "kubernetes",
+						"gardener.cloud/role": "system-component",
+						"resources.gardener.cloud/garbage-collectable-reference": "true",
+						"role":   "proxy",
+						"origin": "gardener",
 					},
+					Name:      configMapNameFor(mode),
+					Namespace: "kube-system",
 					Immutable: new(true),
 					Data: map[string]string{
 						"config.yaml": out,
@@ -463,16 +439,14 @@ winkernel:
 			configMapConntrackFixScriptName = "kube-proxy-conntrack-fix-script-ebff3d39"
 
 			configMapConntrackFixScript = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      configMapConntrackFixScriptName,
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						"app":                 "kubernetes",
-						"gardener.cloud/role": "system-component",
-						"origin":              "gardener",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-						"role": "proxy",
-					},
+				Name:      configMapConntrackFixScriptName,
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					"app":                 "kubernetes",
+					"gardener.cloud/role": "system-component",
+					"origin":              "gardener",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
+					"role": "proxy",
 				},
 				Immutable: new(true),
 				Data: map[string]string{
@@ -505,16 +479,14 @@ done
 
 			configMapCleanupScriptName = "kube-proxy-cleanup-script-a4263ada"
 			configMapCleanupScript     = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      configMapCleanupScriptName,
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						"app":                 "kubernetes",
-						"gardener.cloud/role": "system-component",
-						"origin":              "gardener",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-						"role": "proxy",
-					},
+				Name:      configMapCleanupScriptName,
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					"app":                 "kubernetes",
+					"gardener.cloud/role": "system-component",
+					"origin":              "gardener",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
+					"role": "proxy",
 				},
 				Immutable: new(true),
 				Data: map[string]string{
@@ -577,15 +549,13 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 				}
 
 				ds := &appsv1.DaemonSet{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        daemonSetNameFor(pool),
-						Namespace:   "kube-system",
-						Annotations: referenceAnnotations(),
-						Labels: map[string]string{
-							"gardener.cloud/role":                    "system-component",
-							"node.gardener.cloud/critical-component": "true",
-							"origin":                                 "gardener",
-						},
+					Name:        daemonSetNameFor(pool),
+					Namespace:   "kube-system",
+					Annotations: referenceAnnotations(),
+					Labels: map[string]string{
+						"gardener.cloud/role":                    "system-component",
+						"node.gardener.cloud/critical-component": "true",
+						"origin":                                 "gardener",
 					},
 					Spec: appsv1.DaemonSetSpec{
 						RevisionHistoryLimit: new(int32(2)),
@@ -626,12 +596,10 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 											},
 										},
 										ReadinessProbe: &corev1.Probe{
-											ProbeHandler: corev1.ProbeHandler{
-												HTTPGet: &corev1.HTTPGetAction{
-													Path:   "/livez",
-													Port:   intstr.FromInt32(10256),
-													Scheme: corev1.URISchemeHTTP,
-												},
+											HTTPGet: &corev1.HTTPGetAction{
+												Path:   "/livez",
+												Port:   intstr.FromInt32(10256),
+												Scheme: corev1.URISchemeHTTP,
 											},
 											InitialDelaySeconds: 15,
 											TimeoutSeconds:      15,
@@ -737,84 +705,60 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 								Volumes: []corev1.Volume{
 									{
 										Name: "kubeconfig",
-										VolumeSource: corev1.VolumeSource{
-											Secret: &corev1.SecretVolumeSource{
-												SecretName: secretName,
-											},
+										Secret: &corev1.SecretVolumeSource{
+											SecretName: secretName,
 										},
 									},
 									{
 										Name: "kube-proxy-config",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: configMapNameFor(mode),
-												},
-											},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name: configMapNameFor(mode),
 										},
 									},
 									{
 										Name: "ssl-certs-hosts",
-										VolumeSource: corev1.VolumeSource{
-											HostPath: &corev1.HostPathVolumeSource{
-												Path: "/usr/share/ca-certificates",
-											},
+										HostPath: &corev1.HostPathVolumeSource{
+											Path: "/usr/share/ca-certificates",
 										},
 									},
 									{
 										Name: "kernel-modules",
-										VolumeSource: corev1.VolumeSource{
-											HostPath: &corev1.HostPathVolumeSource{
-												Path: "/lib/modules",
-											},
+										HostPath: &corev1.HostPathVolumeSource{
+											Path: "/lib/modules",
 										},
 									},
 									{
 										Name: "kube-proxy-cleanup-script",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: configMapCleanupScriptName,
-												},
-												DefaultMode: new(int32(511)),
-											},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name:        configMapCleanupScriptName,
+											DefaultMode: new(int32(511)),
 										},
 									},
 									{
 										Name: "kube-proxy-dir",
-										VolumeSource: corev1.VolumeSource{
-											HostPath: &corev1.HostPathVolumeSource{
-												Path: "/var/lib/kube-proxy",
-												Type: new(corev1.HostPathDirectoryOrCreate),
-											},
+										HostPath: &corev1.HostPathVolumeSource{
+											Path: "/var/lib/kube-proxy",
+											Type: new(corev1.HostPathDirectoryOrCreate),
 										},
 									},
 									{
 										Name: "kube-proxy-mode",
-										VolumeSource: corev1.VolumeSource{
-											HostPath: &corev1.HostPathVolumeSource{
-												Path: "/var/lib/kube-proxy/mode",
-												Type: new(corev1.HostPathFileOrCreate),
-											},
+										HostPath: &corev1.HostPathVolumeSource{
+											Path: "/var/lib/kube-proxy/mode",
+											Type: new(corev1.HostPathFileOrCreate),
 										},
 									},
 									{
 										Name: "conntrack-fix-script",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: configMapConntrackFixScriptName,
-												},
-											},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name: configMapConntrackFixScriptName,
 										},
 									},
 									{
 										Name: "xtables-lock",
-										VolumeSource: corev1.VolumeSource{
-											HostPath: &corev1.HostPathVolumeSource{
-												Path: "/run/xtables.lock",
-												Type: new(corev1.HostPathFileOrCreate),
-											},
+										HostPath: &corev1.HostPathVolumeSource{
+											Path: "/run/xtables.lock",
+											Type: new(corev1.HostPathFileOrCreate),
 										},
 									},
 								},
@@ -841,10 +785,8 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 			}
 			vpaFor = func(pool WorkerPool) *vpaautoscalingv1.VerticalPodAutoscaler {
 				return &vpaautoscalingv1.VerticalPodAutoscaler{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      vpaNameFor(pool),
-						Namespace: "kube-system",
-					},
+					Name:      vpaNameFor(pool),
+					Namespace: "kube-system",
 					Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 						ResourcePolicy: &vpaautoscalingv1.PodResourcePolicy{
 							ContainerPolicies: []vpaautoscalingv1.ContainerResourcePolicy{
@@ -893,14 +835,12 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceCentral), managedResourceCentral)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceCentral.Name,
-					Namespace:       managedResourceCentral.Namespace,
-					ResourceVersion: "1",
-					Labels: map[string]string{
-						"origin":    "gardener",
-						"component": "kube-proxy",
-					},
+				Name:            managedResourceCentral.Name,
+				Namespace:       managedResourceCentral.Namespace,
+				ResourceVersion: "1",
+				Labels: map[string]string{
+					"origin":    "gardener",
+					"component": "kube-proxy",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -918,7 +858,7 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 				configMapCleanupScript,
 			))
 
-			managedResourceSecretCentral = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResourceCentral.Spec.SecretRefs[0].Name, Namespace: namespace}}
+			managedResourceSecretCentral = &corev1.Secret{Name: managedResourceCentral.Spec.SecretRefs[0].Name, Namespace: namespace}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretCentral), managedResourceSecretCentral)).To(Succeed())
 			Expect(managedResourceSecretCentral.Type).To(Equal(corev1.SecretTypeOpaque))
 			Expect(managedResourceSecretCentral.Labels).To(Equal(map[string]string{
@@ -938,17 +878,15 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedPoolMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":             "gardener",
-							"component":          "kube-proxy",
-							"role":               "pool",
-							"pool-name":          pool.Name,
-							"kubernetes-version": pool.KubernetesVersion.String(),
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":             "gardener",
+						"component":          "kube-proxy",
+						"role":               "pool",
+						"pool-name":          pool.Name,
+						"kubernetes-version": pool.KubernetesVersion.String(),
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -957,7 +895,7 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 				}
 
 				Expect(managedResource).To(consistOf(daemonSetFor(pool, values.ProxyMode, values.VPAEnabled)))
-				managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: namespace}}
+				managedResourceSecret := &corev1.Secret{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: namespace}
 				expectedPoolMr.Spec.SecretRefs = []corev1.LocalObjectReference{{Name: managedResourceSecret.Name}}
 				utilruntime.Must(references.InjectAnnotations(expectedPoolMr))
 				Expect(managedResource).To(DeepEqual(expectedPoolMr))
@@ -985,14 +923,12 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceCentral), managedResourceCentral)).To(Succeed())
 			expectedMR := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceCentral.Name,
-					Namespace:       managedResourceCentral.Namespace,
-					ResourceVersion: "1",
-					Labels: map[string]string{
-						"origin":    "gardener",
-						"component": "kube-proxy",
-					},
+				Name:            managedResourceCentral.Name,
+				Namespace:       managedResourceCentral.Namespace,
+				ResourceVersion: "1",
+				Labels: map[string]string{
+					"origin":    "gardener",
+					"component": "kube-proxy",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1001,10 +937,9 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 			}
 			Expect(managedResourceCentral).To(contain(configMapFor(values.ProxyMode)))
 
-			managedResourceSecretCentral = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			managedResourceSecretCentral = &corev1.Secret{
 				Name:      managedResourceCentral.Spec.SecretRefs[0].Name,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretCentral), managedResourceSecretCentral)).To(Succeed())
 			Expect(managedResourceSecretCentral.Type).To(Equal(corev1.SecretTypeOpaque))
@@ -1025,17 +960,15 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				poolExpectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":             "gardener",
-							"component":          "kube-proxy",
-							"role":               "pool",
-							"pool-name":          pool.Name,
-							"kubernetes-version": pool.KubernetesVersion.String(),
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":             "gardener",
+						"component":          "kube-proxy",
+						"role":               "pool",
+						"pool-name":          pool.Name,
+						"kubernetes-version": pool.KubernetesVersion.String(),
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1043,10 +976,9 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 					},
 				}
 
-				managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				managedResourceSecret := &corev1.Secret{
 					Name:      managedResource.Spec.SecretRefs[0].Name,
-					Namespace: namespace,
-				}}
+					Namespace: namespace}
 				Expect(managedResource).To(consistOf(daemonSetFor(pool, values.ProxyMode, values.VPAEnabled)))
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
@@ -1076,14 +1008,12 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceCentral), managedResourceCentral)).To(Succeed())
 			expectedMR := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceCentral.Name,
-					Namespace:       managedResourceCentral.Namespace,
-					ResourceVersion: "1",
-					Labels: map[string]string{
-						"origin":    "gardener",
-						"component": "kube-proxy",
-					},
+				Name:            managedResourceCentral.Name,
+				Namespace:       managedResourceCentral.Namespace,
+				ResourceVersion: "1",
+				Labels: map[string]string{
+					"origin":    "gardener",
+					"component": "kube-proxy",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1092,10 +1022,9 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 			}
 			Expect(managedResourceCentral).To(contain(configMapFor(values.ProxyMode)))
 
-			managedResourceSecretCentral = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			managedResourceSecretCentral = &corev1.Secret{
 				Name:      managedResourceCentral.Spec.SecretRefs[0].Name,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretCentral), managedResourceSecretCentral)).To(Succeed())
 			Expect(managedResourceSecretCentral.Type).To(Equal(corev1.SecretTypeOpaque))
@@ -1116,17 +1045,15 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				poolExpectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":             "gardener",
-							"component":          "kube-proxy",
-							"role":               "pool",
-							"pool-name":          pool.Name,
-							"kubernetes-version": pool.KubernetesVersion.String(),
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":             "gardener",
+						"component":          "kube-proxy",
+						"role":               "pool",
+						"pool-name":          pool.Name,
+						"kubernetes-version": pool.KubernetesVersion.String(),
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1134,10 +1061,9 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 					},
 				}
 
-				managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				managedResourceSecret := &corev1.Secret{
 					Name:      managedResource.Spec.SecretRefs[0].Name,
-					Namespace: namespace,
-				}}
+					Namespace: namespace}
 				Expect(managedResource).To(consistOf(daemonSetFor(pool, values.ProxyMode, values.VPAEnabled)))
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
@@ -1170,24 +1096,21 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 				managedResource := managedResourceForPool(pool)
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
-				managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				managedResourceSecret := &corev1.Secret{
 					Name:      managedResource.Spec.SecretRefs[0].Name,
-					Namespace: namespace,
-				}}
+					Namespace: namespace}
 				Expect(managedResource).To(consistOf(daemonSetFor(pool, values.ProxyMode, values.VPAEnabled)))
 
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":             "gardener",
-							"component":          "kube-proxy",
-							"role":               "pool",
-							"pool-name":          pool.Name,
-							"kubernetes-version": pool.KubernetesVersion.String(),
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":             "gardener",
+						"component":          "kube-proxy",
+						"role":               "pool",
+						"pool-name":          pool.Name,
+						"kubernetes-version": pool.KubernetesVersion.String(),
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1210,17 +1133,15 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceForMajorMinorVersionOnly), managedResourceForMajorMinorVersionOnly)).To(Succeed())
 				expectedMrForMajorMinorVersionOnly := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceForMajorMinorVersionOnly.Name,
-						Namespace:       managedResourceForMajorMinorVersionOnly.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":             "gardener",
-							"component":          "kube-proxy",
-							"role":               "pool",
-							"pool-name":          pool.Name,
-							"kubernetes-version": fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
-						},
+					Name:            managedResourceForMajorMinorVersionOnly.Name,
+					Namespace:       managedResourceForMajorMinorVersionOnly.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":             "gardener",
+						"component":          "kube-proxy",
+						"role":               "pool",
+						"pool-name":          pool.Name,
+						"kubernetes-version": fmt.Sprintf("%d.%d", pool.KubernetesVersion.Major(), pool.KubernetesVersion.Minor()),
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1250,14 +1171,12 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceCentral), managedResourceCentral)).To(Succeed())
 			expectedMR := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceCentral.Name,
-					Namespace:       managedResourceCentral.Namespace,
-					ResourceVersion: "1",
-					Labels: map[string]string{
-						"origin":    "gardener",
-						"component": "kube-proxy",
-					},
+				Name:            managedResourceCentral.Name,
+				Namespace:       managedResourceCentral.Namespace,
+				ResourceVersion: "1",
+				Labels: map[string]string{
+					"origin":    "gardener",
+					"component": "kube-proxy",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1266,10 +1185,9 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 			}
 			Expect(managedResourceCentral).To(contain(configMapFor(values.ProxyMode)))
 
-			managedResourceSecretCentral = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			managedResourceSecretCentral = &corev1.Secret{
 				Name:      managedResourceCentral.Spec.SecretRefs[0].Name,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretCentral), managedResourceSecretCentral)).To(Succeed())
 			Expect(managedResourceSecretCentral.Type).To(Equal(corev1.SecretTypeOpaque))
@@ -1290,17 +1208,15 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				poolExpectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":             "gardener",
-							"component":          "kube-proxy",
-							"role":               "pool",
-							"pool-name":          pool.Name,
-							"kubernetes-version": pool.KubernetesVersion.String(),
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":             "gardener",
+						"component":          "kube-proxy",
+						"role":               "pool",
+						"pool-name":          pool.Name,
+						"kubernetes-version": pool.KubernetesVersion.String(),
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1308,10 +1224,9 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 					},
 				}
 
-				managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				managedResourceSecret := &corev1.Secret{
 					Name:      managedResource.Spec.SecretRefs[0].Name,
-					Namespace: namespace,
-				}}
+					Namespace: namespace}
 				Expect(managedResource).To(consistOf(daemonSetFor(pool, values.ProxyMode, values.VPAEnabled)))
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
@@ -1455,24 +1370,20 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			It("should fail because the central ManagedResource doesn't become healthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceCentral.Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceCentral.Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				for _, pool := range values.WorkerPools {
 					By(pool.Name)
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPool(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPool(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 				}
 
@@ -1481,24 +1392,20 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			It("should fail because a pool-specific ManagedResource doesn't become healthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceCentral.Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceCentral.Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				for _, pool := range values.WorkerPools {
 					By(pool.Name)
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPool(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: unhealthyManagedResourceStatus,
+						Name:       managedResourceForPool(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     unhealthyManagedResourceStatus,
 					})).To(Succeed())
 				}
 
@@ -1507,33 +1414,27 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			It("should fail because a pool-specific ManagedResource for major/minor version only doesn't become healthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceCentral.Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceCentral.Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				for _, pool := range values.WorkerPools {
 					By(pool.Name)
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPool(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPool(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: unhealthyManagedResourceStatus,
+						Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     unhealthyManagedResourceStatus,
 					})).To(Succeed())
 				}
 
@@ -1542,33 +1443,27 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			It("should successfully wait for the managed resource to become healthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceCentral.Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceCentral.Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				for _, pool := range values.WorkerPools {
 					By(pool.Name)
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPool(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPool(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 				}
 
@@ -1577,43 +1472,35 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			It("should successfully wait for the managed resource to become healthy despite undesired managed resource unhealthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceCentral.Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceCentral.Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				undesiredPool := WorkerPool{Name: "foo", KubernetesVersion: semver.MustParse("1.1.1")}
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceForPool(undesiredPool).Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceForPool(undesiredPool).Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				for _, pool := range values.WorkerPools {
 					By(pool.Name)
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPool(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPool(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 				}
 
@@ -1622,52 +1509,42 @@ echo "${KUBE_PROXY_MODE}" >"$1"
 
 			It("should successfully wait for the managed resource to become healthy despite undesired managed resource for major/minor version only unhealthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceCentral.Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceCentral.Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				undesiredPool := WorkerPool{Name: "foo", KubernetesVersion: semver.MustParse("1.1.1")}
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceForPool(undesiredPool).Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceForPool(undesiredPool).Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceForPoolForMajorMinorVersionOnly(undesiredPool).Name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceForPoolForMajorMinorVersionOnly(undesiredPool).Name,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				for _, pool := range values.WorkerPools {
 					By(pool.Name)
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPool(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPool(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceForPoolForMajorMinorVersionOnly(pool).Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 				}
 

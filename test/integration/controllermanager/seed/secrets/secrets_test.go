@@ -27,10 +27,8 @@ var _ = Describe("Seed Secrets controller tests", func() {
 
 	BeforeEach(func() {
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -76,30 +74,22 @@ var _ = Describe("Seed Secrets controller tests", func() {
 		}
 
 		secret1 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "secret-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{"gardener.cloud/role": "foo"},
-			},
+			GenerateName: "secret-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{"gardener.cloud/role": "foo"},
 		}
 		secret2 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "secret-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{"gardener.cloud/role": "foo"},
-			},
+			GenerateName: "secret-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{"gardener.cloud/role": "foo"},
 		}
 		secret3 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "secret-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "secret-",
+			Namespace:    testNamespace.Name,
 		}
 		secret4 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "secret-",
-				Namespace:    metav1.NamespaceDefault,
-			},
+			GenerateName: "secret-",
+			Namespace:    metav1.NamespaceDefault,
 		}
 
 		Expect(testClient.Create(ctx, secret1)).To(Succeed())

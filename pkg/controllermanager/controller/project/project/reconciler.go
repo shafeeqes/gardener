@@ -203,12 +203,10 @@ func (r *Reconciler) reconcileNamespaceForProject(ctx context.Context, log logr.
 		}
 
 		obj := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            namespaceName,
-				OwnerReferences: []metav1.OwnerReference{*ownerReference},
-				Labels:          projectLabels,
-				Annotations:     projectAnnotations,
-			},
+			Name:            namespaceName,
+			OwnerReferences: []metav1.OwnerReference{*ownerReference},
+			Labels:          projectLabels,
+			Annotations:     projectAnnotations,
 		}
 		obj.Annotations[v1beta1constants.NamespaceCreatedByProjectController] = "true"
 
@@ -266,10 +264,8 @@ const ResourceQuotaName = "gardener"
 
 func createOrUpdateResourceQuota(ctx context.Context, c client.Client, projectNamespace string, ownerReference *metav1.OwnerReference, config controllermanagerconfigv1alpha1.QuotaConfiguration) error {
 	projectResourceQuota := &corev1.ResourceQuota{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ResourceQuotaName,
-			Namespace: projectNamespace,
-		},
+		Name:      ResourceQuotaName,
+		Namespace: projectNamespace,
 	}
 
 	if _, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, c, projectResourceQuota, func() error {

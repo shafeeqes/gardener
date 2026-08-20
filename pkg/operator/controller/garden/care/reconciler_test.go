@@ -60,9 +60,7 @@ var _ = Describe("Garden Care Control", func() {
 		}
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: gardenName,
-			},
+			Name: gardenName,
 		}
 
 		runtimeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.RuntimeScheme).WithStatusSubresource(&operatorv1alpha1.Garden{}).Build()
@@ -75,7 +73,7 @@ var _ = Describe("Garden Care Control", func() {
 		var req reconcile.Request
 
 		BeforeEach(func() {
-			req = reconcile.Request{NamespacedName: client.ObjectKey{Name: gardenName}}
+			req = reconcile.Request{Name: gardenName}
 		})
 
 		JustBeforeEach(func() {
@@ -90,7 +88,7 @@ var _ = Describe("Garden Care Control", func() {
 
 		Context("when garden no longer exists", func() {
 			It("should stop reconciling and not requeue", func() {
-				req = reconcile.Request{NamespacedName: client.ObjectKey{Name: "some-other-garden"}}
+				req = reconcile.Request{Name: "some-other-garden"}
 				Expect(reconciler.Reconcile(ctx, req)).To(Equal(reconcile.Result{}))
 			})
 		})

@@ -9,8 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -34,15 +32,13 @@ var _ = Describe("Add", func() {
 		DescribeTable("map a managed resource to an extension",
 			func(namespace, name, expectedExtension string) {
 				managedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-						Name:      name,
-					},
+					Namespace: namespace,
+					Name:      name,
 				}
 
 				result := careReconciler.MapManagedResourceToExtension(ctx, managedResource)
 				if expectedExtension != "" {
-					Expect(result).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: expectedExtension}}))
+					Expect(result).To(ConsistOf(reconcile.Request{Name: expectedExtension}))
 				} else {
 					Expect(result).To(BeEmpty())
 				}

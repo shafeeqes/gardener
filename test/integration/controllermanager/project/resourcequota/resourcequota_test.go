@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -51,10 +50,8 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 		BeforeEach(func() {
 			By("Create test Namespace")
 			testNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 			}
 			Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 			log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -66,12 +63,10 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 
 			By("Create ResourceQuota")
 			resourceQuota = &corev1.ResourceQuota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-resource-quota",
-					Namespace: testNamespace.Name,
-					Labels:    map[string]string{testID: testRunID},
-				},
-				Spec: corev1.ResourceQuotaSpec{},
+				Name:      "test-resource-quota",
+				Namespace: testNamespace.Name,
+				Labels:    map[string]string{testID: testRunID},
+				Spec:      corev1.ResourceQuotaSpec{},
 			}
 			Expect(testClient.Create(ctx, resourceQuota)).To(Succeed())
 			log.Info("Created ResourceQuota", "resourceQuota", client.ObjectKeyFromObject(resourceQuota))
@@ -102,11 +97,9 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 		BeforeEach(func() {
 			By("Create test Namespace with project label")
 			testNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "garden-",
-					Labels: map[string]string{
-						testID: testRunID,
-					},
+				GenerateName: "garden-",
+				Labels: map[string]string{
+					testID: testRunID,
 				},
 			}
 			Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
@@ -119,10 +112,8 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 
 			By("Create Project")
 			project = &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5],
-					Labels: map[string]string{testID: testRunID},
-				},
+				Name:   "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5],
+				Labels: map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: &testNamespace.Name,
 				},
@@ -150,11 +141,9 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 				BeforeEach(func() {
 					By("Create ResourceQuota with sufficient quota")
 					resourceQuota = &corev1.ResourceQuota{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-resource-quota",
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{testID: testRunID},
-						},
+						Name:      "test-resource-quota",
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{testID: testRunID},
 						Spec: corev1.ResourceQuotaSpec{
 							Hard: corev1.ResourceList{
 								"count/shoots.core.gardener.cloud": resource.MustParse("1"),
@@ -189,11 +178,9 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 				BeforeEach(func() {
 					By("Create ResourceQuota with shoot quota but without configmap/secret quotas")
 					resourceQuota = &corev1.ResourceQuota{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-resource-quota",
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{testID: testRunID},
-						},
+						Name:      "test-resource-quota",
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{testID: testRunID},
 						Spec: corev1.ResourceQuotaSpec{
 							Hard: corev1.ResourceList{
 								"count/shoots.core.gardener.cloud": resource.MustParse("1"),
@@ -228,11 +215,9 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 				BeforeEach(func() {
 					By("Create ResourceQuota with insufficient quota")
 					resourceQuota = &corev1.ResourceQuota{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-resource-quota",
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{testID: testRunID},
-						},
+						Name:      "test-resource-quota",
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{testID: testRunID},
 						Spec: corev1.ResourceQuotaSpec{
 							Hard: corev1.ResourceList{
 								"count/shoots.core.gardener.cloud": resource.MustParse("1"),
@@ -266,14 +251,12 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 				BeforeEach(func() {
 					By("Create ResourceQuota with matching annotations")
 					resourceQuota = &corev1.ResourceQuota{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-resource-quota",
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{testID: testRunID},
-							Annotations: map[string]string{
-								"gardener.cloud/configmaps-per-shoot": "2",
-								"gardener.cloud/secrets-per-shoot":    "4",
-							},
+						Name:      "test-resource-quota",
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{testID: testRunID},
+						Annotations: map[string]string{
+							"gardener.cloud/configmaps-per-shoot": "2",
+							"gardener.cloud/secrets-per-shoot":    "4",
 						},
 						Spec: corev1.ResourceQuotaSpec{
 							Hard: corev1.ResourceList{
@@ -309,14 +292,12 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 				BeforeEach(func() {
 					By("Create ResourceQuota with higher annotation values")
 					resourceQuota = &corev1.ResourceQuota{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-resource-quota",
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{testID: testRunID},
-							Annotations: map[string]string{
-								"gardener.cloud/configmaps-per-shoot": "3",
-								"gardener.cloud/secrets-per-shoot":    "5",
-							},
+						Name:      "test-resource-quota",
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{testID: testRunID},
+						Annotations: map[string]string{
+							"gardener.cloud/configmaps-per-shoot": "3",
+							"gardener.cloud/secrets-per-shoot":    "5",
 						},
 						Spec: corev1.ResourceQuotaSpec{
 							Hard: corev1.ResourceList{
@@ -352,14 +333,12 @@ var _ = Describe("ResourceQuota Controller tests", func() {
 				BeforeEach(func() {
 					By("Create ResourceQuota with lower annotation values")
 					resourceQuota = &corev1.ResourceQuota{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-resource-quota",
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{testID: testRunID},
-							Annotations: map[string]string{
-								"gardener.cloud/configmaps-per-shoot": "1",
-								"gardener.cloud/secrets-per-shoot":    "3",
-							},
+						Name:      "test-resource-quota",
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{testID: testRunID},
+						Annotations: map[string]string{
+							"gardener.cloud/configmaps-per-shoot": "1",
+							"gardener.cloud/secrets-per-shoot":    "3",
 						},
 						Spec: corev1.ResourceQuotaSpec{
 							Hard: corev1.ResourceList{

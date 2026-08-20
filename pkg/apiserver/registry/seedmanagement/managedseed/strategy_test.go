@@ -113,11 +113,9 @@ var _ = Describe("MatchManagedSeed", func() {
 
 func newManagedSeed(shootName string) *seedmanagement.ManagedSeed {
 	return &seedmanagement.ManagedSeed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
-			Labels:    map[string]string{"foo": "bar"},
-		},
+		Name:      "test",
+		Namespace: "test-namespace",
+		Labels:    map[string]string{"foo": "bar"},
 		Spec: seedmanagement.ManagedSeedSpec{
 			Shoot: &seedmanagement.Shoot{
 				Name: shootName,

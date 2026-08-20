@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	logzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -60,17 +59,13 @@ var _ = Describe("handler", func() {
 			}}
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-secret",
-					Namespace: namespace,
-				},
+				Name:      "test-secret",
+				Namespace: namespace,
 			}
 
 			secretBinding = &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-secret-binding",
-					Namespace: namespace,
-				},
+				Name:      "test-secret-binding",
+				Namespace: namespace,
 				SecretRef: corev1.SecretReference{
 					Name:      secret.Name,
 					Namespace: secret.Namespace,
@@ -81,10 +76,8 @@ var _ = Describe("handler", func() {
 			}
 
 			credentialsBinding = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-credentials-binding",
-					Namespace: "another-namespace",
-				},
+				Name:      "test-credentials-binding",
+				Namespace: "another-namespace",
 				CredentialsRef: corev1.ObjectReference{
 					APIVersion: corev1.SchemeGroupVersion.String(),
 					Kind:       "Secret",
@@ -162,17 +155,13 @@ var _ = Describe("handler", func() {
 			}}
 
 			internalSecret = &gardencorev1beta1.InternalSecret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-internal-secret",
-					Namespace: namespace,
-				},
+				Name:      "test-internal-secret",
+				Namespace: namespace,
 			}
 
 			credentialsBinding1 = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-credentials-binding-1",
-					Namespace: "another-namespace",
-				},
+				Name:      "test-credentials-binding-1",
+				Namespace: "another-namespace",
 				CredentialsRef: corev1.ObjectReference{
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
 					Kind:       "InternalSecret",
@@ -184,10 +173,8 @@ var _ = Describe("handler", func() {
 				},
 			}
 			credentialsBinding2 = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-credentials-binding",
-					Namespace: "another-namespace",
-				},
+				Name:      "test-credentials-binding",
+				Namespace: "another-namespace",
 				CredentialsRef: corev1.ObjectReference{
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
 					Kind:       "InternalSecret",

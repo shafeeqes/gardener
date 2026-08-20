@@ -12,7 +12,6 @@ import (
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -151,10 +150,8 @@ func MachineConditionChangedPredicate(ctx context.Context, log logr.Logger, c cl
 			}
 
 			machineDeployment := &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      machineDeploymentName,
-					Namespace: machine.Namespace,
-				},
+				Name:      machineDeploymentName,
+				Namespace: machine.Namespace,
 			}
 
 			if err := c.Get(ctx, client.ObjectKeyFromObject(machineDeployment), machineDeployment); err != nil {
@@ -181,10 +178,8 @@ func MachineConditionChangedPredicate(ctx context.Context, log logr.Logger, c cl
 			}
 
 			machineDeployment := &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      machineDeploymentName,
-					Namespace: newMachine.Namespace,
-				},
+				Name:      machineDeploymentName,
+				Namespace: newMachine.Namespace,
 			}
 
 			if err := c.Get(ctx, client.ObjectKeyFromObject(machineDeployment), machineDeployment); err != nil {

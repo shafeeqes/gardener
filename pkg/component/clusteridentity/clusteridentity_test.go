@@ -39,10 +39,8 @@ var _ = Describe("ClusterIdentity", func() {
 		namespace = "shoot--foo--bar"
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "cluster-identity",
-				Namespace: "kube-system",
-			},
+			Name:      "cluster-identity",
+			Namespace: "kube-system",
 			Data: map[string]string{
 				"cluster-identity": identity,
 				"origin":           origin,
@@ -62,12 +60,10 @@ var _ = Describe("ClusterIdentity", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            managedResourceName,
-				Namespace:       namespace,
-				Labels:          map[string]string{"origin": "gardener"},
-				ResourceVersion: "1",
-			},
+			Name:            managedResourceName,
+			Namespace:       namespace,
+			Labels:          map[string]string{"origin": "gardener"},
+			ResourceVersion: "1",
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs:   []corev1.LocalObjectReference{},
 				InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -92,8 +88,8 @@ var _ = Describe("ClusterIdentity", func() {
 
 	Describe("#Destroy", func() {
 		It("should successfully delete all the resources", func() {
-			mrSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResourceSecretName, Namespace: namespace}}
-			mr := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: namespace}}
+			mrSecret := &corev1.Secret{Name: managedResourceSecretName, Namespace: namespace}
+			mr := &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: namespace}
 			Expect(c.Create(ctx, mrSecret)).To(Succeed())
 			Expect(c.Create(ctx, mr)).To(Succeed())
 
@@ -131,11 +127,9 @@ var _ = Describe("ClusterIdentity", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -158,11 +152,9 @@ var _ = Describe("ClusterIdentity", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -187,10 +179,8 @@ var _ = Describe("ClusterIdentity", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: namespace,
-					},
+					Name:      managedResourceName,
+					Namespace: namespace,
 				})).To(Succeed())
 
 				Expect(clusterIdentity.WaitCleanup(ctx)).To(MatchError(ContainSubstring("still exists")))
@@ -210,10 +200,8 @@ var _ = Describe("ClusterIdentity", func() {
 
 		BeforeEach(func() {
 			configMapSeed = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cluster-identity",
-					Namespace: metav1.NamespaceSystem,
-				},
+				Name:      "cluster-identity",
+				Namespace: metav1.NamespaceSystem,
 				Immutable: new(true),
 				Data: map[string]string{
 					"cluster-identity": "foo",
@@ -221,10 +209,8 @@ var _ = Describe("ClusterIdentity", func() {
 				},
 			}
 			configMapNonSeed = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cluster-identity",
-					Namespace: metav1.NamespaceSystem,
-				},
+				Name:      "cluster-identity",
+				Namespace: metav1.NamespaceSystem,
 				Immutable: new(true),
 				Data: map[string]string{
 					"cluster-identity": "foo",

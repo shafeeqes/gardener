@@ -51,7 +51,7 @@ var _ = Describe("Reconciler", func() {
 	BeforeEach(func() {
 		ctx = context.Background()
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: seedName},
+			Name: seedName,
 		}
 		request = reconcile.Request{NamespacedName: client.ObjectKeyFromObject(seed)}
 

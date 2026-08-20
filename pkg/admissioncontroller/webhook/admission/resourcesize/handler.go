@@ -65,7 +65,7 @@ func (h *Handler) Handle(ctx context.Context, req admission.Request) admission.R
 		var apiStatus apierrors.APIStatus
 		if errors.As(err, &apiStatus) {
 			status := apiStatus.Status()
-			return admission.Response{AdmissionResponse: admissionv1.AdmissionResponse{Allowed: false, Result: &status}}
+			return admission.Response{Allowed: false, Result: &status}
 		}
 		return admission.Denied(err.Error())
 	}

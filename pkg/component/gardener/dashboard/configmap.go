@@ -144,10 +144,8 @@ func (g *gardenerDashboard) configMap(ctx context.Context) (*corev1.ConfigMap, e
 
 		if g.values.OIDC.CertificateAuthoritySecretRef != nil {
 			caSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      g.values.OIDC.CertificateAuthoritySecretRef.Name,
-					Namespace: g.namespace,
-				},
+				Name:      g.values.OIDC.CertificateAuthoritySecretRef.Name,
+				Namespace: g.namespace,
 			}
 
 			if err := g.client.Get(ctx, client.ObjectKeyFromObject(caSecret), caSecret); err != nil {
@@ -205,11 +203,9 @@ func (g *gardenerDashboard) configMap(ctx context.Context) (*corev1.ConfigMap, e
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapNamePrefix,
-			Namespace: g.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      configMapNamePrefix,
+		Namespace: g.namespace,
+		Labels:    GetLabels(),
 		Data: map[string]string{
 			dataKeyConfig:      rawConfig.String(),
 			dataKeyLoginConfig: string(rawLoginConfig),

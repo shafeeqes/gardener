@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -28,10 +27,8 @@ var _ = Describe("ControllerInstallation Required controller tests", func() {
 	BeforeEach(func() {
 		By("Create ControllerRegistration")
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "ctrlreg1-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "ctrlreg1-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{Kind: extensionsv1alpha1.InfrastructureResource, Type: extensionType},
@@ -58,10 +55,8 @@ var _ = Describe("ControllerInstallation Required controller tests", func() {
 
 		By("Create ControllerInstallation")
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "ctrlinst-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "ctrlinst-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: seedName,
@@ -91,11 +86,9 @@ var _ = Describe("ControllerInstallation Required controller tests", func() {
 		}).Should(Succeed())
 
 		infrastructure = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "infra1-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "infra1-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: extensionsv1alpha1.InfrastructureSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: extensionType,
@@ -163,10 +156,8 @@ var _ = Describe("ControllerInstallation Required controller tests (self-hosted 
 	BeforeEach(func() {
 		By("Create ControllerRegistration")
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "ctrlreg1-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "ctrlreg1-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{Kind: extensionsv1alpha1.InfrastructureResource, Type: extensionType},
@@ -189,10 +180,8 @@ var _ = Describe("ControllerInstallation Required controller tests (self-hosted 
 
 		By("Create ControllerInstallation with ShootRef")
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "ctrlinst-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "ctrlinst-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				ShootRef: &corev1.ObjectReference{
 					Name:      selfHostedShootName,
@@ -220,11 +209,9 @@ var _ = Describe("ControllerInstallation Required controller tests (self-hosted 
 		}).Should(Succeed())
 
 		infrastructure = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "infra1-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "infra1-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: extensionsv1alpha1.InfrastructureSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: extensionType,

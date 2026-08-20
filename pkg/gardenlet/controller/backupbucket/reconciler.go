@@ -78,9 +78,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	extensionBackupBucket := &extensionsv1alpha1.BackupBucket{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: backupBucket.Name,
-		},
+		Name: backupBucket.Name,
 	}
 
 	if backupBucket.DeletionTimestamp != nil {
@@ -138,11 +136,9 @@ func (r *Reconciler) reconcileBackupBucket(
 		lastObservedError         error
 		extensionSecret           = r.emptyExtensionSecret(backupBucket.Name)
 		extensionBackupBucketSpec = extensionsv1alpha1.BackupBucketSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           backupBucket.Spec.Provider.Type,
-				ProviderConfig: backupBucket.Spec.ProviderConfig,
-			},
-			Region: backupBucket.Spec.Provider.Region,
+			Type:           backupBucket.Spec.Provider.Type,
+			ProviderConfig: backupBucket.Spec.ProviderConfig,
+			Region:         backupBucket.Spec.Provider.Region,
 			SecretRef: corev1.SecretReference{
 				Name:      extensionSecret.Name,
 				Namespace: extensionSecret.Namespace,
@@ -362,10 +358,8 @@ func (r *Reconciler) deleteBackupBucket(
 
 func (r *Reconciler) emptyExtensionSecret(backupBucketName string) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      generateBackupBucketSecretName(backupBucketName),
-			Namespace: r.GardenNamespace,
-		},
+		Name:      generateBackupBucketSecretName(backupBucketName),
+		Namespace: r.GardenNamespace,
 	}
 }
 
@@ -392,10 +386,8 @@ func (r *Reconciler) reconcileBackupBucketExtensionSecret(ctx context.Context, e
 func (r *Reconciler) syncGeneratedSecretToGarden(gardenCtx context.Context, seedCtx context.Context, backupBucket *gardencorev1beta1.BackupBucket, extensionBackupBucket *extensionsv1alpha1.BackupBucket) error {
 	if extensionBackupBucket.Status.GeneratedSecretRef != nil {
 		gardenGeneratedSecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      generateGeneratedBackupBucketSecretName(backupBucket.Name),
-				Namespace: r.GardenNamespace,
-			},
+			Name:      generateGeneratedBackupBucketSecretName(backupBucket.Name),
+			Namespace: r.GardenNamespace,
 		}
 
 		// Update the BackupBucket status here before going for the CreateOrGetAndStrategicMergePatch call, so that the SeedAuthorizer
@@ -442,10 +434,8 @@ func (r *Reconciler) deleteGeneratedBackupBucketSecretInGarden(ctx context.Conte
 	}
 
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      backupBucket.Status.GeneratedSecretRef.Name,
-			Namespace: backupBucket.Status.GeneratedSecretRef.Namespace,
-		},
+		Name:      backupBucket.Status.GeneratedSecretRef.Name,
+		Namespace: backupBucket.Status.GeneratedSecretRef.Namespace,
 	}
 
 	if err := r.GardenClient.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {

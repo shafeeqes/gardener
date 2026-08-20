@@ -22,7 +22,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -143,11 +142,9 @@ func (t *GuestBookTest) DeployGuestBookApp(ctx context.Context) {
 	// GCP requires a specific storage class for ARM worker pools
 	if shoot.Spec.Provider.Type == "gcp" && hasARMWorkerPools {
 		Expect(t.framework.ShootClient.Client().Create(ctx, &storagev1.StorageClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gce-hd-balanced",
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gce-hd-balanced",
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			AllowVolumeExpansion: new(true),
 			Provisioner:          "pd.csi.storage.gke.io",
@@ -251,13 +248,13 @@ func (t *GuestBookTest) Cleanup(ctx context.Context) {
 	By("Clean up guestbook app resources")
 
 	Expect(kubernetesutils.DeleteObjects(ctx, t.framework.ShootClient.Client(),
-		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: t.framework.Namespace, Name: GuestBook}},
-		&corev1.Service{ObjectMeta: metav1.ObjectMeta{Namespace: t.framework.Namespace, Name: GuestBook}},
+		&appsv1.Deployment{Namespace: t.framework.Namespace, Name: GuestBook},
+		&corev1.Service{Namespace: t.framework.Namespace, Name: GuestBook},
 	)).To(Succeed())
 
 	Expect(kubernetesutils.DeleteObjects(ctx, t.framework.ShootClient.Client(),
-		&corev1.Service{ObjectMeta: metav1.ObjectMeta{Namespace: t.framework.Namespace, Name: RedisMaster}},
-		&appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Namespace: t.framework.Namespace, Name: RedisMaster}},
+		&corev1.Service{Namespace: t.framework.Namespace, Name: RedisMaster},
+		&appsv1.StatefulSet{Namespace: t.framework.Namespace, Name: RedisMaster},
 	)).To(Succeed())
 
 	By("Redis and the guestbook app have been cleaned up!")

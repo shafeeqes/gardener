@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/observability/logging/fluentcustomresources"
 )
@@ -28,11 +27,9 @@ var _ = Describe("Logging", func() {
 			Expect(fluentBitClusterFilters).To(Equal(
 				[]*fluentbitv1alpha2.ClusterFilter{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							// This filter will be the second one of fluent-bit because the operator orders them by name
-							Name:   "01-systemd",
-							Labels: labels,
-						},
+						// This filter will be the second one of fluent-bit because the operator orders them by name
+						Name:   "01-systemd",
+						Labels: labels,
 						Spec: fluentbitv1alpha2.FilterSpec{
 							Match: "systemd.*",
 							FilterItems: []fluentbitv1alpha2.FilterItem{
@@ -52,11 +49,9 @@ var _ = Describe("Logging", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							// This filter will be the third one of fluent-bit because the operator orders them by name
-							Name:   "02-add-tag-to-record",
-							Labels: labels,
-						},
+						// This filter will be the third one of fluent-bit because the operator orders them by name
+						Name:   "02-add-tag-to-record",
+						Labels: labels,
 						Spec: fluentbitv1alpha2.FilterSpec{
 							Match: "kubernetes.*",
 							FilterItems: []fluentbitv1alpha2.FilterItem{
@@ -75,11 +70,9 @@ var _ = Describe("Logging", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							// This filter will be the last one of fluent-bit because the operator orders them by name
-							Name:   "zz-modify-severity",
-							Labels: labels,
-						},
+						// This filter will be the last one of fluent-bit because the operator orders them by name
+						Name:   "zz-modify-severity",
+						Labels: labels,
 						Spec: fluentbitv1alpha2.FilterSpec{
 							Match: "kubernetes.*",
 							FilterItems: []fluentbitv1alpha2.FilterItem{

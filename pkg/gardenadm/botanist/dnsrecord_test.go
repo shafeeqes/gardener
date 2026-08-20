@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -100,10 +99,8 @@ var _ = Describe("DNSRecord", func() {
 	// healthyControlPlaneNode returns a control-plane Node that passes health.CheckNode with the given addresses.
 	healthyControlPlaneNode := func(name string, addresses ...corev1.NodeAddress) *corev1.Node {
 		return &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: map[string]string{"node-role.kubernetes.io/control-plane": ""},
-			},
+			Name:   name,
+			Labels: map[string]string{"node-role.kubernetes.io/control-plane": ""},
 			Status: corev1.NodeStatus{
 				Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}},
 				Addresses:  addresses,
@@ -114,11 +111,9 @@ var _ = Describe("DNSRecord", func() {
 	Describe("#RestoreExternalDNSRecord", func() {
 		It("should fail if there are no control plane nodes", func(ctx SpecContext) {
 			node := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "worker-1",
-					Labels: map[string]string{
-						"worker.gardener.cloud/pool": "worker",
-					},
+				Name: "worker-1",
+				Labels: map[string]string{
+					"worker.gardener.cloud/pool": "worker",
 				},
 			}
 			Expect(fakeClient.Create(ctx, node)).To(Succeed())

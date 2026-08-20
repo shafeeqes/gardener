@@ -29,9 +29,7 @@ func VerifyExposureClassSwitch(s *ShootContext, waitForReconcileFunc func(s *Sho
 	defer GinkgoRecover()
 
 	expClass := &gardencorev1beta1.ExposureClass{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "local",
-		},
+		Name: "local",
 	}
 
 	Describe("switching exposure class", Ordered, func() {
@@ -43,7 +41,7 @@ func VerifyExposureClassSwitch(s *ShootContext, waitForReconcileFunc func(s *Sho
 
 		verifyAPIServerAccess := func() {
 			It("should be able to talk to API server", func(ctx SpecContext) {
-				Eventually(ctx, s.ShootKomega.Get(&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: metav1.NamespaceSystem}})).Should(Succeed())
+				Eventually(ctx, s.ShootKomega.Get(&corev1.Namespace{Name: metav1.NamespaceSystem})).Should(Succeed())
 			}, SpecTimeout(3*time.Minute)) // timeout must be greater than the ttl of the dnsrecord
 			if !v1beta1helper.IsWorkerless(s.Shoot) {
 				inclusterclient.VerifyInClusterAccessToAPIServer(s)

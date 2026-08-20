@@ -20,10 +20,8 @@ const rbacName = "gardener.cloud:system:terminal-controller-manager"
 
 func (t *terminal) clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   rbacName,
-			Labels: getLabels(),
-		},
+		Name:   rbacName,
+		Labels: getLabels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{corev1.GroupName},
@@ -86,10 +84,8 @@ func (t *terminal) clusterRole() *rbacv1.ClusterRole {
 
 func (t *terminal) clusterRoleBinding(serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   rbacName,
-			Labels: getLabels(),
-		},
+		Name:   rbacName,
+		Labels: getLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -105,11 +101,9 @@ func (t *terminal) clusterRoleBinding(serviceAccountName string) *rbacv1.Cluster
 
 func (t *terminal) role() *rbacv1.Role {
 	return &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      rbacName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    getLabels(),
-		},
+		Name:      rbacName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    getLabels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{corev1.GroupName},
@@ -127,11 +121,9 @@ func (t *terminal) role() *rbacv1.Role {
 
 func (t *terminal) roleBinding(serviceAccountName string) *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      rbacName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    getLabels(),
-		},
+		Name:      rbacName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    getLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "Role",

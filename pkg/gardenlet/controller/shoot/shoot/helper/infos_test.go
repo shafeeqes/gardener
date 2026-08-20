@@ -174,11 +174,9 @@ var _ = Describe("CalculateControllerInfos", func() {
 		Context("seed with emergency switch to temporarily stop reconciliations", func() {
 			BeforeEach(func() {
 				seed = &gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "seed",
-						Annotations: map[string]string{
-							v1beta1constants.AnnotationEmergencyStopShootReconciliations: "true",
-						},
+					Name: "seed",
+					Annotations: map[string]string{
+						v1beta1constants.AnnotationEmergencyStopShootReconciliations: "true",
 					},
 				}
 			})
@@ -192,11 +190,9 @@ var _ = Describe("CalculateControllerInfos", func() {
 		Context("seed with inactive emergency switch does not block reconciliations", func() {
 			BeforeEach(func() {
 				seed = &gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "seed",
-						Annotations: map[string]string{
-							v1beta1constants.AnnotationEmergencyStopShootReconciliations: "false",
-						},
+					Name: "seed",
+					Annotations: map[string]string{
+						v1beta1constants.AnnotationEmergencyStopShootReconciliations: "false",
 					},
 				}
 			})
@@ -433,11 +429,9 @@ var _ = Describe("CalculateControllerInfos", func() {
 		Context("seed with emergency switch to temporarily stop reconciliations", func() {
 			BeforeEach(func() {
 				seed = &gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "seed",
-						Annotations: map[string]string{
-							v1beta1constants.AnnotationEmergencyStopShootReconciliations: "true",
-						},
+					Name: "seed",
+					Annotations: map[string]string{
+						v1beta1constants.AnnotationEmergencyStopShootReconciliations: "true",
 					},
 				}
 			})
@@ -451,11 +445,9 @@ var _ = Describe("CalculateControllerInfos", func() {
 		Context("seed with inactive emergency switch does not block reconciliations", func() {
 			BeforeEach(func() {
 				seed = &gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "seed",
-						Annotations: map[string]string{
-							v1beta1constants.AnnotationEmergencyStopShootReconciliations: "false",
-						},
+					Name: "seed",
+					Annotations: map[string]string{
+						v1beta1constants.AnnotationEmergencyStopShootReconciliations: "false",
 					},
 				}
 			})

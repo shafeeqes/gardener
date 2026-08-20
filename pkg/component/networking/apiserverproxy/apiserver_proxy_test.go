@@ -58,15 +58,13 @@ var _ = Describe("APIServerProxy", func() {
 		proxySeedServerHost = "api.internal.local."
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "apiserver-proxy",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":                 "kubernetes",
-					"gardener.cloud/role": "system-component",
-					"origin":              "gardener",
-					"role":                "apiserver-proxy",
-				},
+			Name:      "apiserver-proxy",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":                 "kubernetes",
+				"gardener.cloud/role": "system-component",
+				"origin":              "gardener",
+				"role":                "apiserver-proxy",
 			},
 			Spec: corev1.ServiceSpec{
 				ClusterIP: "None",
@@ -87,27 +85,25 @@ var _ = Describe("APIServerProxy", func() {
 		}
 
 		scrapeConfig = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-apiserver-proxy",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-apiserver-proxy",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				Scheme:      new(monitoringv1.SchemeHTTPS),
 				TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-					Key:                  "token",
+					Name: "shoot-access-prometheus-shoot",
+					Key:  "token",
 				}},
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					APIServer:  new("https://kube-apiserver"),
 					Role:       "Endpoints",
 					Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				}},
@@ -170,15 +166,13 @@ var _ = Describe("APIServerProxy", func() {
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "apiserver-proxy",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":                 "kubernetes",
-					"gardener.cloud/role": "system-component",
-					"origin":              "gardener",
-					"role":                "apiserver-proxy",
-				},
+			Name:      "apiserver-proxy",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":                 "kubernetes",
+				"gardener.cloud/role": "system-component",
+				"origin":              "gardener",
+				"role":                "apiserver-proxy",
 			},
 			AutomountServiceAccountToken: new(false),
 		}
@@ -202,22 +196,18 @@ var _ = Describe("APIServerProxy", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}, Data: map[string][]byte{"bundle.crt": []byte("FOOBAR")}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace, Data: map[string][]byte{"bundle.crt": []byte("FOOBAR")}})).To(Succeed())
 
 		component = New(c, namespace, sm, values)
 		component.SetAdvertiseIPAddress(advertiseIPAddress)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -234,12 +224,10 @@ var _ = Describe("APIServerProxy", func() {
 			By("Verify that managed resource is consistent")
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -341,11 +329,9 @@ var _ = Describe("APIServerProxy", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -368,11 +354,9 @@ var _ = Describe("APIServerProxy", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -410,16 +394,14 @@ var _ = Describe("APIServerProxy", func() {
 
 func getConfigYAML(hash, dnsLookUpFamily, advertiseIPAddress, xGardenerDestination string) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "apiserver-proxy-config-" + hash,
-			Namespace: "kube-system",
-			Labels: map[string]string{
-				"app":                 "kubernetes",
-				"gardener.cloud/role": "system-component",
-				"origin":              "gardener",
-				"resources.gardener.cloud/garbage-collectable-reference": "true",
-				"role": "apiserver-proxy",
-			},
+		Name:      "apiserver-proxy-config-" + hash,
+		Namespace: "kube-system",
+		Labels: map[string]string{
+			"app":                 "kubernetes",
+			"gardener.cloud/role": "system-component",
+			"origin":              "gardener",
+			"resources.gardener.cloud/garbage-collectable-reference": "true",
+			"role": "apiserver-proxy",
 		},
 		Immutable: new(true),
 		Data: map[string]string{
@@ -582,19 +564,17 @@ static_resources:
 
 func getDaemonSet(hash string, advertiseIPAddress string) *appsv1.DaemonSet {
 	return &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Annotations: map[string]string{
-				references.AnnotationKey(references.KindConfigMap, "apiserver-proxy-config-"+hash): "apiserver-proxy-config-" + hash,
-			},
-			Name:      "apiserver-proxy",
-			Namespace: "kube-system",
-			Labels: map[string]string{
-				"app":                                    "kubernetes",
-				"gardener.cloud/role":                    "system-component",
-				"node.gardener.cloud/critical-component": "true",
-				"origin":                                 "gardener",
-				"role":                                   "apiserver-proxy",
-			},
+		Annotations: map[string]string{
+			references.AnnotationKey(references.KindConfigMap, "apiserver-proxy-config-"+hash): "apiserver-proxy-config-" + hash,
+		},
+		Name:      "apiserver-proxy",
+		Namespace: "kube-system",
+		Labels: map[string]string{
+			"app":                                    "kubernetes",
+			"gardener.cloud/role":                    "system-component",
+			"node.gardener.cloud/critical-component": "true",
+			"origin":                                 "gardener",
+			"role":                                   "apiserver-proxy",
 		},
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
@@ -647,11 +627,9 @@ func getDaemonSet(hash string, advertiseIPAddress string) *appsv1.DaemonSet {
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							LivenessProbe: &corev1.Probe{
 								FailureThreshold: 3,
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/ready",
-										Port: intstr.FromInt32(16910),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/ready",
+									Port: intstr.FromInt32(16910),
 								},
 								InitialDelaySeconds: 1,
 								PeriodSeconds:       10,
@@ -667,11 +645,9 @@ func getDaemonSet(hash string, advertiseIPAddress string) *appsv1.DaemonSet {
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/ready",
-										Port: intstr.FromInt32(16910),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/ready",
+									Port: intstr.FromInt32(16910),
 								},
 								InitialDelaySeconds: 1,
 								PeriodSeconds:       2,
@@ -744,19 +720,13 @@ func getDaemonSet(hash string, advertiseIPAddress string) *appsv1.DaemonSet {
 					Volumes: []corev1.Volume{
 						{
 							Name: "proxy-config",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "apiserver-proxy-config-" + hash,
-									},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: "apiserver-proxy-config-" + hash,
 							},
 						},
 						{
-							Name: "admin-uds",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
+							Name:     "admin-uds",
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					},
 				},

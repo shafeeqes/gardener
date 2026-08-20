@@ -49,7 +49,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		BeforeEach(func() {
 			controllerRegistrations := []*gardencorev1beta1.ControllerRegistration{{
-				ObjectMeta: metav1.ObjectMeta{Name: "registration1"},
+				Name: "registration1",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -90,9 +90,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 			}
 
 			seed = &core.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-seed",
-				},
+				Name: "test-seed",
 				Spec: core.SeedSpec{
 					Provider: core.SeedProvider{
 						Type: providerType1,
@@ -166,15 +164,13 @@ var _ = Describe("ExtensionLabels tests", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(secretBinding.ObjectMeta.Labels).To(Equal(expectedLabels))
 			},
-			Entry("when provider is nil", &core.SecretBinding{ObjectMeta: metav1.ObjectMeta{Name: "test-secretbinding"}, Provider: nil}, nil),
-			Entry("when provider is set", &core.SecretBinding{ObjectMeta: metav1.ObjectMeta{Name: "test-secretbinding"}, Provider: &core.SecretBindingProvider{Type: providerType1}}, map[string]string{"provider.extensions.gardener.cloud/" + providerType1: "true"}),
+			Entry("when provider is nil", &core.SecretBinding{Name: "test-secretbinding", Provider: nil}, nil),
+			Entry("when provider is set", &core.SecretBinding{Name: "test-secretbinding", Provider: &core.SecretBindingProvider{Type: providerType1}}, map[string]string{"provider.extensions.gardener.cloud/" + providerType1: "true"}),
 		)
 
 		It("should add all the correct labels on update", func() {
 			secretBinding := &core.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-secretbinding",
-				},
+				Name: "test-secretbinding",
 			}
 			newSecretBinding := secretBinding.DeepCopy()
 			newSecretBinding.Provider = &core.SecretBindingProvider{
@@ -202,7 +198,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 		)
 
 		It("should add the correct label on creation", func() {
-			credentialsBinding := &security.CredentialsBinding{ObjectMeta: metav1.ObjectMeta{Name: "test-cb"}, Provider: security.CredentialsBindingProvider{Type: providerType1}}
+			credentialsBinding := &security.CredentialsBinding{Name: "test-cb", Provider: security.CredentialsBindingProvider{Type: providerType1}}
 			attrs := admission.NewAttributesRecord(credentialsBinding, nil, security.Kind("CredentialsBinding").WithVersion("version"), "", credentialsBinding.Name, security.Resource("CredentialsBinding").WithVersion("version"), "", admission.Create, &metav1.CreateOptions{}, false, nil)
 			err := admissionHandler.Admit(context.TODO(), attrs, nil)
 
@@ -214,9 +210,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		It("should add the correct label on update", func() {
 			credentialsBinding := &security.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-cb",
-				},
+				Name: "test-cb",
 			}
 			newCredentialsBinding := credentialsBinding.DeepCopy()
 			newCredentialsBinding.Provider = security.CredentialsBindingProvider{Type: providerType2}
@@ -238,7 +232,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 		)
 
 		It("should add the correct label on creation", func() {
-			workloadIdentity := &security.WorkloadIdentity{ObjectMeta: metav1.ObjectMeta{Name: "test-wi"}, Spec: security.WorkloadIdentitySpec{
+			workloadIdentity := &security.WorkloadIdentity{Name: "test-wi", Spec: security.WorkloadIdentitySpec{
 				TargetSystem: security.TargetSystem{
 					Type: providerType1,
 				},
@@ -254,9 +248,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		It("should add the correct label on update", func() {
 			workloadIdentity := &security.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-wi",
-				},
+				Name: "test-wi",
 			}
 			newWorkloadIdentity := workloadIdentity.DeepCopy()
 			newWorkloadIdentity.Spec.TargetSystem.Type = providerType2
@@ -294,7 +286,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		BeforeEach(func() {
 			controllerRegistrations := []*gardencorev1beta1.ControllerRegistration{{
-				ObjectMeta: metav1.ObjectMeta{Name: "registration1"},
+				Name: "registration1",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -317,7 +309,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 					Deployment: nil,
 				},
 			}, {
-				ObjectMeta: metav1.ObjectMeta{Name: "registration2"},
+				Name: "registration2",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{{
 						Kind: extensionsv1alpha1.ExtensionResource,
@@ -335,10 +327,8 @@ var _ = Describe("ExtensionLabels tests", func() {
 			}
 
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-shoot",
-					Namespace: "test-namespace",
-				},
+				Name:      "test-shoot",
+				Namespace: "test-namespace",
 				Spec: core.ShootSpec{
 					Networking: &core.Networking{Type: new(networkingType)},
 					DNS: &core.DNS{
@@ -506,10 +496,8 @@ var _ = Describe("ExtensionLabels tests", func() {
 		Context("Workerless Shoot", func() {
 			BeforeEach(func() {
 				shoot = &core.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-shoot",
-						Namespace: "test-namespace",
-					},
+					Name:      "test-shoot",
+					Namespace: "test-namespace",
 					Spec: core.ShootSpec{
 						DNS: &core.DNS{
 							Providers: []core.DNSProvider{
@@ -585,9 +573,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		BeforeEach(func() {
 			cloudProfile = &core.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-cloudprofile",
-				},
+				Name: "test-cloudprofile",
 				Spec: core.CloudProfileSpec{
 					Type: providerType1,
 				},
@@ -634,10 +620,8 @@ var _ = Describe("ExtensionLabels tests", func() {
 		BeforeEach(func() {
 			providerType = "provider-type"
 			namespacedCloudProfile = &core.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-namespacedcloudprofile",
-					Namespace: "project-namespace",
-				},
+				Name:      "test-namespacedcloudprofile",
+				Namespace: "project-namespace",
 				Spec: core.NamespacedCloudProfileSpec{
 					Parent: core.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -646,9 +630,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 				},
 			}
 			parentCloudProfile = &gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-cloudprofile",
-				},
+				Name: "test-cloudprofile",
 				Spec: gardencorev1beta1.CloudProfileSpec{Type: providerType},
 			}
 		})
@@ -692,9 +674,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		BeforeEach(func() {
 			backupBucket = &core.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-backupbucket",
-				},
+				Name: "test-backupbucket",
 				Spec: core.BackupBucketSpec{
 					Provider: core.BackupBucketProvider{
 						Type: providerType,
@@ -727,9 +707,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		BeforeEach(func() {
 			backupBucket = &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-backupbucket",
-				},
+				Name: "test-backupbucket",
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					Provider: gardencorev1beta1.BackupBucketProvider{
 						Type: providerType1,
@@ -737,10 +715,8 @@ var _ = Describe("ExtensionLabels tests", func() {
 				},
 			}
 			backupEntry = &core.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-backupentry",
-					Namespace: "test-namespace",
-				},
+				Name:      "test-backupentry",
+				Namespace: "test-namespace",
 				Spec: core.BackupEntrySpec{
 					BucketName: backupBucket.Name,
 				},
@@ -764,9 +740,7 @@ var _ = Describe("ExtensionLabels tests", func() {
 
 		It("should add all the correct labels on update", func() {
 			backupBucket2 := &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-backupbucket-2",
-				},
+				Name: "test-backupbucket-2",
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					Provider: gardencorev1beta1.BackupBucketProvider{
 						Type: providerType2,

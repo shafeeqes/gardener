@@ -44,7 +44,7 @@ const (
 )
 
 func (k *kubeAPIServer) emptySecret(name string) *corev1.Secret {
-	return &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: k.namespace}}
+	return &corev1.Secret{Name: name, Namespace: k.namespace}
 }
 
 func (k *kubeAPIServer) reconcileSecretServiceAccountKey(ctx context.Context) (*corev1.Secret, error) {

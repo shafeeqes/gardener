@@ -153,7 +153,7 @@ func MapBackupBucketToSeed(_ context.Context, obj client.Object) []reconcile.Req
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: *backupBucket.Spec.SeedName}}}
+	return []reconcile.Request{{Name: *backupBucket.Spec.SeedName}}
 }
 
 // MapBackupEntryToSeed returns a reconcile.Request object for the seed specified in the .spec.seedName field.
@@ -167,7 +167,7 @@ func MapBackupEntryToSeed(_ context.Context, obj client.Object) []reconcile.Requ
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: *backupEntry.Spec.SeedName}}}
+	return []reconcile.Request{{Name: *backupEntry.Spec.SeedName}}
 }
 
 // MapShootToSeed returns a reconcile.Request object for the seed specified in the .spec.seedName field.
@@ -183,7 +183,7 @@ func MapShootToSeed(log logr.Logger, r *controllerinstallation.Reconciler) handl
 		var requests []reconcile.Request
 
 		if shoot.Spec.SeedName != nil {
-			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: *shoot.Spec.SeedName}})
+			requests = append(requests, reconcile.Request{Name: *shoot.Spec.SeedName})
 		}
 
 		if shoot.Namespace == v1beta1constants.GardenNamespace {
@@ -196,7 +196,7 @@ func MapShootToSeed(log logr.Logger, r *controllerinstallation.Reconciler) handl
 			}
 
 			if metav1.HasLabel(seed.ObjectMeta, v1beta1constants.LabelSelfHostedShootCluster) {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name}})
+				requests = append(requests, reconcile.Request{Name: shoot.Name})
 			}
 		}
 
@@ -219,11 +219,11 @@ func MapControllerInstallationToSeed(_ context.Context, obj client.Object) []rec
 	var requests []reconcile.Request
 
 	if controllerInstallation.Spec.SeedRef != nil {
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.SeedRef.Name}})
+		requests = append(requests, reconcile.Request{Name: controllerInstallation.Spec.SeedRef.Name})
 	}
 
 	if controllerInstallation.Spec.ShootRef != nil && controllerInstallation.Spec.ShootRef.Namespace == v1beta1constants.GardenNamespace {
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.ShootRef.Name}})
+		requests = append(requests, reconcile.Request{Name: controllerInstallation.Spec.ShootRef.Name})
 	}
 
 	return requests

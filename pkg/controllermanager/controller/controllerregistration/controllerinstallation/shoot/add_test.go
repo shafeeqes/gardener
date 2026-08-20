@@ -12,8 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -52,8 +50,8 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should return empty because shoots listed as PartialObjectMetadata cannot be type-asserted to Shoot for self-hosted filtering", func() {
-				shoot1 := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: "garden"}}
-				shoot2 := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot2", Namespace: "garden"}}
+				shoot1 := &gardencorev1beta1.Shoot{Name: "shoot1", Namespace: "garden"}
+				shoot2 := &gardencorev1beta1.Shoot{Name: "shoot2", Namespace: "garden"}
 
 				Expect(fakeClient.Create(ctx, shoot1)).To(Succeed())
 				Expect(fakeClient.Create(ctx, shoot2)).To(Succeed())
@@ -84,7 +82,7 @@ var _ = Describe("Add", func() {
 
 			It("should map to the shoot", func() {
 				Expect(MapBackupBucketToShoot(ctx, backupBucket)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: shootName, Namespace: shootNamespace}},
+					reconcile.Request{Name: shootName, Namespace: shootNamespace},
 				))
 			})
 		})
@@ -111,7 +109,7 @@ var _ = Describe("Add", func() {
 
 			It("should map to the shoot", func() {
 				Expect(MapBackupEntryToShoot(ctx, backupEntry)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: shootName, Namespace: shootNamespace}},
+					reconcile.Request{Name: shootName, Namespace: shootNamespace},
 				))
 			})
 		})
@@ -138,7 +136,7 @@ var _ = Describe("Add", func() {
 
 			It("should map to the shoot", func() {
 				Expect(MapControllerInstallationToShoot(ctx, controllerInstallation)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: shootName, Namespace: shootNamespace}},
+					reconcile.Request{Name: shootName, Namespace: shootNamespace},
 				))
 			})
 		})
@@ -152,9 +150,9 @@ var _ = Describe("Add", func() {
 			)
 
 			BeforeEach(func() {
-				controllerDeployment = &gardencorev1.ControllerDeployment{ObjectMeta: metav1.ObjectMeta{Name: deploymentName}}
+				controllerDeployment = &gardencorev1.ControllerDeployment{Name: deploymentName}
 				controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "registration-"},
+					GenerateName: "registration-",
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 							DeploymentRefs: []gardencorev1beta1.DeploymentRef{{Name: deploymentName}},
@@ -168,8 +166,8 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should return empty because even when a ControllerRegistration references the deployment, shoots listed as PartialObjectMetadata cannot pass the self-hosted filter", func() {
-				shoot1 := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: "garden"}}
-				shoot2 := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot2", Namespace: "garden"}}
+				shoot1 := &gardencorev1beta1.Shoot{Name: "shoot1", Namespace: "garden"}
+				shoot2 := &gardencorev1beta1.Shoot{Name: "shoot2", Namespace: "garden"}
 
 				Expect(fakeClient.Create(ctx, shoot1)).To(Succeed())
 				Expect(fakeClient.Create(ctx, shoot2)).To(Succeed())
@@ -191,18 +189,18 @@ var _ = Describe("Add", func() {
 			)
 
 			BeforeEach(func() {
-				configMap = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: v1beta1constants.GardenNamespace}}
-				secret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: v1beta1constants.GardenNamespace}}
+				configMap = &corev1.ConfigMap{Name: configMapName, Namespace: v1beta1constants.GardenNamespace}
+				secret = &corev1.Secret{Name: secretName, Namespace: v1beta1constants.GardenNamespace}
 
 				controllerDeployment = &gardencorev1.ControllerDeployment{
-					ObjectMeta: metav1.ObjectMeta{Name: deploymentName},
+					Name: deploymentName,
 					Resources: []gardencorev1.NamedResourceReference{
 						{Name: "configmap-ref", ResourceRef: autoscalingv1.CrossVersionObjectReference{Kind: "ConfigMap", Name: configMapName}},
 						{Name: "secret-ref", ResourceRef: autoscalingv1.CrossVersionObjectReference{Kind: "Secret", Name: secretName}},
 					},
 				}
 				controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "registration-"},
+					GenerateName: "registration-",
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 							DeploymentRefs: []gardencorev1beta1.DeploymentRef{{Name: deploymentName}},
@@ -216,7 +214,7 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should return empty when ControllerDeployment matches a referenced ConfigMap (chain ends in self-hosted filter that drops PartialObjectMetadata-listed shoots)", func() {
-				shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "garden"}}
+				shoot := &gardencorev1beta1.Shoot{Name: "shoot", Namespace: "garden"}
 				Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 				Expect(fakeClient.Create(ctx, controllerDeployment)).To(Succeed())
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
@@ -225,7 +223,7 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should return empty when ControllerDeployment matches a referenced Secret (chain ends in self-hosted filter that drops PartialObjectMetadata-listed shoots)", func() {
-				shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "garden"}}
+				shoot := &gardencorev1beta1.Shoot{Name: "shoot", Namespace: "garden"}
 				Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 				Expect(fakeClient.Create(ctx, controllerDeployment)).To(Succeed())
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
@@ -237,7 +235,7 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, controllerDeployment)).To(Succeed())
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
 
-				other := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: v1beta1constants.GardenNamespace}}
+				other := &corev1.ConfigMap{Name: "other", Namespace: v1beta1constants.GardenNamespace}
 				Expect(MapResourceReferenceToAllSelfHostedShoots(log, reconciler)(ctx, other)).To(BeEmpty())
 			})
 

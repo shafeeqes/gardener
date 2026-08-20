@@ -40,10 +40,8 @@ type SecretState struct {
 // cluster.
 func Deploy(ctx context.Context, clock clock.Clock, gardenClient, seedClient client.Client, shoot *gardencorev1beta1.Shoot, controlPlaneNamespace string, overwriteSpec bool) error {
 	shootState := &gardencorev1beta1.ShootState{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shoot.Name,
-			Namespace: shoot.Namespace,
-		},
+		Name:      shoot.Name,
+		Namespace: shoot.Namespace,
 	}
 
 	spec, err := computeSpec(ctx, seedClient, controlPlaneNamespace)
@@ -88,10 +86,8 @@ func Deploy(ctx context.Context, clock clock.Clock, gardenClient, seedClient cli
 // Delete deletes the ShootState resource for the given shoot from the garden cluster.
 func Delete(ctx context.Context, gardenClient client.Client, shoot *gardencorev1beta1.Shoot) error {
 	shootState := &gardencorev1beta1.ShootState{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shoot.Name,
-			Namespace: shoot.Namespace,
-		},
+		Name:      shoot.Name,
+		Namespace: shoot.Namespace,
 	}
 
 	if err := gardenerutils.ConfirmDeletion(ctx, gardenClient, shootState); err != nil {

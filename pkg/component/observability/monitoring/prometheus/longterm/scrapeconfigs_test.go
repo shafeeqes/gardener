@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus/longterm"
 )
@@ -19,7 +18,7 @@ var _ = Describe("PrometheusRules", func() {
 		It("should only contain the expected scrape configs", func() {
 			Expect(longterm.CentralScrapeConfigs()).To(HaveExactElements(
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{Name: "prometheus-longterm"},
+					Name: "prometheus-longterm",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						StaticConfigs: []monitoringv1alpha1.StaticConfig{{
 							Targets: []monitoringv1alpha1.Target{"localhost:9090"},
@@ -32,7 +31,7 @@ var _ = Describe("PrometheusRules", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{Name: "cortex-frontend"},
+					Name: "cortex-frontend",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						StaticConfigs: []monitoringv1alpha1.StaticConfig{{
 							Targets: []monitoringv1alpha1.Target{"localhost:9091"},
@@ -45,7 +44,7 @@ var _ = Describe("PrometheusRules", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{Name: "prometheus-garden"},
+					Name: "prometheus-garden",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels:     new(false),
 						HonorTimestamps: new(true),

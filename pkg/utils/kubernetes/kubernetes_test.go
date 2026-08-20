@@ -21,7 +21,6 @@ import (
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	"go.uber.org/mock/gomock"
-	admissionv1 "k8s.io/api/admission/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -145,10 +144,8 @@ var _ = Describe("kubernetes", func() {
 			namespace = "bar"
 			name      = "foo"
 			configMap = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      name,
-				},
+				Namespace: namespace,
+				Name:      name,
 			}
 		)
 
@@ -204,10 +201,8 @@ var _ = Describe("kubernetes", func() {
 	Describe("#WaitUntilResourcesDeleted", func() {
 		var (
 			configMap = corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      name,
-				},
+				Namespace: namespace,
+				Name:      name,
 			}
 			configMapList *corev1.ConfigMapList
 		)
@@ -263,10 +258,8 @@ var _ = Describe("kubernetes", func() {
 
 		BeforeEach(func() {
 			service = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 			}
 		})
 
@@ -337,10 +330,8 @@ var _ = Describe("kubernetes", func() {
 		BeforeEach(func() {
 			key = client.ObjectKey{Namespace: namespace, Name: name}
 			configMap = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      name,
-				},
+				Namespace: namespace,
+				Name:      name,
 			}
 		})
 
@@ -443,10 +434,8 @@ var _ = Describe("kubernetes", func() {
 		It("should return nil when the Service has .status.loadBalancer.ingress[]", func() {
 			var (
 				svc = &corev1.Service{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "load-balancer",
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      "load-balancer",
+					Namespace: metav1.NamespaceSystem,
 					Status: corev1.ServiceStatus{
 						LoadBalancer: corev1.LoadBalancerStatus{
 							Ingress: []corev1.LoadBalancerIngress{
@@ -468,14 +457,10 @@ var _ = Describe("kubernetes", func() {
 		It("should return err when the Service has no .status.loadBalancer.ingress[]", func() {
 			var (
 				svc = &corev1.Service{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: "v1",
-						Kind:       "Service",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "load-balancer",
-						Namespace: metav1.NamespaceSystem,
-					},
+					APIVersion: "v1",
+					Kind:       "Service",
+					Name:       "load-balancer",
+					Namespace:  metav1.NamespaceSystem,
 				}
 				event = &corev1.Event{
 					ObjectMeta:     *svc.ObjectMeta.DeepCopy(),
@@ -535,14 +520,10 @@ var _ = Describe("kubernetes", func() {
 			}
 
 			serviceObj = &corev1.Service{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "Service",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				APIVersion: "v1",
+				Kind:       "Service",
+				Name:       name,
+				Namespace:  namespace,
 			}
 		})
 
@@ -693,8 +674,8 @@ var _ = Describe("kubernetes", func() {
 			Expect(OwnedBy(obj, apiVersion, kind, name, uid)).To(matcher)
 		},
 		Entry("no owner references", &corev1.Pod{}, "apiVersion", "kind", "name", types.UID("uid"), BeFalse()),
-		Entry("owner not found", &corev1.Pod{ObjectMeta: metav1.ObjectMeta{OwnerReferences: []metav1.OwnerReference{{APIVersion: "different-apiVersion", Kind: "different-kind", Name: "different-name", UID: types.UID("different-uid")}}}}, "apiVersion", "kind", "name", types.UID("uid"), BeFalse()),
-		Entry("owner found", &corev1.Pod{ObjectMeta: metav1.ObjectMeta{OwnerReferences: []metav1.OwnerReference{{APIVersion: "apiVersion", Kind: "kind", Name: "name", UID: types.UID("uid")}}}}, "apiVersion", "kind", "name", types.UID("uid"), BeTrue()),
+		Entry("owner not found", &corev1.Pod{OwnerReferences: []metav1.OwnerReference{{APIVersion: "different-apiVersion", Kind: "different-kind", Name: "different-name", UID: types.UID("different-uid")}}}, "apiVersion", "kind", "name", types.UID("uid"), BeFalse()),
+		Entry("owner found", &corev1.Pod{OwnerReferences: []metav1.OwnerReference{{APIVersion: "apiVersion", Kind: "kind", Name: "name", UID: types.UID("uid")}}}, "apiVersion", "kind", "name", types.UID("uid"), BeTrue()),
 	)
 
 	Describe("#NewestObject", func() {
@@ -723,9 +704,9 @@ var _ = Describe("kubernetes", func() {
 		})
 
 		var (
-			obj1 = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "obj1", CreationTimestamp: metav1.Now()}}
-			obj2 = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "obj2", CreationTimestamp: metav1.Time{Time: time.Now().Add(+time.Hour)}}}
-			obj3 = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "obj3", CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)}}}
+			obj1 = &corev1.Pod{Name: "obj1", CreationTimestamp: metav1.Now()}
+			obj2 = &corev1.Pod{Name: "obj2", CreationTimestamp: metav1.Time{Time: time.Now().Add(+time.Hour)}}
+			obj3 = &corev1.Pod{Name: "obj3", CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)}}
 		)
 
 		It("should return the newest object w/o filter func", func() {
@@ -787,11 +768,9 @@ var _ = Describe("kubernetes", func() {
 			}
 
 			deployment = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					UID:       uid,
-				},
+				Name:      name,
+				Namespace: namespace,
+				UID:       uid,
 				Spec: appsv1.DeploymentSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: labels,
@@ -800,19 +779,17 @@ var _ = Describe("kubernetes", func() {
 			}
 
 			replicaSet1 = &appsv1.ReplicaSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              name + "-" + rs1PodTemplateHash,
-					Namespace:         namespace,
-					Labels:            rs1Labels,
-					UID:               "replicaset1",
-					CreationTimestamp: metav1.Now(),
-					OwnerReferences: []metav1.OwnerReference{{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-						Name:       name,
-						UID:        uid,
-					}},
-				},
+				Name:              name + "-" + rs1PodTemplateHash,
+				Namespace:         namespace,
+				Labels:            rs1Labels,
+				UID:               "replicaset1",
+				CreationTimestamp: metav1.Now(),
+				OwnerReferences: []metav1.OwnerReference{{
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       name,
+					UID:        uid,
+				}},
 				Spec: appsv1.ReplicaSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: rs1Labels,
@@ -820,19 +797,17 @@ var _ = Describe("kubernetes", func() {
 				},
 			}
 			replicaSet2 = &appsv1.ReplicaSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              name + "-" + rs2PodTemplateHash,
-					Namespace:         namespace,
-					Labels:            rs2Labels,
-					UID:               "replicaset2",
-					CreationTimestamp: metav1.Time{Time: time.Now().Add(+time.Hour)},
-					OwnerReferences: []metav1.OwnerReference{{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-						Name:       "other-deployment",
-						UID:        "other-uid",
-					}},
-				},
+				Name:              name + "-" + rs2PodTemplateHash,
+				Namespace:         namespace,
+				Labels:            rs2Labels,
+				UID:               "replicaset2",
+				CreationTimestamp: metav1.Time{Time: time.Now().Add(+time.Hour)},
+				OwnerReferences: []metav1.OwnerReference{{
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       "other-deployment",
+					UID:        "other-uid",
+				}},
 				Spec: appsv1.ReplicaSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: rs2Labels,
@@ -840,19 +815,17 @@ var _ = Describe("kubernetes", func() {
 				},
 			}
 			replicaSet3 = &appsv1.ReplicaSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              name + "-" + rs3PodTemplateHash,
-					Namespace:         namespace,
-					Labels:            rs3Labels,
-					UID:               "replicaset3",
-					CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)},
-					OwnerReferences: []metav1.OwnerReference{{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-						Name:       name,
-						UID:        uid,
-					}},
-				},
+				Name:              name + "-" + rs3PodTemplateHash,
+				Namespace:         namespace,
+				Labels:            rs3Labels,
+				UID:               "replicaset3",
+				CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)},
+				OwnerReferences: []metav1.OwnerReference{{
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       name,
+					UID:        uid,
+				}},
 				Spec: appsv1.ReplicaSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: rs3Labels,
@@ -860,7 +833,7 @@ var _ = Describe("kubernetes", func() {
 				},
 			}
 
-			pod1 = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			pod1 = &corev1.Pod{
 				Name:              "pod1",
 				Namespace:         namespace,
 				UID:               "pod1",
@@ -871,9 +844,8 @@ var _ = Describe("kubernetes", func() {
 					Kind:       "ReplicaSet",
 					Name:       replicaSet1.Name,
 					UID:        replicaSet1.UID,
-				}},
-			}}
-			pod2 = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+				}}}
+			pod2 = &corev1.Pod{
 				Name:              "pod2",
 				Namespace:         namespace,
 				UID:               "pod2",
@@ -884,8 +856,7 @@ var _ = Describe("kubernetes", func() {
 					Kind:       "ReplicaSet",
 					Name:       replicaSet1.Name,
 					UID:        replicaSet1.UID,
-				}},
-			}}
+				}}}
 		)
 
 		It("should return an error because the newest ReplicaSet determination failed", func() {
@@ -927,7 +898,7 @@ var _ = Describe("kubernetes", func() {
 		})
 
 		It("should return an error because the replicasSet has no pod selector", func() {
-			rs := &appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{
+			rs := &appsv1.ReplicaSet{
 				Name:              "rs",
 				Namespace:         namespace,
 				Labels:            rs1Labels,
@@ -938,8 +909,7 @@ var _ = Describe("kubernetes", func() {
 					Kind:       "Deployment",
 					Name:       name,
 					UID:        uid,
-				}},
-			}}
+				}}}
 			rsError := fmt.Errorf("no pod selector specified in replicaSet %s/%s", rs.Namespace, rs.Name)
 
 			Expect(fakeClient.Create(ctx, rs)).To(Succeed())
@@ -951,19 +921,17 @@ var _ = Describe("kubernetes", func() {
 
 		It("should return an error because the replicasSet has no matchLabels or matchExpressions", func() {
 			rs := &appsv1.ReplicaSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              "rs",
-					Namespace:         namespace,
-					Labels:            rs1Labels,
-					UID:               "rs",
-					CreationTimestamp: metav1.Now(),
-					OwnerReferences: []metav1.OwnerReference{{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-						Name:       name,
-						UID:        uid,
-					}},
-				},
+				Name:              "rs",
+				Namespace:         namespace,
+				Labels:            rs1Labels,
+				UID:               "rs",
+				CreationTimestamp: metav1.Now(),
+				OwnerReferences: []metav1.OwnerReference{{
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       name,
+					UID:        uid,
+				}},
 				Spec: appsv1.ReplicaSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels:      map[string]string{},
@@ -981,19 +949,17 @@ var _ = Describe("kubernetes", func() {
 
 		It("should return an error because the matchExpressions is invalid", func() {
 			rs := &appsv1.ReplicaSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              "rs",
-					Namespace:         namespace,
-					Labels:            rs1Labels,
-					UID:               "rs",
-					CreationTimestamp: metav1.Now(),
-					OwnerReferences: []metav1.OwnerReference{{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-						Name:       name,
-						UID:        uid,
-					}},
-				},
+				Name:              "rs",
+				Namespace:         namespace,
+				Labels:            rs1Labels,
+				UID:               "rs",
+				CreationTimestamp: metav1.Now(),
+				OwnerReferences: []metav1.OwnerReference{{
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       name,
+					UID:        uid,
+				}},
 				Spec: appsv1.ReplicaSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchExpressions: []metav1.LabelSelectorRequirement{{Key: "foo", Operator: metav1.LabelSelectorOpIn, Values: []string{}}},
@@ -1052,7 +1018,7 @@ var _ = Describe("kubernetes", func() {
 		BeforeEach(func() {
 			pods = mockcorev1.NewMockPodInterface(ctrl)
 
-			pod = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: podName}}
+			pod = &corev1.Pod{Name: podName}
 		})
 
 		It("should return an error if the log retrieval failed", func() {
@@ -1153,32 +1119,32 @@ var _ = Describe("kubernetes", func() {
 		},
 
 		Entry("object w/o namespace in object with generateName",
-			&corev1.Pod{ObjectMeta: metav1.ObjectMeta{GenerateName: "foo"}},
-			admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Namespace: "bar"}},
+			&corev1.Pod{GenerateName: "foo"},
+			admission.Request{Namespace: "bar"},
 			client.ObjectKey{Namespace: "bar", Name: "foo"},
 		),
 		Entry("object w/o namespace in object with name",
-			&corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "foo"}},
-			admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Namespace: "bar"}},
+			&corev1.Pod{Name: "foo"},
+			admission.Request{Namespace: "bar"},
 			client.ObjectKey{Namespace: "bar", Name: "foo"},
 		),
 		Entry("object w/ namespace with generateName",
-			&corev1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: "bar", GenerateName: "foo"}},
+			&corev1.Pod{Namespace: "bar", GenerateName: "foo"},
 			admission.Request{},
 			client.ObjectKey{Namespace: "bar", Name: "foo"},
 		),
 		Entry("object w/ namespace with name",
-			&corev1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: "bar", Name: "foo"}},
+			&corev1.Pod{Namespace: "bar", Name: "foo"},
 			admission.Request{},
 			client.ObjectKey{Namespace: "bar", Name: "foo"},
 		),
 		Entry("non-namespaced object with generateName",
-			&corev1.Node{ObjectMeta: metav1.ObjectMeta{GenerateName: "foo"}},
+			&corev1.Node{GenerateName: "foo"},
 			admission.Request{},
 			client.ObjectKey{Namespace: "", Name: "foo"},
 		),
 		Entry("non-namespaced object with name",
-			&corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "foo"}},
+			&corev1.Node{Name: "foo"},
 			admission.Request{},
 			client.ObjectKey{Namespace: "", Name: "foo"},
 		),

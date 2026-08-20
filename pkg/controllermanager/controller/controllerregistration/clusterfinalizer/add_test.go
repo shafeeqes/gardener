@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -49,7 +48,7 @@ var _ = Describe("Add", func() {
 
 			Expect(queue.Len()).To(Equal(1))
 			item, _ := queue.Get()
-			Expect(item).To(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "seed-1"}}))
+			Expect(item).To(Equal(reconcile.Request{Name: "seed-1"}))
 		})
 
 		It("should not enqueue on delete when seedRef is nil", func() {
@@ -72,7 +71,7 @@ var _ = Describe("Add", func() {
 
 			Expect(queue.Len()).To(Equal(1))
 			item, _ := queue.Get()
-			Expect(item).To(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "seed-1"}}))
+			Expect(item).To(Equal(reconcile.Request{Name: "seed-1"}))
 		})
 
 		It("should not enqueue on update when seedRef was not cleared", func() {
@@ -120,7 +119,7 @@ var _ = Describe("Add", func() {
 
 			Expect(queue.Len()).To(Equal(1))
 			item, _ := queue.Get()
-			Expect(item).To(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-1", Namespace: "garden-project"}}))
+			Expect(item).To(Equal(reconcile.Request{Name: "shoot-1", Namespace: "garden-project"}))
 		})
 
 		It("should not enqueue on delete when shootRef is nil", func() {

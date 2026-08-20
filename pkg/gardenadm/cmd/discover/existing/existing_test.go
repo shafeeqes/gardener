@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -91,21 +90,15 @@ var _ = Describe("Existing", func() {
 		Expect(fakeClient.Create(ctx, resources.ControllerRegistrationDNS)).To(Succeed())
 
 		backupBucketSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-backup-secret",
-				Namespace: "garden",
-			},
+			Name:      "test-backup-secret",
+			Namespace: "garden",
 		}
 		backupBucketGeneratedSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-backup-bucket-generated-secret",
-				Namespace: "garden",
-			},
+			Name:      "test-backup-bucket-generated-secret",
+			Namespace: "garden",
 		}
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-backup-bucket",
-			},
+			Name: "test-backup-bucket",
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				CredentialsRef: &corev1.ObjectReference{
 					APIVersion: "v1",
@@ -122,10 +115,8 @@ var _ = Describe("Existing", func() {
 			},
 		}
 		backupEntry = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-backup-entry",
-				Namespace: resources.Shoot.Namespace,
-			},
+			Name:      "test-backup-entry",
+			Namespace: resources.Shoot.Namespace,
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				BucketName: backupBucket.Name,
 				ShootRef: &corev1.ObjectReference{
@@ -137,10 +128,8 @@ var _ = Describe("Existing", func() {
 			},
 		}
 		shootState = &gardencorev1beta1.ShootState{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-shoot",
-				Namespace: resources.Shoot.Namespace,
-			},
+			Name:      "test-shoot",
+			Namespace: resources.Shoot.Namespace,
 		}
 	})
 

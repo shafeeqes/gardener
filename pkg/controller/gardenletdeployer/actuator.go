@@ -292,11 +292,9 @@ func (a *Actuator) Delete(
 
 func (a *Actuator) ensureGardenNamespace(ctx context.Context, targetClient client.Client) error {
 	gardenNamespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: a.GardenletNamespaceTarget,
-			Labels: map[string]string{
-				v1beta1constants.GardenRole: v1beta1constants.GardenRoleGarden,
-			},
+		Name: a.GardenletNamespaceTarget,
+		Labels: map[string]string{
+			v1beta1constants.GardenRole: v1beta1constants.GardenRoleGarden,
 		},
 	}
 	if err := targetClient.Get(ctx, client.ObjectKeyFromObject(gardenNamespace), gardenNamespace); err != nil {
@@ -310,9 +308,7 @@ func (a *Actuator) ensureGardenNamespace(ctx context.Context, targetClient clien
 
 func (a *Actuator) deleteGardenNamespace(ctx context.Context, targetClient kubernetes.Interface) error {
 	gardenNamespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: a.GardenletNamespaceTarget,
-		},
+		Name: a.GardenletNamespaceTarget,
 	}
 	return client.IgnoreNotFound(targetClient.Client().Delete(ctx, gardenNamespace))
 }
@@ -330,9 +326,7 @@ func (a *Actuator) getGardenNamespace(ctx context.Context, targetClient kubernet
 
 func (a *Actuator) deleteSeed(ctx context.Context, obj client.Object) error {
 	seed := &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: obj.GetName(),
-		},
+		Name: obj.GetName(),
 	}
 	return client.IgnoreNotFound(a.GardenClient.Delete(ctx, seed))
 }
@@ -439,7 +433,7 @@ func (a *Actuator) getGardenletDeployment(ctx context.Context, targetClient kube
 // as the object currently reconciled. This can help preventing multiple deployments with different seed configuration
 // into the same cluster (e.g., because of kubeconfig configuration issues).
 func (a *Actuator) verifyExistingGardenlet(ctx context.Context, log logr.Logger, targetClient client.Reader, currentSeedName string) error {
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameGardenlet, Namespace: a.GardenletNamespaceTarget}}
+	deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameGardenlet, Namespace: a.GardenletNamespaceTarget}
 	if err := targetClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return fmt.Errorf("failed reading %s deployment: %w", client.ObjectKeyFromObject(deployment), err)
@@ -455,7 +449,7 @@ func (a *Actuator) verifyExistingGardenlet(ctx context.Context, log logr.Logger,
 		return nil
 	}
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: deployment.Spec.Template.Spec.Volumes[configMapVolumeIndex].ConfigMap.Name, Namespace: a.GardenletNamespaceTarget}}
+	configMap := &corev1.ConfigMap{Name: deployment.Spec.Template.Spec.Volumes[configMapVolumeIndex].ConfigMap.Name, Namespace: a.GardenletNamespaceTarget}
 	if err := targetClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		return fmt.Errorf("failed reading %s ConfigMap: %w", client.ObjectKeyFromObject(configMap), err)
 	}
@@ -516,7 +510,7 @@ func (a *Actuator) reconcileSeedSecrets(ctx context.Context, obj client.Object, 
 	// TODO(dimityrmirchev): Remove this logic when the DoNotCopyBackupCredentials feature gate is removed, i.e. after v1.134 has been released.
 	if metav1.IsControlledBy(backupSecret, obj) {
 		secret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Namespace: spec.Backup.CredentialsRef.Namespace, Name: spec.Backup.CredentialsRef.Name},
+			Namespace: spec.Backup.CredentialsRef.Namespace, Name: spec.Backup.CredentialsRef.Name,
 		}
 
 		if _, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, a.GardenClient, secret, func() error {

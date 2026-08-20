@@ -21,10 +21,8 @@ import (
 
 func (k *kubeAPIServer) emptyHorizontalPodAutoscaler() *autoscalingv2.HorizontalPodAutoscaler {
 	return &autoscalingv2.HorizontalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      k.values.NamePrefix + v1beta1constants.DeploymentNameKubeAPIServer,
-			Namespace: k.namespace,
-		},
+		Name:      k.values.NamePrefix + v1beta1constants.DeploymentNameKubeAPIServer,
+		Namespace: k.namespace,
 	}
 }
 

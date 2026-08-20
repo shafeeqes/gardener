@@ -36,20 +36,16 @@ func (n *nodeLocalDNS) computeResourcesData() (*corev1.ServiceAccount, *corev1.C
 
 	var (
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "node-local-dns",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:                         "node-local-dns",
+			Namespace:                    metav1.NamespaceSystem,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "node-local-dns",
-				Namespace: metav1.NamespaceSystem,
-				Labels: map[string]string{
-					labelKey: nodelocaldnsconstants.LabelValue,
-				},
+			Name:      "node-local-dns",
+			Namespace: metav1.NamespaceSystem,
+			Labels: map[string]string{
+				labelKey: nodelocaldnsconstants.LabelValue,
 			},
 			Data: map[string]string{
 				configDataKey: domain + `:53 {
@@ -115,12 +111,10 @@ ip6.arpa:53 {
 
 	var (
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: metav1.NamespaceSystem,
-				Labels: map[string]string{
-					labelKey: "kube-dns-upstream",
-				},
+			Name:      serviceName,
+			Namespace: metav1.NamespaceSystem,
+			Labels: map[string]string{
+				labelKey: "kube-dns-upstream",
 			},
 			Spec: corev1.ServiceSpec{
 				Selector: map[string]string{
@@ -158,22 +152,20 @@ func (n *nodeLocalDNS) computePoolResourcesData(serviceAccount *corev1.ServiceAc
 	clientObjects = []client.Object{serviceAccount, configMap, service}
 	for _, poolName := range poolNames {
 		daemonSet = &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "node-local-dns-" + poolName,
-				Namespace: metav1.NamespaceSystem,
-				Annotations: map[string]string{
-					// This annotation is required so that the new label selector that includes the worker's name,
-					// introduced with https://github.com/gardener/gardener/pull/14286, can be applied by GRM as
-					// the `spec.selector` field is immutable.
-					// TODO(plkokanov): Remove this annotation after v1.140 has been released.
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
-				Labels: map[string]string{
-					labelKey:                                    nodelocaldnsconstants.LabelValue,
-					v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleSystemComponent,
-					managedresources.LabelKeyOrigin:             managedresources.LabelValueGardener,
-					v1beta1constants.LabelNodeCriticalComponent: "true",
-				},
+			Name:      "node-local-dns-" + poolName,
+			Namespace: metav1.NamespaceSystem,
+			Annotations: map[string]string{
+				// This annotation is required so that the new label selector that includes the worker's name,
+				// introduced with https://github.com/gardener/gardener/pull/14286, can be applied by GRM as
+				// the `spec.selector` field is immutable.
+				// TODO(plkokanov): Remove this annotation after v1.140 has been released.
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
+			},
+			Labels: map[string]string{
+				labelKey:                                    nodelocaldnsconstants.LabelValue,
+				v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleSystemComponent,
+				managedresources.LabelKeyOrigin:             managedresources.LabelValueGardener,
+				v1beta1constants.LabelNodeCriticalComponent: "true",
 			},
 			Spec: appsv1.DaemonSetSpec{
 				UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
@@ -269,12 +261,10 @@ func (n *nodeLocalDNS) computePoolResourcesData(serviceAccount *corev1.ServiceAc
 									},
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Host: n.getIPVSAddress(),
-											Path: "/health",
-											Port: intstr.FromInt32(livenessProbePort),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Host: n.getIPVSAddress(),
+										Path: "/health",
+										Port: intstr.FromInt32(livenessProbePort),
 									},
 									InitialDelaySeconds: int32(60),
 									TimeoutSeconds:      int32(5),
@@ -304,50 +294,36 @@ func (n *nodeLocalDNS) computePoolResourcesData(serviceAccount *corev1.ServiceAc
 						Volumes: []corev1.Volume{
 							{
 								Name: "xtables-lock",
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: "/run/xtables.lock",
-										Type: &hostPathFileOrCreate,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/run/xtables.lock",
+									Type: &hostPathFileOrCreate,
 								},
 							},
 							{
 								Name: "kube-dns-config",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: "kube-dns",
-										},
-										Optional: new(true),
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name:     "kube-dns",
+									Optional: new(true),
 								},
 							},
 							{
 								Name: "config-volume",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMap.Name,
-										},
-										Items: []corev1.KeyToPath{
-											{
-												Key:  configDataKey,
-												Path: "Corefile.base",
-											},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: configMap.Name,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  configDataKey,
+											Path: "Corefile.base",
 										},
 									},
 								},
 							},
 							{
 								Name: volumeMountNameCustomConfig,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: coredns.CustomConfigMapName,
-										},
-										DefaultMode: new(int32(420)),
-										Optional:    new(true),
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name:        coredns.CustomConfigMapName,
+									DefaultMode: new(int32(420)),
+									Optional:    new(true),
 								},
 							},
 						},
@@ -392,10 +368,8 @@ func (n *nodeLocalDNS) computePoolResourcesData(serviceAccount *corev1.ServiceAc
 			})
 
 			daemonSet.Spec.Template.Spec.Volumes = append(daemonSet.Spec.Template.Spec.Volumes, corev1.Volume{
-				Name: volumeMountNameGeneratedConfig,
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
+				Name:     volumeMountNameGeneratedConfig,
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			})
 
 			daemonSet.Spec.Template.Spec.Containers[0].VolumeMounts = append(daemonSet.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -410,10 +384,8 @@ func (n *nodeLocalDNS) computePoolResourcesData(serviceAccount *corev1.ServiceAc
 		if n.values.VPAEnabled {
 			vpaUpdateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 			vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-local-dns-" + poolName,
-					Namespace: metav1.NamespaceSystem,
-				},
+				Name:      "node-local-dns-" + poolName,
+				Namespace: metav1.NamespaceSystem,
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: appsv1.SchemeGroupVersion.String(),

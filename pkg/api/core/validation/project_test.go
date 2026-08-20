@@ -26,9 +26,7 @@ var _ = Describe("Project Validation Tests", func() {
 
 		BeforeEach(func() {
 			project = &core.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "project-1",
-				},
+				Name: "project-1",
 				Spec: core.ProjectSpec{
 					CreatedBy: &rbacv1.Subject{
 						APIGroup: "rbac.authorization.k8s.io",
@@ -42,20 +40,16 @@ var _ = Describe("Project Validation Tests", func() {
 					},
 					Members: []core.ProjectMember{
 						{
-							Subject: rbacv1.Subject{
-								APIGroup: "rbac.authorization.k8s.io",
-								Kind:     rbacv1.UserKind,
-								Name:     "alice.doe@example.com",
-							},
-							Roles: []string{core.ProjectMemberAdmin},
+							APIGroup: "rbac.authorization.k8s.io",
+							Kind:     rbacv1.UserKind,
+							Name:     "alice.doe@example.com",
+							Roles:    []string{core.ProjectMemberAdmin},
 						},
 						{
-							Subject: rbacv1.Subject{
-								APIGroup: "rbac.authorization.k8s.io",
-								Kind:     rbacv1.UserKind,
-								Name:     "bob.doe@example.com",
-							},
-							Roles: []string{core.ProjectMemberViewer, core.ProjectMemberUserAccessManager},
+							APIGroup: "rbac.authorization.k8s.io",
+							Kind:     rbacv1.UserKind,
+							Name:     "bob.doe@example.com",
+							Roles:    []string{core.ProjectMemberViewer, core.ProjectMemberUserAccessManager},
 						},
 					},
 				},
@@ -281,11 +275,9 @@ var _ = Describe("Project Validation Tests", func() {
 		It("should forbid invalid service account usernames", func() {
 			project.Spec.Members = append(project.Spec.Members,
 				core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.UserKind,
-						Name:     "system:serviceaccount:abcd",
-					},
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.UserKind,
+					Name:     "system:serviceaccount:abcd",
 				},
 			)
 
@@ -300,32 +292,24 @@ var _ = Describe("Project Validation Tests", func() {
 		It("should forbid duplicate members", func() {
 			project.Spec.Members = append(project.Spec.Members,
 				core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.UserKind,
-						Name:     "system:serviceaccount:foo:bar",
-					},
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.UserKind,
+					Name:     "system:serviceaccount:foo:bar",
 				},
 				core.ProjectMember{
-					Subject: rbacv1.Subject{
-						Kind:      rbacv1.ServiceAccountKind,
-						Name:      "bar",
-						Namespace: "foo",
-					},
+					Kind:      rbacv1.ServiceAccountKind,
+					Name:      "bar",
+					Namespace: "foo",
 				},
 				core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.GroupKind,
-						Name:     "baz",
-					},
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.GroupKind,
+					Name:     "baz",
 				},
 				core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.GroupKind,
-						Name:     "baz",
-					},
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.GroupKind,
+					Name:     "baz",
 				},
 			)
 

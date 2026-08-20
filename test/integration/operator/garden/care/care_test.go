@@ -39,10 +39,8 @@ var _ = Describe("Garden Care controller tests", func() {
 
 	BeforeEach(func() {
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   gardenName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   gardenName,
+			Labels: map[string]string{testID: testRunID},
 			Spec: operatorv1alpha1.GardenSpec{
 				RuntimeCluster: operatorv1alpha1.RuntimeCluster{
 					Networking: operatorv1alpha1.RuntimeNetworking{
@@ -108,10 +106,8 @@ var _ = Describe("Garden Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create ManagedResource for runtime cluster")
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name),
-				},
+				Name:      managedResourceName,
+				Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name),
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class:      new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{Name: "foo-secret"}},
@@ -122,7 +118,7 @@ var _ = Describe("Garden Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource for runtime cluster")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name)}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name)})).To(Succeed())
 			})
 		})
 
@@ -175,10 +171,8 @@ var _ = Describe("Garden Care controller tests", func() {
 
 			By("Create ManagedResource for virtual Cluster")
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name),
-				},
+				Name:      managedResourceName,
+				Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name),
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{{Name: "foo-secret"}},
 				},
@@ -188,7 +182,7 @@ var _ = Describe("Garden Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource for virtual cluster")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name)}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name)})).To(Succeed())
 			})
 		})
 
@@ -381,11 +375,9 @@ var _ = Describe("Garden Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create ManagedResource for observability components")
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name),
-					Labels:    map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
-				},
+				Name:      managedResourceName,
+				Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name),
+				Labels:    map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{{Name: "foo-secret"}},
 				},
@@ -395,7 +387,7 @@ var _ = Describe("Garden Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource for observability components")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name)}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: getManagedResourceNamespace(managedResourceName, testNamespace.Name)})).To(Succeed())
 			})
 		})
 
@@ -432,13 +424,11 @@ var _ = Describe("Garden Care controller tests", func() {
 func createDeployments(names []string, roleLabel, role string) {
 	for _, name := range names {
 		deployment := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID:    testRunID,
-					roleLabel: role,
-				},
+			Name:      name,
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID:    testRunID,
+				roleLabel: role,
 			},
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"foo": "bar"}},
@@ -484,13 +474,11 @@ func createDeployments(names []string, roleLabel, role string) {
 func createETCDs(names []string) {
 	for _, name := range names {
 		etcd := &druidcorev1alpha1.Etcd{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
-				},
+			Name:      name,
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
 			},
 			Spec: druidcorev1alpha1.EtcdSpec{
 				Labels:   map[string]string{"foo": "bar"},
@@ -526,7 +514,7 @@ func createETCDs(names []string) {
 
 func updateDeploymentStatusToHealthy(name string) {
 	By("Update status to healthy for Deployment " + name)
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: testNamespace.Name}}
+	deployment := &appsv1.Deployment{Name: name, Namespace: testNamespace.Name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 
 	deployment.Status.ObservedGeneration = deployment.Generation
@@ -538,7 +526,7 @@ func updateDeploymentStatusToHealthy(name string) {
 
 func updateETCDStatusToHealthy(name string) {
 	By("Update status to healthy for ETCD " + name)
-	etcd := &druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: testNamespace.Name}}
+	etcd := &druidcorev1alpha1.Etcd{Name: name, Namespace: testNamespace.Name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(etcd), etcd)).To(Succeed())
 
 	etcd.Status.ObservedGeneration = &etcd.Generation
@@ -552,7 +540,7 @@ func updateETCDStatusToHealthy(name string) {
 
 func updateManagedResourceStatusToHealthy(name string) {
 	By("Update status to healthy for ManagedResource " + name)
-	managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: getManagedResourceNamespace(name, testNamespace.Name)}}
+	managedResource := &resourcesv1alpha1.ManagedResource{Name: name, Namespace: getManagedResourceNamespace(name, testNamespace.Name)}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
 	managedResource.Status.ObservedGeneration = managedResource.Generation

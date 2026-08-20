@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -64,9 +63,7 @@ var _ = Describe("Actuator", func() {
 		ctrl = gomock.NewController(GinkgoT())
 
 		backupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootTechnicalID + "--" + shootUID,
-			},
+			Name: shootTechnicalID + "--" + shootUID,
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				BucketName: bucketName,
 				SecretRef: corev1.SecretReference{
@@ -80,10 +77,8 @@ var _ = Describe("Actuator", func() {
 			"bucketName": []byte(bucketName),
 		}
 		backupEntrySecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      providerSecretName,
-				Namespace: providerSecretNamespace,
-			},
+			Name:      providerSecretName,
+			Namespace: providerSecretNamespace,
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
@@ -94,16 +89,12 @@ var _ = Describe("Actuator", func() {
 		}
 		etcdBackupSecretKey = client.ObjectKey{Namespace: shootTechnicalID, Name: "etcd-backup"}
 		etcdBackupSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "etcd-backup",
-				Namespace: shootTechnicalID,
-			},
-			Data: etcdBackupSecretData,
+			Name:      "etcd-backup",
+			Namespace: shootTechnicalID,
+			Data:      etcdBackupSecretData,
 		}
 		seedNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootTechnicalID,
-			},
+			Name: shootTechnicalID,
 		}
 
 	})

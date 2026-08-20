@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -121,7 +120,7 @@ func (r *Reconciler) MapGardenToExtensions(log logr.Logger) handler.MapFunc {
 
 		var requests []reconcile.Request
 		for _, extension := range extensionList.Items {
-			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: extension.Name, Namespace: extension.Namespace}})
+			requests = append(requests, reconcile.Request{Name: extension.Name, Namespace: extension.Namespace})
 		}
 
 		return requests
@@ -186,7 +185,7 @@ func (r *Reconciler) MapObjectKindToExtensions(log logr.Logger, objectKind strin
 		for _, extension := range extensionList.Items {
 			for _, resource := range extension.Spec.Resources {
 				if resource.Kind == objectKind {
-					requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: extension.Name}})
+					requests = append(requests, reconcile.Request{Name: extension.Name})
 					break
 				}
 			}

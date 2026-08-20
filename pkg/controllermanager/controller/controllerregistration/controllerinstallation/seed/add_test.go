@@ -12,8 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -50,8 +48,8 @@ var _ = Describe("Add", func() {
 			var seed1, seed2 *gardencorev1beta1.Seed
 
 			BeforeEach(func() {
-				seed1 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed1"}}
-				seed2 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed2"}}
+				seed1 = &gardencorev1beta1.Seed{Name: "seed1"}
+				seed2 = &gardencorev1beta1.Seed{Name: "seed2"}
 
 				Expect(fakeClient.Create(ctx, seed1)).To(Succeed())
 				Expect(fakeClient.Create(ctx, seed2)).To(Succeed())
@@ -59,8 +57,8 @@ var _ = Describe("Add", func() {
 
 			It("should map to all seeds", func() {
 				Expect(MapToAllSeeds(log, reconciler)(ctx, nil)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed1.Name}},
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed2.Name}},
+					reconcile.Request{Name: seed1.Name},
+					reconcile.Request{Name: seed2.Name},
 				))
 			})
 		})
@@ -82,7 +80,7 @@ var _ = Describe("Add", func() {
 
 			It("should map to the seed", func() {
 				Expect(MapBackupBucketToSeed(ctx, backupBucket)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seedName}},
+					reconcile.Request{Name: seedName},
 				))
 			})
 		})
@@ -104,7 +102,7 @@ var _ = Describe("Add", func() {
 
 			It("should map to the seed", func() {
 				Expect(MapBackupEntryToSeed(ctx, backupEntry)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seedName}},
+					reconcile.Request{Name: seedName},
 				))
 			})
 		})
@@ -117,11 +115,9 @@ var _ = Describe("Add", func() {
 
 			BeforeEach(func() {
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "some-shoot",
-						Namespace: "some-namespace",
-					},
-					Spec: gardencorev1beta1.ShootSpec{SeedName: &seedName},
+					Name:      "some-shoot",
+					Namespace: "some-namespace",
+					Spec:      gardencorev1beta1.ShootSpec{SeedName: &seedName},
 				}
 			})
 
@@ -132,37 +128,35 @@ var _ = Describe("Add", func() {
 
 			It("should map to the seed", func() {
 				Expect(MapShootToSeed(log, reconciler)(ctx, shoot)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seedName}},
+					reconcile.Request{Name: seedName},
 				))
 			})
 
 			It("should also map to the self-hosted seed when shoot is in garden namespace", func() {
 				selfHostedSeed := &gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "self-hosted",
-						Labels: map[string]string{v1beta1constants.LabelSelfHostedShootCluster: "true"},
-					},
+					Name:   "self-hosted",
+					Labels: map[string]string{v1beta1constants.LabelSelfHostedShootCluster: "true"},
 				}
 				Expect(fakeClient.Create(ctx, selfHostedSeed)).To(Succeed())
 
 				shoot.Name = "self-hosted"
 				shoot.Namespace = v1beta1constants.GardenNamespace
 				Expect(MapShootToSeed(log, reconciler)(ctx, shoot)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seedName}},
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: "self-hosted"}},
+					reconcile.Request{Name: seedName},
+					reconcile.Request{Name: "self-hosted"},
 				))
 			})
 
 			It("should not map to a seed without the self-hosted label when shoot is in garden namespace", func() {
 				regularSeed := &gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{Name: "regular-seed"},
+					Name: "regular-seed",
 				}
 				Expect(fakeClient.Create(ctx, regularSeed)).To(Succeed())
 
 				shoot.Name = "regular-seed"
 				shoot.Namespace = v1beta1constants.GardenNamespace
 				Expect(MapShootToSeed(log, reconciler)(ctx, shoot)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seedName}},
+					reconcile.Request{Name: seedName},
 				))
 			})
 		})
@@ -179,7 +173,7 @@ var _ = Describe("Add", func() {
 
 			It("should map to the seed", func() {
 				Expect(MapControllerInstallationToSeed(ctx, controllerInstallation)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seedName}},
+					reconcile.Request{Name: seedName},
 				))
 			})
 		})
@@ -194,9 +188,9 @@ var _ = Describe("Add", func() {
 			)
 
 			BeforeEach(func() {
-				controllerDeployment = &gardencorev1.ControllerDeployment{ObjectMeta: metav1.ObjectMeta{Name: deploymentName}}
+				controllerDeployment = &gardencorev1.ControllerDeployment{Name: deploymentName}
 				controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "registration-"},
+					GenerateName: "registration-",
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 							DeploymentRefs: []gardencorev1beta1.DeploymentRef{{Name: deploymentName}},
@@ -204,8 +198,8 @@ var _ = Describe("Add", func() {
 					},
 				}
 
-				seed1 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed1"}}
-				seed2 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed2"}}
+				seed1 = &gardencorev1beta1.Seed{Name: "seed1"}
+				seed2 = &gardencorev1beta1.Seed{Name: "seed2"}
 
 				Expect(fakeClient.Create(ctx, seed1)).To(Succeed())
 				Expect(fakeClient.Create(ctx, seed2)).To(Succeed())
@@ -219,8 +213,8 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
 
 				Expect(MapControllerDeploymentToAllSeeds(log, reconciler)(ctx, controllerDeployment)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed1.Name}},
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed2.Name}},
+					reconcile.Request{Name: seed1.Name},
+					reconcile.Request{Name: seed2.Name},
 				))
 			})
 		})
@@ -238,18 +232,18 @@ var _ = Describe("Add", func() {
 			)
 
 			BeforeEach(func() {
-				configMap = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: v1beta1constants.GardenNamespace}}
-				secret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: v1beta1constants.GardenNamespace}}
+				configMap = &corev1.ConfigMap{Name: configMapName, Namespace: v1beta1constants.GardenNamespace}
+				secret = &corev1.Secret{Name: secretName, Namespace: v1beta1constants.GardenNamespace}
 
 				controllerDeployment = &gardencorev1.ControllerDeployment{
-					ObjectMeta: metav1.ObjectMeta{Name: deploymentName},
+					Name: deploymentName,
 					Resources: []gardencorev1.NamedResourceReference{
 						{Name: "configmap-ref", ResourceRef: autoscalingv1.CrossVersionObjectReference{Kind: "ConfigMap", Name: configMapName}},
 						{Name: "secret-ref", ResourceRef: autoscalingv1.CrossVersionObjectReference{Kind: "Secret", Name: secretName}},
 					},
 				}
 				controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "registration-"},
+					GenerateName: "registration-",
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 							DeploymentRefs: []gardencorev1beta1.DeploymentRef{{Name: deploymentName}},
@@ -257,8 +251,8 @@ var _ = Describe("Add", func() {
 					},
 				}
 
-				seed1 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed1"}}
-				seed2 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed2"}}
+				seed1 = &gardencorev1beta1.Seed{Name: "seed1"}
+				seed2 = &gardencorev1beta1.Seed{Name: "seed2"}
 
 				Expect(fakeClient.Create(ctx, seed1)).To(Succeed())
 				Expect(fakeClient.Create(ctx, seed2)).To(Succeed())
@@ -287,8 +281,8 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
 
 				Expect(MapResourceReferenceToAllSeeds(log, reconciler)(ctx, configMap)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed1.Name}},
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed2.Name}},
+					reconcile.Request{Name: seed1.Name},
+					reconcile.Request{Name: seed2.Name},
 				))
 			})
 
@@ -297,8 +291,8 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
 
 				Expect(MapResourceReferenceToAllSeeds(log, reconciler)(ctx, secret)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed1.Name}},
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: seed2.Name}},
+					reconcile.Request{Name: seed1.Name},
+					reconcile.Request{Name: seed2.Name},
 				))
 			})
 
@@ -306,7 +300,7 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, controllerDeployment)).To(Succeed())
 				Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
 
-				other := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: v1beta1constants.GardenNamespace}}
+				other := &corev1.ConfigMap{Name: "other", Namespace: v1beta1constants.GardenNamespace}
 				Expect(MapResourceReferenceToAllSeeds(log, reconciler)(ctx, other)).To(BeEmpty())
 			})
 

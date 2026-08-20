@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -23,7 +22,7 @@ var _ = Describe("Managedresource", func() {
 				Expect(err).To(matcher)
 			},
 			Entry("applied condition not true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -39,7 +38,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("healthy condition not true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -55,7 +54,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("conditions true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -71,7 +70,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, Not(HaveOccurred())),
 			Entry("no applied condition", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -83,7 +82,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("no healthy condition", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -95,19 +94,19 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("no conditions", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 				},
 			}, HaveOccurred()),
 			Entry("outdated generation", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 2},
+				Generation: 2,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 				},
 			}, HaveOccurred()),
 			Entry("no status", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 2},
+				Generation: 2,
 			}, HaveOccurred()),
 		)
 	})
@@ -119,7 +118,7 @@ var _ = Describe("Managedresource", func() {
 				Expect(err).To(matcher)
 			},
 			Entry("applied condition not true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -131,7 +130,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("condition true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -143,26 +142,26 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, Not(HaveOccurred())),
 			Entry("no applied condition", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions:         []gardencorev1beta1.Condition{},
 				},
 			}, HaveOccurred()),
 			Entry("no conditions", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 				},
 			}, HaveOccurred()),
 			Entry("outdated generation", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 2},
+				Generation: 2,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 				},
 			}, HaveOccurred()),
 			Entry("no status", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 2},
+				Generation: 2,
 			}, HaveOccurred()),
 		)
 	})
@@ -174,7 +173,7 @@ var _ = Describe("Managedresource", func() {
 				Expect(err).To(matcher)
 			},
 			Entry("healthy condition not true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -186,7 +185,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("condition true", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -198,20 +197,20 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, Not(HaveOccurred())),
 			Entry("no healthy condition", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions:         []gardencorev1beta1.Condition{},
 				},
 			}, HaveOccurred()),
 			Entry("no conditions", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 				},
 			}, HaveOccurred()),
 			Entry("no status", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 2},
+				Generation: 2,
 			}, HaveOccurred()),
 		)
 	})
@@ -223,7 +222,7 @@ var _ = Describe("Managedresource", func() {
 				Expect(err).To(matcher)
 			},
 			Entry("progressing condition not false", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -235,7 +234,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, HaveOccurred()),
 			Entry("progressing condition false", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -247,7 +246,7 @@ var _ = Describe("Managedresource", func() {
 				},
 			}, Not(HaveOccurred())),
 			Entry("no progressing condition", resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions:         []gardencorev1beta1.Condition{},

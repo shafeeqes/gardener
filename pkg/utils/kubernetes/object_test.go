@@ -14,7 +14,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
@@ -68,8 +67,8 @@ var _ = Describe("Object", func() {
 				}).
 				Build()
 
-			obj1 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "default"}}
-			obj2 := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "d1", Namespace: "default"}}
+			obj1 := &corev1.Secret{Name: "s1", Namespace: "default"}
+			obj2 := &appsv1.Deployment{Name: "d1", Namespace: "default"}
 			Expect(fakeClient.Create(ctx, obj1)).To(Succeed())
 			Expect(fakeClient.Create(ctx, obj2)).To(Succeed())
 
@@ -77,8 +76,8 @@ var _ = Describe("Object", func() {
 		})
 
 		It("should successfully delete all objects", func() {
-			obj1 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "default"}}
-			obj2 := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "d1", Namespace: "default"}}
+			obj1 := &corev1.Secret{Name: "s1", Namespace: "default"}
+			obj2 := &appsv1.Deployment{Name: "d1", Namespace: "default"}
 			Expect(fakeClient.Create(ctx, obj1)).To(Succeed())
 			Expect(fakeClient.Create(ctx, obj2)).To(Succeed())
 
@@ -104,7 +103,7 @@ var _ = Describe("Object", func() {
 		})
 
 		It("should not fail to delete the object (not found error)", func() {
-			Expect(DeleteObject(ctx, fakeClient, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "nonexistent", Namespace: "default"}})).To(Succeed())
+			Expect(DeleteObject(ctx, fakeClient, &corev1.Secret{Name: "nonexistent", Namespace: "default"})).To(Succeed())
 		})
 
 		It("should not fail to delete the object (no match error)", func() {
@@ -121,7 +120,7 @@ var _ = Describe("Object", func() {
 		})
 
 		It("should successfully delete the object", func() {
-			obj := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "default"}}
+			obj := &corev1.Secret{Name: "s1", Namespace: "default"}
 			Expect(fakeClient.Create(ctx, obj)).To(Succeed())
 
 			Expect(DeleteObject(ctx, fakeClient, obj)).To(Succeed())
@@ -131,9 +130,9 @@ var _ = Describe("Object", func() {
 
 	Describe("#DeleteObjectsFromListConditionally", func() {
 		var (
-			obj1 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "1"}}
-			obj2 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "2"}}
-			obj3 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "3"}}
+			obj1 = &corev1.Namespace{Name: "1"}
+			obj2 = &corev1.Namespace{Name: "2"}
+			obj3 = &corev1.Namespace{Name: "3"}
 
 			predicateFn = func(obj runtime.Object) bool {
 				acc, _ := meta.Accessor(obj)
@@ -237,7 +236,7 @@ var _ = Describe("Object", func() {
 			})
 
 			It("should return true because objects found", func() {
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: namespace}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "foo", Namespace: namespace})).To(Succeed())
 
 				inUse, err := ResourcesExist(ctx, fakeClient, objList, scheme, listOpts...)
 				Expect(err).NotTo(HaveOccurred())
@@ -272,11 +271,9 @@ var _ = Describe("Object", func() {
 
 			It("should return true because objects found", func() {
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: namespace,
-					},
-					Data: map[string][]byte{"foo": []byte("bar")},
+					Name:      "foo",
+					Namespace: namespace,
+					Data:      map[string][]byte{"foo": []byte("bar")},
 				})).To(Succeed())
 
 				inUse, err := ResourcesExist(ctx, fakeClient, objList, scheme, listOpts...)
@@ -306,10 +303,8 @@ var _ = Describe("Object", func() {
 		It("should properly make the ConfigMap immutable", func() {
 			var (
 				configMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   name,
-						Labels: labels,
-					},
+					Name:       name,
+					Labels:     labels,
 					Data:       map[string]string{"foo": "bar"},
 					BinaryData: map[string][]byte{"bar": []byte("foo")},
 				}
@@ -327,10 +322,8 @@ var _ = Describe("Object", func() {
 		It("should properly make the Secret immutable", func() {
 			var (
 				secret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   nameWithHyphenSuffix,
-						Labels: labels,
-					},
+					Name:       nameWithHyphenSuffix,
+					Labels:     labels,
 					Data:       map[string][]byte{"foo": []byte("bar")},
 					StringData: map[string]string{"bar": "foo"},
 				}

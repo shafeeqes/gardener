@@ -13,7 +13,6 @@ import (
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -51,9 +50,7 @@ var _ = Describe("Reconciler", func() {
 		ctx = context.Background()
 
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: controllerInstallationName,
-			},
+			Name: controllerInstallationName,
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: "foo-seed",
@@ -62,9 +59,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		request = reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Name: controllerInstallationName,
-			},
+			Name: controllerInstallationName,
 		}
 
 		gardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).WithStatusSubresource(&gardencorev1beta1.ControllerInstallation{}).Build()
@@ -236,10 +231,8 @@ func notHealthyManagedResource(name string) *resourcesv1alpha1.ManagedResource {
 
 func managedResource(name string, conditions []gardencorev1beta1.Condition) *resourcesv1alpha1.ManagedResource {
 	return &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: gardenNamespace,
-		},
+		Name:      name,
+		Namespace: gardenNamespace,
 		Status: resourcesv1alpha1.ManagedResourceStatus{
 			Conditions: conditions,
 		},

@@ -92,9 +92,7 @@ func ControllerRegistrationForExtension(extension *operatorv1alpha1.Extension) (
 
 	var (
 		controllerDeployment = &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extension.Name,
-			},
+			Name: extension.Name,
 			Helm: &gardencorev1.HelmControllerDeployment{
 				Values:        extension.Spec.Deployment.ExtensionDeployment.Values,
 				OCIRepository: extension.Spec.Deployment.ExtensionDeployment.Helm.OCIRepository,
@@ -103,9 +101,7 @@ func ControllerRegistrationForExtension(extension *operatorv1alpha1.Extension) (
 		}
 
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extension.Name,
-			},
+			Name: extension.Name,
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: resources,
 				Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{

@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -21,7 +20,7 @@ var _ = Describe("ReplicationController", func() {
 			Expect(err).To(matcher)
 		},
 		Entry("not observed at latest version", &corev1.ReplicationController{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 		}, HaveOccurred()),
 		Entry("not enough ready replicas", &corev1.ReplicationController{
 			Spec:   corev1.ReplicationControllerSpec{Replicas: new(int32(2))},

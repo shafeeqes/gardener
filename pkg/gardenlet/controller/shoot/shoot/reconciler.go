@@ -279,7 +279,7 @@ func (r *Reconciler) prepareOperation(ctx context.Context, log logr.Logger, shoo
 
 	var seed *gardencorev1beta1.Seed
 	if !v1beta1helper.IsShootSelfHosted(shoot.Spec.Provider.Workers) {
-		seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: r.Config.SeedConfig.Name}}
+		seed = &gardencorev1beta1.Seed{Name: r.Config.SeedConfig.Name}
 		// always fetch the seed that this gardenlet is responsible for (instead of using spec.seedName),
 		// it is never acting on a foreign seed (e.g., during control plane migration)
 		if err := r.GardenClient.Get(ctx, client.ObjectKeyFromObject(seed), seed); err != nil {
@@ -289,7 +289,7 @@ func (r *Reconciler) prepareOperation(ctx context.Context, log logr.Logger, shoo
 
 	var exposureClass *gardencorev1beta1.ExposureClass
 	if shoot.Spec.ExposureClassName != nil {
-		exposureClass = &gardencorev1beta1.ExposureClass{ObjectMeta: metav1.ObjectMeta{Name: *shoot.Spec.ExposureClassName}}
+		exposureClass = &gardencorev1beta1.ExposureClass{Name: *shoot.Spec.ExposureClassName}
 		if err := r.GardenClient.Get(ctx, client.ObjectKeyFromObject(exposureClass), exposureClass); err != nil {
 			return nil, reconcile.Result{}, err
 		}
@@ -496,7 +496,7 @@ func (r *Reconciler) deleteClusterResourceFromSeed(ctx context.Context, shoot *g
 	if shoot.Status.TechnicalID == "" {
 		return nil
 	}
-	cluster := &extensionsv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Name: shoot.Status.TechnicalID}}
+	cluster := &extensionsv1alpha1.Cluster{Name: shoot.Status.TechnicalID}
 	return client.IgnoreNotFound(r.SeedClientSet.Client().Delete(ctx, cluster))
 }
 
@@ -1167,7 +1167,7 @@ func extensionResourceStillExists(ctx context.Context, reader client.Reader, obj
 }
 
 func checkIfSeedNamespaceExists(ctx context.Context, o *operation.Operation, botanist *botanistpkg.Botanist) error {
-	botanist.SeedNamespaceObject = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: o.Shoot.ControlPlaneNamespace}}
+	botanist.SeedNamespaceObject = &corev1.Namespace{Name: o.Shoot.ControlPlaneNamespace}
 	if err := botanist.SeedClientSet.APIReader().Get(ctx, client.ObjectKeyFromObject(botanist.SeedNamespaceObject), botanist.SeedNamespaceObject); err != nil {
 		if apierrors.IsNotFound(err) {
 			o.Logger.Info("Did not find namespace in the Seed cluster", "namespace", client.ObjectKeyFromObject(o.SeedNamespaceObject))

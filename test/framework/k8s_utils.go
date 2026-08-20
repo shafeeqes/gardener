@@ -18,7 +18,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -35,7 +34,7 @@ import (
 // WaitUntilDaemonSetIsRunning waits until the daemon set with <daemonSetName> is running
 func (f *CommonFramework) WaitUntilDaemonSetIsRunning(ctx context.Context, k8sClient client.Client, name, namespace string) error {
 	return retry.Until(ctx, defaultPollInterval, func(ctx context.Context) (done bool, err error) {
-		daemonSet := &appsv1.DaemonSet{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
+		daemonSet := &appsv1.DaemonSet{Namespace: namespace, Name: name}
 		log := f.Logger.WithValues("daemonSet", client.ObjectKeyFromObject(daemonSet))
 
 		if err := k8sClient.Get(ctx, client.ObjectKeyFromObject(daemonSet), daemonSet); err != nil {
@@ -55,7 +54,7 @@ func (f *CommonFramework) WaitUntilDaemonSetIsRunning(ctx context.Context, k8sCl
 // WaitUntilStatefulSetIsRunning waits until the stateful set with <statefulSetName> is running
 func (f *CommonFramework) WaitUntilStatefulSetIsRunning(ctx context.Context, name, namespace string, c kubernetes.Interface) error {
 	return retry.Until(ctx, defaultPollInterval, func(ctx context.Context) (done bool, err error) {
-		statefulSet := &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
+		statefulSet := &appsv1.StatefulSet{Namespace: namespace, Name: name}
 		log := f.Logger.WithValues("statefulSet", client.ObjectKeyFromObject(statefulSet))
 
 		if err := c.Client().Get(ctx, client.ObjectKeyFromObject(statefulSet), statefulSet); err != nil {
@@ -75,7 +74,7 @@ func (f *CommonFramework) WaitUntilStatefulSetIsRunning(ctx context.Context, nam
 // WaitUntilIngressIsReady waits until the given ingress is ready
 func (f *CommonFramework) WaitUntilIngressIsReady(ctx context.Context, name string, namespace string, k8sClient kubernetes.Interface) error {
 	return retry.Until(ctx, defaultPollInterval, func(ctx context.Context) (done bool, err error) {
-		ingress := &networkingv1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
+		ingress := &networkingv1.Ingress{Namespace: namespace, Name: name}
 		log := f.Logger.WithValues("ingress", client.ObjectKeyFromObject(ingress))
 
 		if err := k8sClient.Client().Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, ingress); err != nil {
@@ -99,7 +98,7 @@ func (f *CommonFramework) WaitUntilIngressIsReady(ctx context.Context, name stri
 // WaitUntilDeploymentIsReady waits until the given deployment is ready
 func (f *CommonFramework) WaitUntilDeploymentIsReady(ctx context.Context, name string, namespace string, k8sClient kubernetes.Interface) error {
 	return retry.Until(ctx, defaultPollInterval, func(ctx context.Context) (done bool, err error) {
-		deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
+		deployment := &appsv1.Deployment{Namespace: namespace, Name: name}
 		log := f.Logger.WithValues("deployment", client.ObjectKeyFromObject(deployment))
 
 		if err := k8sClient.Client().Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, deployment); err != nil {
@@ -407,11 +406,9 @@ func NewClientFromServiceAccount(ctx context.Context, k8sClient kubernetes.Inter
 	}
 
 	restConfig := &rest.Config{
-		Host: k8sClient.RESTConfig().Host,
-		TLSClientConfig: rest.TLSClientConfig{
-			Insecure: false,
-			CAData:   k8sClient.RESTConfig().CAData,
-		},
+		Host:        k8sClient.RESTConfig().Host,
+		Insecure:    false,
+		CAData:      k8sClient.RESTConfig().CAData,
 		BearerToken: token,
 	}
 
@@ -425,7 +422,7 @@ func NewClientFromServiceAccount(ctx context.Context, k8sClient kubernetes.Inter
 // WaitUntilPodIsRunning waits until the pod with <podName> is running
 func WaitUntilPodIsRunning(ctx context.Context, log logr.Logger, name, namespace string, c kubernetes.Interface) error {
 	return retry.Until(ctx, defaultPollInterval, func(ctx context.Context) (done bool, err error) {
-		pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
+		pod := &corev1.Pod{Namespace: namespace, Name: name}
 		podLog := log.WithValues("pod", client.ObjectKeyFromObject(pod))
 
 		if err := c.Client().Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, pod); err != nil {
@@ -472,10 +469,8 @@ func DeployRootPod(ctx context.Context, c client.Client, namespace string, noden
 	}
 
 	rootPod := corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("rootpod-%s", id),
-			Namespace: namespace,
-		},
+		Name:      fmt.Sprintf("rootpod-%s", id),
+		Namespace: namespace,
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
@@ -507,10 +502,8 @@ func DeployRootPod(ctx context.Context, c client.Client, namespace string, noden
 			Volumes: []corev1.Volume{
 				{
 					Name: "root-volume",
-					VolumeSource: corev1.VolumeSource{
-						HostPath: &corev1.HostPathVolumeSource{
-							Path: "/",
-						},
+					HostPath: &corev1.HostPathVolumeSource{
+						Path: "/",
 					},
 				},
 			},

@@ -57,7 +57,7 @@ func AddToManager(
 		return err
 	}
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.ClusterIdentity, Namespace: metav1.NamespaceSystem}}
+	configMap := &corev1.ConfigMap{Name: v1beta1constants.ClusterIdentity, Namespace: metav1.NamespaceSystem}
 	if err := gardenCluster.GetClient().Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		return fmt.Errorf("failed getting cluster-identity ConfigMap in garden cluster: %w", err)
 	}

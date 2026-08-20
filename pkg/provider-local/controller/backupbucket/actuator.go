@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -62,7 +61,7 @@ func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, backupBucket 
 
 func (a *actuator) Delete(ctx context.Context, log logr.Logger, bb *extensionsv1alpha1.BackupBucket) error {
 	if ref := bb.Status.GeneratedSecretRef; ref != nil {
-		if err := kubernetesutils.DeleteObject(ctx, a.client, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: ref.Name, Namespace: ref.Namespace}}); err != nil {
+		if err := kubernetesutils.DeleteObject(ctx, a.client, &corev1.Secret{Name: ref.Name, Namespace: ref.Namespace}); err != nil {
 			return err
 		}
 	}

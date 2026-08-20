@@ -15,7 +15,6 @@ import (
 	gomegatypes "github.com/onsi/gomega/types"
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -84,11 +83,9 @@ var _ = Describe("utils", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).Build()
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "secret-",
-					Namespace:    "garden",
-					Labels:       map[string]string{"gardener.cloud/role": "controlplane-cert"},
-				},
+				GenerateName: "secret-",
+				Namespace:    "garden",
+				Labels:       map[string]string{"gardener.cloud/role": "controlplane-cert"},
 			}
 		})
 
@@ -606,8 +603,8 @@ var _ = Describe("utils", func() {
 			seedProvider = "seedProvider"
 			dnsProvider = "dnsProvider"
 
-			seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed"}}
-			shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "garden-project"}}
+			seed = &gardencorev1beta1.Seed{Name: "seed"}
+			shoot = &gardencorev1beta1.Shoot{Name: "shoot", Namespace: "garden-project"}
 
 			requiredExtensions = sets.New(
 				"DNSRecord/"+dnsProvider,
@@ -636,9 +633,7 @@ var _ = Describe("utils", func() {
 			BeforeEach(func() {
 				controllerInstallations = []*gardencorev1beta1.ControllerInstallation{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "seedProviderExtension",
-						},
+						Name: "seedProviderExtension",
 						Spec: gardencorev1beta1.ControllerInstallationSpec{
 							RegistrationRef: corev1.ObjectReference{
 								Name: "foo",
@@ -667,9 +662,7 @@ var _ = Describe("utils", func() {
 			BeforeEach(func() {
 				controllerRegistrations = []*gardencorev1beta1.ControllerRegistration{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "seedProviderExtension",
-						},
+						Name: "seedProviderExtension",
 						Spec: gardencorev1beta1.ControllerRegistrationSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: extensionsv1alpha1.ControlPlaneResource, Type: seedProvider},
@@ -679,9 +672,7 @@ var _ = Describe("utils", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "dnsProviderExtension",
-						},
+						Name: "dnsProviderExtension",
 						Spec: gardencorev1beta1.ControllerRegistrationSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: extensionsv1alpha1.DNSRecordResource, Type: dnsProvider},
@@ -691,9 +682,7 @@ var _ = Describe("utils", func() {
 				}
 				controllerInstallations = []*gardencorev1beta1.ControllerInstallation{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "seedProviderExtension",
-						},
+						Name: "seedProviderExtension",
 						Spec: gardencorev1beta1.ControllerInstallationSpec{
 							RegistrationRef: corev1.ObjectReference{
 								Name: controllerRegistrations[0].Name,
@@ -715,9 +704,7 @@ var _ = Describe("utils", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "dnsProviderExtension",
-						},
+						Name: "dnsProviderExtension",
 						Spec: gardencorev1beta1.ControllerInstallationSpec{
 							RegistrationRef: corev1.ObjectReference{
 								Name: controllerRegistrations[1].Name,
@@ -803,10 +790,8 @@ var _ = Describe("utils", func() {
 
 		It("should return true when a ManagedSeed exists", func() {
 			managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-seed",
-					Namespace: "garden",
-				},
+				Name:      "my-seed",
+				Namespace: "garden",
 			}
 			Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 

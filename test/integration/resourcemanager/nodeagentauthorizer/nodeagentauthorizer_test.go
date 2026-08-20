@@ -62,7 +62,7 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 				ExpectWithOffset(1, err).ToNot(HaveOccurred())
 
 				csr = &certificatesv1.CertificateSigningRequest{
-					ObjectMeta: metav1.ObjectMeta{Name: "foo-request"},
+					Name: "foo-request",
 					Spec: certificatesv1.CertificateSigningRequestSpec{
 						Usages: []certificatesv1.KeyUsage{
 							certificatesv1.UsageDigitalSignature,
@@ -147,10 +147,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 
 			It("should be able to create and patch an event", func() {
 				event := &eventsv1.Event{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "event-",
-						Namespace:    testNamespace.Name,
-					},
+					GenerateName: "event-",
+					Namespace:    testNamespace.Name,
 					Regarding: corev1.ObjectReference{
 						Kind:      "Namespace",
 						Name:      testNamespace.Name,
@@ -181,11 +179,11 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 			})
 
 			It("should forbid to update an event", func() {
-				ExpectWithOffset(1, testClientNodeAgent.Update(ctx, &corev1.Event{ObjectMeta: metav1.ObjectMeta{Name: "foo-event", Namespace: "default"}})).To(BeForbiddenError())
+				ExpectWithOffset(1, testClientNodeAgent.Update(ctx, &corev1.Event{Name: "foo-event", Namespace: "default"})).To(BeForbiddenError())
 			})
 
 			It("should forbid to delete an event", func() {
-				ExpectWithOffset(1, testClientNodeAgent.Delete(ctx, &corev1.Event{ObjectMeta: metav1.ObjectMeta{Name: "foo-event", Namespace: "default"}})).To(BeForbiddenError())
+				ExpectWithOffset(1, testClientNodeAgent.Delete(ctx, &corev1.Event{Name: "foo-event", Namespace: "default"})).To(BeForbiddenError())
 			})
 		})
 
@@ -200,9 +198,7 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 
 			BeforeEach(func() {
 				otherNode = &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: otherNodeName,
-					},
+					Name: otherNodeName,
 				}
 				if machineNamespace != nil {
 					otherNode.Labels = map[string]string{"node.gardener.cloud/machine-name": otherMachineName}
@@ -224,10 +220,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 						createNode(node, machine)
 					}
 					lease := &coordinationv1.Lease{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: namespace,
-						},
+						Name:      name,
+						Namespace: namespace,
 					}
 					ExpectWithOffset(1, testClient.Create(ctx, lease)).To(Succeed())
 					DeferCleanup(func() {
@@ -253,10 +247,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 						createNode(node, machine)
 					}
 					lease := &coordinationv1.Lease{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: namespace,
-						},
+						Name:      name,
+						Namespace: namespace,
 					}
 					ExpectWithOffset(1, testClient.Create(ctx, lease)).To(Succeed())
 					DeferCleanup(func() {
@@ -279,10 +271,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 						createNode(node, machine)
 					}
 					lease := &coordinationv1.Lease{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: namespace,
-						},
+						Name:      name,
+						Namespace: namespace,
 					}
 					ExpectWithOffset(1, testClient.Create(ctx, lease)).To(Succeed())
 					DeferCleanup(func() {
@@ -306,10 +296,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 						createNode(node, machine)
 					}
 					lease := &coordinationv1.Lease{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: namespace,
-						},
+						Name:      name,
+						Namespace: namespace,
 					}
 					ExpectWithOffset(1, testClient.Create(ctx, lease)).To(Succeed())
 					DeferCleanup(func() {
@@ -365,10 +353,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 						createNode(node, machine)
 					}
 					lease := &coordinationv1.Lease{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: namespace,
-						},
+						Name:      name,
+						Namespace: namespace,
 					}
 					ExpectWithOffset(1, testClientNodeAgent.Create(ctx, lease)).To(matcher)
 					DeferCleanup(func() {
@@ -391,10 +377,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 
 			BeforeEach(func() {
 				otherNode = &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   otherNodeName,
-						Labels: map[string]string{},
-					},
+					Name:   otherNodeName,
+					Labels: map[string]string{},
 				}
 				if machineNamespace != nil {
 					otherNode.Labels = map[string]string{"node.gardener.cloud/machine-name": otherMachineName}
@@ -488,11 +472,9 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 				createNode(node, machine)
 
 				machineSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      machineSecretName,
-						Namespace: "kube-system",
-						Labels:    map[string]string{"worker.gardener.cloud/pool": "foo"},
-					},
+					Name:      machineSecretName,
+					Namespace: "kube-system",
+					Labels:    map[string]string{"worker.gardener.cloud/pool": "foo"},
 				}
 				ExpectWithOffset(1, testClient.Create(ctx, machineSecret)).To(Succeed())
 				DeferCleanup(func() {
@@ -501,11 +483,9 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 				})
 
 				otherMachineSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      otherMachineSecretName,
-						Namespace: "kube-system",
-						Labels:    map[string]string{"worker.gardener.cloud/pool": "foo"},
-					},
+					Name:      otherMachineSecretName,
+					Namespace: "kube-system",
+					Labels:    map[string]string{"worker.gardener.cloud/pool": "foo"},
 				}
 				ExpectWithOffset(1, testClient.Create(ctx, otherMachineSecret)).To(Succeed())
 				DeferCleanup(func() {
@@ -514,10 +494,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 				})
 
 				valitailSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      valitailSecretName,
-						Namespace: "kube-system",
-					},
+					Name:      valitailSecretName,
+					Namespace: "kube-system",
 				}
 				ExpectWithOffset(1, testClient.Create(ctx, valitailSecret)).To(Succeed())
 				DeferCleanup(func() {
@@ -526,10 +504,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 				})
 
 				fooSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "default",
-					},
+					Name:      "foo",
+					Namespace: "default",
 				}
 				ExpectWithOffset(1, testClient.Create(ctx, fooSecret)).To(Succeed())
 				DeferCleanup(func() {
@@ -538,10 +514,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 				})
 
 				barSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bar",
-						Namespace: "kube-system",
-					},
+					Name:      "bar",
+					Namespace: "kube-system",
 				}
 				ExpectWithOffset(1, testClient.Create(ctx, barSecret)).To(Succeed())
 				DeferCleanup(func() {
@@ -644,10 +618,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 			machineNamespace = &testNamespace.Name
 
 			machine = &machinev1alpha1.Machine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      machineName,
-					Namespace: testNamespace.Name,
-				},
+				Name:      machineName,
+				Namespace: testNamespace.Name,
 				Spec: machinev1alpha1.MachineSpec{
 					NodeTemplateSpec: machinev1alpha1.NodeTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
@@ -663,10 +635,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 			})
 
 			otherMachine = &machinev1alpha1.Machine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      otherMachineName,
-					Namespace: testNamespace.Name,
-				},
+				Name:      otherMachineName,
+				Namespace: testNamespace.Name,
 				Spec: machinev1alpha1.MachineSpec{
 					NodeTemplateSpec: machinev1alpha1.NodeTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
@@ -682,10 +652,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 			})
 
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   nodeName,
-					Labels: map[string]string{"node.gardener.cloud/machine-name": machine.Name},
-				},
+				Name:   nodeName,
+				Labels: map[string]string{"node.gardener.cloud/machine-name": machine.Name},
 			}
 			DeferCleanup(func() {
 				By("Delete Node")
@@ -704,10 +672,8 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 			otherMachine = nil
 
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   nodeName,
-					Labels: map[string]string{v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: machineSecretName},
-				},
+				Name:   nodeName,
+				Labels: map[string]string{v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: machineSecretName},
 			}
 			DeferCleanup(func() {
 				By("Delete Node")

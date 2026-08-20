@@ -40,9 +40,9 @@ var _ = Describe("event reconciler", func() {
 		fakeClock = testclock.NewFakeClock(time.Date(2022, 0, 0, 0, 0, 0, 0, time.UTC))
 
 		event = &eventsv1.Event{
-			ObjectMeta: metav1.ObjectMeta{Name: "test"},
-			EventTime:  metav1.MicroTime{Time: fakeClock.Now()},
-			Regarding:  corev1.ObjectReference{Kind: "Project", APIVersion: "core.gardener.cloud/v1beta1"},
+			Name:      "test",
+			EventTime: metav1.MicroTime{Time: fakeClock.Now()},
+			Regarding: corev1.ObjectReference{Kind: "Project", APIVersion: "core.gardener.cloud/v1beta1"},
 		}
 		request = reconcile.Request{NamespacedName: client.ObjectKeyFromObject(event)}
 

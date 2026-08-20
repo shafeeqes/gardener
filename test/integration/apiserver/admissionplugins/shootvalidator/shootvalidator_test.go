@@ -7,7 +7,6 @@ package shootvalidator_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -28,10 +27,8 @@ var _ = Describe("ShootValidator tests", func() {
 
 	BeforeEach(func() {
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName:  &cloudProfile.Name,
 				SecretBindingName: new(testSecretBinding.Name),

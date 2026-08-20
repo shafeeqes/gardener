@@ -6,7 +6,6 @@ package terminal
 
 import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils"
 )
@@ -18,10 +17,8 @@ var webhookLabels = map[string]string{
 
 func (t *terminal) mutatingWebhookConfiguration(caBundle []byte) *admissionregistrationv1.MutatingWebhookConfiguration {
 	return &admissionregistrationv1.MutatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "terminal-mutating-webhook-configuration",
-			Labels: utils.MergeStringMaps(getLabels(), webhookLabels),
-		},
+		Name:   "terminal-mutating-webhook-configuration",
+		Labels: utils.MergeStringMaps(getLabels(), webhookLabels),
 		Webhooks: []admissionregistrationv1.MutatingWebhook{{
 			Name:                    "mutating-create-update-terminal.gardener.cloud",
 			AdmissionReviewVersions: []string{"v1", "v1beta1"},
@@ -38,10 +35,8 @@ func (t *terminal) mutatingWebhookConfiguration(caBundle []byte) *admissionregis
 
 func (t *terminal) validatingWebhookConfiguration(caBundle []byte) *admissionregistrationv1.ValidatingWebhookConfiguration {
 	return &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "terminal-validating-webhook-configuration",
-			Labels: utils.MergeStringMaps(getLabels(), webhookLabels),
-		},
+		Name:   "terminal-validating-webhook-configuration",
+		Labels: utils.MergeStringMaps(getLabels(), webhookLabels),
 		Webhooks: []admissionregistrationv1.ValidatingWebhook{{
 			Name:                    "validating-create-update-terminal.gardener.cloud",
 			AdmissionReviewVersions: []string{"v1", "v1beta1"},
@@ -57,10 +52,8 @@ func (t *terminal) validatingWebhookConfiguration(caBundle []byte) *admissionreg
 }
 
 var webhookRules = []admissionregistrationv1.RuleWithOperations{{
-	Rule: admissionregistrationv1.Rule{
-		APIGroups:   []string{"dashboard.gardener.cloud"},
-		APIVersions: []string{"v1alpha1"},
-		Resources:   []string{"terminals"},
-	},
-	Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+	APIGroups:   []string{"dashboard.gardener.cloud"},
+	APIVersions: []string{"v1alpha1"},
+	Resources:   []string{"terminals"},
+	Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 }}

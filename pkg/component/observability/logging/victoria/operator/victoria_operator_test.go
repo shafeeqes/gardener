@@ -82,42 +82,34 @@ var _ = Describe("VictoriaOperator", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "victoria-operator",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":                 "victoria-operator",
-					"role":                "observability",
-					"gardener.cloud/role": "observability",
-					"high-availability-config.resources.gardener.cloud/type": "controller",
-				},
+			Name:      "victoria-operator",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":                 "victoria-operator",
+				"role":                "observability",
+				"gardener.cloud/role": "observability",
+				"high-availability-config.resources.gardener.cloud/type": "controller",
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "victoria-operator",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":                 "victoria-operator",
-					"role":                "observability",
-					"gardener.cloud/role": "observability",
-					"high-availability-config.resources.gardener.cloud/type": "controller",
-				},
+			Name:      "victoria-operator",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":                 "victoria-operator",
+				"role":                "observability",
+				"gardener.cloud/role": "observability",
+				"high-availability-config.resources.gardener.cloud/type": "controller",
 			},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(1)),
@@ -177,21 +169,17 @@ var _ = Describe("VictoriaOperator", func() {
 									},
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/health",
-											Port: intstr.FromInt32(8081),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/health",
+										Port: intstr.FromInt32(8081),
 									},
 									InitialDelaySeconds: 15,
 									PeriodSeconds:       20,
 								},
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/ready",
-											Port: intstr.FromInt32(8081),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/ready",
+										Port: intstr.FromInt32(8081),
 									},
 									InitialDelaySeconds: 5,
 									PeriodSeconds:       10,
@@ -209,15 +197,13 @@ var _ = Describe("VictoriaOperator", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "victoria-operator",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":                 "victoria-operator",
-					"role":                "observability",
-					"gardener.cloud/role": "observability",
-					"high-availability-config.resources.gardener.cloud/type": "controller",
-				},
+			Name:      "victoria-operator",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":                 "victoria-operator",
+				"role":                "observability",
+				"gardener.cloud/role": "observability",
+				"high-availability-config.resources.gardener.cloud/type": "controller",
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -246,14 +232,12 @@ var _ = Describe("VictoriaOperator", func() {
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "victoria-operator",
-				Labels: map[string]string{
-					"app":                 "victoria-operator",
-					"role":                "observability",
-					"gardener.cloud/role": "observability",
-					"high-availability-config.resources.gardener.cloud/type": "controller",
-				},
+			Name: "victoria-operator",
+			Labels: map[string]string{
+				"app":                 "victoria-operator",
+				"role":                "observability",
+				"gardener.cloud/role": "observability",
+				"high-availability-config.resources.gardener.cloud/type": "controller",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -306,14 +290,12 @@ var _ = Describe("VictoriaOperator", func() {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "victoria-operator",
-				Labels: map[string]string{
-					"app":                 "victoria-operator",
-					"role":                "observability",
-					"gardener.cloud/role": "observability",
-					"high-availability-config.resources.gardener.cloud/type": "controller",
-				},
+			Name: "victoria-operator",
+			Labels: map[string]string{
+				"app":                 "victoria-operator",
+				"role":                "observability",
+				"gardener.cloud/role": "observability",
+				"high-availability-config.resources.gardener.cloud/type": "controller",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -328,15 +310,13 @@ var _ = Describe("VictoriaOperator", func() {
 		}
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "victoria-operator",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":                 "victoria-operator",
-					"role":                "observability",
-					"gardener.cloud/role": "observability",
-					"high-availability-config.resources.gardener.cloud/type": "controller",
-				},
+			Name:      "victoria-operator",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":                 "victoria-operator",
+				"role":                "observability",
+				"gardener.cloud/role": "observability",
+				"high-availability-config.resources.gardener.cloud/type": "controller",
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
@@ -364,12 +344,10 @@ var _ = Describe("VictoriaOperator", func() {
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 			})
 
@@ -378,13 +356,11 @@ var _ = Describe("VictoriaOperator", func() {
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels:          map[string]string{"gardener.cloud/role": "seed-system-component", "care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
-					},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component", "care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class:       new("seed"),
 						SecretRefs:  []corev1.LocalObjectReference{{Name: managedResource.Spec.SecretRefs[0].Name}},
@@ -440,12 +416,10 @@ var _ = Describe("VictoriaOperator", func() {
 
 			It("should fail because the ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -453,11 +427,9 @@ var _ = Describe("VictoriaOperator", func() {
 
 			It("should succeed because the ManagedResource is healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

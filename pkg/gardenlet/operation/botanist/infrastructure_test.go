@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -52,7 +51,7 @@ var _ = Describe("Infrastructure", func() {
 		sm = fakesecretsmanager.New(fakeClient, namespace)
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ssh-keypair", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ssh-keypair", Namespace: namespace})).To(Succeed())
 
 		botanist = &Botanist{
 			Operation: &operation.Operation{
@@ -135,10 +134,8 @@ var _ = Describe("Infrastructure", func() {
 			servicesCIDRs  = []string{"3.4.5.6/7"}
 			egressCIDRs    = []string{"4.5.6.7/8"}
 			shoot          = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: shootNamespace,
-				},
+				Name:      shootName,
+				Namespace: shootNamespace,
 				Spec: gardencorev1beta1.ShootSpec{
 					Networking: &gardencorev1beta1.Networking{
 						// Nodes:    new(nodesCIDRs[0]),
@@ -167,7 +164,7 @@ var _ = Describe("Infrastructure", func() {
 
 			// Create the Cluster resource in the seed fake client
 			Expect(seedFakeClient.Create(ctx, &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{Name: botanist.Shoot.ControlPlaneNamespace},
+				Name: botanist.Shoot.ControlPlaneNamespace,
 			})).To(Succeed())
 		})
 

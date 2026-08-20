@@ -49,16 +49,12 @@ var _ = Describe("ManagedSeed", func() {
 			worker2Zones = []string{"4", "5", "6"}
 
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 				Spec: core.ShootSpec{
 					Addons: &core.Addons{
 						NginxIngress: &core.NginxIngress{
-							Addon: core.Addon{
-								Enabled: false,
-							},
+							Enabled: false,
 						},
 					},
 					Kubernetes: core.Kubernetes{
@@ -87,21 +83,17 @@ var _ = Describe("ManagedSeed", func() {
 
 			gardenletConfig = &gardenletconfigv1alpha1.GardenletConfiguration{
 				SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-					SeedTemplate: gardencorev1beta1.SeedTemplate{
-						Spec: gardencorev1beta1.SeedSpec{
-							Provider: gardencorev1beta1.SeedProvider{
-								Zones: append(worker1Zones, worker2Zones...),
-							},
+					Spec: gardencorev1beta1.SeedSpec{
+						Provider: gardencorev1beta1.SeedProvider{
+							Zones: append(worker1Zones, worker2Zones...),
 						},
 					},
 				},
 			}
 
 			managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 				Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 					Shoot: &seedmanagementv1alpha1.Shoot{
 						Name: name,
@@ -308,17 +300,13 @@ var _ = Describe("ManagedSeed", func() {
 
 			BeforeEach(func() {
 				shoot1 = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-					},
+					Name:      name,
+					Namespace: namespace,
 				}
 
 				anotherShoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bar",
-						Namespace: "garden",
-					},
+					Name:      "bar",
+					Namespace: "garden",
 				}
 			})
 

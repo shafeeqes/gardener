@@ -31,7 +31,7 @@ var _ = Describe("DaemonSet", func() {
 			Expect(err).To(matcher)
 		},
 		Entry("not observed at latest version", &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 		}, HaveOccurred()),
 		Entry("not enough scheduled", &appsv1.DaemonSet{
 			Status: appsv1.DaemonSetStatus{DesiredNumberScheduled: 1},
@@ -101,9 +101,7 @@ var _ = Describe("DaemonSet", func() {
 
 		BeforeEach(func() {
 			daemonSet = &appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 42,
-				},
+				Generation: 42,
 				Status: appsv1.DaemonSetStatus{
 					ObservedGeneration:     42,
 					DesiredNumberScheduled: 3,
@@ -145,10 +143,8 @@ var _ = Describe("DaemonSet", func() {
 		BeforeEach(func() {
 			ctx = context.Background()
 			ds = &appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-ds",
-					Namespace: "kube-system",
-				},
+				Name:      "test-ds",
+				Namespace: "kube-system",
 				Spec: appsv1.DaemonSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: map[string]string{"app": "test"},
@@ -172,7 +168,7 @@ var _ = Describe("DaemonSet", func() {
 
 		preservedNode := func() *corev1.Node {
 			return &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: "node-preserved"},
+				Name: "node-preserved",
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{
 						{Type: machinev1alpha1.NodePreserved, Status: corev1.ConditionTrue},
@@ -184,18 +180,16 @@ var _ = Describe("DaemonSet", func() {
 
 		normalNode := func(name string) *corev1.Node {
 			return &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
+				Name: name,
 			}
 		}
 
 		notReadyPod := func(name, nodeName string) *corev1.Pod {
 			return &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: "kube-system",
-					Labels:    map[string]string{"app": "test"},
-				},
-				Spec: corev1.PodSpec{NodeName: nodeName},
+				Name:      name,
+				Namespace: "kube-system",
+				Labels:    map[string]string{"app": "test"},
+				Spec:      corev1.PodSpec{NodeName: nodeName},
 				Status: corev1.PodStatus{
 					Conditions: []corev1.PodCondition{
 						{Type: corev1.PodReady, Status: corev1.ConditionFalse},

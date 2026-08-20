@@ -12,8 +12,6 @@ import (
 	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -50,7 +48,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			pred = reconciler.DestinationRulePredicate()
 			destinationRule = &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "ns"},
+				Name: "test", Namespace: "ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc.ns.svc.cluster.local",
 					ExportTo: []string{"*"},
@@ -140,7 +138,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			pred = reconciler.ServicePredicate()
 			service = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "svc", Namespace: "ns"},
+				Name: "svc", Namespace: "ns",
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{{Name: "http", Port: 80}},
 				},
@@ -194,11 +192,9 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			pred = reconciler.NamespacePredicate()
 			namespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "istio-ingress",
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-					},
+				Name: "istio-ingress",
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 				},
 			}
 		})
@@ -283,23 +279,23 @@ var _ = Describe("Add", func() {
 
 		It("should map DestinationRule to its namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "shoot-ns"},
+				Name: "test", Namespace: "shoot-ns",
 			}
 			Expect(reconciler.MapDestinationRuleToNamespace(ctx, destinationRule)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns"}},
+				reconcile.Request{Name: "shoot-ns"},
 			))
 		})
 	})
 
 	Describe("#MapServiceToNamespaces", func() {
 		It("should return nil for non-Service object", func() {
-			namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "ns"}}
+			namespace := &corev1.Namespace{Name: "ns"}
 			Expect(reconciler.MapServiceToNamespaces(ctx, namespace)).To(BeNil())
 		})
 
 		It("should map service to namespaces of DRs that reference it by FQDN", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc.shoot-ns-1.svc.cluster.local",
 				},
@@ -307,7 +303,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule)).To(Succeed())
 
 			destinationRule2 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr2", Namespace: "shoot-ns-2"},
+				Name: "dr2", Namespace: "shoot-ns-2",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "other-svc.shoot-ns-2.svc.cluster.local",
 				},
@@ -315,18 +311,18 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule2)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns-1"},
+				Name: "my-svc", Namespace: "shoot-ns-1",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-1"}},
+				reconcile.Request{Name: "shoot-ns-1"},
 			))
 		})
 
 		It("should map service to namespaces of DRs that reference it by short name", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns"},
+				Name: "dr1", Namespace: "shoot-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc",
 				},
@@ -334,18 +330,18 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns"},
+				Name: "my-svc", Namespace: "shoot-ns",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns"}},
+				reconcile.Request{Name: "shoot-ns"},
 			))
 		})
 
 		It("should map service to namespaces of DRs that reference it by service.namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns"},
+				Name: "dr1", Namespace: "shoot-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc.shoot-ns",
 				},
@@ -353,18 +349,18 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns"},
+				Name: "my-svc", Namespace: "shoot-ns",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns"}},
+				reconcile.Request{Name: "shoot-ns"},
 			))
 		})
 
 		It("should map service to namespaces of DRs that reference it by service.namespace.svc", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns"},
+				Name: "dr1", Namespace: "shoot-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc.shoot-ns.svc",
 				},
@@ -372,18 +368,18 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns"},
+				Name: "my-svc", Namespace: "shoot-ns",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns"}},
+				reconcile.Request{Name: "shoot-ns"},
 			))
 		})
 
 		It("should not match service when DR uses short name but is in a different namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "other-ns"},
+				Name: "dr1", Namespace: "other-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc",
 				},
@@ -391,7 +387,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns"},
+				Name: "my-svc", Namespace: "shoot-ns",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
@@ -400,7 +396,7 @@ var _ = Describe("Add", func() {
 
 		It("should match service cross-namespace when DR uses FQDN", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "other-ns"},
+				Name: "dr1", Namespace: "other-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc.shoot-ns.svc.cluster.local",
 				},
@@ -408,18 +404,18 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns"},
+				Name: "my-svc", Namespace: "shoot-ns",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "other-ns"}},
+				reconcile.Request{Name: "other-ns"},
 			))
 		})
 
 		It("should not return duplicates", func() {
 			destinationRule1 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns"},
+				Name: "dr1", Namespace: "shoot-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc.shoot-ns.svc.cluster.local",
 				},
@@ -427,7 +423,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule1)).To(Succeed())
 
 			destinationRule2 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr2", Namespace: "shoot-ns"},
+				Name: "dr2", Namespace: "shoot-ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "my-svc.shoot-ns.svc.cluster.local",
 				},
@@ -435,13 +431,13 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule2)).To(Succeed())
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-svc", Namespace: "shoot-ns"},
+				Name: "my-svc", Namespace: "shoot-ns",
 			}
 
 			requests := reconciler.MapServiceToNamespaces(ctx, service)
 			Expect(requests).To(HaveLen(1))
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns"}},
+				reconcile.Request{Name: "shoot-ns"},
 			))
 		})
 	})
@@ -451,11 +447,9 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			istioIngressNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "istio-ingress",
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-					},
+				Name: "istio-ingress",
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 				},
 			}
 		})
@@ -471,7 +465,7 @@ var _ = Describe("Add", func() {
 
 		It("should return namespaces of DRs with empty exportTo (defaults to all)", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: nil,
@@ -481,13 +475,13 @@ var _ = Describe("Add", func() {
 
 			requests := reconciler.MapNamespaceToSourceNamespaces(ctx, istioIngressNamespace)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-1"}},
+				reconcile.Request{Name: "shoot-ns-1"},
 			))
 		})
 
 		It("should return namespaces of DRs with exportTo '*'", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"*"},
@@ -497,13 +491,13 @@ var _ = Describe("Add", func() {
 
 			requests := reconciler.MapNamespaceToSourceNamespaces(ctx, istioIngressNamespace)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-1"}},
+				reconcile.Request{Name: "shoot-ns-1"},
 			))
 		})
 
 		It("should return namespaces of DRs that explicitly export to the namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"istio-ingress"},
@@ -513,13 +507,13 @@ var _ = Describe("Add", func() {
 
 			requests := reconciler.MapNamespaceToSourceNamespaces(ctx, istioIngressNamespace)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-1"}},
+				reconcile.Request{Name: "shoot-ns-1"},
 			))
 		})
 
 		It("should not return namespaces of DRs that export to a different namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"other-istio-ingress"},
@@ -533,7 +527,7 @@ var _ = Describe("Add", func() {
 
 		It("should return namespaces of DRs with exportTo '.' when DR is in the same namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "istio-ingress"},
+				Name: "dr1", Namespace: "istio-ingress",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.istio-ingress.svc.cluster.local",
 					ExportTo: []string{"."},
@@ -543,13 +537,13 @@ var _ = Describe("Add", func() {
 
 			requests := reconciler.MapNamespaceToSourceNamespaces(ctx, istioIngressNamespace)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "istio-ingress"}},
+				reconcile.Request{Name: "istio-ingress"},
 			))
 		})
 
 		It("should not return namespaces of DRs with exportTo '.' when DR is in a different namespace", func() {
 			destinationRule := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"."},
@@ -563,7 +557,7 @@ var _ = Describe("Add", func() {
 
 		It("should not return duplicates when multiple DRs in same namespace match", func() {
 			destinationRule1 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"*"},
@@ -572,7 +566,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule1)).To(Succeed())
 
 			destinationRule2 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr2", Namespace: "shoot-ns-1"},
+				Name: "dr2", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc2.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"istio-ingress"},
@@ -583,13 +577,13 @@ var _ = Describe("Add", func() {
 			requests := reconciler.MapNamespaceToSourceNamespaces(ctx, istioIngressNamespace)
 			Expect(requests).To(HaveLen(1))
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-1"}},
+				reconcile.Request{Name: "shoot-ns-1"},
 			))
 		})
 
 		It("should return multiple namespaces when DRs from different namespaces match", func() {
 			destinationRule1 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr1", Namespace: "shoot-ns-1"},
+				Name: "dr1", Namespace: "shoot-ns-1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc1.shoot-ns-1.svc.cluster.local",
 					ExportTo: []string{"*"},
@@ -598,7 +592,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule1)).To(Succeed())
 
 			destinationRule2 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr2", Namespace: "shoot-ns-2"},
+				Name: "dr2", Namespace: "shoot-ns-2",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc2.shoot-ns-2.svc.cluster.local",
 					ExportTo: []string{"istio-ingress"},
@@ -607,7 +601,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, destinationRule2)).To(Succeed())
 
 			destinationRule3 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "dr3", Namespace: "shoot-ns-3"},
+				Name: "dr3", Namespace: "shoot-ns-3",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "svc3.shoot-ns-3.svc.cluster.local",
 					ExportTo: []string{"other-ns"},
@@ -617,8 +611,8 @@ var _ = Describe("Add", func() {
 
 			requests := reconciler.MapNamespaceToSourceNamespaces(ctx, istioIngressNamespace)
 			Expect(requests).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-1"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot-ns-2"}},
+				reconcile.Request{Name: "shoot-ns-1"},
+				reconcile.Request{Name: "shoot-ns-2"},
 			))
 		})
 	})

@@ -10,9 +10,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -59,10 +57,8 @@ var _ = Describe("SecretBindingControl", func() {
 
 		It("should return true as no other secretbinding references the secret", func() {
 			secretBinding := &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretBinding1Name,
-					Namespace: secretBinding1Namespace,
-				},
+				Name:      secretBinding1Name,
+				Namespace: secretBinding1Namespace,
 				SecretRef: corev1.SecretReference{
 					Namespace: secretNamespace,
 					Name:      secretName,
@@ -79,10 +75,8 @@ var _ = Describe("SecretBindingControl", func() {
 
 		It("should return false as another secretbinding references the secret", func() {
 			secretBinding := &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretBinding2Name,
-					Namespace: secretBinding2Namespace,
-				},
+				Name:      secretBinding2Name,
+				Namespace: secretBinding2Namespace,
 				SecretRef: corev1.SecretReference{
 					Namespace: secretNamespace,
 					Name:      secretName,
@@ -112,17 +106,13 @@ var _ = Describe("SecretBindingControl", func() {
 
 		BeforeEach(func() {
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-				},
+				Name:      "secret",
+				Namespace: "namespace",
 			}
 
 			secretBinding = &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretBindingName,
-					Namespace: secretBindingNamespace,
-				},
+				Name:      secretBindingName,
+				Namespace: secretBindingNamespace,
 				SecretRef: corev1.SecretReference{
 					Namespace: secret.Namespace,
 					Name:      secret.Name,
@@ -136,7 +126,7 @@ var _ = Describe("SecretBindingControl", func() {
 			Expect(fakeClient.Create(ctx, secretBinding)).To(Succeed())
 
 			reconciler = &Reconciler{Client: fakeClient}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: secretBindingNamespace, Name: secretBindingName}}
+			request = reconcile.Request{Namespace: secretBindingNamespace, Name: secretBindingName}
 		})
 
 		It("should add the secretbinding referred label and finalizer to the secret referred by the secretbinding", func() {
@@ -187,10 +177,8 @@ var _ = Describe("SecretBindingControl", func() {
 
 		It("should not remove any of the label from the secret when there are other secretbindings referring it", func() {
 			secretBinding2 := &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secretbinding-2",
-					Namespace: "some-namespace",
-				},
+				Name:      "secretbinding-2",
+				Namespace: "some-namespace",
 				SecretRef: corev1.SecretReference{
 					Namespace: secret.Namespace,
 					Name:      secret.Name,
@@ -216,11 +204,9 @@ var _ = Describe("SecretBindingControl", func() {
 		It("should persist the credentialsbinding reference label", func() {
 			Expect(fakeClient.Delete(ctx, secret)).To(Succeed())
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-					Labels:    map[string]string{"reference.gardener.cloud/credentialsbinding": "true"},
-				},
+				Name:      "secret",
+				Namespace: "namespace",
+				Labels:    map[string]string{"reference.gardener.cloud/credentialsbinding": "true"},
 			}
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -241,10 +227,8 @@ var _ = Describe("SecretBindingControl", func() {
 		It("should remove the finalizer", func() {
 			Expect(fakeClient.Delete(ctx, secret)).To(Succeed())
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-				},
+				Name:      "secret",
+				Namespace: "namespace",
 			}
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -285,30 +269,22 @@ var _ = Describe("SecretBindingControl", func() {
 
 		BeforeEach(func() {
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-				},
+				Name:      "secret",
+				Namespace: "namespace",
 			}
 
 			quota1 = &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      quotaName1,
-					Namespace: quotaNamespace1,
-				},
+				Name:      quotaName1,
+				Namespace: quotaNamespace1,
 			}
 			quota2 = &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      quotaName2,
-					Namespace: quotaNamespace2,
-				},
+				Name:      quotaName2,
+				Namespace: quotaNamespace2,
 			}
 
 			secretBinding1 = &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretBindingName1,
-					Namespace: secretBindingNamespace1,
-				},
+				Name:      secretBindingName1,
+				Namespace: secretBindingNamespace1,
 				Quotas: []corev1.ObjectReference{
 					{
 						Name:      quotaName1,
@@ -326,11 +302,9 @@ var _ = Describe("SecretBindingControl", func() {
 			}
 
 			secretBinding2 = &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       secretBindingName2,
-					Namespace:  secretBindingNamespace2,
-					Finalizers: []string{"gardener"},
-				},
+				Name:       secretBindingName2,
+				Namespace:  secretBindingNamespace2,
+				Finalizers: []string{"gardener"},
 				Quotas: []corev1.ObjectReference{
 					{
 						Name:      quotaName2,
@@ -344,7 +318,7 @@ var _ = Describe("SecretBindingControl", func() {
 			}
 
 			reconciler = &Reconciler{Client: fakeClient}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: secretBindingNamespace1, Name: secretBindingName1}}
+			request = reconcile.Request{Namespace: secretBindingNamespace1, Name: secretBindingName1}
 
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 			Expect(fakeClient.Create(ctx, quota1)).To(Succeed())
@@ -385,7 +359,7 @@ var _ = Describe("SecretBindingControl", func() {
 				"reference.gardener.cloud/secretbinding", "true",
 			))
 
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: secretBindingNamespace2, Name: secretBindingName2}}
+			request = reconcile.Request{Namespace: secretBindingNamespace2, Name: secretBindingName2}
 			_, err = reconciler.Reconcile(ctx, request)
 			Expect(err).NotTo(HaveOccurred())
 

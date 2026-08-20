@@ -17,7 +17,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/komega"
@@ -74,7 +73,7 @@ func verifyTopologySpreadConstraints(ctx context.Context, seedKomega komega.Kome
 		matcher = BeNil()
 	}
 
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: shootTechnicalID}}
+	deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: shootTechnicalID}
 	Eventually(ctx, seedKomega.Object(deployment)).Should(HaveField("Spec.Template.Spec.TopologySpreadConstraints", matcher))
 }
 
@@ -88,7 +87,7 @@ func verifyETCDAffinity(ctx context.Context, seedClient client.Client, shootTech
 
 	for _, name := range []string{v1beta1constants.ETCDRoleEvents, v1beta1constants.ETCDRoleMain} {
 		Eventually(ctx, func(g Gomega) {
-			statefulSet := &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: "etcd-" + name, Namespace: shootTechnicalID}}
+			statefulSet := &appsv1.StatefulSet{Name: "etcd-" + name, Namespace: shootTechnicalID}
 			g.Expect(seedClient.Get(ctx, client.ObjectKeyFromObject(statefulSet), statefulSet)).To(Succeed())
 
 			g.Expect(statefulSet.Spec.Template.Spec.Affinity).NotTo(BeNil())

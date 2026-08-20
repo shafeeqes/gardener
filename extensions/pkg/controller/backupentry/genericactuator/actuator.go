@@ -185,10 +185,8 @@ func emptyEtcdBackupSecret(backupEntryName string) *corev1.Secret {
 	shootTechnicalID, _ := backupentry.ExtractShootDetailsFromBackupEntryName(backupEntryName)
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: shootTechnicalID,
-		},
+		Name:      secretName,
+		Namespace: shootTechnicalID,
 	}
 }
 

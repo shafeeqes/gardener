@@ -94,9 +94,9 @@ func (t *terraformer) GetStateOutputVariables(ctx context.Context, variables ...
 // is not present on any of the used configmaps and secrets. Otherwise, it returns false.
 func (t *terraformer) IsStateEmpty(ctx context.Context) bool {
 	for _, obj := range []client.Object{
-		&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.configName}},
-		&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.stateName}},
-		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.variablesName}},
+		&corev1.ConfigMap{Namespace: t.namespace, Name: t.configName},
+		&corev1.ConfigMap{Namespace: t.namespace, Name: t.stateName},
+		&corev1.Secret{Namespace: t.namespace, Name: t.variablesName},
 	} {
 		resourceName := obj.GetName()
 		if err := t.client.Get(ctx, client.ObjectKey{Namespace: t.namespace, Name: resourceName}, obj); client.IgnoreNotFound(err) != nil {
@@ -194,7 +194,7 @@ func (f StateConfigMapInitializerFunc) Initialize(ctx context.Context, c client.
 // Deprecated: This function is deprecated and will be removed after v1.154 has been released.
 func CreateState(ctx context.Context, c client.Client, namespace, name string, ownerRef *metav1.OwnerReference) error {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name},
+		Namespace: namespace, Name: name,
 		Data: map[string]string{
 			StateKey: "",
 		},
@@ -214,7 +214,7 @@ func (cus CreateOrUpdateState) Initialize(ctx context.Context, c client.Client, 
 	if cus.State == nil {
 		return fmt.Errorf("missing state when creating or updating terraform state ConfigMap %s/%s", namespace, name)
 	}
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
+	configMap := &corev1.ConfigMap{Namespace: namespace, Name: name}
 
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, c, configMap, func() error {
 		if configMap.Data == nil {

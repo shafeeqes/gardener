@@ -26,7 +26,7 @@ const (
 )
 
 func (g *gardenerAPIServer) emptySecret(name string) *corev1.Secret {
-	return &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: g.namespace}}
+	return &corev1.Secret{Name: name, Namespace: g.namespace}
 }
 
 func (g *gardenerAPIServer) newVirtualGardenAccessSecret() *gardenerutils.AccessSecret {

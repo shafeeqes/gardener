@@ -20,10 +20,8 @@ var _ = Describe("ContainerRuntime validation tests", func() {
 
 	BeforeEach(func() {
 		cr = &extensionsv1alpha1.ContainerRuntime{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-cr",
-				Namespace: "shoot-namespace-seed",
-			},
+			Name:      "test-cr",
+			Namespace: "shoot-namespace-seed",
 			Spec: extensionsv1alpha1.ContainerRuntimeSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: "provider",

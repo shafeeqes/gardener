@@ -131,59 +131,47 @@ var _ = Describe("GardenerDashboard", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient, comptest.CmpOptsForIstio()...)
 
 		managedResourceRuntime = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameRuntime,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameRuntime,
+			Namespace: namespace,
 		}
 		managedResourceVirtual = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameVirtual,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameVirtual,
+			Namespace: namespace,
 		}
 		managedResourceSecretRuntime = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceRuntime.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceRuntime.Name,
+			Namespace: namespace,
 		}
 		managedResourceSecretVirtual = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceVirtual.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceVirtual.Name,
+			Namespace: namespace,
 		}
 	})
 
 	JustBeforeEach(func() {
 		virtualGardenAccessSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-gardener-dashboard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "gardener-dashboard",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
+			Name:      "shoot-access-gardener-dashboard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "gardener-dashboard",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 		sessionSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard-session-secret-34ea1210",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"manager-identity":              "fake",
-					"name":                          "gardener-dashboard-session-secret",
-					"rotation-strategy":             "keepold",
-					"checksum-of-config":            "5743303071195020433",
-					"last-rotation-initiation-time": "",
-					"managed-by":                    "secrets-manager",
-				},
+			Name:      "gardener-dashboard-session-secret-34ea1210",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"manager-identity":              "fake",
+				"name":                          "gardener-dashboard-session-secret",
+				"rotation-strategy":             "keepold",
+				"checksum-of-config":            "5743303071195020433",
+				"last-rotation-initiation-time": "",
+				"managed-by":                    "secrets-manager",
 			},
 			Type:      corev1.SecretTypeOpaque,
 			Immutable: new(true),
@@ -195,13 +183,11 @@ var _ = Describe("GardenerDashboard", func() {
 		}
 		configMap = func(enableTokenLogin bool, terminal *TerminalValues, oidc *OIDCValues, ingressDomains []string, gitHub *operatorv1alpha1.DashboardGitHub, frontendConfigMapName *string) *corev1.ConfigMap {
 			obj := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-dashboard-config",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":  "gardener",
-						"role": "dashboard",
-					},
+				Name:      "gardener-dashboard-config",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":  "gardener",
+					"role": "dashboard",
 				},
 				Data: make(map[string]string),
 			}
@@ -331,14 +317,12 @@ frontend:
 		}(enableTokenLogin, terminal, oidc, ingressValues.Domains, gitHub, frontendConfigMapName)
 		deployment = func(oidc *OIDCValues, gitHub *operatorv1alpha1.DashboardGitHub, assetsConfigMapName *string) *appsv1.Deployment {
 			obj := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-dashboard",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":  "gardener",
-						"role": "dashboard",
-						"high-availability-config.resources.gardener.cloud/type": "server",
-					},
+				Name:      "gardener-dashboard",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":  "gardener",
+					"role": "dashboard",
+					"high-availability-config.resources.gardener.cloud/type": "server",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -429,10 +413,8 @@ frontend:
 										},
 									},
 									LivenessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											TCPSocket: &corev1.TCPSocketAction{
-												Port: intstr.FromString("https"),
-											},
+										TCPSocket: &corev1.TCPSocketAction{
+											Port: intstr.FromString("https"),
 										},
 										InitialDelaySeconds: 15,
 										TimeoutSeconds:      5,
@@ -441,12 +423,10 @@ frontend:
 										PeriodSeconds:       20,
 									},
 									ReadinessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/healthz",
-												Port:   intstr.FromString("https"),
-												Scheme: "HTTPS",
-											},
+										HTTPGet: &corev1.HTTPGetAction{
+											Path:   "/healthz",
+											Port:   intstr.FromString("https"),
+											Scheme: "HTTPS",
 										},
 										InitialDelaySeconds: 5,
 										TimeoutSeconds:      5,
@@ -483,48 +463,40 @@ frontend:
 							Volumes: []corev1.Volume{
 								{
 									Name: "gardener-dashboard-sessionsecret",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  sessionSecret.Name,
-											DefaultMode: new(int32(0640)),
-											Items: []corev1.KeyToPath{{
-												Key:  "password",
-												Path: "sessionSecret",
-											}},
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  sessionSecret.Name,
+										DefaultMode: new(int32(0640)),
+										Items: []corev1.KeyToPath{{
+											Key:  "password",
+											Path: "sessionSecret",
+										}},
 									},
 								},
 								{
 									Name: "gardener-dashboard-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{Name: configMap.Name},
-											Items: []corev1.KeyToPath{{
-												Key:  "config.yaml",
-												Path: "config.yaml",
-											}},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: configMap.Name,
+										Items: []corev1.KeyToPath{{
+											Key:  "config.yaml",
+											Path: "config.yaml",
+										}},
 									},
 								},
 								{
 									Name: "gardener-dashboard-login-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{Name: configMap.Name},
-											Items: []corev1.KeyToPath{{
-												Key:  "login-config.json",
-												Path: "login-config.json",
-											}},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: configMap.Name,
+										Items: []corev1.KeyToPath{{
+											Key:  "login-config.json",
+											Path: "login-config.json",
+										}},
 									},
 								},
 								{
 									Name: "gardener-dashboard-tls",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  "gardener-dashboard-server",
-											DefaultMode: new(int32(0640)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  "gardener-dashboard-server",
+										DefaultMode: new(int32(0640)),
 									},
 								},
 							},
@@ -536,15 +508,13 @@ frontend:
 			if sessionSecretPrevious != nil {
 				obj.Spec.Template.Spec.Volumes = append(obj.Spec.Template.Spec.Volumes, corev1.Volume{
 					Name: "gardener-dashboard-sessionsecret-previous",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  sessionSecretPrevious.Name,
-							DefaultMode: new(int32(0640)),
-							Items: []corev1.KeyToPath{{
-								Key:  "password",
-								Path: "sessionSecretPrevious",
-							}},
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  sessionSecretPrevious.Name,
+						DefaultMode: new(int32(0640)),
+						Items: []corev1.KeyToPath{{
+							Key:  "password",
+							Path: "sessionSecretPrevious",
+						}},
 					},
 				})
 				obj.Spec.Template.Spec.Containers[0].VolumeMounts = append(obj.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -557,11 +527,9 @@ frontend:
 			if oidc != nil {
 				obj.Spec.Template.Spec.Volumes = append(obj.Spec.Template.Spec.Volumes, corev1.Volume{
 					Name: "gardener-dashboard-oidc",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  oidc.SecretRef.Name,
-							DefaultMode: new(int32(0640)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  oidc.SecretRef.Name,
+						DefaultMode: new(int32(0640)),
 					},
 				})
 				obj.Spec.Template.Spec.Containers[0].VolumeMounts = append(obj.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -573,11 +541,9 @@ frontend:
 			if gitHub != nil {
 				obj.Spec.Template.Spec.Volumes = append(obj.Spec.Template.Spec.Volumes, corev1.Volume{
 					Name: "gardener-dashboard-github",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  gitHub.SecretRef.Name,
-							DefaultMode: new(int32(0640)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  gitHub.SecretRef.Name,
+						DefaultMode: new(int32(0640)),
 					},
 				})
 				obj.Spec.Template.Spec.Containers[0].VolumeMounts = append(obj.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -589,8 +555,8 @@ frontend:
 			if assetsConfigMapName != nil {
 				metav1.SetMetaDataAnnotation(&obj.Spec.Template.ObjectMeta, "checksum-configmap-"+*assetsConfigMapName, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 				obj.Spec.Template.Spec.Volumes = append(obj.Spec.Template.Spec.Volumes, corev1.Volume{
-					Name:         "gardener-dashboard-assets",
-					VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: *assetsConfigMapName}}},
+					Name:      "gardener-dashboard-assets",
+					ConfigMap: &corev1.ConfigMapVolumeSource{Name: *assetsConfigMapName},
 				})
 				obj.Spec.Template.Spec.Containers[0].VolumeMounts = append(obj.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
 					Name:      "gardener-dashboard-assets",
@@ -603,17 +569,15 @@ frontend:
 			return obj
 		}(oidc, gitHub, assetsConfigMapName)
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9050}]`,
-					"networking.istio.io/exportTo": "virtual-garden-istio-ingress",
-				},
+			Name:      "gardener-dashboard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
+			},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9050}]`,
+				"networking.istio.io/exportTo": "virtual-garden-istio-ingress",
 			},
 			Spec: corev1.ServiceSpec{
 				Type:     corev1.ServiceTypeClusterIP,
@@ -636,13 +600,11 @@ frontend:
 			},
 		}
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener-dashboard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
@@ -654,13 +616,11 @@ frontend:
 			},
 		}
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard-vpa",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener-dashboard-vpa",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -690,13 +650,11 @@ frontend:
 			},
 		}
 		gateway = &istionetworkingv1beta1.Gateway{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener-dashboard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Spec: istioapinetworkingv1beta1.Gateway{
 				Servers: []*istioapinetworkingv1beta1.Server{{
@@ -714,13 +672,11 @@ frontend:
 			},
 		}
 		virtualService = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener-dashboard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Spec: istioapinetworkingv1beta1.VirtualService{
 				ExportTo: []string{"virtual-garden-istio-ingress"},
@@ -741,13 +697,11 @@ frontend:
 			},
 		}
 		destinationRule = &istionetworkingv1beta1.DestinationRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-dashboard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener-dashboard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Spec: istioapinetworkingv1beta1.DestinationRule{
 				ExportTo: []string{"virtual-garden-istio-ingress"},
@@ -778,34 +732,28 @@ frontend:
 			},
 		}
 		tlsSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "some-namespace-gardener-dashboard-gardener-dashboard-tls",
-				Namespace: "virtual-garden-istio-ingress",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "some-namespace-gardener-dashboard-gardener-dashboard-tls",
+			Namespace: "virtual-garden-istio-ingress",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 		}
 		tlsCASecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "some-namespace-gardener-dashboard-tls-ca",
-				Namespace: "virtual-garden-istio-ingress",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "some-namespace-gardener-dashboard-tls-ca",
+			Namespace: "virtual-garden-istio-ingress",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Data: map[string][]byte{
 				"cacert": []byte("ca-cert-data"),
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "garden-gardener-dashboard",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "garden"},
-			},
+			Name:      "garden-gardener-dashboard",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "garden"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":  "gardener",
@@ -822,12 +770,10 @@ frontend:
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:dashboard",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name: "gardener.cloud:system:dashboard",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -864,12 +810,10 @@ frontend:
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:dashboard",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name: "gardener.cloud:system:dashboard",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -883,22 +827,18 @@ frontend:
 			}},
 		}
 		serviceAccountTerminal = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dashboard-terminal-admin",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "dashboard-terminal-admin",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 		}
 		clusterRoleBindingTerminal = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:dashboard-terminal:admin",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name: "gardener.cloud:dashboard-terminal:admin",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -912,13 +852,11 @@ frontend:
 			}},
 		}
 		clusterRoleTerminalProjectMember = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "dashboard.gardener.cloud:system:project-member",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-					"rbac.gardener.cloud/aggregate-to-project-member": "true",
-				},
+			Name: "dashboard.gardener.cloud:system:project-member",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
+				"rbac.gardener.cloud/aggregate-to-project-member": "true",
 			},
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups: []string{"dashboard.gardener.cloud"},
@@ -927,13 +865,11 @@ frontend:
 			}},
 		}
 		roleGitHub = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:dashboard-github-webhook",
-				Namespace: "garden",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener.cloud:system:dashboard-github-webhook",
+			Namespace: "garden",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -950,13 +886,11 @@ frontend:
 			},
 		}
 		roleBindingGitHub = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:dashboard-github-webhook",
-				Namespace: "garden",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "dashboard",
-				},
+			Name:      "gardener.cloud:system:dashboard-github-webhook",
+			Namespace: "garden",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "dashboard",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -985,8 +919,8 @@ frontend:
 		deployer = New(fakeClient, namespace, fakeSecretManager, values)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-garden-runtime", Namespace: namespace}, Data: map[string][]byte{"bundle.crt": []byte("ca-cert-data")}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-garden-runtime", Namespace: namespace, Data: map[string][]byte{"bundle.crt": []byte("ca-cert-data")}})).To(Succeed())
 	})
 
 	Describe("#Deploy", func() {
@@ -1000,21 +934,17 @@ frontend:
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretVirtual), managedResourceSecretVirtual)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 			})
 
@@ -1022,25 +952,21 @@ frontend:
 				Expect(deployer.Deploy(ctx)).To(Succeed())
 
 				tlsSecretInGardenNamespace := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener-dashboard-tls",
-						Namespace: namespace,
-					},
+					Name:      "gardener-dashboard-tls",
+					Namespace: namespace,
 				}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(tlsSecretInGardenNamespace), tlsSecretInGardenNamespace)).To(Succeed())
 				tlsSecret.Data = tlsSecretInGardenNamespace.Data
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceRuntime), managedResourceRuntime)).To(Succeed())
 				expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceRuntime.Name,
-						Namespace:       managedResourceRuntime.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
-						},
+					Name:            managedResourceRuntime.Name,
+					Namespace:       managedResourceRuntime.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class:       new("seed"),
@@ -1057,15 +983,13 @@ frontend:
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceVirtual), managedResourceVirtual)).To(Succeed())
 				expectedVirtualMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceVirtual.Name,
-						Namespace:       managedResourceVirtual.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"origin":                             "gardener",
-							"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
-						},
+					Name:            managedResourceVirtual.Name,
+					Namespace:       managedResourceVirtual.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"origin":                             "gardener",
+						"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1116,17 +1040,15 @@ frontend:
 			When("previous session secret found", func() {
 				BeforeEach(func() {
 					sessionSecretPrevious = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "gardener-dashboard-session-secret-old",
-							Namespace: namespace,
-							Labels: map[string]string{
-								"manager-identity":              "fake",
-								"name":                          "gardener-dashboard-session-secret",
-								"rotation-strategy":             "keepold",
-								"checksum-of-config":            "5743303071195020433",
-								"last-rotation-initiation-time": "",
-								"managed-by":                    "secrets-manager",
-							},
+						Name:      "gardener-dashboard-session-secret-old",
+						Namespace: namespace,
+						Labels: map[string]string{
+							"manager-identity":              "fake",
+							"name":                          "gardener-dashboard-session-secret",
+							"rotation-strategy":             "keepold",
+							"checksum-of-config":            "5743303071195020433",
+							"last-rotation-initiation-time": "",
+							"managed-by":                    "secrets-manager",
 						},
 						Type:      corev1.SecretTypeOpaque,
 						Immutable: new(true),
@@ -1159,13 +1081,11 @@ frontend:
 			When("terminal is configured", func() {
 				BeforeEach(func() {
 					terminal = &TerminalValues{
-						DashboardTerminal: operatorv1alpha1.DashboardTerminal{
-							Container: operatorv1alpha1.DashboardTerminalContainer{
-								Image:       "some-image:latest",
-								Description: new("cool image"),
-							},
-							AllowedHosts: []string{"first", "second"},
+						Container: operatorv1alpha1.DashboardTerminalContainer{
+							Image:       "some-image:latest",
+							Description: new("cool image"),
 						},
+						AllowedHosts:           []string{"first", "second"},
 						GardenTerminalSeedHost: "terminal-host",
 					}
 				})
@@ -1179,17 +1099,15 @@ frontend:
 			When("oidc is configured", func() {
 				BeforeEach(func() {
 					oidc = &OIDCValues{
-						DashboardOIDC: operatorv1alpha1.DashboardOIDC{
-							AdditionalScopes: []string{"first", "second"},
-							SecretRef:        corev1.LocalObjectReference{Name: "some-oidc-secret"},
-						},
-						IssuerURL:      "http://issuer",
-						ClientIDPublic: "public-client",
+						AdditionalScopes: []string{"first", "second"},
+						SecretRef:        corev1.LocalObjectReference{Name: "some-oidc-secret"},
+						IssuerURL:        "http://issuer",
+						ClientIDPublic:   "public-client",
 					}
 
 					Expect(fakeClient.Create(ctx, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: oidc.DashboardOIDC.SecretRef.Name, Namespace: namespace},
-						Data:       map[string][]byte{"client_id": []byte("id"), "client_secret": []byte("secret")},
+						Name: oidc.DashboardOIDC.SecretRef.Name, Namespace: namespace,
+						Data: map[string][]byte{"client_id": []byte("id"), "client_secret": []byte("secret")},
 					})).To(Succeed())
 				})
 
@@ -1219,8 +1137,8 @@ frontend:
 				Context("with webhook secret", func() {
 					BeforeEach(func() {
 						Expect(fakeClient.Create(ctx, &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{Name: gitHub.SecretRef.Name, Namespace: namespace},
-							Data:       map[string][]byte{"authentication.token": []byte("token"), "webhookSecret": []byte("webhookSecret")},
+							Name: gitHub.SecretRef.Name, Namespace: namespace,
+							Data: map[string][]byte{"authentication.token": []byte("token"), "webhookSecret": []byte("webhookSecret")},
 						})).To(Succeed())
 					})
 
@@ -1235,8 +1153,8 @@ frontend:
 						gitHub.PollInterval = &metav1.Duration{Duration: 10 * time.Minute}
 
 						Expect(fakeClient.Create(ctx, &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{Name: gitHub.SecretRef.Name, Namespace: namespace},
-							Data:       map[string][]byte{"authentication.token": []byte("token")},
+							Name: gitHub.SecretRef.Name, Namespace: namespace,
+							Data: map[string][]byte{"authentication.token": []byte("token")},
 						})).To(Succeed())
 					})
 
@@ -1252,7 +1170,7 @@ frontend:
 					frontendConfigMapName = new("frontend")
 
 					Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: *frontendConfigMapName, Namespace: namespace},
+						Name: *frontendConfigMapName, Namespace: namespace,
 						Data: map[string]string{"frontend-config.yaml": `
 foo:
   bar: baz
@@ -1277,7 +1195,7 @@ themes:
 					assetsConfigMapName = new("assets")
 
 					Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: *assetsConfigMapName, Namespace: namespace},
+						Name: *assetsConfigMapName, Namespace: namespace,
 						Data: map[string]string{"assets-config.yaml": `
 assets:
   foo: YmFy
@@ -1357,21 +1275,17 @@ assets:
 
 			It("should fail because the runtime and virtual ManagedResources are unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -1379,20 +1293,16 @@ assets:
 
 			It("should fail because the runtime ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1417,11 +1327,9 @@ assets:
 
 			It("should fail because the virtual ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1442,12 +1350,10 @@ assets:
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -1455,11 +1361,9 @@ assets:
 
 			It("should succeed because the runtime and virtual ManagedResource are healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1480,11 +1384,9 @@ assets:
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1509,11 +1411,9 @@ assets:
 
 			It("should succeed because the both ManagedResource are healthy and progressed", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1534,11 +1434,9 @@ assets:
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

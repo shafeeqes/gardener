@@ -9,7 +9,6 @@ import (
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/component"
 )
@@ -31,10 +30,8 @@ func (a *alertManager) config() *monitoringv1alpha1.AlertmanagerConfig {
 	}
 
 	return &monitoringv1alpha1.AlertmanagerConfig{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.name(),
-			Namespace: a.namespace,
-		},
+		Name:      a.name(),
+		Namespace: a.namespace,
 		Spec: monitoringv1alpha1.AlertmanagerConfigSpec{
 			// The root route on which each incoming alert enters.
 			Route: &monitoringv1alpha1.Route{
@@ -115,12 +112,10 @@ func (a *alertManager) smtpSecret() *corev1.Secret {
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.name() + "-smtp",
-			Namespace: a.namespace,
-		},
-		Type: a.values.AlertingSMTPSecret.Type,
-		Data: map[string][]byte{dataKeyAuthPassword: a.values.AlertingSMTPSecret.Data[dataKeyAuthPassword]},
+		Name:      a.name() + "-smtp",
+		Namespace: a.namespace,
+		Type:      a.values.AlertingSMTPSecret.Type,
+		Data:      map[string][]byte{dataKeyAuthPassword: a.values.AlertingSMTPSecret.Data[dataKeyAuthPassword]},
 	}
 }
 
@@ -143,8 +138,8 @@ func (a *alertManager) emailConfigs() []monitoringv1alpha1.EmailConfig {
 			AuthUsername: new(string(a.values.AlertingSMTPSecret.Data["auth_username"])),
 			AuthIdentity: new(string(a.values.AlertingSMTPSecret.Data["auth_identity"])),
 			AuthPassword: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{Name: a.smtpSecret().Name},
-				Key:                  dataKeyAuthPassword,
+				Name: a.smtpSecret().Name,
+				Key:  dataKeyAuthPassword,
 			},
 		})
 	}

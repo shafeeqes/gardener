@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -127,7 +126,7 @@ func (h *Handler) admitGarden(ctx context.Context, request admission.Request) ad
 
 	// Validate each referenced ConfigMap
 	for _, configMapName := range configMapNames {
-		configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: h.GetNamespace(), Name: configMapName}}
+		configMap := &corev1.ConfigMap{Namespace: h.GetNamespace(), Name: configMapName}
 		if err := h.APIReader.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 			if apierrors.IsNotFound(err) {
 				return admission.Errored(http.StatusUnprocessableEntity, fmt.Errorf("referenced ConfigMap %s does not exist: %w", client.ObjectKeyFromObject(configMap), err))
@@ -190,7 +189,7 @@ func (h *Handler) admitShoot(ctx context.Context, request admission.Request) adm
 		return admissionwebhook.Allowed(fmt.Sprintf("Neither %s ConfigMap nor Kubernetes version or other relevant fields were changed", h.ConfigMapPurpose))
 	}
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: shoot.Namespace, Name: configMapName}}
+	configMap := &corev1.ConfigMap{Namespace: shoot.Namespace, Name: configMapName}
 	if err := h.APIReader.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		if apierrors.IsNotFound(err) {
 			return admission.Errored(http.StatusUnprocessableEntity, fmt.Errorf("referenced %s ConfigMap %s does not exist: %w", h.ConfigMapPurpose, client.ObjectKeyFromObject(configMap), err))

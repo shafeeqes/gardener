@@ -80,10 +80,8 @@ var _ = Describe("Seed Care controller tests", func() {
 		})
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   seedName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   seedName,
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -145,10 +143,8 @@ var _ = Describe("Seed Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create ManagedResource")
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: testNamespace.Name,
-				},
+				Name:      managedResourceName,
+				Namespace: testNamespace.Name,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class:      new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{Name: "foo-secret"}},
@@ -159,7 +155,7 @@ var _ = Describe("Seed Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: testNamespace.Name}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: testNamespace.Name})).To(Succeed())
 			})
 		})
 
@@ -194,12 +190,12 @@ var _ = Describe("Seed Care controller tests", func() {
 		It("should delete stale pods in all namespaces except kube-system", func() {
 			var (
 				pod1 = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "pod-", Namespace: testNamespace.Name},
-					Spec:       corev1.PodSpec{Containers: []corev1.Container{{Name: "foo-container", Image: "foo"}}},
+					GenerateName: "pod-", Namespace: testNamespace.Name,
+					Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "foo-container", Image: "foo"}}},
 				}
 				pod2 = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "pod-", Namespace: metav1.NamespaceSystem},
-					Spec:       corev1.PodSpec{Containers: []corev1.Container{{Name: "foo-container", Image: "foo"}}},
+					GenerateName: "pod-", Namespace: metav1.NamespaceSystem,
+					Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "foo-container", Image: "foo"}}},
 				}
 			)
 
@@ -224,7 +220,7 @@ var _ = Describe("Seed Care controller tests", func() {
 
 func updateManagedResourceStatusToHealthy(name string) {
 	By("Update status to healthy for ManagedResource " + name)
-	managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: testNamespace.Name}}
+	managedResource := &resourcesv1alpha1.ManagedResource{Name: name, Namespace: testNamespace.Name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
 	managedResource.Status.ObservedGeneration = managedResource.Generation

@@ -15,7 +15,6 @@ import (
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -220,7 +219,7 @@ func ErrorMachineImageNotFound(name, version string, opt ...string) error {
 
 // FetchUserData fetches the user data for a worker pool.
 func FetchUserData(ctx context.Context, c client.Client, namespace string, pool extensionsv1alpha1.WorkerPool) ([]byte, error) {
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: pool.UserDataSecretRef.Name, Namespace: namespace}}
+	secret := &corev1.Secret{Name: pool.UserDataSecretRef.Name, Namespace: namespace}
 	if err := c.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 		return nil, fmt.Errorf("failed fetching user data secret %s referenced in worker pool %s: %w", pool.UserDataSecretRef.Name, pool.Name, err)
 	}

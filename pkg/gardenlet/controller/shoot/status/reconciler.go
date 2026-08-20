@@ -54,10 +54,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	worker := &extensionsv1alpha1.Worker{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shoot.Name,
-			Namespace: v1beta1helper.ControlPlaneNamespaceForShoot(shoot),
-		},
+		Name:      shoot.Name,
+		Namespace: v1beta1helper.ControlPlaneNamespaceForShoot(shoot),
 	}
 	if err := r.SeedClient.Get(ctx, client.ObjectKeyFromObject(worker), worker); err != nil {
 		if apierrors.IsNotFound(err) {

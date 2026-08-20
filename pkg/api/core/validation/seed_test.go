@@ -36,9 +36,7 @@ var _ = Describe("Seed Validation Tests", func() {
 		services := "10.241.0.0/16"
 		nodesCIDR := "10.250.0.0/16"
 		seed = &core.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "seed-1",
-			},
+			Name: "seed-1",
 			Spec: core.SeedSpec{
 				Provider: core.SeedProvider{
 					Type:   "foo",
@@ -100,10 +98,8 @@ var _ = Describe("Seed Validation Tests", func() {
 			},
 		}
 		seedTemplate = &core.SeedTemplate{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-				},
+			Labels: map[string]string{
+				"foo": "bar",
 			},
 			Spec: seed.Spec,
 		}

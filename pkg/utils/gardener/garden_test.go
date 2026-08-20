@@ -66,7 +66,7 @@ var _ = Describe("Garden", func() {
 		DescribeTable("default name/namespace",
 			func(prefix string) {
 				Expect(NewGardenAccessSecret(prefix+name, namespace)).To(Equal(&AccessSecret{
-					Secret:             &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "garden-access-" + name, Namespace: namespace}},
+					Secret:             &corev1.Secret{Name: "garden-access-" + name, Namespace: namespace},
 					ServiceAccountName: name,
 					Class:              "garden",
 				}))
@@ -81,7 +81,7 @@ var _ = Describe("Garden", func() {
 				WithNameOverride("other-name").
 				WithNamespaceOverride("other-namespace"),
 			).To(Equal(&AccessSecret{
-				Secret:             &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "other-name", Namespace: "other-namespace"}},
+				Secret:             &corev1.Secret{Name: "other-name", Namespace: "other-namespace"},
 				ServiceAccountName: name,
 				Class:              "garden",
 			}))
@@ -140,33 +140,27 @@ var _ = Describe("Garden", func() {
 
 			Expect(podSpec.Volumes).To(ContainElement(corev1.Volume{
 				Name: "garden-kubeconfig",
-				VolumeSource: corev1.VolumeSource{
-					Projected: &corev1.ProjectedVolumeSource{
-						DefaultMode: new(int32(420)),
-						Sources: []corev1.VolumeProjection{
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: genericTokenKubeconfigSecretName,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  "kubeconfig",
-										Path: "kubeconfig",
-									}},
-									Optional: new(false),
-								},
+				Projected: &corev1.ProjectedVolumeSource{
+					DefaultMode: new(int32(420)),
+					Sources: []corev1.VolumeProjection{
+						{
+							Secret: &corev1.SecretProjection{
+								Name: genericTokenKubeconfigSecretName,
+								Items: []corev1.KeyToPath{{
+									Key:  "kubeconfig",
+									Path: "kubeconfig",
+								}},
+								Optional: new(false),
 							},
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: tokenSecretName,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  "token",
-										Path: "token",
-									}},
-									Optional: new(false),
-								},
+						},
+						{
+							Secret: &corev1.SecretProjection{
+								Name: tokenSecretName,
+								Items: []corev1.KeyToPath{{
+									Key:  "token",
+									Path: "token",
+								}},
+								Optional: new(false),
 							},
 						},
 					},
@@ -195,9 +189,7 @@ var _ = Describe("Garden", func() {
 			baseConfig = &rest.Config{
 				Username: "test",
 				Host:     "https://garden.local.gardener.cloud",
-				TLSClientConfig: rest.TLSClientConfig{
-					CAData: []byte("ca"),
-				},
+				CAData:   []byte("ca"),
 			}
 		})
 
@@ -261,11 +253,9 @@ var _ = Describe("Garden", func() {
 		BeforeEach(func() {
 			namespace = "garden"
 			gardenSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "secret-",
-					Namespace:    namespace,
-					Labels:       map[string]string{"gardener.cloud/role": "garden-cert"},
-				},
+				GenerateName: "secret-",
+				Namespace:    namespace,
+				Labels:       map[string]string{"gardener.cloud/role": "garden-cert"},
 			}
 		})
 
@@ -303,11 +293,9 @@ var _ = Describe("Garden", func() {
 		BeforeEach(func() {
 			namespace = "garden"
 			gardenSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "secret-",
-					Namespace:    namespace,
-					Labels:       map[string]string{"gardener.cloud/role": "garden-cert"},
-				},
+				GenerateName: "secret-",
+				Namespace:    namespace,
+				Labels:       map[string]string{"gardener.cloud/role": "garden-cert"},
 			}
 		})
 
@@ -360,11 +348,9 @@ var _ = Describe("Garden", func() {
 				},
 			}
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "internal-domain",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"foo": []byte("bar")},
+				Name:      "internal-domain",
+				Namespace: namespace,
+				Data:      map[string][]byte{"foo": []byte("bar")},
 			}
 		})
 
@@ -454,10 +440,8 @@ var _ = Describe("Garden", func() {
 
 		It("should allow WorkloadIdentity credentials", func() {
 			workloadIdentity := &securityv1alpha1.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "internal-domain",
-					Namespace: namespace,
-				},
+				Name:      "internal-domain",
+				Namespace: namespace,
 				Spec: securityv1alpha1.WorkloadIdentitySpec{
 					Audiences: []string{"test"},
 					TargetSystem: securityv1alpha1.TargetSystem{
@@ -502,17 +486,15 @@ var _ = Describe("Garden", func() {
 		BeforeEach(func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "internal-domain",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleInternalDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider": providerType,
-						"dns.gardener.cloud/domain":   domain,
-						"dns.gardener.cloud/zone":     zone,
-					},
+				Name:      "internal-domain",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleInternalDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider": providerType,
+					"dns.gardener.cloud/domain":   domain,
+					"dns.gardener.cloud/zone":     zone,
 				},
 				Data: map[string][]byte{"foo": []byte("bar")},
 			}
@@ -579,24 +561,18 @@ var _ = Describe("Garden", func() {
 
 		It("should return domain information from SeedDNSProviderConfig array", func() {
 			secret1 := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "default-domain-1",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"foo": []byte("bar")},
+				Name:      "default-domain-1",
+				Namespace: namespace,
+				Data:      map[string][]byte{"foo": []byte("bar")},
 			}
 			secret2 := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "default-domain-2",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"baz": []byte("qux")},
+				Name:      "default-domain-2",
+				Namespace: namespace,
+				Data:      map[string][]byte{"baz": []byte("qux")},
 			}
 			workloadIdentity := &securityv1alpha1.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "default-domain-3",
-					Namespace: namespace,
-				},
+				Name:      "default-domain-3",
+				Namespace: namespace,
 				Spec: securityv1alpha1.WorkloadIdentitySpec{
 					Audiences: []string{"test"},
 					TargetSystem: securityv1alpha1.TargetSystem{
@@ -671,32 +647,28 @@ var _ = Describe("Garden", func() {
 
 		It("should return domain information from labeled secrets when no seedDNSDefaults provided", func() {
 			secret1 := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "default-domain-1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider": providerType1,
-						"dns.gardener.cloud/domain":   domain1,
-						"dns.gardener.cloud/zone":     zone1,
-					},
+				Name:      "default-domain-1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider": providerType1,
+					"dns.gardener.cloud/domain":   domain1,
+					"dns.gardener.cloud/zone":     zone1,
 				},
 				Data: map[string][]byte{"foo": []byte("bar")},
 			}
 			secret2 := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "default-domain-2",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider": providerType2,
-						"dns.gardener.cloud/domain":   domain2,
-						"dns.gardener.cloud/zone":     zone2,
-					},
+				Name:      "default-domain-2",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider": providerType2,
+					"dns.gardener.cloud/domain":   domain2,
+					"dns.gardener.cloud/zone":     zone2,
 				},
 				Data: map[string][]byte{"baz": []byte("qux")},
 			}
@@ -757,16 +729,14 @@ var _ = Describe("Garden", func() {
 
 		It("should error if default domain secret is malformed", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "malformed-secret",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider": providerType1,
-						// Missing domain annotation
-					},
+				Name:      "malformed-secret",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider": providerType1,
+					// Missing domain annotation
 				},
 				Data: map[string][]byte{"foo": []byte("bar")},
 			}
@@ -781,49 +751,43 @@ var _ = Describe("Garden", func() {
 		It("should sort default domains by priority", func() {
 			// Create secrets with different priorities
 			secretHighPriority := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "high-priority-domain",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider":                providerType1,
-						"dns.gardener.cloud/domain":                  "high.example.com",
-						"dns.gardener.cloud/zone":                    zone1,
-						"dns.gardener.cloud/domain-default-priority": "10",
-					},
+				Name:      "high-priority-domain",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider":                providerType1,
+					"dns.gardener.cloud/domain":                  "high.example.com",
+					"dns.gardener.cloud/zone":                    zone1,
+					"dns.gardener.cloud/domain-default-priority": "10",
 				},
 				Data: map[string][]byte{"high": []byte("priority")},
 			}
 			secretMediumPriority := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "medium-priority-domain",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider":                providerType2,
-						"dns.gardener.cloud/domain":                  "medium.example.com",
-						"dns.gardener.cloud/zone":                    zone2,
-						"dns.gardener.cloud/domain-default-priority": "5",
-					},
+				Name:      "medium-priority-domain",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider":                providerType2,
+					"dns.gardener.cloud/domain":                  "medium.example.com",
+					"dns.gardener.cloud/zone":                    zone2,
+					"dns.gardener.cloud/domain-default-priority": "5",
 				},
 				Data: map[string][]byte{"medium": []byte("priority")},
 			}
 			secretLowPriority := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "low-priority-domain",
-					Namespace: namespace,
-					Labels: map[string]string{
-						constants.GardenRole: constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						"dns.gardener.cloud/provider": "dns-provider",
-						"dns.gardener.cloud/domain":   "low.example.com",
-						"dns.gardener.cloud/zone":     "zone-3",
-					},
+				Name:      "low-priority-domain",
+				Namespace: namespace,
+				Labels: map[string]string{
+					constants.GardenRole: constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					"dns.gardener.cloud/provider": "dns-provider",
+					"dns.gardener.cloud/domain":   "low.example.com",
+					"dns.gardener.cloud/zone":     "zone-3",
 				},
 				Data: map[string][]byte{"low": []byte("priority")},
 			}
@@ -873,20 +837,16 @@ var _ = Describe("Garden", func() {
 
 		It("should return secrets sorted by priority descending", func() {
 			high := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "high",
-					Namespace:   namespace,
-					Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
-					Annotations: map[string]string{DNSProvider: "p", DNSDomain: "high.example.com", DNSDefaultDomainPriority: "10"},
-				},
+				Name:        "high",
+				Namespace:   namespace,
+				Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
+				Annotations: map[string]string{DNSProvider: "p", DNSDomain: "high.example.com", DNSDefaultDomainPriority: "10"},
 			}
 			medium := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "medium",
-					Namespace:   namespace,
-					Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
-					Annotations: map[string]string{DNSProvider: "p", DNSDomain: "medium.example.com", DNSDefaultDomainPriority: "5"},
-				},
+				Name:        "medium",
+				Namespace:   namespace,
+				Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
+				Annotations: map[string]string{DNSProvider: "p", DNSDomain: "medium.example.com", DNSDefaultDomainPriority: "5"},
 			}
 			invalid := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
@@ -918,20 +878,16 @@ var _ = Describe("Garden", func() {
 
 		It("should keep stable ordering for secrets with identical priorities", func() {
 			first := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "first",
-					Namespace:   namespace,
-					Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
-					Annotations: map[string]string{DNSProvider: "p", DNSDomain: "first.example.com", DNSDefaultDomainPriority: "7"},
-				},
+				Name:        "first",
+				Namespace:   namespace,
+				Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
+				Annotations: map[string]string{DNSProvider: "p", DNSDomain: "first.example.com", DNSDefaultDomainPriority: "7"},
 			}
 			second := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "second",
-					Namespace:   namespace,
-					Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
-					Annotations: map[string]string{DNSProvider: "p", DNSDomain: "second.example.com", DNSDefaultDomainPriority: "7"},
-				},
+				Name:        "second",
+				Namespace:   namespace,
+				Labels:      map[string]string{constants.GardenRole: constants.GardenRoleDefaultDomain},
+				Annotations: map[string]string{DNSProvider: "p", DNSDomain: "second.example.com", DNSDefaultDomainPriority: "7"},
 			}
 
 			Expect(fakeClient.Create(ctx, second)).To(Succeed())
@@ -954,7 +910,7 @@ var _ = Describe("Garden", func() {
 			It("should create the garden namespace with the expected metadata", func() {
 				Expect(ReconcileGardenNamespace(ctx, fakeClient, namespaceName, zones, false, nil)).To(Succeed())
 
-				namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "garden"}}
+				namespace := &corev1.Namespace{Name: "garden"}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(namespace), namespace)).To(Succeed())
 				Expect(namespace.Annotations).To(BeEmpty())
 				Expect(namespace.Labels).To(BeEmpty())
@@ -962,9 +918,7 @@ var _ = Describe("Garden", func() {
 
 			It("should reconcile the garden namespace with the expected metadata", func() {
 				namespace := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "garden",
-					},
+					Name: "garden",
 				}
 				Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
 
@@ -980,7 +934,7 @@ var _ = Describe("Garden", func() {
 			It("should create the garden namespace with the expected metadata", func() {
 				Expect(ReconcileGardenNamespace(ctx, fakeClient, namespaceName, zones, true, nil)).To(Succeed())
 
-				namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "garden"}}
+				namespace := &corev1.Namespace{Name: "garden"}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(namespace), namespace)).To(Succeed())
 				Expect(namespace.Annotations).To(HaveKeyWithValue("high-availability-config.resources.gardener.cloud/zones", "1,2"))
 				Expect(namespace.Labels).To(And(
@@ -992,15 +946,13 @@ var _ = Describe("Garden", func() {
 
 			It("should reconcile the garden namespace with the expected metadata", func() {
 				namespace := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "garden",
-						Annotations: map[string]string{
-							"high-availability-config.resources.gardener.cloud/zones": "none",
-						},
-						Labels: map[string]string{
-							"pod-security.kubernetes.io/enforce":                         "unprivileged",
-							"high-availability-config.resources.gardener.cloud/consider": "",
-						},
+					Name: "garden",
+					Annotations: map[string]string{
+						"high-availability-config.resources.gardener.cloud/zones": "none",
+					},
+					Labels: map[string]string{
+						"pod-security.kubernetes.io/enforce":                         "unprivileged",
+						"high-availability-config.resources.gardener.cloud/consider": "",
 					},
 				}
 				Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
@@ -1032,17 +984,17 @@ var _ = Describe("Garden", func() {
 		})
 
 		It("should return that the cluster is a self-hosted shoot", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "shoot"}}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Namespace{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "shoot"}})).To(Succeed())
 			Expect(ClusterIsSelfHostedShoot(ctx, fakeClient)).To(BeTrue())
 		})
 
 		It("should return that the cluster is not a self-hosted shoot because kube-system namespace is not labeled correctly", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "kube-system"}}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Namespace{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "kube-system"}})).To(Succeed())
 			Expect(ClusterIsSelfHostedShoot(ctx, fakeClient)).To(BeFalse())
 		})
 
 		It("should return that the cluster is not a self-hosted shoot because kube-system namespace is not labeled at all", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system"}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Namespace{Name: "kube-system"})).To(Succeed())
 			Expect(ClusterIsSelfHostedShoot(ctx, fakeClient)).To(BeFalse())
 		})
 

@@ -297,8 +297,8 @@ var _ = Describe("health check", func() {
 					desiredMachines = int32(len(nodes))
 				}
 				Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineDeployment{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-					Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: desiredMachines},
+					GenerateName: "deploy", Namespace: controlPlaneNamespace,
+					Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: desiredMachines},
 				})).To(Succeed())
 
 				shootObj := &shootpkg.Shoot{
@@ -457,11 +457,9 @@ var _ = Describe("health check", func() {
 						kubernetesVersion.Original(),
 					),
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "non-mcm-node",
-							Annotations: map[string]string{
-								"node.machine.sapcloud.io/not-managed-by-mcm": "1",
-							},
+						Name: "non-mcm-node",
+						Annotations: map[string]string{
+							"node.machine.sapcloud.io/not-managed-by-mcm": "1",
 						},
 					},
 				},
@@ -475,8 +473,8 @@ var _ = Describe("health check", func() {
 				},
 				int32(1),
 				[]coordinationv1.Lease{{
-					ObjectMeta: metav1.ObjectMeta{Name: "gardener-node-agent-" + nodeName},
-					Spec:       coordinationv1.LeaseSpec{RenewTime: &metav1.MicroTime{Time: time.Now()}, LeaseDurationSeconds: new(int32(40))},
+					Name: "gardener-node-agent-" + nodeName,
+					Spec: coordinationv1.LeaseSpec{RenewTime: &metav1.MicroTime{Time: time.Now()}, LeaseDurationSeconds: new(int32(40))},
 				}},
 				BeNil()),
 			Entry("should report NodeAgentUnhealthy for managed node without lease",
@@ -503,12 +501,10 @@ var _ = Describe("health check", func() {
 				kubernetesVersion,
 				[]corev1.Node{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "preserved-node",
-							Labels: labels.Set{"worker.gardener.cloud/pool": workerPoolName1, "worker.gardener.cloud/kubernetes-version": kubernetesVersion.Original()},
-							Annotations: map[string]string{
-								nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: cloudConfigSecretChecksum1,
-							},
+						Name:   "preserved-node",
+						Labels: labels.Set{"worker.gardener.cloud/pool": workerPoolName1, "worker.gardener.cloud/kubernetes-version": kubernetesVersion.Original()},
+						Annotations: map[string]string{
+							nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: cloudConfigSecretChecksum1,
 						},
 						Status: corev1.NodeStatus{
 							NodeInfo: corev1.NodeSystemInfo{KubeletVersion: kubernetesVersion.Original()},
@@ -534,12 +530,10 @@ var _ = Describe("health check", func() {
 				kubernetesVersion,
 				[]corev1.Node{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "preserved-node",
-							Labels: labels.Set{"worker.gardener.cloud/pool": workerPoolName1, "worker.gardener.cloud/kubernetes-version": kubernetesVersion.Original()},
-							Annotations: map[string]string{
-								nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: cloudConfigSecretChecksum1,
-							},
+						Name:   "preserved-node",
+						Labels: labels.Set{"worker.gardener.cloud/pool": workerPoolName1, "worker.gardener.cloud/kubernetes-version": kubernetesVersion.Original()},
+						Annotations: map[string]string{
+							nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: cloudConfigSecretChecksum1,
 						},
 						Status: corev1.NodeStatus{
 							NodeInfo: corev1.NodeSystemInfo{KubeletVersion: kubernetesVersion.Original()},
@@ -550,12 +544,10 @@ var _ = Describe("health check", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "unpreserved-node",
-							Labels: labels.Set{"worker.gardener.cloud/pool": workerPoolName1, "worker.gardener.cloud/kubernetes-version": kubernetesVersion.Original()},
-							Annotations: map[string]string{
-								nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: cloudConfigSecretChecksum1,
-							},
+						Name:   "unpreserved-node",
+						Labels: labels.Set{"worker.gardener.cloud/pool": workerPoolName1, "worker.gardener.cloud/kubernetes-version": kubernetesVersion.Original()},
+						Annotations: map[string]string{
+							nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: cloudConfigSecretChecksum1,
 						},
 						Status: corev1.NodeStatus{
 							NodeInfo: corev1.NodeSystemInfo{KubeletVersion: kubernetesVersion.Original()},
@@ -589,8 +581,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentAvailable, Status: machinev1alpha1.ConditionFalse},
 								{Type: machinev1alpha1.MachineDeploymentProgressing, Status: machinev1alpha1.ConditionTrue, Reason: "NewMachineSetNotAvailable"},
@@ -607,8 +599,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentProgressing, Status: machinev1alpha1.ConditionTrue, Reason: "NewMachineSetNotAvailable"}, {},
 							}},
@@ -624,7 +616,7 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineUnknown},
 							},
@@ -638,8 +630,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentProgressing, Status: machinev1alpha1.ConditionTrue, Reason: "NewMachineSetNotAvailable"}, {},
 							}},
@@ -655,7 +647,7 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineRunning},
 							},
@@ -669,8 +661,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentProgressing, Status: machinev1alpha1.ConditionTrue, Reason: "NewMachineSetNotAvailable"}, {},
 							}},
@@ -686,7 +678,7 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachinePending},
 							},
@@ -700,8 +692,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentProgressing, Status: machinev1alpha1.ConditionTrue, Reason: "NewMachineSetNotAvailable"}, {},
 							}},
@@ -716,7 +708,7 @@ var _ = Describe("health check", func() {
 			It("should return progressing when detecting a regular node rollout (no status)", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
-						{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace}},
+						{GenerateName: "obj-", Namespace: controlPlaneNamespace},
 					},
 				}
 				for _, machine := range machineList.Items {
@@ -726,8 +718,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentProgressing, Status: machinev1alpha1.ConditionTrue, Reason: "NewMachineSetNotAvailable"}, {},
 							}},
@@ -745,8 +737,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 						},
 					},
 				}
@@ -771,8 +763,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentAvailable, Status: machinev1alpha1.ConditionFalse}, {},
 							}},
@@ -788,7 +780,7 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineUnknown},
 							},
@@ -802,8 +794,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 							Status: machinev1alpha1.MachineDeploymentStatus{Conditions: []machinev1alpha1.MachineDeploymentCondition{
 								{Type: machinev1alpha1.MachineDeploymentAvailable, Status: machinev1alpha1.ConditionFalse}, {},
 							}},
@@ -819,13 +811,13 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineRunning},
 							},
 						},
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineRunning},
 							},
@@ -839,8 +831,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
 						},
 					},
 				}
@@ -853,7 +845,7 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineRunning},
 							},
@@ -867,8 +859,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 						},
 					},
 				}
@@ -881,7 +873,7 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachineRunning},
 							},
@@ -905,8 +897,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(1)},
 						},
 					},
 				}
@@ -919,13 +911,13 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachinePending},
 							},
 						},
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+							GenerateName: "obj-", Namespace: controlPlaneNamespace,
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{Phase: machinev1alpha1.MachinePending},
 							},
@@ -939,8 +931,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
 						},
 					},
 				}
@@ -952,8 +944,8 @@ var _ = Describe("health check", func() {
 			It("should return progressing when detecting a regular scale up (no status)", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
-						{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace}},
-						{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace}},
+						{GenerateName: "obj-", Namespace: controlPlaneNamespace},
+						{GenerateName: "obj-", Namespace: controlPlaneNamespace},
 					},
 				}
 				for _, machine := range machineList.Items {
@@ -963,8 +955,8 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
 						},
 					},
 				}
@@ -991,13 +983,13 @@ var _ = Describe("health check", func() {
 
 					machineList = &machinev1alpha1.MachineList{
 						Items: []machinev1alpha1.Machine{
-							{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: controlPlaneNamespace, Labels: map[string]string{"node": nodeName}}},
+							{GenerateName: "obj-", Namespace: controlPlaneNamespace, Labels: map[string]string{"node": nodeName}},
 						},
 					}
 					nodeList = []*corev1.Node{
 						{
-							ObjectMeta: metav1.ObjectMeta{Name: nodeName},
-							Spec:       corev1.NodeSpec{Unschedulable: true},
+							Name: nodeName,
+							Spec: corev1.NodeSpec{Unschedulable: true},
 						},
 					}
 				)
@@ -1023,20 +1015,18 @@ var _ = Describe("health check", func() {
 					machineList = &machinev1alpha1.MachineList{
 						Items: []machinev1alpha1.Machine{
 							{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:         "foo",
-									GenerateName: "obj-",
-									Namespace:    controlPlaneNamespace,
-									Labels:       map[string]string{"node": nodeName},
-									Finalizers:   []string{"in-deletion"},
-								},
+								Name:         "foo",
+								GenerateName: "obj-",
+								Namespace:    controlPlaneNamespace,
+								Labels:       map[string]string{"node": nodeName},
+								Finalizers:   []string{"in-deletion"},
 							},
 						},
 					}
 					nodeList = []*corev1.Node{
 						{
-							ObjectMeta: metav1.ObjectMeta{Name: nodeName},
-							Spec:       corev1.NodeSpec{Unschedulable: true},
+							Name: nodeName,
+							Spec: corev1.NodeSpec{Unschedulable: true},
 						},
 					}
 				)
@@ -1053,11 +1043,9 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								GenerateName: "obj-",
-								Namespace:    controlPlaneNamespace,
-								Labels:       map[string]string{"node": "preserved-node"},
-							},
+							GenerateName: "obj-",
+							Namespace:    controlPlaneNamespace,
+							Labels:       map[string]string{"node": "preserved-node"},
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{
 									Phase: machinev1alpha1.MachineFailed,
@@ -1075,28 +1063,28 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(3)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(3)},
 						},
 					},
 				}
 				nodeList := []*corev1.Node{
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "node-1"},
+						Name: "node-1",
 						Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 							{Type: corev1.NodeReady, Status: corev1.ConditionTrue},
 						}},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "node-2"},
+						Name: "node-2",
 						Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 							{Type: corev1.NodeReady, Status: corev1.ConditionTrue},
 						}},
 					},
 					{
 						// preserved unhealthy node — cordoned by MCM, included in nodesForScalingCheck
-						ObjectMeta: metav1.ObjectMeta{Name: "preserved-node"},
-						Spec:       corev1.NodeSpec{Unschedulable: true},
+						Name: "preserved-node",
+						Spec: corev1.NodeSpec{Unschedulable: true},
 						Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 							{Type: machinev1alpha1.NodePreserved, Status: corev1.ConditionTrue},
 							{Type: corev1.NodeReady, Status: corev1.ConditionFalse},
@@ -1116,12 +1104,10 @@ var _ = Describe("health check", func() {
 				machineList := &machinev1alpha1.MachineList{
 					Items: []machinev1alpha1.Machine{
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:         "preserved-machine",
-								GenerateName: "obj-",
-								Namespace:    controlPlaneNamespace,
-								Labels:       map[string]string{"node": preservedNodeName},
-							},
+							Name:         "preserved-machine",
+							GenerateName: "obj-",
+							Namespace:    controlPlaneNamespace,
+							Labels:       map[string]string{"node": preservedNodeName},
 							Status: machinev1alpha1.MachineStatus{
 								CurrentStatus: machinev1alpha1.CurrentStatus{
 									Phase: machinev1alpha1.MachineFailed,
@@ -1132,13 +1118,11 @@ var _ = Describe("health check", func() {
 							},
 						},
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:         "draining-machine",
-								GenerateName: "obj-",
-								Namespace:    controlPlaneNamespace,
-								Labels:       map[string]string{"node": unpreservedNodeName},
-								Finalizers:   []string{"in-deletion"},
-							},
+							Name:         "draining-machine",
+							GenerateName: "obj-",
+							Namespace:    controlPlaneNamespace,
+							Labels:       map[string]string{"node": unpreservedNodeName},
+							Finalizers:   []string{"in-deletion"},
 						},
 					},
 				}
@@ -1151,29 +1135,29 @@ var _ = Describe("health check", func() {
 				machineDeploymentList := &machinev1alpha1.MachineDeploymentList{
 					Items: []machinev1alpha1.MachineDeployment{
 						{
-							ObjectMeta: metav1.ObjectMeta{GenerateName: "deploy", Namespace: controlPlaneNamespace},
-							Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
+							GenerateName: "deploy", Namespace: controlPlaneNamespace,
+							Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: int32(2)},
 						},
 					},
 				}
 				nodeList := []*corev1.Node{
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "node-1"},
+						Name: "node-1",
 						Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 							{Type: corev1.NodeReady, Status: corev1.ConditionTrue},
 						}},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: preservedNodeName},
-						Spec:       corev1.NodeSpec{Unschedulable: true},
+						Name: preservedNodeName,
+						Spec: corev1.NodeSpec{Unschedulable: true},
 						Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 							{Type: machinev1alpha1.NodePreserved, Status: corev1.ConditionTrue},
 							{Type: corev1.NodeReady, Status: corev1.ConditionFalse},
 						}},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: unpreservedNodeName},
-						Spec:       corev1.NodeSpec{Unschedulable: true},
+						Name: unpreservedNodeName,
+						Spec: corev1.NodeSpec{Unschedulable: true},
 						Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 							{Type: corev1.NodeReady, Status: corev1.ConditionTrue},
 						}},
@@ -1194,9 +1178,9 @@ var _ = Describe("health check", func() {
 		)
 
 		BeforeEach(func() {
-			deploymentCA = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler", Namespace: controlPlaneNamespace}, Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))}}
-			deploymentKCM = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager", Namespace: controlPlaneNamespace}, Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))}}
-			deploymentMCM = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager", Namespace: controlPlaneNamespace}, Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))}}
+			deploymentCA = &appsv1.Deployment{Name: "cluster-autoscaler", Namespace: controlPlaneNamespace, Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))}}
+			deploymentKCM = &appsv1.Deployment{Name: "kube-controller-manager", Namespace: controlPlaneNamespace, Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))}}
+			deploymentMCM = &appsv1.Deployment{Name: "machine-controller-manager", Namespace: controlPlaneNamespace, Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))}}
 		})
 
 		It("should report an error because a required relevant deployment does not exist", func() {
@@ -1239,13 +1223,11 @@ var _ = Describe("health check", func() {
 		var (
 			nodeName = "node1"
 
-			node = &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: nodeName}}
+			node = &corev1.Node{Name: nodeName}
 
 			validLease = &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      nodeName,
-					Namespace: "kube-node-lease",
-				},
+				Name:      nodeName,
+				Namespace: "kube-node-lease",
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime:            &metav1.MicroTime{Time: fakeClock.Now()},
 					LeaseDurationSeconds: new(int32(40)),
@@ -1253,10 +1235,8 @@ var _ = Describe("health check", func() {
 			}
 
 			expiredLease = &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      nodeName,
-					Namespace: "kube-node-lease",
-				},
+				Name:      nodeName,
+				Namespace: "kube-node-lease",
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime:            &metav1.MicroTime{Time: fakeClock.Now()},
 					LeaseDurationSeconds: new(int32(-40)),
@@ -1264,10 +1244,8 @@ var _ = Describe("health check", func() {
 			}
 
 			unrelatedLease = &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node2",
-					Namespace: "kube-node-lease",
-				},
+				Name:      "node2",
+				Namespace: "kube-node-lease",
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime:            &metav1.MicroTime{Time: fakeClock.Now()},
 					LeaseDurationSeconds: new(int32(40)),
@@ -1288,7 +1266,7 @@ var _ = Describe("health check", func() {
 				}
 
 				for _, nodeName := range additionalNodeNames {
-					nodeList.Items = append(nodeList.Items, corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: nodeName}})
+					nodeList.Items = append(nodeList.Items, corev1.Node{Name: nodeName})
 
 					lease := validLease.DeepCopy()
 					lease.Name = nodeName
@@ -1311,9 +1289,7 @@ var _ = Describe("health check", func() {
 	Describe("#CheckingNodeAgentLease", func() {
 		var (
 			validLease = coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener-node-agent-node1",
-				},
+				Name: "gardener-node-agent-node1",
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime:            &metav1.MicroTime{Time: fakeClock.Now()},
 					LeaseDurationSeconds: new(int32(40)),
@@ -1321,9 +1297,7 @@ var _ = Describe("health check", func() {
 			}
 
 			expiredLease = coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener-node-agent-node1",
-				},
+				Name: "gardener-node-agent-node1",
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime:            &metav1.MicroTime{Time: fakeClock.Now()},
 					LeaseDurationSeconds: new(int32(-40)),
@@ -1331,9 +1305,7 @@ var _ = Describe("health check", func() {
 			}
 
 			unrelatedLease = coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener-node-agent-node2",
-				},
+				Name: "gardener-node-agent-node2",
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime:            &metav1.MicroTime{Time: fakeClock.Now()},
 					LeaseDurationSeconds: new(int32(40)),
@@ -1342,9 +1314,7 @@ var _ = Describe("health check", func() {
 
 			nodeList = []*corev1.Node{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "node1",
-					},
+					Name: "node1",
 				},
 			}
 		)
@@ -1367,7 +1337,7 @@ var _ = Describe("health check", func() {
 	Describe("#CheckSystemdUnitsReady", func() {
 		It("should return nil when no nodes have the condition", func() {
 			nodes := []*corev1.Node{
-				{ObjectMeta: metav1.ObjectMeta{Name: "node1"}},
+				{Name: "node1"},
 			}
 
 			Expect(CheckSystemdUnitsReady(nodes)).To(Succeed())
@@ -1376,7 +1346,7 @@ var _ = Describe("health check", func() {
 		It("should return nil when all nodes report healthy systemd units", func() {
 			nodes := []*corev1.Node{
 				{
-					ObjectMeta: metav1.ObjectMeta{Name: "node1"},
+					Name: "node1",
 					Status: corev1.NodeStatus{
 						Conditions: []corev1.NodeCondition{
 							{
@@ -1394,7 +1364,7 @@ var _ = Describe("health check", func() {
 		It("should return error when a node reports unhealthy systemd units", func() {
 			nodes := []*corev1.Node{
 				{
-					ObjectMeta: metav1.ObjectMeta{Name: "node1"},
+					Name: "node1",
 					Status: corev1.NodeStatus{
 						Conditions: []corev1.NodeCondition{
 							{
@@ -1413,7 +1383,7 @@ var _ = Describe("health check", func() {
 		It("should return error when a node reports unknown systemd units status", func() {
 			nodes := []*corev1.Node{
 				{
-					ObjectMeta: metav1.ObjectMeta{Name: "node1"},
+					Name: "node1",
 					Status: corev1.NodeStatus{
 						Conditions: []corev1.NodeCondition{
 							{
@@ -1432,7 +1402,7 @@ var _ = Describe("health check", func() {
 		It("should aggregate all unhealthy nodes", func() {
 			nodes := []*corev1.Node{
 				{
-					ObjectMeta: metav1.ObjectMeta{Name: "node1"},
+					Name: "node1",
 					Status: corev1.NodeStatus{
 						Conditions: []corev1.NodeCondition{
 							{
@@ -1444,7 +1414,7 @@ var _ = Describe("health check", func() {
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{Name: "node2"},
+					Name: "node2",
 					Status: corev1.NodeStatus{
 						Conditions: []corev1.NodeCondition{
 							{
@@ -1528,8 +1498,8 @@ var _ = Describe("health check", func() {
 		BeforeEach(func() {
 			// Seed client: a ManagedResource with ResourcesHealthy=False referencing a DaemonSet.
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-mr", Namespace: controlPlaneNamespace},
-				Spec:       resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "dummy"}}},
+				Name: "test-mr", Namespace: controlPlaneNamespace,
+				Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "dummy"}}},
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					Conditions: []gardencorev1beta1.Condition{
 						{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -1537,7 +1507,7 @@ var _ = Describe("health check", func() {
 						{Type: resourcesv1alpha1.ResourcesProgressing, Status: gardencorev1beta1.ConditionFalse},
 					},
 					Resources: []resourcesv1alpha1.ObjectReference{
-						{ObjectReference: corev1.ObjectReference{Kind: "DaemonSet", Namespace: "kube-system", Name: "csi-driver"}},
+						{Kind: "DaemonSet", Namespace: "kube-system", Name: "csi-driver"},
 					},
 				},
 			}
@@ -1546,16 +1516,16 @@ var _ = Describe("health check", func() {
 			// Seed client: a MachineDeployment with preserved failed replicas so that
 			// CheckPreservation keeps noPreservedFailedMachines as False (mirrors the shoot status).
 			md := &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "worker", Namespace: controlPlaneNamespace},
-				Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
-				Status:     machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 1},
+				Name: "worker", Namespace: controlPlaneNamespace,
+				Spec:   machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
+				Status: machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 1},
 			}
 			Expect(fakeClient.Create(ctx, md)).To(Succeed())
 
 			// Shoot client: unhealthy DaemonSet, preserved node, not-ready pod on that node,
 			// and a tunnel pod so the tunnel check does not fail.
 			ds := &appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{Name: "csi-driver", Namespace: "kube-system"},
+				Name: "csi-driver", Namespace: "kube-system",
 				Spec: appsv1.DaemonSetSpec{
 					Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "csi-driver"}},
 					UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
@@ -1572,19 +1542,19 @@ var _ = Describe("health check", func() {
 				},
 			}
 			tunnelPod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{Name: "vpn-shoot", Namespace: metav1.NamespaceSystem, Labels: map[string]string{"type": "tunnel"}},
-				Status:     corev1.PodStatus{Phase: corev1.PodRunning},
+				Name: "vpn-shoot", Namespace: metav1.NamespaceSystem, Labels: map[string]string{"type": "tunnel"},
+				Status: corev1.PodStatus{Phase: corev1.PodRunning},
 			}
 			preservedNode := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: "preserved-node"},
+				Name: "preserved-node",
 				Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{
 					{Type: machinev1alpha1.NodePreserved, Status: corev1.ConditionTrue},
 					{Type: corev1.NodeReady, Status: corev1.ConditionFalse},
 				}},
 			}
 			notReadyPod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{Name: "csi-driver-preserved", Namespace: "kube-system", Labels: map[string]string{"app": "csi-driver"}},
-				Spec:       corev1.PodSpec{NodeName: "preserved-node"},
+				Name: "csi-driver-preserved", Namespace: "kube-system", Labels: map[string]string{"app": "csi-driver"},
+				Spec: corev1.PodSpec{NodeName: "preserved-node"},
 				Status: corev1.PodStatus{Conditions: []corev1.PodCondition{
 					{Type: corev1.PodReady, Status: corev1.ConditionFalse},
 				}},
@@ -1616,12 +1586,12 @@ var _ = Describe("health check", func() {
 		It("does not suppress when no MachineDeployments have preserved failed replicas", func() {
 			// Replace the BeforeEach MachineDeployment (PreservedFailedReplicas=1) with one that
 			// has no preserved replicas, so CheckPreservation keeps the condition True.
-			md := &machinev1alpha1.MachineDeployment{ObjectMeta: metav1.ObjectMeta{Name: "worker", Namespace: controlPlaneNamespace}}
+			md := &machinev1alpha1.MachineDeployment{Name: "worker", Namespace: controlPlaneNamespace}
 			Expect(fakeClient.Delete(ctx, md)).To(Succeed())
 			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "worker", Namespace: controlPlaneNamespace},
-				Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
-				Status:     machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 0},
+				Name: "worker", Namespace: controlPlaneNamespace,
+				Spec:   machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
+				Status: machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 0},
 			})).To(Succeed())
 
 			h, shootInfo := makeHealthAndShoot() // no preserved machines
@@ -1641,10 +1611,10 @@ var _ = Describe("health check", func() {
 
 		It("does not suppress when the unhealthy pod is on a non-preserved node", func() {
 			// Replace the preserved node with a normal node.
-			normalNode := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "preserved-node"}} // same name, no condition
+			normalNode := &corev1.Node{Name: "preserved-node"} // same name, no condition
 			oneUnavailable := intstr.FromInt32(1)
 			ds := &appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{Name: "csi-driver", Namespace: "kube-system"},
+				Name: "csi-driver", Namespace: "kube-system",
 				Spec: appsv1.DaemonSetSpec{
 					Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "csi-driver"}},
 					UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
@@ -1661,12 +1631,12 @@ var _ = Describe("health check", func() {
 				},
 			}
 			tunnelPod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{Name: "vpn-shoot", Namespace: metav1.NamespaceSystem, Labels: map[string]string{"type": "tunnel"}},
-				Status:     corev1.PodStatus{Phase: corev1.PodRunning},
+				Name: "vpn-shoot", Namespace: metav1.NamespaceSystem, Labels: map[string]string{"type": "tunnel"},
+				Status: corev1.PodStatus{Phase: corev1.PodRunning},
 			}
 			notReadyPod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{Name: "csi-driver-normal", Namespace: "kube-system", Labels: map[string]string{"app": "csi-driver"}},
-				Spec:       corev1.PodSpec{NodeName: "preserved-node"},
+				Name: "csi-driver-normal", Namespace: "kube-system", Labels: map[string]string{"app": "csi-driver"},
+				Spec: corev1.PodSpec{NodeName: "preserved-node"},
 				Status: corev1.PodStatus{Conditions: []corev1.PodCondition{
 					{Type: corev1.PodReady, Status: corev1.ConditionFalse},
 				}},
@@ -1787,11 +1757,9 @@ var _ = Describe("health check", func() {
 
 func newNode(labels labels.Set, annotations map[string]string, kubeletVersion string) corev1.Node {
 	return corev1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        "node1",
-			Labels:      labels,
-			Annotations: annotations,
-		},
+		Name:        "node1",
+		Labels:      labels,
+		Annotations: annotations,
 		Status: corev1.NodeStatus{
 			NodeInfo: corev1.NodeSystemInfo{
 				KubeletVersion: kubeletVersion,

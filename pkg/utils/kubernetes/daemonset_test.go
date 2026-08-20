@@ -16,9 +16,7 @@ import (
 var _ = Describe("DaemonSet", func() {
 	DescribeTable("#PodManagedByDaemonSet", func(ownerRefs []metav1.OwnerReference, expectedResult bool) {
 		pod := &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				OwnerReferences: ownerRefs,
-			},
+			OwnerReferences: ownerRefs,
 		}
 
 		Expect(PodManagedByDaemonSet(pod)).To(Equal(expectedResult))

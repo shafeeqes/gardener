@@ -21,12 +21,10 @@ var _ = Describe("validation", func() {
 
 	BeforeEach(func() {
 		backupEntry = &core.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "example-backup-entry",
-				Namespace: "garden",
-				Annotations: map[string]string{
-					core.BackupEntryForceDeletion: "true",
-				},
+			Name:      "example-backup-entry",
+			Namespace: "garden",
+			Annotations: map[string]string{
+				core.BackupEntryForceDeletion: "true",
 			},
 			Spec: core.BackupEntrySpec{
 				BucketName: "some-bucket",

@@ -18,10 +18,8 @@ const clusterRoleName = "prometheus-operator"
 
 func (p *prometheusOperator) clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"monitoring.coreos.com"},
@@ -105,10 +103,8 @@ func (p *prometheusOperator) clusterRole() *rbacv1.ClusterRole {
 
 func (p *prometheusOperator) clusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "prometheus-operator",
-			Labels: GetLabels(),
-		},
+		Name:   "prometheus-operator",
+		Labels: GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "ClusterRole",
@@ -124,9 +120,7 @@ func (p *prometheusOperator) clusterRoleBinding() *rbacv1.ClusterRoleBinding {
 
 func (p *prometheusOperator) clusterRolePrometheus() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "prometheus",
-		},
+		Name: "prometheus",
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{corev1.GroupName},

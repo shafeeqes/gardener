@@ -53,10 +53,8 @@ var _ = Describe("KubeScheduler", func() {
 		profileBinPacking       = gardencorev1beta1.SchedulingProfileBinPacking
 		configEmpty       *gardencorev1beta1.KubeSchedulerConfig
 		configFull        = &gardencorev1beta1.KubeSchedulerConfig{
-			KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-				FeatureGates: map[string]bool{"Foo": true, "Bar": false, "Baz": false},
-			},
-			Profile: &profileBinPacking,
+			FeatureGates: map[string]bool{"Foo": true, "Bar": false, "Baz": false},
+			Profile:      &profileBinPacking,
 		}
 		consistOf func(...client.Object) types.GomegaMatcher
 
@@ -81,44 +79,38 @@ var _ = Describe("KubeScheduler", func() {
 			componentConfigYAML := string(data)
 
 			cm := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            "kube-scheduler-config",
-					Namespace:       namespace,
-					ResourceVersion: "1",
-				},
-				Data: map[string]string{"config.yaml": componentConfigYAML},
+				Name:            "kube-scheduler-config",
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Data:            map[string]string{"config.yaml": componentConfigYAML},
 			}
 			Expect(kubernetesutils.MakeUnique(cm)).To(Succeed())
 			return cm
 		}
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: namespace,
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "kube-scheduler",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				ResourceVersion: "0",
+			Name:      secretName,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "kube-scheduler",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
-			Type: corev1.SecretTypeOpaque,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			ResourceVersion: "0",
+			Type:            corev1.SecretTypeOpaque,
 		}
 
 		pdbMaxUnavailable = intstr.FromInt32(1)
 		pdb               = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      pdbName,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "scheduler",
-				},
-				ResourceVersion: "1",
+			Name:      pdbName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "scheduler",
 			},
+			ResourceVersion: "1",
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &pdbMaxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -132,7 +124,7 @@ var _ = Describe("KubeScheduler", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{Name: vpaName, Namespace: namespace, ResourceVersion: "1"},
+			Name: vpaName, Namespace: namespace, ResourceVersion: "1",
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -156,18 +148,16 @@ var _ = Describe("KubeScheduler", func() {
 			},
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "scheduler",
-				},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":10259}]`,
-				},
-				ResourceVersion: "1",
+			Name:      serviceName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "scheduler",
 			},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":10259}]`,
+			},
+			ResourceVersion: "1",
 			Spec: corev1.ServiceSpec{
 				Selector: map[string]string{
 					"app":  "kubernetes",
@@ -187,18 +177,16 @@ var _ = Describe("KubeScheduler", func() {
 			configMap := configMapFor(componentConfigFilePath)
 
 			deploy := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      deploymentName,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 "kubernetes",
-						"role":                "scheduler",
-						"gardener.cloud/role": "controlplane",
-						"high-availability-config.resources.gardener.cloud/type":             "controller",
-						"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-					},
-					ResourceVersion: "1",
+				Name:      deploymentName,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 "kubernetes",
+					"role":                "scheduler",
+					"gardener.cloud/role": "controlplane",
+					"high-availability-config.resources.gardener.cloud/type":             "controller",
+					"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 				},
+				ResourceVersion: "1",
 				Spec: appsv1.DeploymentSpec{
 					RevisionHistoryLimit: new(int32(1)),
 					Replicas:             &replicas,
@@ -234,12 +222,10 @@ var _ = Describe("KubeScheduler", func() {
 									ImagePullPolicy: corev1.PullIfNotPresent,
 									Command:         commandForKubernetesVersion(10259, featureGateFlags(config)...),
 									LivenessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/healthz",
-												Scheme: corev1.URISchemeHTTPS,
-												Port:   intstr.FromInt32(10259),
-											},
+										HTTPGet: &corev1.HTTPGetAction{
+											Path:   "/healthz",
+											Scheme: corev1.URISchemeHTTPS,
+											Port:   intstr.FromInt32(10259),
 										},
 										SuccessThreshold:    1,
 										FailureThreshold:    2,
@@ -283,20 +269,16 @@ var _ = Describe("KubeScheduler", func() {
 							Volumes: []corev1.Volume{
 								{
 									Name: "client-ca",
-									VolumeSource: corev1.VolumeSource{
-										Projected: &corev1.ProjectedVolumeSource{
-											DefaultMode: new(int32(420)),
-											Sources: []corev1.VolumeProjection{
-												{
-													Secret: &corev1.SecretProjection{
-														LocalObjectReference: corev1.LocalObjectReference{
-															Name: secretNameClientCA,
-														},
-														Items: []corev1.KeyToPath{{
-															Key:  "bundle.crt",
-															Path: "bundle.crt",
-														}},
-													},
+									Projected: &corev1.ProjectedVolumeSource{
+										DefaultMode: new(int32(420)),
+										Sources: []corev1.VolumeProjection{
+											{
+												Secret: &corev1.SecretProjection{
+													Name: secretNameClientCA,
+													Items: []corev1.KeyToPath{{
+														Key:  "bundle.crt",
+														Path: "bundle.crt",
+													}},
 												},
 											},
 										},
@@ -304,21 +286,15 @@ var _ = Describe("KubeScheduler", func() {
 								},
 								{
 									Name: "kube-scheduler-server",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  secretNameServer,
-											DefaultMode: new(int32(0640)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  secretNameServer,
+										DefaultMode: new(int32(0640)),
 									},
 								},
 								{
 									Name: "kube-scheduler-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: configMap.Name,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: configMap.Name,
 									},
 								},
 							},
@@ -333,12 +309,10 @@ var _ = Describe("KubeScheduler", func() {
 		}
 
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-kube-scheduler",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-kube-scheduler",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "kube-scheduler.rules",
@@ -408,31 +382,23 @@ var _ = Describe("KubeScheduler", func() {
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-kube-scheduler",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-kube-scheduler",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":  "kubernetes",
 					"role": "scheduler",
 				}},
 				Endpoints: []monitoringv1.Endpoint{{
-					Port:   "metrics",
-					Scheme: new(monitoringv1.SchemeHTTPS),
-					HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-						HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-							TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-							HTTPConfigWithoutTLS: monitoringv1.HTTPConfigWithoutTLS{
-								Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-									Key:                  "token",
-								}},
-							},
-						},
-					},
+					Port:      "metrics",
+					Scheme:    new(monitoringv1.SchemeHTTPS),
+					TLSConfig: &monitoringv1.TLSConfig{InsecureSkipVerify: new(true)},
+					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
+					}},
 					RelabelConfigs: []monitoringv1.RelabelConfig{{
 						Action: "labelmap",
 						Regex:  `__meta_kubernetes_service_label_(.+)`,
@@ -447,9 +413,7 @@ var _ = Describe("KubeScheduler", func() {
 		}
 
 		clusterRoleBinding1 = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:kube-scheduler",
-			},
+			Name: "gardener.cloud:target:kube-scheduler",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -464,9 +428,7 @@ var _ = Describe("KubeScheduler", func() {
 			},
 		}
 		clusterRoleBinding2 = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:kube-scheduler-volume",
-			},
+			Name: "gardener.cloud:target:kube-scheduler-volume",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -491,18 +453,16 @@ var _ = Describe("KubeScheduler", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-client", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-client", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#Deploy", func() {
 		BeforeEach(func() {
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: namespace,
-					Labels:    map[string]string{"origin": "gardener"},
-				},
+				Name:      managedResourceName,
+				Namespace: namespace,
+				Labels:    map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{
 						{Name: managedResourceSecretName},
@@ -522,12 +482,10 @@ var _ = Describe("KubeScheduler", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels:          map[string]string{"origin": "gardener"},
-					},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels:          map[string]string{"origin": "gardener"},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -542,52 +500,42 @@ var _ = Describe("KubeScheduler", func() {
 
 				expectedConfigMap := configMapFor(expectedComponentConfigFilePath)
 				actualConfigMap := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      expectedConfigMap.Name,
-						Namespace: namespace,
-					},
+					Name:      expectedConfigMap.Name,
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualConfigMap), actualConfigMap)).To(Succeed())
 				Expect(actualConfigMap).To(DeepEqual(expectedConfigMap))
 
 				actualDeployment := &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      deploymentName,
-						Namespace: namespace,
-					},
+					Name:      deploymentName,
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualDeployment), actualDeployment)).To(Succeed())
 				Expect(actualDeployment).To(DeepEqual(deploymentFor(config, expectedComponentConfigFilePath)))
 
 				actualVPA := &vpaautoscalingv1.VerticalPodAutoscaler{
-					ObjectMeta: metav1.ObjectMeta{Name: vpaName, Namespace: namespace},
+					Name: vpaName, Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualVPA), actualVPA)).To(Succeed())
 				Expect(actualVPA).To(DeepEqual(vpa))
 
 				actualService := &corev1.Service{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      serviceName,
-						Namespace: namespace,
-					},
+					Name:      serviceName,
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualService), actualService)).To(Succeed())
 				Expect(actualService).To(DeepEqual(service))
 
 				actualPDB := &policyv1.PodDisruptionBudget{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      pdbName,
-						Namespace: namespace,
-					},
+					Name:      pdbName,
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualPDB), actualPDB)).To(Succeed())
 				Expect(actualPDB).To(DeepEqual(pdb))
 
 				actualPrometheusRule := &monitoringv1.PrometheusRule{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      prometheusRuleName,
-						Namespace: namespace,
-					},
+					Name:      prometheusRuleName,
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualPrometheusRule), actualPrometheusRule)).To(Succeed())
 				Expect(actualPrometheusRule).To(DeepEqual(prometheusRule))
@@ -595,10 +543,8 @@ var _ = Describe("KubeScheduler", func() {
 				componenttest.PrometheusRule(prometheusRule, "testdata/shoot-kube-scheduler.prometheusrule.test.yaml")
 
 				actualServiceMonitor := &monitoringv1.ServiceMonitor{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      serviceMonitorName,
-						Namespace: namespace,
-					},
+					Name:      serviceMonitorName,
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(actualServiceMonitor), actualServiceMonitor)).To(Succeed())
 				Expect(actualServiceMonitor).To(DeepEqual(serviceMonitor))

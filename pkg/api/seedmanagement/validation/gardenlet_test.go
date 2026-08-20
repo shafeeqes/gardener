@@ -12,7 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"k8s.io/component-base/config/v1alpha1"
 
 	gardencorehelper "github.com/gardener/gardener/pkg/api/core/helper"
 	. "github.com/gardener/gardener/pkg/api/seedmanagement/validation"
@@ -25,10 +24,8 @@ import (
 var _ = Describe("Gardenlet Validation Tests", func() {
 	var (
 		seed = &core.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-				},
+			Labels: map[string]string{
+				"foo": "bar",
 			},
 			Spec: core.SeedSpec{
 				Backup: &core.Backup{
@@ -92,11 +89,9 @@ var _ = Describe("Gardenlet Validation Tests", func() {
 
 	BeforeEach(func() {
 		gardenlet = &seedmanagement.Gardenlet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       name,
-				Namespace:  namespace,
-				Generation: 1,
-			},
+			Name:       name,
+			Namespace:  namespace,
+			Generation: 1,
 			Spec: seedmanagement.GardenletSpec{
 				Deployment: seedmanagement.GardenletSelfDeployment{
 					Helm: seedmanagement.GardenletHelm{
@@ -308,9 +303,7 @@ var _ = Describe("Gardenlet Validation Tests", func() {
 			It("should forbid garden client connection kubeconfig if bootstrap is specified", func() {
 				gardenlet.Spec.Config = gardenletConfiguration(seedx,
 					&gardenletconfigv1alpha1.GardenClientConnection{
-						ClientConnectionConfiguration: v1alpha1.ClientConnectionConfiguration{
-							Kubeconfig: "foo",
-						},
+						Kubeconfig: "foo",
 					},
 				)
 

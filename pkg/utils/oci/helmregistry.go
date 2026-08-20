@@ -18,7 +18,6 @@ import (
 	gcrv1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/imagevector"
@@ -89,7 +88,7 @@ func (r *HelmRegistry) Pull(ctx context.Context, oci *gardencorev1.OCIRepository
 	// Configure custom transport with CA bundle if provided
 	var caCertPool *x509.CertPool
 	if oci.CABundleSecretRef != nil {
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: secretNamespace, Name: oci.CABundleSecretRef.Name}}
+		secret := &corev1.Secret{Namespace: secretNamespace, Name: oci.CABundleSecretRef.Name}
 		if err := r.client.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 			return nil, fmt.Errorf("failed to get CA bundle secret %s: %w", client.ObjectKeyFromObject(secret), err)
 		}
@@ -126,7 +125,7 @@ func (r *HelmRegistry) Pull(ctx context.Context, oci *gardencorev1.OCIRepository
 	}
 
 	if oci.PullSecretRef != nil {
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: secretNamespace, Name: oci.PullSecretRef.Name}}
+		secret := &corev1.Secret{Namespace: secretNamespace, Name: oci.PullSecretRef.Name}
 		if err := r.client.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 			return nil, fmt.Errorf("failed to get pull secret %s: %w", client.ObjectKeyFromObject(secret), err)
 		}

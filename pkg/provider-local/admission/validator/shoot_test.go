@@ -27,10 +27,8 @@ var _ = Describe("Shoot Validator", func() {
 	BeforeEach(func() {
 		shootValidator = validator.NewShootValidator()
 		shoot = &core.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-1",
-				Namespace: "garden-dev",
-			},
+			Name:      "shoot-1",
+			Namespace: "garden-dev",
 			Spec: core.ShootSpec{
 				Networking: &core.Networking{},
 				Provider: core.Provider{

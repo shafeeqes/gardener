@@ -28,9 +28,7 @@ var _ = Describe("Admission", func() {
 
 			projectName = "my-project"
 			projectBase = core.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: projectName,
-				},
+				Name: projectName,
 			}
 
 			userInfo user.Info
@@ -66,11 +64,9 @@ var _ = Describe("Admission", func() {
 				}))
 
 				Expect(project.Spec.Members).To(ConsistOf(core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: "rbac.authorization.k8s.io",
-						Kind:     "User",
-						Name:     userInfo.GetName(),
-					},
+					APIGroup: "rbac.authorization.k8s.io",
+					Kind:     "User",
+					Name:     userInfo.GetName(),
 					Roles: []string{
 						core.ProjectMemberAdmin,
 						core.ProjectMemberOwner,
@@ -102,11 +98,9 @@ var _ = Describe("Admission", func() {
 
 			It("should add project owner to members", func() {
 				projectOwner := core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: "rbac.authorization.k8s.io",
-						Kind:     "User",
-						Name:     "foo",
-					},
+					APIGroup: "rbac.authorization.k8s.io",
+					Kind:     "User",
+					Name:     "foo",
 					Roles: []string{
 						core.ProjectMemberAdmin,
 						core.ProjectMemberOwner,
@@ -114,11 +108,9 @@ var _ = Describe("Admission", func() {
 				}
 
 				projectMemberBar := core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: "rbac.authorization.k8s.io",
-						Kind:     "User",
-						Name:     "bar",
-					},
+					APIGroup: "rbac.authorization.k8s.io",
+					Kind:     "User",
+					Name:     "bar",
 					Roles: []string{
 						core.ProjectMemberViewer,
 					},
@@ -134,11 +126,9 @@ var _ = Describe("Admission", func() {
 
 			It("should not re-add owner as member", func() {
 				projectOwner := core.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: "rbac.authorization.k8s.io",
-						Kind:     "User",
-						Name:     "foo",
-					},
+					APIGroup: "rbac.authorization.k8s.io",
+					Kind:     "User",
+					Name:     "foo",
 					Roles: []string{
 						core.ProjectMemberAdmin,
 						core.ProjectMemberOwner,

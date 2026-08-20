@@ -12,7 +12,6 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -47,27 +46,25 @@ var _ = Describe("NodeExporter", func() {
 		managedResourceSecret *corev1.Secret
 
 		scrapeConfig = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-node-exporter",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-node-exporter",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				Scheme:      new(monitoringv1.SchemeHTTPS),
 				TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-					Key:                  "token",
+					Name: "shoot-access-prometheus-shoot",
+					Key:  "token",
 				}},
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					APIServer:  new("https://kube-apiserver"),
 					Role:       "Endpoints",
 					Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				}},
@@ -118,12 +115,10 @@ var _ = Describe("NodeExporter", func() {
 		}
 
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-node-exporter",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-node-exporter",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "node-exporter.rules",
@@ -247,16 +242,12 @@ var _ = Describe("NodeExporter", func() {
 		}
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -438,12 +429,10 @@ status: {}
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -548,11 +537,9 @@ status: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -575,11 +562,9 @@ status: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

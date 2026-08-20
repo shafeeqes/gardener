@@ -197,11 +197,9 @@ var _ = Describe("Strategy", func() {
 
 func newBackupBucket() *core.BackupBucket {
 	return &core.BackupBucket{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
-			Labels:    map[string]string{"foo": "bar"},
-		},
+		Name:      "test",
+		Namespace: "test-namespace",
+		Labels:    map[string]string{"foo": "bar"},
 		Spec: core.BackupBucketSpec{
 			SeedName: new("foo"),
 			ShootRef: &corev1.ObjectReference{

@@ -84,12 +84,10 @@ var _ = Describe("GardenerAPIServer", func() {
 		deployment          *appsv1.Deployment
 		apiServiceFor       = func(group, version string) *apiregistrationv1.APIService {
 			return &apiregistrationv1.APIService{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: version + "." + group,
-					Labels: map[string]string{
-						"app":  "gardener",
-						"role": "apiserver",
-					},
+				Name: version + "." + group,
+				Labels: map[string]string{
+					"app":  "gardener",
+					"role": "apiserver",
 				},
 				Spec: apiregistrationv1.APIServiceSpec{
 					Service: &apiregistrationv1.ServiceReference{
@@ -125,12 +123,10 @@ var _ = Describe("GardenerAPIServer", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(testScheme).Build()
 		fakeSecretManager = fakesecretsmanager.New(fakeClient, namespace)
 		values = Values{
-			Values: apiserver.Values{
-				ETCDEncryption: apiserver.ETCDEncryptionConfig{
-					ResourcesToEncrypt: []string{"shootstates.core.gardener.cloud"},
-				},
-				RuntimeVersion: semver.MustParse("1.33.1"),
+			ETCDEncryption: apiserver.ETCDEncryptionConfig{
+				ResourcesToEncrypt: []string{"shootstates.core.gardener.cloud"},
 			},
+			RuntimeVersion: semver.MustParse("1.33.1"),
 			Autoscaling: AutoscalingConfig{
 				Replicas:           &replicas,
 				APIServerResources: resources,
@@ -155,38 +151,28 @@ var _ = Describe("GardenerAPIServer", func() {
 		))
 
 		managedResourceRuntime = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameRuntime,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameRuntime,
+			Namespace: namespace,
 		}
 		managedResourceVirtual = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameVirtual,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameVirtual,
+			Namespace: namespace,
 		}
 		managedResourceSecretRuntime = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceRuntime.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceRuntime.Name,
+			Namespace: namespace,
 		}
 		managedResourceSecretVirtual = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceVirtual.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceVirtual.Name,
+			Namespace: namespace,
 		}
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name:      "gardener-apiserver",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
@@ -199,17 +185,15 @@ var _ = Describe("GardenerAPIServer", func() {
 		}
 
 		serviceRuntime = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: namespace,
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports":       `[{"protocol":"TCP","port":8443}]`,
-					"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8443}]`,
-				},
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name:      "gardener-apiserver",
+			Namespace: namespace,
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports":       `[{"protocol":"TCP","port":8443}]`,
+				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8443}]`,
+			},
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
@@ -227,13 +211,11 @@ var _ = Describe("GardenerAPIServer", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver-vpa",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name:      "gardener-apiserver-vpa",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -266,25 +248,23 @@ var _ = Describe("GardenerAPIServer", func() {
 			},
 		}
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
-				Annotations: map[string]string{
-					"reference.resources.gardener.cloud/configmap-1b2d9b42": "gardener-apiserver-audit-policy-config-1e270362",
-					"reference.resources.gardener.cloud/configmap-6e5f123b": "gardener-apiserver-admission-config-07c5248a",
-					"reference.resources.gardener.cloud/secret-9dca243c":    "shoot-access-gardener-apiserver",
-					"reference.resources.gardener.cloud/secret-47fc132b":    "gardener-apiserver-admission-kubeconfigs-e3b0c442",
-					"reference.resources.gardener.cloud/secret-389fbba5":    "etcd-client",
-					"reference.resources.gardener.cloud/secret-867d23cd":    "generic-token-kubeconfig",
-					"reference.resources.gardener.cloud/secret-3af026bf":    "gardener-apiserver-etcd-encryption-configuration-fe8711ae",
-					"reference.resources.gardener.cloud/secret-3696832b":    "gardener-apiserver",
-					"reference.resources.gardener.cloud/secret-e01f5645":    "ca-etcd",
-					"reference.resources.gardener.cloud/secret-14294f8f":    "gardener-apiserver-workload-identity-signing-key-f70e59e4",
-				},
+			Name:      "gardener-apiserver",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
+			},
+			Annotations: map[string]string{
+				"reference.resources.gardener.cloud/configmap-1b2d9b42": "gardener-apiserver-audit-policy-config-1e270362",
+				"reference.resources.gardener.cloud/configmap-6e5f123b": "gardener-apiserver-admission-config-07c5248a",
+				"reference.resources.gardener.cloud/secret-9dca243c":    "shoot-access-gardener-apiserver",
+				"reference.resources.gardener.cloud/secret-47fc132b":    "gardener-apiserver-admission-kubeconfigs-e3b0c442",
+				"reference.resources.gardener.cloud/secret-389fbba5":    "etcd-client",
+				"reference.resources.gardener.cloud/secret-867d23cd":    "generic-token-kubeconfig",
+				"reference.resources.gardener.cloud/secret-3af026bf":    "gardener-apiserver-etcd-encryption-configuration-fe8711ae",
+				"reference.resources.gardener.cloud/secret-3696832b":    "gardener-apiserver",
+				"reference.resources.gardener.cloud/secret-e01f5645":    "ca-etcd",
+				"reference.resources.gardener.cloud/secret-14294f8f":    "gardener-apiserver-workload-identity-signing-key-f70e59e4",
 			},
 			Spec: appsv1.DeploymentSpec{
 				MinReadySeconds:      30,
@@ -374,12 +354,10 @@ var _ = Describe("GardenerAPIServer", func() {
 							}},
 							Resources: resources,
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/livez",
-										Scheme: "HTTPS",
-										Port:   intstr.FromInt32(8443),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/livez",
+									Scheme: "HTTPS",
+									Port:   intstr.FromInt32(8443),
 								},
 								SuccessThreshold:    1,
 								FailureThreshold:    3,
@@ -388,12 +366,10 @@ var _ = Describe("GardenerAPIServer", func() {
 								TimeoutSeconds:      15,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/readyz",
-										Scheme: "HTTPS",
-										Port:   intstr.FromInt32(8443),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/readyz",
+									Scheme: "HTTPS",
+									Port:   intstr.FromInt32(8443),
 								},
 								SuccessThreshold:    1,
 								FailureThreshold:    3,
@@ -443,79 +419,59 @@ var _ = Describe("GardenerAPIServer", func() {
 						Volumes: []corev1.Volume{
 							{
 								Name: "gardener-apiserver-workload-identity",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: "gardener-apiserver-workload-identity-signing-key-f70e59e4",
-										Items: []corev1.KeyToPath{
-											{
-												Key:  "id_rsa",
-												Path: "key.pem",
-											},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "gardener-apiserver-workload-identity-signing-key-f70e59e4",
+									Items: []corev1.KeyToPath{
+										{
+											Key:  "id_rsa",
+											Path: "key.pem",
 										},
 									},
 								},
 							},
 							{
 								Name: "ca-etcd",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: "ca-etcd",
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "ca-etcd",
 								},
 							},
 							{
 								Name: "etcd-client",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName:  "etcd-client",
-										DefaultMode: new(int32(0640)),
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName:  "etcd-client",
+									DefaultMode: new(int32(0640)),
 								},
 							},
 							{
 								Name: "server",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName:  "gardener-apiserver",
-										DefaultMode: new(int32(0640)),
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName:  "gardener-apiserver",
+									DefaultMode: new(int32(0640)),
 								},
 							},
 							{
 								Name: "audit-policy-config",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: "gardener-apiserver-audit-policy-config-1e270362",
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: "gardener-apiserver-audit-policy-config-1e270362",
 								},
 							},
 							{
 								Name: "admission-config",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: "gardener-apiserver-admission-config-07c5248a",
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: "gardener-apiserver-admission-config-07c5248a",
 								},
 							},
 							{
 								Name: "admission-kubeconfigs",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: "gardener-apiserver-admission-kubeconfigs-e3b0c442",
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "gardener-apiserver-admission-kubeconfigs-e3b0c442",
 								},
 							},
 							{
 								Name: "etcd-encryption-secret",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName:  "gardener-apiserver-etcd-encryption-configuration-fe8711ae",
-										DefaultMode: new(int32(0640)),
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName:  "gardener-apiserver-etcd-encryption-configuration-fe8711ae",
+									DefaultMode: new(int32(0640)),
 								},
 							},
 						},
@@ -526,13 +482,11 @@ var _ = Describe("GardenerAPIServer", func() {
 		utilruntime.Must(gardener.InjectGenericKubeconfig(deployment, "generic-token-kubeconfig", "shoot-access-gardener-apiserver"))
 
 		serviceVirtual = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name:      "gardener-apiserver",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
@@ -548,14 +502,12 @@ var _ = Describe("GardenerAPIServer", func() {
 			},
 		}
 		endpointSlice := &discoveryv1.EndpointSlice{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":                        "gardener",
-					"role":                       "apiserver",
-					"kubernetes.io/service-name": "gardener-apiserver",
-				},
+			Name:      "gardener-apiserver",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":                        "gardener",
+				"role":                       "apiserver",
+				"kubernetes.io/service-name": "gardener-apiserver",
 			},
 			AddressType: "IPv4",
 			Ports: []discoveryv1.EndpointPort{{
@@ -567,13 +519,11 @@ var _ = Describe("GardenerAPIServer", func() {
 			}},
 		}
 		endpoints := &corev1.Endpoints{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name:      "gardener-apiserver",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			Subsets: []corev1.EndpointSubset{{
 				Ports: []corev1.EndpointPort{{
@@ -593,12 +543,10 @@ var _ = Describe("GardenerAPIServer", func() {
 			endpointsResources = []client.Object{endpoints}
 		}
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:apiserver",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name: "gardener.cloud:system:apiserver",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups: []string{"*"},
@@ -607,12 +555,10 @@ var _ = Describe("GardenerAPIServer", func() {
 			}},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:apiserver",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name: "gardener.cloud:system:apiserver",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -626,12 +572,10 @@ var _ = Describe("GardenerAPIServer", func() {
 			}},
 		}
 		clusterRoleBindingAuthDelegation = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:apiserver:auth-delegator",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name: "gardener.cloud:apiserver:auth-delegator",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -645,13 +589,11 @@ var _ = Describe("GardenerAPIServer", func() {
 			}},
 		}
 		roleBindingAuthReader = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:apiserver:auth-reader",
-				Namespace: "kube-system",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "apiserver",
-				},
+			Name:      "gardener.cloud:apiserver:auth-reader",
+			Namespace: "kube-system",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "apiserver",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -665,11 +607,9 @@ var _ = Describe("GardenerAPIServer", func() {
 			}},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "garden-gardener-apiserver",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "garden"},
-			},
+			Name:      "garden-gardener-apiserver",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "garden"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":  "gardener",
@@ -678,17 +618,11 @@ var _ = Describe("GardenerAPIServer", func() {
 				Endpoints: []monitoringv1.Endpoint{{
 					TargetPort: new(intstr.FromInt32(8443)),
 					Scheme:     new(monitoringv1.SchemeHTTPS),
-					HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-						HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-							TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-							HTTPConfigWithoutTLS: monitoringv1.HTTPConfigWithoutTLS{
-								Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-garden"},
-									Key:                  "token",
-								}},
-							},
-						},
-					},
+					TLSConfig:  &monitoringv1.TLSConfig{InsecureSkipVerify: new(true)},
+					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
+						Name: "shoot-access-prometheus-garden",
+						Key:  "token",
+					}},
 					MetricRelabelConfigs: []monitoringv1.RelabelConfig{{
 						SourceLabels: []monitoringv1.LabelName{"__name__"},
 						Action:       "keep",
@@ -702,10 +636,10 @@ var _ = Describe("GardenerAPIServer", func() {
 	Describe("#Deploy", func() {
 		BeforeEach(func() {
 			By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-gardener", Namespace: namespace}})).To(Succeed())
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: namespace}})).To(Succeed())
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "etcd-client", Namespace: namespace}})).To(Succeed())
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-gardener", Namespace: namespace})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: namespace})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "etcd-client", Namespace: namespace})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 
 			// Create runtime service manually since it is required by the Deploy function. In reality, it gets created
 			// via the ManagedResource, however in this unit test the respective controller is not running, hence we
@@ -725,19 +659,15 @@ var _ = Describe("GardenerAPIServer", func() {
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretVirtual), managedResourceSecretVirtual)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 				})).To(Succeed())
 			})
 
@@ -759,8 +689,8 @@ resources:
 
 						By("Verify encryption config secret")
 						expectedSecretETCDEncryptionConfiguration := &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-etcd-encryption-configuration", Namespace: namespace},
-							Data:       map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
+							Name: "gardener-apiserver-etcd-encryption-configuration", Namespace: namespace,
+							Data: map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
 						}
 						Expect(kubernetesutils.MakeUnique(expectedSecretETCDEncryptionConfiguration)).To(Succeed())
 
@@ -771,17 +701,15 @@ resources:
 
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(Succeed())
 						Expect(actualSecretETCDEncryptionConfiguration).To(Equal(&corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      expectedSecretETCDEncryptionConfiguration.Name,
-								Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
-								Labels: map[string]string{
-									"resources.gardener.cloud/garbage-collectable-reference": "true",
-									"role": "gardener-apiserver-etcd-encryption-configuration",
-								},
-								ResourceVersion: "1",
+							Name:      expectedSecretETCDEncryptionConfiguration.Name,
+							Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
+							Labels: map[string]string{
+								"resources.gardener.cloud/garbage-collectable-reference": "true",
+								"role": "gardener-apiserver-etcd-encryption-configuration",
 							},
-							Immutable: new(true),
-							Data:      expectedSecretETCDEncryptionConfiguration.Data,
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            expectedSecretETCDEncryptionConfiguration.Data,
 						}))
 
 						By("Deploy again and ensure that labels are still present")
@@ -805,19 +733,15 @@ resources:
 					DescribeTable("successfully deploy the ETCD encryption configuration secret resource w/ old key",
 						func(encryptWithCurrentKey bool) {
 							deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-								Values: apiserver.Values{
-									ETCDEncryption: apiserver.ETCDEncryptionConfig{EncryptWithCurrentKey: encryptWithCurrentKey, ResourcesToEncrypt: []string{"shootstates.core.gardener.cloud"}},
-									RuntimeVersion: semver.MustParse("1.33.1"),
-								},
-								TargetVersion: semver.MustParse("1.33.1"),
+								ETCDEncryption: apiserver.ETCDEncryptionConfig{EncryptWithCurrentKey: encryptWithCurrentKey, ResourcesToEncrypt: []string{"shootstates.core.gardener.cloud"}},
+								RuntimeVersion: semver.MustParse("1.33.1"),
+								TargetVersion:  semver.MustParse("1.33.1"),
 							})
 
 							oldKeyName, oldKeySecret := "key-old", "old-secret"
 							Expect(fakeClient.Create(ctx, &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      "gardener-apiserver-etcd-encryption-key-old",
-									Namespace: namespace,
-								},
+								Name:      "gardener-apiserver-etcd-encryption-key-old",
+								Namespace: namespace,
 								Data: map[string][]byte{
 									"key":    []byte(oldKeyName),
 									"secret": []byte(oldKeySecret),
@@ -852,8 +776,8 @@ resources:
 `
 
 							expectedSecretETCDEncryptionConfiguration := &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-etcd-encryption-configuration", Namespace: namespace},
-								Data:       map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
+								Name: "gardener-apiserver-etcd-encryption-configuration", Namespace: namespace,
+								Data: map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
 							}
 							Expect(kubernetesutils.MakeUnique(expectedSecretETCDEncryptionConfiguration)).To(Succeed())
 
@@ -864,17 +788,15 @@ resources:
 
 							Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(Succeed())
 							Expect(actualSecretETCDEncryptionConfiguration).To(DeepEqual(&corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      expectedSecretETCDEncryptionConfiguration.Name,
-									Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
-									Labels: map[string]string{
-										"resources.gardener.cloud/garbage-collectable-reference": "true",
-										"role": "gardener-apiserver-etcd-encryption-configuration",
-									},
-									ResourceVersion: "1",
+								Name:      expectedSecretETCDEncryptionConfiguration.Name,
+								Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
+								Labels: map[string]string{
+									"resources.gardener.cloud/garbage-collectable-reference": "true",
+									"role": "gardener-apiserver-etcd-encryption-configuration",
 								},
-								Immutable: new(true),
-								Data:      expectedSecretETCDEncryptionConfiguration.Data,
+								ResourceVersion: "1",
+								Immutable:       new(true),
+								Data:            expectedSecretETCDEncryptionConfiguration.Data,
 							}))
 
 							secretList := &corev1.SecretList{}
@@ -893,17 +815,15 @@ resources:
 
 				It("should successfully deploy the access secret for the virtual garden", func() {
 					accessSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "shoot-access-gardener-apiserver",
-							Namespace: namespace,
-							Labels: map[string]string{
-								"resources.gardener.cloud/purpose": "token-requestor",
-								"resources.gardener.cloud/class":   "shoot",
-							},
-							Annotations: map[string]string{
-								"serviceaccount.resources.gardener.cloud/name":      "gardener-apiserver",
-								"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-							},
+						Name:      "shoot-access-gardener-apiserver",
+						Namespace: namespace,
+						Labels: map[string]string{
+							"resources.gardener.cloud/purpose": "token-requestor",
+							"resources.gardener.cloud/class":   "shoot",
+						},
+						Annotations: map[string]string{
+							"serviceaccount.resources.gardener.cloud/name":      "gardener-apiserver",
+							"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 						},
 						Type: corev1.SecretTypeOpaque,
 					}
@@ -923,16 +843,14 @@ resources:
 					)
 
 					deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-						Values: apiserver.Values{
-							Audit:          auditConfig,
-							RuntimeVersion: semver.MustParse("1.33.1"),
-						},
-						TargetVersion: semver.MustParse("1.33.1"),
+						Audit:          auditConfig,
+						RuntimeVersion: semver.MustParse("1.33.1"),
+						TargetVersion:  semver.MustParse("1.33.1"),
 					})
 
 					expectedSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-audit-webhook-kubeconfig", Namespace: namespace},
-						Data:       map[string][]byte{"kubeconfig.yaml": kubeconfig},
+						Name: "gardener-apiserver-audit-webhook-kubeconfig", Namespace: namespace,
+						Data: map[string][]byte{"kubeconfig.yaml": kubeconfig},
 					}
 					Expect(kubernetesutils.MakeUnique(expectedSecret)).To(Succeed())
 
@@ -943,22 +861,20 @@ resources:
 
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecret), actualSecret)).To(Succeed())
 					Expect(actualSecret).To(DeepEqual(&corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            expectedSecret.Name,
-							Namespace:       expectedSecret.Namespace,
-							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-							ResourceVersion: "1",
-						},
-						Immutable: new(true),
-						Data:      expectedSecret.Data,
+						Name:            expectedSecret.Name,
+						Namespace:       expectedSecret.Namespace,
+						Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+						ResourceVersion: "1",
+						Immutable:       new(true),
+						Data:            expectedSecret.Data,
 					}))
 				})
 
 				Context("admission kubeconfigs", func() {
 					It("should successfully deploy the secret resource w/o admission plugin kubeconfigs", func() {
 						secretAdmissionKubeconfigs := &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-admission-kubeconfigs", Namespace: namespace},
-							Data:       map[string][]byte{},
+							Name: "gardener-apiserver-admission-kubeconfigs", Namespace: namespace,
+							Data: map[string][]byte{},
 						}
 						Expect(kubernetesutils.MakeUnique(secretAdmissionKubeconfigs)).To(Succeed())
 
@@ -966,33 +882,29 @@ resources:
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secretAdmissionKubeconfigs), secretAdmissionKubeconfigs)).To(Succeed())
 						Expect(secretAdmissionKubeconfigs).To(DeepEqual(&corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            secretAdmissionKubeconfigs.Name,
-								Namespace:       secretAdmissionKubeconfigs.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      secretAdmissionKubeconfigs.Data,
+							Name:            secretAdmissionKubeconfigs.Name,
+							Namespace:       secretAdmissionKubeconfigs.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            secretAdmissionKubeconfigs.Data,
 						}))
 					})
 
 					It("should successfully deploy the configmap resource w/ admission plugins", func() {
 						admissionPlugins := []apiserver.AdmissionPluginConfig{
-							{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-							{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz"}, Kubeconfig: []byte("foo")},
+							{Name: "Foo"},
+							{Name: "Baz", Kubeconfig: []byte("foo")},
 						}
 
 						deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-							Values: apiserver.Values{
-								EnabledAdmissionPlugins: admissionPlugins,
-								RuntimeVersion:          semver.MustParse("1.33.1"),
-							},
-							TargetVersion: semver.MustParse("1.33.1"),
+							EnabledAdmissionPlugins: admissionPlugins,
+							RuntimeVersion:          semver.MustParse("1.33.1"),
+							TargetVersion:           semver.MustParse("1.33.1"),
 						})
 
 						secretAdmissionKubeconfigs := &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-admission-kubeconfigs", Namespace: namespace},
+							Name: "gardener-apiserver-admission-kubeconfigs", Namespace: namespace,
 							Data: map[string][]byte{
 								"baz-kubeconfig.yaml": []byte("foo"),
 							},
@@ -1003,14 +915,12 @@ resources:
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secretAdmissionKubeconfigs), secretAdmissionKubeconfigs)).To(Succeed())
 						Expect(secretAdmissionKubeconfigs).To(DeepEqual(&corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            secretAdmissionKubeconfigs.Name,
-								Namespace:       secretAdmissionKubeconfigs.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      secretAdmissionKubeconfigs.Data,
+							Name:            secretAdmissionKubeconfigs.Name,
+							Namespace:       secretAdmissionKubeconfigs.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            secretAdmissionKubeconfigs.Data,
 						}))
 					})
 				})
@@ -1020,7 +930,7 @@ resources:
 				Context("audit", func() {
 					It("should successfully deploy the configmap resource w/ default policy", func() {
 						configMapAuditPolicy := &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-audit-policy-config", Namespace: namespace},
+							Name: "gardener-apiserver-audit-policy-config", Namespace: namespace,
 							Data: map[string]string{"audit-policy.yaml": `apiVersion: audit.k8s.io/v1
 kind: Policy
 metadata: {}
@@ -1034,14 +944,12 @@ rules:
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMapAuditPolicy), configMapAuditPolicy)).To(Succeed())
 						Expect(configMapAuditPolicy).To(DeepEqual(&corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            configMapAuditPolicy.Name,
-								Namespace:       configMapAuditPolicy.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      configMapAuditPolicy.Data,
+							Name:            configMapAuditPolicy.Name,
+							Namespace:       configMapAuditPolicy.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            configMapAuditPolicy.Data,
 						}))
 					})
 
@@ -1052,16 +960,14 @@ rules:
 						)
 
 						deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-							Values: apiserver.Values{
-								Audit:          auditConfig,
-								RuntimeVersion: semver.MustParse("1.33.1"),
-							},
-							TargetVersion: semver.MustParse("1.33.1"),
+							Audit:          auditConfig,
+							RuntimeVersion: semver.MustParse("1.33.1"),
+							TargetVersion:  semver.MustParse("1.33.1"),
 						})
 
 						configMapAuditPolicy := &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-audit-policy-config", Namespace: namespace},
-							Data:       map[string]string{"audit-policy.yaml": policy},
+							Name: "gardener-apiserver-audit-policy-config", Namespace: namespace,
+							Data: map[string]string{"audit-policy.yaml": policy},
 						}
 						Expect(kubernetesutils.MakeUnique(configMapAuditPolicy)).To(Succeed())
 
@@ -1069,14 +975,12 @@ rules:
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMapAuditPolicy), configMapAuditPolicy)).To(Succeed())
 						Expect(configMapAuditPolicy).To(DeepEqual(&corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            configMapAuditPolicy.Name,
-								Namespace:       configMapAuditPolicy.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      configMapAuditPolicy.Data,
+							Name:            configMapAuditPolicy.Name,
+							Namespace:       configMapAuditPolicy.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            configMapAuditPolicy.Data,
 						}))
 					})
 				})
@@ -1084,7 +988,7 @@ rules:
 				Context("admission", func() {
 					It("should successfully deploy the configmap resource w/o admission plugins", func() {
 						configMapAdmission := &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-admission-config", Namespace: namespace},
+							Name: "gardener-apiserver-admission-config", Namespace: namespace,
 							Data: map[string]string{"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
 plugins: null
@@ -1096,53 +1000,45 @@ plugins: null
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMapAdmission), configMapAdmission)).To(Succeed())
 						Expect(configMapAdmission).To(DeepEqual(&corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            configMapAdmission.Name,
-								Namespace:       configMapAdmission.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      configMapAdmission.Data,
+							Name:            configMapAdmission.Name,
+							Namespace:       configMapAdmission.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            configMapAdmission.Data,
 						}))
 					})
 
 					It("should successfully deploy the configmap resource w/ admission plugins", func() {
 						admissionPlugins := []apiserver.AdmissionPluginConfig{
-							{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-							{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("some-config-for-baz")}}},
+							{Name: "Foo"},
+							{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("some-config-for-baz")}},
 							{
-								AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-									Name: "MutatingAdmissionWebhook",
-									Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+								Name: "MutatingAdmissionWebhook",
+								Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-								},
 								Kubeconfig: []byte("foo"),
 							},
 							{
-								AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-									Name: "ValidatingAdmissionWebhook",
-									Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+								Name: "ValidatingAdmissionWebhook",
+								Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-								},
 								Kubeconfig: []byte("foo"),
 							},
 						}
 
 						deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-							Values: apiserver.Values{
-								EnabledAdmissionPlugins: admissionPlugins,
-								RuntimeVersion:          semver.MustParse("1.33.1"),
-							},
-							TargetVersion: semver.MustParse("1.33.1"),
+							EnabledAdmissionPlugins: admissionPlugins,
+							RuntimeVersion:          semver.MustParse("1.33.1"),
+							TargetVersion:           semver.MustParse("1.33.1"),
 						})
 
 						configMapAdmission := &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-admission-config", Namespace: namespace},
+							Name: "gardener-apiserver-admission-config", Namespace: namespace,
 							Data: map[string]string{
 								"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
@@ -1174,49 +1070,41 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMapAdmission), configMapAdmission)).To(Succeed())
 						Expect(configMapAdmission).To(DeepEqual(&corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            configMapAdmission.Name,
-								Namespace:       configMapAdmission.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      configMapAdmission.Data,
+							Name:            configMapAdmission.Name,
+							Namespace:       configMapAdmission.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            configMapAdmission.Data,
 						}))
 					})
 
 					It("should successfully deploy the configmap resource w/ admission plugins w/ config but w/o kubeconfigs", func() {
 						admissionPlugins := []apiserver.AdmissionPluginConfig{
 							{
-								AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-									Name: "MutatingAdmissionWebhook",
-									Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+								Name: "MutatingAdmissionWebhook",
+								Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-								},
 							},
 							{
-								AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-									Name: "ValidatingAdmissionWebhook",
-									Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+								Name: "ValidatingAdmissionWebhook",
+								Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-								},
 							},
 						}
 
 						deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-							Values: apiserver.Values{
-								EnabledAdmissionPlugins: admissionPlugins,
-								RuntimeVersion:          semver.MustParse("1.33.1"),
-							},
-							TargetVersion: semver.MustParse("1.33.1"),
+							EnabledAdmissionPlugins: admissionPlugins,
+							RuntimeVersion:          semver.MustParse("1.33.1"),
+							TargetVersion:           semver.MustParse("1.33.1"),
 						})
 
 						configMapAdmission := &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-admission-config", Namespace: namespace},
+							Name: "gardener-apiserver-admission-config", Namespace: namespace,
 							Data: map[string]string{
 								"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
@@ -1244,43 +1132,35 @@ kubeConfigFile: ""
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMapAdmission), configMapAdmission)).To(Succeed())
 						Expect(configMapAdmission).To(DeepEqual(&corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            configMapAdmission.Name,
-								Namespace:       configMapAdmission.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      configMapAdmission.Data,
+							Name:            configMapAdmission.Name,
+							Namespace:       configMapAdmission.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            configMapAdmission.Data,
 						}))
 					})
 
 					It("should successfully deploy the configmap resource w/ admission plugins w/o configs but w/ kubeconfig", func() {
 						admissionPlugins := []apiserver.AdmissionPluginConfig{
 							{
-								AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-									Name: "MutatingAdmissionWebhook",
-								},
+								Name:       "MutatingAdmissionWebhook",
 								Kubeconfig: []byte("foo"),
 							},
 							{
-								AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-									Name: "ValidatingAdmissionWebhook",
-								},
+								Name:       "ValidatingAdmissionWebhook",
 								Kubeconfig: []byte("foo"),
 							},
 						}
 
 						deployer = New(fakeClient, namespace, fakeSecretManager, Values{
-							Values: apiserver.Values{
-								EnabledAdmissionPlugins: admissionPlugins,
-								RuntimeVersion:          semver.MustParse("1.33.1"),
-							},
-							TargetVersion: semver.MustParse("1.33.1"),
+							EnabledAdmissionPlugins: admissionPlugins,
+							RuntimeVersion:          semver.MustParse("1.33.1"),
+							TargetVersion:           semver.MustParse("1.33.1"),
 						})
 
 						configMapAdmission := &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver-admission-config", Namespace: namespace},
+							Name: "gardener-apiserver-admission-config", Namespace: namespace,
 							Data: map[string]string{
 								"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
@@ -1308,14 +1188,12 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 						Expect(deployer.Deploy(ctx)).To(Succeed())
 						Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMapAdmission), configMapAdmission)).To(Succeed())
 						Expect(configMapAdmission).To(DeepEqual(&corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:            configMapAdmission.Name,
-								Namespace:       configMapAdmission.Namespace,
-								Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-								ResourceVersion: "1",
-							},
-							Immutable: new(true),
-							Data:      configMapAdmission.Data,
+							Name:            configMapAdmission.Name,
+							Namespace:       configMapAdmission.Namespace,
+							Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+							ResourceVersion: "1",
+							Immutable:       new(true),
+							Data:            configMapAdmission.Data,
 						}))
 					})
 				})
@@ -1340,15 +1218,13 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceRuntime), managedResourceRuntime)).To(Succeed())
 					expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            managedResourceRuntime.Name,
-							Namespace:       managedResourceRuntime.Namespace,
-							ResourceVersion: "2",
-							Generation:      1,
-							Labels: map[string]string{
-								"gardener.cloud/role":                "seed-system-component",
-								"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
-							},
+						Name:            managedResourceRuntime.Name,
+						Namespace:       managedResourceRuntime.Namespace,
+						ResourceVersion: "2",
+						Generation:      1,
+						Labels: map[string]string{
+							"gardener.cloud/role":                "seed-system-component",
+							"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
 						},
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							Class:       new("seed"),
@@ -1364,15 +1240,13 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceVirtual), managedResourceVirtual)).To(Succeed())
 					expectedVirtualMr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            managedResourceVirtual.Name,
-							Namespace:       managedResourceVirtual.Namespace,
-							ResourceVersion: "2",
-							Generation:      1,
-							Labels: map[string]string{
-								"origin":                             "gardener",
-								"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
-							},
+						Name:            managedResourceVirtual.Name,
+						Namespace:       managedResourceVirtual.Namespace,
+						ResourceVersion: "2",
+						Generation:      1,
+						Labels: map[string]string{
+							"origin":                             "gardener",
+							"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
 						},
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1459,12 +1333,10 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 
 			It("should fail because the runtime ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -1472,11 +1344,9 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 
 			It("should fail because the runtime ManagedResource is still progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1501,11 +1371,9 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 
 			It("should fail because the virtual ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1526,12 +1394,10 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -1539,11 +1405,9 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 
 			It("should succeed because the both ManagedResource are healthy and progressed", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1564,12 +1428,10 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(Succeed())

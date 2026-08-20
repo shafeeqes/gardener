@@ -17,11 +17,9 @@ import (
 
 func (a *alertManager) alertManager() *monitoringv1.Alertmanager {
 	obj := &monitoringv1.Alertmanager{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.values.Name,
-			Namespace: a.namespace,
-			Labels:    a.getLabels(),
-		},
+		Name:      a.values.Name,
+		Namespace: a.namespace,
+		Labels:    a.getLabels(),
 		Spec: monitoringv1.AlertmanagerSpec{
 			PodMetadata: &monitoringv1.EmbeddedObjectMetadata{
 				Labels: utils.MergeStringMaps(a.getLabels(), map[string]string{

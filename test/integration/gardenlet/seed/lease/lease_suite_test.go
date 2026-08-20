@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	kubernetesclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -96,10 +95,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create seed")
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "seed-",
-			Labels:       map[string]string{testID: testRunID},
-		},
+		GenerateName: "seed-",
+		Labels:       map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",
@@ -149,9 +146,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "gardener-system-seed-lease-",
-		},
+		GenerateName: "gardener-system-seed-lease-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)

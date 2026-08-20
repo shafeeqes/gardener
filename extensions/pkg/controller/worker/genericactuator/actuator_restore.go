@@ -10,7 +10,6 @@ import (
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
@@ -116,7 +115,7 @@ func addStateToMachineDeployment(
 			return fmt.Errorf("cannot fetch machine state from ShootState because garden client is missing")
 		}
 
-		shootState := &gardencorev1beta1.ShootState{ObjectMeta: metav1.ObjectMeta{Name: shoot.Name, Namespace: shoot.Namespace}}
+		shootState := &gardencorev1beta1.ShootState{Name: shoot.Name, Namespace: shoot.Namespace}
 		log.Info("Reading machine state from ShootState as fallback", "shootState", client.ObjectKeyFromObject(shootState))
 
 		// We use the `gardenReader` here to prevent controller-runtime from trying to cache/list the ShootStates.

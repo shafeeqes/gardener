@@ -22,10 +22,8 @@ var _ = Describe("OperatingSystemConfig validation tests", func() {
 
 	BeforeEach(func() {
 		osc = &extensionsv1alpha1.OperatingSystemConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-osc",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-osc",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           "provider",

@@ -50,10 +50,8 @@ var _ = Describe("ReplicaGetter", func() {
 			}).Build()
 
 		managedSeedSet = &seedmanagementv1alpha1.ManagedSeedSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: seedmanagementv1alpha1.ManagedSeedSetSpec{
 				Selector: metav1.LabelSelector{
 					MatchLabels: map[string]string{
@@ -64,49 +62,37 @@ var _ = Describe("ReplicaGetter", func() {
 		}
 		shoots = []gardencorev1beta1.Shoot{
 			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "-0",
-					Namespace: namespace,
-					Labels:    map[string]string{"name": name},
-				},
+				Name:      name + "-0",
+				Namespace: namespace,
+				Labels:    map[string]string{"name": name},
 			},
 			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "-1",
-					Namespace: namespace,
-					Labels:    map[string]string{"name": name},
-				},
+				Name:      name + "-1",
+				Namespace: namespace,
+				Labels:    map[string]string{"name": name},
 			},
 			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "-2",
-					Namespace: namespace,
-					Labels:    map[string]string{"name": name},
-				},
+				Name:      name + "-2",
+				Namespace: namespace,
+				Labels:    map[string]string{"name": name},
 			},
 		}
 		managedSeeds = []seedmanagementv1alpha1.ManagedSeed{
 			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "-0",
-					Namespace: namespace,
-					Labels:    map[string]string{"name": name},
-				},
+				Name:      name + "-0",
+				Namespace: namespace,
+				Labels:    map[string]string{"name": name},
 			},
 			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "-1",
-					Namespace: namespace,
-					Labels:    map[string]string{"name": name},
-				},
+				Name:      name + "-1",
+				Namespace: namespace,
+				Labels:    map[string]string{"name": name},
 			},
 		}
 		seeds = []gardencorev1beta1.Seed{
 			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   name + "-0",
-					Labels: map[string]string{"name": name},
-				},
+				Name:   name + "-0",
+				Labels: map[string]string{"name": name},
 			},
 		}
 	})
@@ -114,10 +100,8 @@ var _ = Describe("ReplicaGetter", func() {
 	Describe("#GetReplicas", func() {
 		It("should return all existing replicas", func() {
 			scheduledShoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
+				Name:      "foo",
+				Namespace: "bar",
 				Spec: gardencorev1beta1.ShootSpec{
 					SeedName: &seeds[0].Name,
 				},

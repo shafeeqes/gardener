@@ -145,19 +145,15 @@ var _ = Describe("NginxIngress", func() {
 			},
 		}
 		b.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			Name:      shootName,
+			Namespace: shootNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				DNS: &gardencorev1beta1.DNS{
 					Domain: new(externalDomain),
 				},
 				Addons: &gardencorev1beta1.Addons{
 					NginxIngress: &gardencorev1beta1.NginxIngress{
-						Addon: gardencorev1beta1.Addon{
-							Enabled: true,
-						},
+						Enabled: true,
 					},
 				},
 			},
@@ -286,18 +282,16 @@ var _ = Describe("NginxIngress", func() {
 			err := client.Get(ctx, types.NamespacedName{Name: shootName + "-ingress", Namespace: controlPlaneNamespace}, dnsRecord)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(dnsRecord).To(DeepDerivativeEqual(&extensionsv1alpha1.DNSRecord{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            shootName + "-ingress",
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-					Annotations: map[string]string{
-						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-					},
-					Labels: map[string]string{
-						"role":                "ingress",
-						"gardener.cloud/role": "controlplane",
-					},
+				Name:            shootName + "-ingress",
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Annotations: map[string]string{
+					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+				},
+				Labels: map[string]string{
+					"role":                "ingress",
+					"gardener.cloud/role": "controlplane",
 				},
 				Spec: extensionsv1alpha1.DNSRecordSpec{
 					DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -319,12 +313,10 @@ var _ = Describe("NginxIngress", func() {
 			err = client.Get(ctx, types.NamespacedName{Name: DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName, Namespace: controlPlaneNamespace}, secret)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(secret).To(DeepDerivativeEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-				},
-				Type: corev1.SecretTypeOpaque,
+				Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Type:            corev1.SecretTypeOpaque,
 				Data: map[string][]byte{
 					"external-foo": []byte("external-bar"),
 				},

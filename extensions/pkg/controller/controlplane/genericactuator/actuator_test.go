@@ -182,8 +182,8 @@ var _ = Describe("Actuator", func() {
 		))
 
 		cp = &extensionsv1alpha1.ControlPlane{
-			ObjectMeta: metav1.ObjectMeta{Name: "control-plane", Namespace: namespace},
-			Spec:       extensionsv1alpha1.ControlPlaneSpec{},
+			Name: "control-plane", Namespace: namespace,
+			Spec: extensionsv1alpha1.ControlPlaneSpec{},
 		}
 
 		shootAccessSecretsFunc = func(namespace string) []*gardenerutils.AccessSecret {
@@ -191,22 +191,22 @@ var _ = Describe("Actuator", func() {
 		}
 
 		cpSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.SecretNameCloudProvider, Namespace: namespace},
-			Data:       map[string][]byte{"foo": []byte("bar")},
+			Name: v1beta1constants.SecretNameCloudProvider, Namespace: namespace,
+			Data: map[string][]byte{"foo": []byte("bar")},
 		}
 		cpConfigMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{Name: cloudProviderConfigName, Namespace: namespace},
-			Data:       map[string]string{"abc": "xyz"},
+			Name: cloudProviderConfigName, Namespace: namespace,
+			Data: map[string]string{"abc": "xyz"},
 		}
 
 		resourceKeyConfigurationSeedChart = client.ObjectKey{Namespace: namespace, Name: ControlPlaneSeedConfigurationChartResourceName}
 		createdMRSecretForConfigurationSeedChart = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneSeedConfigurationChartResourceName, Namespace: namespace},
-			Data:       map[string][]byte{chartName: []byte(renderedContent)},
-			Type:       corev1.SecretTypeOpaque,
+			Name: ControlPlaneSeedConfigurationChartResourceName, Namespace: namespace,
+			Data: map[string][]byte{chartName: []byte(renderedContent)},
+			Type: corev1.SecretTypeOpaque,
 		}
 		createdMRForConfigurationSeedChart = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneSeedConfigurationChartResourceName, Namespace: namespace},
+			Name: ControlPlaneSeedConfigurationChartResourceName, Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class: new(v1beta1constants.SeedResourceManagerClass),
 				SecretRefs: []corev1.LocalObjectReference{
@@ -216,12 +216,12 @@ var _ = Describe("Actuator", func() {
 		}
 
 		createdMRSecretForControlPlaneSeedChart = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneSeedChartResourceName, Namespace: namespace},
-			Data:       map[string][]byte{chartName: []byte(renderedContent)},
-			Type:       corev1.SecretTypeOpaque,
+			Name: ControlPlaneSeedChartResourceName, Namespace: namespace,
+			Data: map[string][]byte{chartName: []byte(renderedContent)},
+			Type: corev1.SecretTypeOpaque,
 		}
 		createdMRForControlPlaneSeedChart = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneSeedChartResourceName, Namespace: namespace},
+			Name: ControlPlaneSeedChartResourceName, Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class: new(v1beta1constants.SeedResourceManagerClass),
 				SecretRefs: []corev1.LocalObjectReference{
@@ -232,12 +232,12 @@ var _ = Describe("Actuator", func() {
 
 		resourceKeyCPShootChart = client.ObjectKey{Namespace: namespace, Name: ControlPlaneShootChartResourceName}
 		createdMRSecretForCPShootChart = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneShootChartResourceName, Namespace: namespace},
-			Data:       map[string][]byte{chartName: []byte(renderedContent)},
-			Type:       corev1.SecretTypeOpaque,
+			Name: ControlPlaneShootChartResourceName, Namespace: namespace,
+			Data: map[string][]byte{chartName: []byte(renderedContent)},
+			Type: corev1.SecretTypeOpaque,
 		}
 		createdMRForCPShootChart = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneShootChartResourceName, Namespace: namespace},
+			Name: ControlPlaneShootChartResourceName, Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{
 					{Name: ControlPlaneShootChartResourceName},
@@ -250,12 +250,12 @@ var _ = Describe("Actuator", func() {
 
 		resourceKeyCPShootCRDsChart = client.ObjectKey{Namespace: namespace, Name: ControlPlaneShootCRDsChartResourceName}
 		createdMRSecretForCPShootCRDsChart = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneShootCRDsChartResourceName, Namespace: namespace},
-			Data:       map[string][]byte{chartName: []byte(renderedContent)},
-			Type:       corev1.SecretTypeOpaque,
+			Name: ControlPlaneShootCRDsChartResourceName, Namespace: namespace,
+			Data: map[string][]byte{chartName: []byte(renderedContent)},
+			Type: corev1.SecretTypeOpaque,
 		}
 		createdMRForCPShootCRDsChart = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: ControlPlaneShootCRDsChartResourceName, Namespace: namespace},
+			Name: ControlPlaneShootCRDsChartResourceName, Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{
 					{Name: ControlPlaneShootCRDsChartResourceName},
@@ -268,12 +268,12 @@ var _ = Describe("Actuator", func() {
 
 		resourceKeyStorageClassesChart = client.ObjectKey{Namespace: namespace, Name: StorageClassesChartResourceName}
 		createdMRSecretForStorageClassesChart = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: StorageClassesChartResourceName, Namespace: namespace},
-			Data:       map[string][]byte{chartName: []byte(renderedContent)},
-			Type:       corev1.SecretTypeOpaque,
+			Name: StorageClassesChartResourceName, Namespace: namespace,
+			Data: map[string][]byte{chartName: []byte(renderedContent)},
+			Type: corev1.SecretTypeOpaque,
 		}
 		createdMRForStorageClassesChart = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: StorageClassesChartResourceName, Namespace: namespace},
+			Name: StorageClassesChartResourceName, Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{
 					{Name: StorageClassesChartResourceName},
@@ -286,7 +286,7 @@ var _ = Describe("Actuator", func() {
 
 		resourceKeyShootWebhooks = client.ObjectKey{Namespace: namespace, Name: ShootWebhooksResourceName}
 		createdMRForShootWebhooks = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: ShootWebhooksResourceName, Namespace: namespace},
+			Name: ShootWebhooksResourceName, Namespace: namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{
 					{Name: ShootWebhooksResourceName},
@@ -423,9 +423,9 @@ webhooks:
 				Expect(err).NotTo(HaveOccurred())
 
 				createdMRSecretForShootWebhooks := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: ShootWebhooksResourceName, Namespace: namespace},
-					Data:       map[string][]byte{"data.yaml.br": compressedData},
-					Type:       corev1.SecretTypeOpaque,
+					Name: ShootWebhooksResourceName, Namespace: namespace,
+					Data: map[string][]byte{"data.yaml.br": compressedData},
+					Type: corev1.SecretTypeOpaque,
 				}
 
 				expectManagedResourceCreated(ctx, c, createdMRSecretForShootWebhooks, createdMRForShootWebhooks)
@@ -535,12 +535,12 @@ webhooks:
 
 			if webhookConfig != nil {
 				Expect(c.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: ShootWebhooksResourceName, Namespace: namespace},
+					Name: ShootWebhooksResourceName, Namespace: namespace,
 				})).To(Succeed())
 				Expect(c.Create(ctx, createdMRForShootWebhooks.DeepCopy())).To(Succeed())
 			}
 			Expect(c.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: shootAccessSecretsFunc(namespace)[0].Secret.Name, Namespace: namespace},
+				Name: shootAccessSecretsFunc(namespace)[0].Secret.Name, Namespace: namespace,
 			})).To(Succeed())
 
 			// Call Delete method and check the result

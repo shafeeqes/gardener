@@ -9,8 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -41,16 +39,12 @@ var _ = Describe("Controller", func() {
 		exposureClassName = "test-exposureclass"
 		reconciler = &Reconciler{Client: fakeClient, Recorder: &events.FakeRecorder{}}
 		exposureClass = &gardencorev1beta1.ExposureClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: exposureClassName,
-			},
+			Name: exposureClassName,
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-shoot",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-shoot",
+			Namespace: "test-namespace",
 			Spec: gardencorev1beta1.ShootSpec{
 				ExposureClassName: &exposureClassName,
 			},
@@ -60,7 +54,7 @@ var _ = Describe("Controller", func() {
 	It("should return nil because object is not found", func() {
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(exposureClass), &gardencorev1beta1.ExposureClass{})).To(BeNotFoundError())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: exposureClassName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: exposureClassName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -71,7 +65,7 @@ var _ = Describe("Controller", func() {
 		})
 
 		It("should ensure the finalizer", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: exposureClassName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: exposureClassName})
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(exposureClass), exposureClass)).To(Succeed())
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
@@ -93,7 +87,7 @@ var _ = Describe("Controller", func() {
 			exposureClass.Finalizers = []string{"test-finalizer"}
 			Expect(fakeClient.Patch(ctx, exposureClass, patch)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: exposureClassName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: exposureClassName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -101,13 +95,13 @@ var _ = Describe("Controller", func() {
 		It("should return error because Shoot referencing ExposureClass exists", func() {
 			Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: exposureClassName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: exposureClassName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("cannot delete ExposureClass")))
 		})
 
 		It("should remove the finalizer because no Shoot is referencing the ExposureClass", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: exposureClassName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: exposureClassName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(exposureClass), exposureClass)).To(BeNotFoundError())

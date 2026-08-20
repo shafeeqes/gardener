@@ -12,7 +12,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -43,10 +42,8 @@ var _ = Describe("CopyBackupsTask", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(s).Build()
 
 		expected = &druidcorev1alpha1.EtcdCopyBackupsTask{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "bar",
-				Namespace: "shoot--foo--bar",
-			},
+			Name:      "bar",
+			Namespace: "shoot--foo--bar",
 			Spec: druidcorev1alpha1.EtcdCopyBackupsTaskSpec{
 				SourceStore: druidcorev1alpha1.StoreSpec{},
 				TargetStore: druidcorev1alpha1.StoreSpec{},

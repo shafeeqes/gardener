@@ -9,7 +9,6 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -124,10 +123,8 @@ func (r *Reconciler) MapSecretToManagedResources(managedResourcePredicates ...pr
 			for _, secretRef := range mr.Spec.SecretRefs {
 				if secretRef.Name == secret.Name {
 					requests = append(requests, reconcile.Request{
-						NamespacedName: types.NamespacedName{
-							Namespace: mr.Namespace,
-							Name:      mr.Name,
-						},
+						Namespace: mr.Namespace,
+						Name:      mr.Name,
 					})
 				}
 			}

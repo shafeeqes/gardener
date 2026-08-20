@@ -807,9 +807,9 @@ var _ = Describe("Utils tests", func() {
 				{
 					Name: "test-image",
 					Versions: []core.MachineImageVersion{{
-						ExpirableVersion: core.ExpirableVersion{Version: "1.0.0"},
-						CRI:              []core.CRI{{Name: "containerd"}},
-						Architectures:    []string{"amd64"},
+						Version:       "1.0.0",
+						CRI:           []core.CRI{{Name: "containerd"}},
+						Architectures: []string{"amd64"},
 					}},
 					UpdateStrategy: new(core.UpdateStrategyMajor),
 				},

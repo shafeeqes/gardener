@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -34,10 +33,8 @@ var _ = Describe("Seed BackupBucketsCheck controller tests", func() {
 
 		By("Create Seed")
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -98,12 +95,10 @@ var _ = Describe("Seed BackupBucketsCheck controller tests", func() {
 		}).Should(Succeed())
 
 		bb1 = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "foo-1-",
-				Labels: map[string]string{
-					"provider.extensions.gardener.cloud/providerType": "true",
-					testID: testRunID,
-				},
+			GenerateName: "foo-1-",
+			Labels: map[string]string{
+				"provider.extensions.gardener.cloud/providerType": "true",
+				testID: testRunID,
 			},
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				SeedName: &seed.Name,

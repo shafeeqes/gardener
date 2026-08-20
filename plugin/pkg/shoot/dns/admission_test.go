@@ -107,64 +107,52 @@ var _ = Describe("dns", func() {
 		BeforeEach(func() {
 			ctx = context.Background()
 			defaultDomainSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-1",
-					Namespace: v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						gardenerutils.DNSDomain:   domain,
-						gardenerutils.DNSProvider: defaultDomainProvider,
-					},
+				Name:      "secret-1",
+				Namespace: v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					gardenerutils.DNSDomain:   domain,
+					gardenerutils.DNSProvider: defaultDomainProvider,
 				},
 			}
 			defaultDomainSecretHigherPriority = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-2",
-					Namespace: v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						gardenerutils.DNSDomain:                domainHigherPriority,
-						gardenerutils.DNSDefaultDomainPriority: "5",
-						gardenerutils.DNSProvider:              defaultDomainProvider,
-					},
+				Name:      "secret-2",
+				Namespace: v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					gardenerutils.DNSDomain:                domainHigherPriority,
+					gardenerutils.DNSDefaultDomainPriority: "5",
+					gardenerutils.DNSProvider:              defaultDomainProvider,
 				},
 			}
 			defaultDomainSecretLowerPriority = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-2",
-					Namespace: v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						gardenerutils.DNSDomain:                domainLowerPriority,
-						gardenerutils.DNSDefaultDomainPriority: "-5",
-						gardenerutils.DNSProvider:              defaultDomainProvider,
-					},
+				Name:      "secret-2",
+				Namespace: v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					gardenerutils.DNSDomain:                domainLowerPriority,
+					gardenerutils.DNSDefaultDomainPriority: "-5",
+					gardenerutils.DNSProvider:              defaultDomainProvider,
 				},
 			}
 			project = &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: projectName,
-				},
+				Name: projectName,
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: new(namespace),
 				},
 			}
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seedName,
-				},
+				Name: seedName,
 			}
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: namespace,
-				},
+				Name:      shootName,
+				Namespace: namespace,
 				Spec: core.ShootSpec{
 					DNS: &core.DNS{
 						Providers: []core.DNSProvider{
@@ -356,10 +344,8 @@ var _ = Describe("dns", func() {
 				Expect(coreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Add(seed)).To(Succeed())
 
 				overwriteSecret := corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "secret-overwrite",
-						Namespace: v1beta1constants.GardenNamespace,
-					},
+					Name:      "secret-overwrite",
+					Namespace: v1beta1constants.GardenNamespace,
 				}
 				Expect(kubeInformerFactory.Core().V1().Secrets().Informer().GetStore().Add(&overwriteSecret)).To(Succeed())
 				seed.Spec.DNS = gardencorev1beta1.SeedDNS{
@@ -552,9 +538,7 @@ var _ = Describe("dns", func() {
 
 			BeforeEach(func() {
 				destinationSeed = gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: destinationSeedName,
-					},
+					Name: destinationSeedName,
 				}
 
 				shoot.Spec.DNS.Providers = nil
@@ -591,36 +575,28 @@ var _ = Describe("dns", func() {
 		BeforeEach(func() {
 			ctx = context.Background()
 			defaultDomainSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-1",
-					Namespace: v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
-					},
-					Annotations: map[string]string{
-						gardenerutils.DNSDomain:   domain,
-						gardenerutils.DNSProvider: defaultDomainProvider,
-					},
+				Name:      "secret-1",
+				Namespace: v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
+				},
+				Annotations: map[string]string{
+					gardenerutils.DNSDomain:   domain,
+					gardenerutils.DNSProvider: defaultDomainProvider,
 				},
 			}
 			project = &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: projectName,
-				},
+				Name: projectName,
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: new(namespace),
 				},
 			}
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seedName,
-				},
+				Name: seedName,
 			}
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: namespace,
-				},
+				Name:      shootName,
+				Namespace: namespace,
 				Spec: core.ShootSpec{
 					DNS:      &core.DNS{},
 					SeedName: new(seedName),
@@ -651,9 +627,7 @@ var _ = Describe("dns", func() {
 
 		It("should forbid when object is not Shoot", func() {
 			project := core.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "my-project",
-				},
+				Name: "my-project",
 			}
 			attrs := admission.NewAttributesRecord(&project, nil, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Create, &metav1.CreateOptions{}, false, nil)
 

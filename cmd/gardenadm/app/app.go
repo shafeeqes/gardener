@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericiooptions"
 
 	"github.com/gardener/gardener/pkg/gardenadm/cmd"
 	"github.com/gardener/gardener/pkg/gardenadm/cmd/bootstrap"
@@ -28,7 +27,7 @@ const Name = "gardenadm"
 // NewCommand creates a new cobra.Command for running gardenadm.
 func NewCommand() *cobra.Command {
 	opts := &cmd.Options{
-		IOStreams: genericiooptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr},
+		In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr,
 	}
 
 	cmd := &cobra.Command{

@@ -11,7 +11,6 @@ import (
 	fluentbitv1alpha2 "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2"
 	fluentbitv1alpha2filter "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/filter"
 	fluentbitv1alpha2input "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/input"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/component"
@@ -35,10 +34,8 @@ func getContainerdTag() string {
 func generateClusterInputs() []*fluentbitv1alpha2.ClusterInput {
 	return []*fluentbitv1alpha2.ClusterInput{
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   strings.ReplaceAll(getContainerdTag(), ".", "-"),
-				Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-			},
+			Name:   strings.ReplaceAll(getContainerdTag(), ".", "-"),
+			Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 			Spec: fluentbitv1alpha2.InputSpec{
 				Systemd: &fluentbitv1alpha2input.Systemd{
 					Tag:           getContainerdTag(),
@@ -54,10 +51,8 @@ func generateClusterInputs() []*fluentbitv1alpha2.ClusterInput {
 func generateClusterFilters() []*fluentbitv1alpha2.ClusterFilter {
 	return []*fluentbitv1alpha2.ClusterFilter{
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   strings.ReplaceAll(getContainerdTag(), ".", "-"),
-				Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-			},
+			Name:   strings.ReplaceAll(getContainerdTag(), ".", "-"),
+			Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 			Spec: fluentbitv1alpha2.FilterSpec{
 				Match: getContainerdTag() + ".*",
 				FilterItems: []fluentbitv1alpha2.FilterItem{

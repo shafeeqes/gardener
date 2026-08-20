@@ -397,7 +397,7 @@ func (h *Handler) admitSecret(ctx context.Context, seedName string, request admi
 			return admission.Errored(http.StatusUnprocessableEntity, fmt.Errorf("label %q value must be set to %q", v1beta1constants.LabelDiscoveryPublic, v1beta1constants.LabelPublicKeysServiceAccount))
 		}
 
-		shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: shootNamespace}}
+		shoot := &gardencorev1beta1.Shoot{Name: shootName, Namespace: shootNamespace}
 		if err := h.Client.Get(ctx, client.ObjectKeyFromObject(shoot), shoot); err != nil {
 			if apierrors.IsNotFound(err) {
 				return admission.Errored(http.StatusForbidden, err)

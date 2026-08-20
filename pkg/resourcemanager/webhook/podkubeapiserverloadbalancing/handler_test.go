@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -44,10 +43,8 @@ var _ = Describe("Handler", func() {
 
 		handler = &Handler{Logger: log, TargetClient: targetClient}
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: testNamespace,
-				Name:      "bar-pod",
-			},
+			Namespace: testNamespace,
+			Name:      "bar-pod",
 		}
 	})
 
@@ -63,10 +60,8 @@ var _ = Describe("Handler", func() {
 		When("the istio-internal-load-balancing configmap is found", func() {
 			BeforeEach(func() {
 				configMap := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: testNamespace,
-						Name:      "istio-internal-load-balancing",
-					},
+					Namespace: testNamespace,
+					Name:      "istio-internal-load-balancing",
 					Data: map[string]string{
 						resourcemanagerconfigv1alpha1.HostsConfigMapKey:          "api.example.com,api2.example.com",
 						resourcemanagerconfigv1alpha1.IstioNamespaceConfigMapKey: istioNamespace,
@@ -91,11 +86,9 @@ var _ = Describe("Handler", func() {
 					pod.Spec.Volumes = []corev1.Volume{
 						{
 							Name: "foobar",
-							VolumeSource: corev1.VolumeSource{
-								Projected: &corev1.ProjectedVolumeSource{
-									Sources: []corev1.VolumeProjection{
-										{Secret: &corev1.SecretProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "generic-token-kubeconfig-foobar"}}},
-									},
+							Projected: &corev1.ProjectedVolumeSource{
+								Sources: []corev1.VolumeProjection{
+									{Secret: &corev1.SecretProjection{Name: "generic-token-kubeconfig-foobar"}},
 								},
 							},
 						},
@@ -104,10 +97,8 @@ var _ = Describe("Handler", func() {
 
 				It("should add host aliases and network policy label to the pod", func() {
 					istioService := &corev1.Service{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: istioNamespace,
-							Name:      "istio-ingressgateway-internal",
-						},
+						Namespace: istioNamespace,
+						Name:      "istio-ingressgateway-internal",
 						Spec: corev1.ServiceSpec{
 							ClusterIP:  "10.10.10.10",
 							ClusterIPs: []string{"10.10.10.10", "3fff::2"},

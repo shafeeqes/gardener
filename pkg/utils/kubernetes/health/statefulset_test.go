@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -28,7 +27,7 @@ var _ = Describe("StatefulSet", func() {
 			Status: appsv1.StatefulSetStatus{ReadyReplicas: 1},
 		}, BeNil()),
 		Entry("not observed at latest version", &appsv1.StatefulSet{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 		}, HaveOccurred()),
 		Entry("not enough ready replicas", &appsv1.StatefulSet{
 			Spec:   appsv1.StatefulSetSpec{Replicas: new(int32(2))},
@@ -43,9 +42,7 @@ var _ = Describe("StatefulSet", func() {
 
 		BeforeEach(func() {
 			statefulSet = &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 42,
-				},
+				Generation: 42,
 				Spec: appsv1.StatefulSetSpec{
 					Replicas: new(int32(3)),
 				},

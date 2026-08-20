@@ -23,10 +23,8 @@ var _ = Describe("CredentialsBinding Validation Tests", func() {
 
 		BeforeEach(func() {
 			credentialsBinding = &security.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "binding",
-					Namespace: "garden",
-				},
+				Name:      "binding",
+				Namespace: "garden",
 				Provider: security.CredentialsBindingProvider{
 					Type: "foo",
 				},
@@ -182,10 +180,8 @@ var _ = Describe("CredentialsBinding Validation Tests", func() {
 
 		BeforeEach(func() {
 			credentialsBinding = &security.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "binding",
-					Namespace: "garden",
-				},
+				Name:      "binding",
+				Namespace: "garden",
 				Provider: security.CredentialsBindingProvider{
 					Type: "foo",
 				},

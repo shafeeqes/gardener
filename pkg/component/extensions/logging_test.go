@@ -10,7 +10,6 @@ import (
 	fluentbitv1alpha2parser "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/parser"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/extensions"
 )
@@ -24,10 +23,8 @@ var _ = Describe("Logging", func() {
 			Expect(loggingConfig.Filters).To(Equal(
 				[]*fluentbitv1alpha2.ClusterFilter{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "gardener-extension",
-							Labels: map[string]string{"fluentbit.gardener/type": "seed"},
-						},
+						Name:   "gardener-extension",
+						Labels: map[string]string{"fluentbit.gardener/type": "seed"},
 						Spec: fluentbitv1alpha2.FilterSpec{
 							Match: "kubernetes.*gardener-extension*",
 							FilterItems: []fluentbitv1alpha2.FilterItem{
@@ -58,10 +55,8 @@ var _ = Describe("Logging", func() {
 			Expect(loggingConfig.Parsers).To(Equal(
 				[]*fluentbitv1alpha2.ClusterParser{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "extensions-parser",
-							Labels: map[string]string{"fluentbit.gardener/type": "seed"},
-						},
+						Name:   "extensions-parser",
+						Labels: map[string]string{"fluentbit.gardener/type": "seed"},
 						Spec: fluentbitv1alpha2.ParserSpec{
 							JSON: &fluentbitv1alpha2parser.JSON{
 								TimeKey:    "ts",

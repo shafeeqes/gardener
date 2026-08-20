@@ -64,10 +64,8 @@ var _ = Describe("Garden Reference controller tests", func() {
 		allReferencedObjects = append(allReferencedObjects, configMap1, configMap2, configMap3, configMap4, configMap5)
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "garden-" + testRunID,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "garden-" + testRunID,
+			Labels: map[string]string{testID: testRunID},
 			Spec: operatorv1alpha1.GardenSpec{
 				DNS: &operatorv1alpha1.DNSManagement{
 					Providers: []operatorv1alpha1.DNSProvider{

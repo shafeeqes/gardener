@@ -14,7 +14,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -41,13 +40,13 @@ var _ = Describe("ActuatorRestore", func() {
 
 			stateDeployment1 = &shootstate.MachineDeploymentState{
 				Replicas:    1,
-				MachineSets: []machinev1alpha1.MachineSet{{ObjectMeta: metav1.ObjectMeta{Name: "deploy1-set1"}}},
-				Machines:    []machinev1alpha1.Machine{{ObjectMeta: metav1.ObjectMeta{Name: "deploy1-machine1"}}},
+				MachineSets: []machinev1alpha1.MachineSet{{Name: "deploy1-set1"}},
+				Machines:    []machinev1alpha1.Machine{{Name: "deploy1-machine1"}},
 			}
 			stateDeployment2 = &shootstate.MachineDeploymentState{
 				Replicas:    2,
-				MachineSets: []machinev1alpha1.MachineSet{{ObjectMeta: metav1.ObjectMeta{Name: "deploy2-set1"}}},
-				Machines:    []machinev1alpha1.Machine{{ObjectMeta: metav1.ObjectMeta{Name: "deploy2-machine1"}}},
+				MachineSets: []machinev1alpha1.MachineSet{{Name: "deploy2-set1"}},
+				Machines:    []machinev1alpha1.Machine{{Name: "deploy2-machine1"}},
 			}
 			machineState = &shootstate.MachineState{MachineDeployments: map[string]*shootstate.MachineDeploymentState{
 				"deploy1": stateDeployment1,
@@ -60,8 +59,8 @@ var _ = Describe("ActuatorRestore", func() {
 		BeforeEach(func() {
 			fakeGardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 
-			shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "bar", Namespace: "foo"}}
-			shootState = &gardencorev1beta1.ShootState{ObjectMeta: metav1.ObjectMeta{Name: shoot.Name, Namespace: shoot.Namespace}}
+			shoot = &gardencorev1beta1.Shoot{Name: "bar", Namespace: "foo"}
+			shootState = &gardencorev1beta1.ShootState{Name: shoot.Name, Namespace: shoot.Namespace}
 			worker = &extensionsv1alpha1.Worker{}
 
 			wantedMachineDeployments = []extensionsworkercontroller.MachineDeployment{
@@ -173,32 +172,26 @@ var _ = Describe("ActuatorRestore", func() {
 			fakeSeedClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 			expectedMachineSet = machinev1alpha1.MachineSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machineset",
-					Namespace: "test-ns",
-					Labels: map[string]string{
-						"name": "pool1",
-					},
+				Name:      "machineset",
+				Namespace: "test-ns",
+				Labels: map[string]string{
+					"name": "pool1",
 				},
 			}
 
 			expectedMachine1 = machinev1alpha1.Machine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machine",
-					Namespace: "test-ns",
-					Labels: map[string]string{
-						"node": "node-name-one",
-					},
+				Name:      "machine",
+				Namespace: "test-ns",
+				Labels: map[string]string{
+					"node": "node-name-one",
 				},
 			}
 
 			expectedMachine2 = machinev1alpha1.Machine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machine-two",
-					Namespace: "test-ns",
-					Labels: map[string]string{
-						"node": "node-name-two",
-					},
+				Name:      "machine-two",
+				Namespace: "test-ns",
+				Labels: map[string]string{
+					"node": "node-name-two",
 				},
 			}
 

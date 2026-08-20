@@ -18,7 +18,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/clock"
 	testclock "k8s.io/utils/clock/testing"
@@ -107,28 +106,23 @@ var _ = Describe("Reconciler", func() {
 			serviceAccountNamespace = "kube-system"
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: metav1.NamespaceDefault,
-					Annotations: map[string]string{
-						"serviceaccount.resources.gardener.cloud/name":      serviceAccountName,
-						"serviceaccount.resources.gardener.cloud/namespace": serviceAccountNamespace,
-					},
-					Labels: map[string]string{
-						"resources.gardener.cloud/purpose": "token-requestor",
-					},
+				Name:      secretName,
+				Namespace: metav1.NamespaceDefault,
+				Annotations: map[string]string{
+					"serviceaccount.resources.gardener.cloud/name":      serviceAccountName,
+					"serviceaccount.resources.gardener.cloud/namespace": serviceAccountNamespace,
+				},
+				Labels: map[string]string{
+					"resources.gardener.cloud/purpose": "token-requestor",
 				},
 			}
 			serviceAccount = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      serviceAccountName,
-					Namespace: serviceAccountNamespace,
-				},
+				Name:      serviceAccountName,
+				Namespace: serviceAccountNamespace,
 			}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{
+			request = reconcile.Request{
 				Name:      secret.Name,
-				Namespace: secret.Namespace,
-			}}
+				Namespace: secret.Namespace}
 		})
 
 		It("should create a new service account, generate a new token and requeue", func() {
@@ -231,10 +225,8 @@ var _ = Describe("Reconciler", func() {
 			Expect(serviceAccount.AutomountServiceAccountToken).To(PointTo(BeFalse()))
 
 			targetSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      targetSecretName,
-					Namespace: targetSecretNamespace,
-				},
+				Name:      targetSecretName,
+				Namespace: targetSecretNamespace,
 			}
 
 			Expect(targetClient.Get(ctx, client.ObjectKeyFromObject(targetSecret), targetSecret)).To(Succeed())
@@ -269,10 +261,8 @@ var _ = Describe("Reconciler", func() {
 			Expect(result).To(Equal(reconcile.Result{RequeueAfter: expectedRenewDuration}))
 
 			targetSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      targetSecretName,
-					Namespace: targetSecretNamespace,
-				},
+				Name:      targetSecretName,
+				Namespace: targetSecretNamespace,
 			}
 
 			Expect(targetClient.Get(ctx, client.ObjectKeyFromObject(targetSecret), targetSecret)).To(Succeed())
@@ -329,11 +319,9 @@ var _ = Describe("Reconciler", func() {
 				secret.Annotations["token-requestor.resources.gardener.cloud/target-secret-namespace"] = targetSecretNamespace
 
 				targetSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      targetSecretName,
-						Namespace: targetSecretNamespace,
-					},
-					Data: map[string][]byte{"token": []byte("token")},
+					Name:      targetSecretName,
+					Namespace: targetSecretNamespace,
+					Data:      map[string][]byte{"token": []byte("token")},
 				}
 
 				Expect(targetClient.Create(ctx, targetSecret)).To(Succeed())

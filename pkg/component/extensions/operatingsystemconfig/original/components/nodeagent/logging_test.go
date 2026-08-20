@@ -10,7 +10,6 @@ import (
 	fluentbitv1alpha2input "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/input"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	. "github.com/gardener/gardener/pkg/component/extensions/operatingsystemconfig/original/components/nodeagent"
@@ -25,10 +24,8 @@ var _ = Describe("Logging", func() {
 			Expect(loggingConfig.Inputs).To(Equal(
 				[]*fluentbitv1alpha2.ClusterInput{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "systemd-gardener-node-agent",
-							Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-						},
+						Name:   "systemd-gardener-node-agent",
+						Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 						Spec: fluentbitv1alpha2.InputSpec{
 							Systemd: &fluentbitv1alpha2input.Systemd{
 								Tag:           "systemd.gardener-node-agent",
@@ -43,10 +40,8 @@ var _ = Describe("Logging", func() {
 			Expect(loggingConfig.Filters).To(Equal(
 				[]*fluentbitv1alpha2.ClusterFilter{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "systemd-gardener-node-agent",
-							Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-						},
+						Name:   "systemd-gardener-node-agent",
+						Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 						Spec: fluentbitv1alpha2.FilterSpec{
 							Match: "systemd.gardener-node-agent.*",
 							FilterItems: []fluentbitv1alpha2.FilterItem{

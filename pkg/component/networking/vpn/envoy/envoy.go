@@ -82,17 +82,13 @@ func GetEnvoyProxyContainer(image string) *corev1.Container {
 			fmt.Sprintf("%s/%s", volumeMountPathEnvoyConfig, fileNameEnvoyConfig),
 		},
 		ReadinessProbe: &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				TCPSocket: &corev1.TCPSocketAction{
-					Port: intstr.FromInt32(envoyPort),
-				},
+			TCPSocket: &corev1.TCPSocketAction{
+				Port: intstr.FromInt32(envoyPort),
 			},
 		},
 		LivenessProbe: &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				TCPSocket: &corev1.TCPSocketAction{
-					Port: intstr.FromInt32(envoyPort),
-				},
+			TCPSocket: &corev1.TCPSocketAction{
+				Port: intstr.FromInt32(envoyPort),
 			},
 		},
 		Resources: corev1.ResourceRequirements{

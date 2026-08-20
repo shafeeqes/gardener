@@ -70,21 +70,17 @@ var _ = Describe("Plutono", func() {
 		}
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "observability-ingress", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "observability-ingress-users", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "observability-ingress", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "observability-ingress-users", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#Deploy", func() {
@@ -92,13 +88,11 @@ var _ = Describe("Plutono", func() {
 			manifests []string
 
 			plutonoConfigSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "plutono-config-fd97f886",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"component": "plutono",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-					},
+				Name:      "plutono-config-fd97f886",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"component": "plutono",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
 				},
 				Type:      corev1.SecretTypeOpaque,
 				Immutable: new(true),
@@ -112,20 +106,16 @@ admin_password = ________________________________`),
 			}
 
 			serviceAccount = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "plutono",
-					Namespace: namespace,
-					Labels:    map[string]string{"component": "plutono"},
-				},
+				Name:                         "plutono",
+				Namespace:                    namespace,
+				Labels:                       map[string]string{"component": "plutono"},
 				AutomountServiceAccountToken: new(false),
 			}
 
 			role = &rbacv1.Role{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "plutono-data-refresher",
-					Namespace: namespace,
-					Labels:    map[string]string{"component": "plutono"},
-				},
+				Name:      "plutono-data-refresher",
+				Namespace: namespace,
+				Labels:    map[string]string{"component": "plutono"},
 				Rules: []rbacv1.PolicyRule{{
 					APIGroups: []string{""},
 					Resources: []string{"configmaps"},
@@ -134,11 +124,9 @@ admin_password = ________________________________`),
 			}
 
 			roleBinding = &rbacv1.RoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "plutono-data-refresher",
-					Namespace: namespace,
-					Labels:    map[string]string{"component": "plutono"},
-				},
+				Name:      "plutono-data-refresher",
+				Namespace: namespace,
+				Labels:    map[string]string{"component": "plutono"},
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: "rbac.authorization.k8s.io",
 					Kind:     "Role",
@@ -270,15 +258,11 @@ metadata:
 
 			deploymentYAMLFor = func(values Values) *appsv1.Deployment {
 				deployment := &appsv1.Deployment{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: appsv1.SchemeGroupVersion.String(),
-						Kind:       "Deployment",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "plutono",
-						Namespace: namespace,
-						Labels:    getLabels(),
-					},
+					APIVersion: appsv1.SchemeGroupVersion.String(),
+					Kind:       "Deployment",
+					Name:       "plutono",
+					Namespace:  namespace,
+					Labels:     getLabels(),
 					Spec: appsv1.DeploymentSpec{
 						RevisionHistoryLimit: new(int32(2)),
 						Replicas:             new(values.Replicas),
@@ -431,49 +415,35 @@ metadata:
 								Volumes: []corev1.Volume{
 									{
 										Name: "dashboard-providers",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "plutono-dashboard-providers-140e41f3",
-												},
-											},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name: "plutono-dashboard-providers-140e41f3",
 										},
 									},
 									{
 										Name: "config",
-										VolumeSource: corev1.VolumeSource{
-											Secret: &corev1.SecretVolumeSource{
-												SecretName: "plutono-config-fd97f886",
-											},
+										Secret: &corev1.SecretVolumeSource{
+											SecretName: "plutono-config-fd97f886",
 										},
 									},
 									{
 										Name: "admin-user",
-										VolumeSource: corev1.VolumeSource{
-											Secret: &corev1.SecretVolumeSource{
-												SecretName: "plutono-admin-68aadabd",
-											},
+										Secret: &corev1.SecretVolumeSource{
+											SecretName: "plutono-admin-68aadabd",
 										},
 									},
 									{
 										Name: "storage",
-										VolumeSource: corev1.VolumeSource{
-											EmptyDir: &corev1.EmptyDirVolumeSource{
-												SizeLimit: new(resource.MustParse("100Mi")),
-											},
+										EmptyDir: &corev1.EmptyDirVolumeSource{
+											SizeLimit: new(resource.MustParse("100Mi")),
 										},
 									},
 									{
-										Name: "datasources",
-										VolumeSource: corev1.VolumeSource{
-											EmptyDir: &corev1.EmptyDirVolumeSource{},
-										},
+										Name:     "datasources",
+										EmptyDir: &corev1.EmptyDirVolumeSource{},
 									},
 									{
-										Name: "dashboards",
-										VolumeSource: corev1.VolumeSource{
-											EmptyDir: &corev1.EmptyDirVolumeSource{},
-										},
+										Name:     "dashboards",
+										EmptyDir: &corev1.EmptyDirVolumeSource{},
 									},
 								},
 							},
@@ -696,7 +666,7 @@ status: {}
 			if values.ClusterType == comp.ClusterTypeShoot {
 				nsLabels["gardener.cloud/role"] = "shoot"
 			}
-			Expect(c.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace, Labels: nsLabels}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Namespace{Name: namespace, Labels: nsLabels})).To(Succeed())
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(BeNotFoundError())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(BeNotFoundError())
@@ -705,14 +675,12 @@ status: {}
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:          "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:          "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class:       new("seed"),
@@ -770,7 +738,7 @@ status: {}
 			Expect(secretMetas).To(HaveLen(1))
 			Expect(secretMetas[0]).To(Equal(tlsSecretMetaFor(values)))
 
-			dashboardsConfigMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: dashboardConfigMapName, Namespace: namespace}}
+			dashboardsConfigMap := &corev1.ConfigMap{Name: dashboardConfigMapName, Namespace: namespace}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(dashboardsConfigMap), dashboardsConfigMap)).To(Succeed(), "Could not successfully get dashboards configMap")
 			Expect(dashboardsConfigMap.Labels).To(HaveKeyWithValue("dashboard.monitoring.gardener.cloud/"+clusterLabelKey(values), "true"), "Dashboards configMap does not contain expected key")
 
@@ -861,7 +829,7 @@ status: {}
 							dataSourceConfigMapYAMLFor(values),
 						), "Resource manifests do not match the expected ones")
 
-						dashboardsConfigMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: dashboardConfigMapName, Namespace: namespace}}
+						dashboardsConfigMap := &corev1.ConfigMap{Name: dashboardConfigMapName, Namespace: namespace}
 						Expect(c.Get(ctx, client.ObjectKeyFromObject(dashboardsConfigMap), dashboardsConfigMap)).To(Succeed(), "Could not successfully get dashboards configMap")
 						Expect(dashboardsConfigMap.Labels).To(HaveKeyWithValue("dashboard.monitoring.gardener.cloud/"+clusterLabelKey(values), "true"), "Dashboards configMap does not contain expected key")
 
@@ -915,7 +883,7 @@ status: {}
 
 	Describe("#Destroy", func() {
 		It("should successfully destroy all resources", func() {
-			dashboardConfigMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "plutono-dashboards", Namespace: namespace}}
+			dashboardConfigMap := &corev1.ConfigMap{Name: "plutono-dashboards", Namespace: namespace}
 
 			component = New(c, namespace, fakeSecretManager, values)
 			Expect(c.Create(ctx, managedResource)).To(Succeed())
@@ -955,11 +923,9 @@ status: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -982,11 +948,9 @@ status: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

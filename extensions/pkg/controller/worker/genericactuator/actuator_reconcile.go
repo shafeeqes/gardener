@@ -149,7 +149,7 @@ func (a *genericActuator) Reconcile(ctx context.Context, log logr.Logger, worker
 		return fmt.Errorf("failed to cleanup the orphaned machine class secrets: %w", err)
 	}
 
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: worker.Namespace}}
+	deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: worker.Namespace}
 	if err := a.seedClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment); client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("failed reading deployment %s: %w", client.ObjectKeyFromObject(deployment), err)
 	}
@@ -224,10 +224,8 @@ func deployMachineDeployment(
 	var labels = map[string]string{extensionsworkercontroller.LabelKeyMachineDeploymentName: deployment.Name}
 
 	machineDeployment := &machinev1alpha1.MachineDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deployment.Name,
-			Namespace: worker.Namespace,
-		},
+		Name:      deployment.Name,
+		Namespace: worker.Namespace,
 	}
 
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, cl, machineDeployment, func() error {
@@ -285,9 +283,7 @@ func deployMachineDeployment(
 		}
 		machineDeployment.Spec.AutoPreserveFailedMachineMax = deployment.AutoPreserveFailedMachineMax
 		machineDeployment.Spec.Template = machinev1alpha1.MachineTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: getMachineLabels(deployment.Strategy, labels, worker.Name),
-			},
+			Labels: getMachineLabels(deployment.Strategy, labels, worker.Name),
 			Spec: machinev1alpha1.MachineSpec{
 				Class: machinev1alpha1.ClassSpec{
 					Kind: "MachineClass",

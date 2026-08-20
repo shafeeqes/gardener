@@ -201,28 +201,22 @@ var _ = Describe("ResourceManager", func() {
 			getAPIServerAddress = func() string { return "kube-apiserver" }
 
 			By("Ensure secrets managed outside of this function for which secretsmanager.Get() will be called")
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 
 			bootstrapKubeconfigSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-access-gardener-resource-manager-bootstrap-d9a4d56e",
-					Namespace: namespace,
-				},
+				Name:      "shoot-access-gardener-resource-manager-bootstrap-d9a4d56e",
+				Namespace: namespace,
 			}
 			shootAccessSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-access-gardener-resource-manager",
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"serviceaccount.resources.gardener.cloud/token-renew-timestamp": fakeClock.Now().Add(time.Hour).Format(time.RFC3339),
-					},
+				Name:      "shoot-access-gardener-resource-manager",
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"serviceaccount.resources.gardener.cloud/token-renew-timestamp": fakeClock.Now().Add(time.Hour).Format(time.RFC3339),
 				},
 			}
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-core-gardener-resource-manager",
-					Namespace: namespace,
-				},
+				Name:      "shoot-core-gardener-resource-manager",
+				Namespace: namespace,
 			}
 
 		})
@@ -330,7 +324,7 @@ var _ = Describe("ResourceManager", func() {
 			Context("with failure", func() {
 				It("fails because the bootstrap kubeconfig secret cannot be created", func() {
 					fakeClient = fakeclient.NewClientBuilder().WithScheme(scheme).
-						WithObjects(&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}}).
+						WithObjects(&corev1.Secret{Name: "ca", Namespace: namespace}).
 						WithInterceptorFuncs(interceptor.Funcs{
 							Create: func(ctx context.Context, client client.WithWatch, obj client.Object, opts ...client.CreateOption) error {
 								if _, ok := obj.(*corev1.Secret); ok {

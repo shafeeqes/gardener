@@ -91,11 +91,9 @@ var _ = Describe("handler", func() {
 		}
 
 		responseAllowed = admission.Response{
-			AdmissionResponse: admissionv1.AdmissionResponse{
-				Allowed: true,
-				Result: &metav1.Status{
-					Code: int32(http.StatusOK),
-				},
+			Allowed: true,
+			Result: &metav1.Status{
+				Code: int32(http.StatusOK),
 			},
 		}
 	})
@@ -112,12 +110,10 @@ var _ = Describe("handler", func() {
 				request.UserInfo = gardenletUser
 
 				Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: false,
-						Result: &metav1.Status{
-							Code:    int32(http.StatusBadRequest),
-							Message: `unexpected resource: ""`,
-						},
+					Allowed: false,
+					Result: &metav1.Status{
+						Code:    int32(http.StatusBadRequest),
+						Message: `unexpected resource: ""`,
 					},
 				}))
 			})
@@ -127,12 +123,10 @@ var _ = Describe("handler", func() {
 				request.Resource = metav1.GroupVersionResource{}
 
 				Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: false,
-						Result: &metav1.Status{
-							Code:    int32(http.StatusBadRequest),
-							Message: `unexpected resource: ""`,
-						},
+					Allowed: false,
+					Result: &metav1.Status{
+						Code:    int32(http.StatusBadRequest),
+						Message: `unexpected resource: ""`,
 					},
 				}))
 			})
@@ -155,10 +149,8 @@ var _ = Describe("handler", func() {
 				request.Namespace = "bar"
 
 				backupEntry := &gardencorev1beta1.BackupEntry{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      request.Name,
-						Namespace: request.Namespace,
-					},
+					Name:      request.Name,
+					Namespace: request.Namespace,
 				}
 				Expect(fakeClient.Create(ctx, backupEntry)).To(Succeed())
 
@@ -188,12 +180,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -209,12 +199,10 @@ var _ = Describe("handler", func() {
 
 					It("should return an error because fetching the related shoot failed", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusInternalServerError),
-									Message: `shoots.core.gardener.cloud "foo" not found`,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusInternalServerError),
+								Message: `shoots.core.gardener.cloud "foo" not found`,
 							},
 						}))
 					})
@@ -222,10 +210,8 @@ var _ = Describe("handler", func() {
 					DescribeTable("should forbid the request because the seed name of the related shoot does not match",
 						func(seedNameInShoot *string) {
 							shoot := &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      name,
-									Namespace: namespace,
-								},
+								Name:      name,
+								Namespace: namespace,
 								Spec: gardencorev1beta1.ShootSpec{
 									SeedName: seedNameInShoot,
 								},
@@ -234,12 +220,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						},
@@ -250,10 +234,8 @@ var _ = Describe("handler", func() {
 
 					It("should allow the request because seed name in spec matches", func() {
 						shoot := &gardencorev1beta1.Shoot{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      name,
-								Namespace: namespace,
-							},
+							Name:      name,
+							Namespace: namespace,
 							Spec: gardencorev1beta1.ShootSpec{
 								SeedName: &seedName,
 							},
@@ -266,10 +248,8 @@ var _ = Describe("handler", func() {
 
 					It("should allow the request because seed name in status matches", func() {
 						shoot := &gardencorev1beta1.Shoot{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      name,
-								Namespace: namespace,
-							},
+							Name:      name,
+							Namespace: namespace,
 							Status: gardencorev1beta1.ShootStatus{
 								SeedName: &seedName,
 							},
@@ -301,12 +281,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -323,12 +301,10 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
@@ -344,12 +320,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						},
@@ -378,40 +352,32 @@ var _ = Describe("handler", func() {
 
 					It("should return an error because reading the Seed failed", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusInternalServerError),
-									Message: `seeds.core.gardener.cloud "seed" not found`,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusInternalServerError),
+								Message: `seeds.core.gardener.cloud "seed" not found`,
 							},
 						}))
 					})
 
 					It("should forbid the request because the seed UID and the bucket name does not match", func() {
 						seed := &gardencorev1beta1.Seed{
-							ObjectMeta: metav1.ObjectMeta{
-								Name: seedName,
-							},
+							Name: seedName,
 						}
 						Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "cannot delete unrelated BackupBucket",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "cannot delete unrelated BackupBucket",
 							},
 						}))
 					})
 
 					It("should allow the request because the seed UID and the bucket name does match", func() {
 						seed := &gardencorev1beta1.Seed{
-							ObjectMeta: metav1.ObjectMeta{
-								Name: seedName,
-							},
+							Name: seedName,
 						}
 						Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 
@@ -444,12 +410,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -467,12 +431,10 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
@@ -490,9 +452,7 @@ var _ = Describe("handler", func() {
 
 							if seedNameInBackupEntry != nil && *seedNameInBackupEntry == seedName {
 								backupBucket := &gardencorev1beta1.BackupBucket{
-									ObjectMeta: metav1.ObjectMeta{
-										Name: bucketName,
-									},
+									Name: bucketName,
 									Spec: gardencorev1beta1.BackupBucketSpec{
 										SeedName: seedNameInBackupBucket,
 									},
@@ -502,12 +462,10 @@ var _ = Describe("handler", func() {
 							}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						},
@@ -529,9 +487,7 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = objData
 
 						backupBucket := &gardencorev1beta1.BackupBucket{
-							ObjectMeta: metav1.ObjectMeta{
-								Name: bucketName,
-							},
+							Name: bucketName,
 							Spec: gardencorev1beta1.BackupBucketSpec{
 								SeedName: &seedName,
 							},
@@ -551,14 +507,12 @@ var _ = Describe("handler", func() {
 
 						BeforeEach(func() {
 							objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      fmt.Sprintf("%s-%s", v1beta1constants.BackupSourcePrefix, shootBackupEntryName),
-									Namespace: namespace,
-									OwnerReferences: []metav1.OwnerReference{
-										{
-											Name: shootName,
-											Kind: "Shoot",
-										},
+								Name:      fmt.Sprintf("%s-%s", v1beta1constants.BackupSourcePrefix, shootBackupEntryName),
+								Namespace: namespace,
+								OwnerReferences: []metav1.OwnerReference{
+									{
+										Name: shootName,
+										Kind: "Shoot",
 									},
 								},
 								Spec: gardencorev1beta1.BackupEntrySpec{
@@ -570,10 +524,8 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							shoot = &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootName,
-									Namespace: namespace,
-								},
+								Name:      shootName,
+								Namespace: namespace,
 								Status: gardencorev1beta1.ShootStatus{
 									LastOperation: &gardencorev1beta1.LastOperation{
 										Type:  gardencorev1beta1.LastOperationTypeRestore,
@@ -585,12 +537,10 @@ var _ = Describe("handler", func() {
 
 						It("should forbid the request because the shoot owning the source BackupEntry could not be found", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shootName).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shootName).Error(),
 								},
 							}))
 						})
@@ -598,10 +548,8 @@ var _ = Describe("handler", func() {
 						DescribeTable("should forbid the request because a the shoot owning the source BackupEntry is not in restore phase",
 							func(lastOperation *gardencorev1beta1.LastOperation) {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      shootName,
-										Namespace: namespace,
-									},
+									Name:      shootName,
+									Namespace: namespace,
 									Status: gardencorev1beta1.ShootStatus{
 										LastOperation: lastOperation,
 									},
@@ -610,12 +558,10 @@ var _ = Describe("handler", func() {
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("creation of source BackupEntry is only allowed during shoot Restore operation (shoot: %s)", shootName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("creation of source BackupEntry is only allowed during shoot Restore operation (shoot: %s)", shootName),
 									},
 								}))
 							},
@@ -630,12 +576,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("could not find original BackupEntry %s: %v", shootBackupEntryName, apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "backupentries"}, shootBackupEntryName).Error()),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("could not find original BackupEntry %s: %v", shootBackupEntryName, apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "backupentries"}, shootBackupEntryName).Error()),
 								},
 							}))
 						})
@@ -644,10 +588,8 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							backupEntry := &gardencorev1beta1.BackupEntry{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootBackupEntryName,
-									Namespace: namespace,
-								},
+								Name:      shootBackupEntryName,
+								Namespace: namespace,
 								Spec: gardencorev1beta1.BackupEntrySpec{
 									BucketName: "some-different-bucket",
 									SeedName:   new("some-different-seedname"),
@@ -657,12 +599,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, backupEntry)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: "specification of source BackupEntry must equal specification of original BackupEntry " + shootBackupEntryName,
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: "specification of source BackupEntry must equal specification of original BackupEntry " + shootBackupEntryName,
 								},
 							}))
 						})
@@ -671,10 +611,8 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							backupEntry := &gardencorev1beta1.BackupEntry{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootBackupEntryName,
-									Namespace: namespace,
-								},
+								Name:      shootBackupEntryName,
+								Namespace: namespace,
 								Spec: gardencorev1beta1.BackupEntrySpec{
 									BucketName: bucketName,
 									SeedName:   &seedName,
@@ -708,12 +646,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -731,12 +667,10 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
@@ -794,12 +728,10 @@ var _ = Describe("handler", func() {
 
 							It("should forbid the request because seed does not belong to a managedseed", func() {
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 									},
 								}))
 							})
@@ -818,33 +750,27 @@ var _ = Describe("handler", func() {
 									handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 									Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-										AdmissionResponse: admissionv1.AdmissionResponse{
-											Allowed: false,
-											Result: &metav1.Status{
-												Code:    int32(http.StatusInternalServerError),
-												Message: fakeErr.Error(),
-											},
+										Allowed: false,
+										Result: &metav1.Status{
+											Code:    int32(http.StatusInternalServerError),
+											Message: fakeErr.Error(),
 										},
 									}))
 								})
 
 								It("should forbid the request because managedseed's `.metadata.deletionTimestamp` is nil", func() {
 									managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-										ObjectMeta: metav1.ObjectMeta{
-											Name:      differentSeedName,
-											Namespace: managedSeedNamespace,
-										},
+										Name:      differentSeedName,
+										Namespace: managedSeedNamespace,
 									}
 
 									Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 									Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-										AdmissionResponse: admissionv1.AdmissionResponse{
-											Allowed: false,
-											Result: &metav1.Status{
-												Code:    int32(http.StatusForbidden),
-												Message: "object can only be deleted if corresponding ManagedSeed has a deletion timestamp",
-											},
+										Allowed: false,
+										Result: &metav1.Status{
+											Code:    int32(http.StatusForbidden),
+											Message: "object can only be deleted if corresponding ManagedSeed has a deletion timestamp",
 										},
 									}))
 								})
@@ -854,35 +780,29 @@ var _ = Describe("handler", func() {
 								Context("requiring information from shoot", func() {
 									It("should forbid the request because managedseed's `.spec.shoot` is nil", func() {
 										managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-											ObjectMeta: metav1.ObjectMeta{
-												Name:       differentSeedName,
-												Namespace:  managedSeedNamespace,
-												Finalizers: []string{"finalizer"},
-											},
-											Spec: seedmanagementv1alpha1.ManagedSeedSpec{},
+											Name:       differentSeedName,
+											Namespace:  managedSeedNamespace,
+											Finalizers: []string{"finalizer"},
+											Spec:       seedmanagementv1alpha1.ManagedSeedSpec{},
 										}
 
 										Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 										Expect(fakeClient.Delete(ctx, managedSeed)).To(Succeed())
 
 										Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-											AdmissionResponse: admissionv1.AdmissionResponse{
-												Allowed: false,
-												Result: &metav1.Status{
-													Code:    int32(http.StatusForbidden),
-													Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-												},
+											Allowed: false,
+											Result: &metav1.Status{
+												Code:    int32(http.StatusForbidden),
+												Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 											},
 										}))
 									})
 
 									It("should forbid the request because reading the shoot referenced by the managedseed failed", func() {
 										managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-											ObjectMeta: metav1.ObjectMeta{
-												Name:       differentSeedName,
-												Namespace:  managedSeedNamespace,
-												Finalizers: []string{"finalizer"},
-											},
+											Name:       differentSeedName,
+											Namespace:  managedSeedNamespace,
+											Finalizers: []string{"finalizer"},
 											Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 												Shoot: &seedmanagementv1alpha1.Shoot{Name: shootName},
 											},
@@ -892,12 +812,10 @@ var _ = Describe("handler", func() {
 										Expect(fakeClient.Delete(ctx, managedSeed)).To(Succeed())
 
 										Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-											AdmissionResponse: admissionv1.AdmissionResponse{
-												Allowed: false,
-												Result: &metav1.Status{
-													Code:    int32(http.StatusInternalServerError),
-													Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shootName).Error(),
-												},
+											Allowed: false,
+											Result: &metav1.Status{
+												Code:    int32(http.StatusInternalServerError),
+												Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shootName).Error(),
 											},
 										}))
 									})
@@ -905,11 +823,9 @@ var _ = Describe("handler", func() {
 									DescribeTable("should forbid the request because the seed name of the shoot referenced by the managedseed does not match",
 										func(seedNameInShoot *string) {
 											managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-												ObjectMeta: metav1.ObjectMeta{
-													Name:       differentSeedName,
-													Namespace:  managedSeedNamespace,
-													Finalizers: []string{"finalizer"},
-												},
+												Name:       differentSeedName,
+												Namespace:  managedSeedNamespace,
+												Finalizers: []string{"finalizer"},
 												Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 													Shoot: &seedmanagementv1alpha1.Shoot{Name: shootName},
 												},
@@ -919,10 +835,8 @@ var _ = Describe("handler", func() {
 											Expect(fakeClient.Delete(ctx, managedSeed)).To(Succeed())
 
 											shoot := &gardencorev1beta1.Shoot{
-												ObjectMeta: metav1.ObjectMeta{
-													Name:      shootName,
-													Namespace: managedSeedNamespace,
-												},
+												Name:      shootName,
+												Namespace: managedSeedNamespace,
 												Spec: gardencorev1beta1.ShootSpec{
 													SeedName: seedNameInShoot,
 												},
@@ -931,12 +845,10 @@ var _ = Describe("handler", func() {
 											Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 											Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-												AdmissionResponse: admissionv1.AdmissionResponse{
-													Allowed: false,
-													Result: &metav1.Status{
-														Code:    int32(http.StatusForbidden),
-														Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-													},
+												Allowed: false,
+												Result: &metav1.Status{
+													Code:    int32(http.StatusForbidden),
+													Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 												},
 											}))
 										},
@@ -947,11 +859,9 @@ var _ = Describe("handler", func() {
 
 									It("should allow the request because the seed name of the shoot referenced by the managedseed matches", func() {
 										managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-											ObjectMeta: metav1.ObjectMeta{
-												Name:       differentSeedName,
-												Namespace:  managedSeedNamespace,
-												Finalizers: []string{"finalizer"},
-											},
+											Name:       differentSeedName,
+											Namespace:  managedSeedNamespace,
+											Finalizers: []string{"finalizer"},
 											Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 												Shoot: &seedmanagementv1alpha1.Shoot{Name: shootName},
 											},
@@ -961,10 +871,8 @@ var _ = Describe("handler", func() {
 										Expect(fakeClient.Delete(ctx, managedSeed)).To(Succeed())
 
 										shoot := &gardencorev1beta1.Shoot{
-											ObjectMeta: metav1.ObjectMeta{
-												Name:      shootName,
-												Namespace: managedSeedNamespace,
-											},
+											Name:      shootName,
+											Namespace: managedSeedNamespace,
 											Spec: gardencorev1beta1.ShootSpec{
 												SeedName: &seedName,
 											},
@@ -1005,12 +913,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1026,12 +932,10 @@ var _ = Describe("handler", func() {
 
 					It("should forbid the request because it's no expected secret", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
@@ -1043,12 +947,10 @@ var _ = Describe("handler", func() {
 
 						It("should return an error because the related backupbucket was not found", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "backupbuckets"}, name).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "backupbuckets"}, name).Error(),
 								},
 							}))
 						})
@@ -1066,21 +968,17 @@ var _ = Describe("handler", func() {
 							handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
 
 						It("should forbid because the related backupbucket does not belong to gardenlet's seed", func() {
 							backupBucket := &gardencorev1beta1.BackupBucket{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: name,
-								},
+								Name: name,
 								Spec: gardencorev1beta1.BackupBucketSpec{
 									SeedName: new("some-different-seed"),
 								},
@@ -1088,21 +986,17 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						})
 
 						It("should allow because the related backupbucket does belong to gardenlet's seed", func() {
 							backupBucket := gardencorev1beta1.BackupBucket{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: name,
-								},
+								Name: name,
 								Spec: gardencorev1beta1.BackupBucketSpec{
 									SeedName: &seedName,
 								},
@@ -1122,12 +1016,10 @@ var _ = Describe("handler", func() {
 
 							It("should return an error because the related shoot was not found", func() {
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
 									},
 								}))
 							})
@@ -1145,22 +1037,18 @@ var _ = Describe("handler", func() {
 								handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
 
 							It("should forbid because the related shoot does not belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
+									Name:      name,
+									Namespace: namespace,
 									Spec: gardencorev1beta1.ShootSpec{
 										SeedName: new("some-different-seed"),
 									},
@@ -1169,22 +1057,18 @@ var _ = Describe("handler", func() {
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 									},
 								}))
 							})
 
 							It("should allow because the related shoot does belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
+									Name:      name,
+									Namespace: namespace,
 									Spec: gardencorev1beta1.ShootSpec{
 										SeedName: &seedName,
 									},
@@ -1214,10 +1098,8 @@ var _ = Describe("handler", func() {
 								request.Object.Raw = data
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result:  expectedResult,
-									},
+									Allowed: false,
+									Result:  expectedResult,
 								}))
 							},
 
@@ -1232,10 +1114,8 @@ var _ = Describe("handler", func() {
 							Entry(
 								"missing shoot.gardener.cloud/namespace label",
 								&corev1.Secret{
-									ObjectMeta: metav1.ObjectMeta{
-										Labels: map[string]string{
-											"shoot.gardener.cloud/name": "foo",
-										},
+									Labels: map[string]string{
+										"shoot.gardener.cloud/name": "foo",
 									},
 								},
 								&metav1.Status{
@@ -1246,11 +1126,9 @@ var _ = Describe("handler", func() {
 							Entry(
 								"missing discovery.gardener.cloud/public label",
 								&corev1.Secret{
-									ObjectMeta: metav1.ObjectMeta{
-										Labels: map[string]string{
-											"shoot.gardener.cloud/name":      "foo",
-											"shoot.gardener.cloud/namespace": "foo",
-										},
+									Labels: map[string]string{
+										"shoot.gardener.cloud/name":      "foo",
+										"shoot.gardener.cloud/namespace": "foo",
 									},
 								},
 								&metav1.Status{
@@ -1261,12 +1139,10 @@ var _ = Describe("handler", func() {
 							Entry(
 								"label discovery.gardener.cloud/public has wrong value",
 								&corev1.Secret{
-									ObjectMeta: metav1.ObjectMeta{
-										Labels: map[string]string{
-											"shoot.gardener.cloud/name":       "foo",
-											"shoot.gardener.cloud/namespace":  "foo",
-											"discovery.gardener.cloud/public": "foo",
-										},
+									Labels: map[string]string{
+										"shoot.gardener.cloud/name":       "foo",
+										"shoot.gardener.cloud/namespace":  "foo",
+										"discovery.gardener.cloud/public": "foo",
 									},
 								},
 								&metav1.Status{
@@ -1279,12 +1155,10 @@ var _ = Describe("handler", func() {
 						Context("secret is configured correctly", func() {
 							BeforeEach(func() {
 								secret := &corev1.Secret{
-									ObjectMeta: metav1.ObjectMeta{
-										Labels: map[string]string{
-											"shoot.gardener.cloud/name":       name,
-											"shoot.gardener.cloud/namespace":  namespace,
-											"discovery.gardener.cloud/public": "serviceaccount",
-										},
+									Labels: map[string]string{
+										"shoot.gardener.cloud/name":       name,
+										"shoot.gardener.cloud/namespace":  namespace,
+										"discovery.gardener.cloud/public": "serviceaccount",
 									},
 								}
 								data, err := runtime.Encode(encoder, secret)
@@ -1294,12 +1168,10 @@ var _ = Describe("handler", func() {
 
 							It("should return an error because the related shoot was not found", func() {
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
 									},
 								}))
 							})
@@ -1317,22 +1189,18 @@ var _ = Describe("handler", func() {
 								handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
 
 							It("should forbid because the related shoot does not belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
+									Name:      name,
+									Namespace: namespace,
 									Spec: gardencorev1beta1.ShootSpec{
 										SeedName: new("some-different-seed"),
 									},
@@ -1341,22 +1209,18 @@ var _ = Describe("handler", func() {
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 									},
 								}))
 							})
 
 							It("should allow because the related shoot does belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
+									Name:      name,
+									Namespace: namespace,
 									Spec: gardencorev1beta1.ShootSpec{
 										SeedName: &seedName,
 									},
@@ -1390,10 +1254,8 @@ var _ = Describe("handler", func() {
 								},
 							}
 							managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      managedSeedName,
-									Namespace: managedSeedNamespace,
-								},
+								Name:      managedSeedName,
+								Namespace: managedSeedNamespace,
 								Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 									Shoot: &seedmanagementv1alpha1.Shoot{
 										Name: shootName,
@@ -1401,10 +1263,8 @@ var _ = Describe("handler", func() {
 								},
 							}
 							shoot = &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootName,
-									Namespace: managedSeedNamespace,
-								},
+								Name:      shootName,
+								Namespace: managedSeedNamespace,
 								Spec: gardencorev1beta1.ShootSpec{
 									SeedName: &seedName,
 								},
@@ -1422,12 +1282,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = []byte(`{]`)
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusBadRequest),
-										Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusBadRequest),
+									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 								},
 							}))
 						})
@@ -1439,12 +1297,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: fmt.Sprintf("unexpected secret type: %q", secret.Type),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: fmt.Sprintf("unexpected secret type: %q", secret.Type),
 								},
 							}))
 						})
@@ -1456,12 +1312,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: "\"usage-bootstrap-authentication\" must be set to 'true'",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: "\"usage-bootstrap-authentication\" must be set to 'true'",
 								},
 							}))
 						})
@@ -1473,12 +1327,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: "\"usage-bootstrap-signing\" must be set to 'true'",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: "\"usage-bootstrap-signing\" must be set to 'true'",
 								},
 							}))
 						})
@@ -1490,24 +1342,20 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: "\"auth-extra-groups\" must not be set",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: "\"auth-extra-groups\" must not be set",
 								},
 							}))
 						})
 
 						It("should forbid if the managedseed does not exist", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "managedseeds"}, managedSeedName).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "managedseeds"}, managedSeedName).Error(),
 								},
 							}))
 						})
@@ -1525,12 +1373,10 @@ var _ = Describe("handler", func() {
 							handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -1539,12 +1385,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shootName).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shootName).Error(),
 								},
 							}))
 						})
@@ -1556,12 +1400,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						})
@@ -1582,12 +1424,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -1597,18 +1437,14 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(fakeClient.Create(ctx, &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: managedSeedName,
-								},
+								Name: managedSeedName,
 							})).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusBadRequest),
-										Message: "managed seed " + managedSeedNamespace + "/" + managedSeedName + " is already bootstrapped",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusBadRequest),
+									Message: "managed seed " + managedSeedNamespace + "/" + managedSeedName + " is already bootstrapped",
 								},
 							}))
 						})
@@ -1625,9 +1461,7 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							seed := &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: managedSeedName,
-								},
+								Name: managedSeedName,
 								Status: gardencorev1beta1.SeedStatus{
 									ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)},
 								},
@@ -1643,9 +1477,7 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							seed := &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: managedSeedName,
-								},
+								Name: managedSeedName,
 							}
 							Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 
@@ -1672,10 +1504,8 @@ var _ = Describe("handler", func() {
 								},
 							}
 							gardenlet = &seedmanagementv1alpha1.Gardenlet{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      gardenletName,
-									Namespace: gardenletNamespace,
-								},
+								Name:      gardenletName,
+								Namespace: gardenletNamespace,
 							}
 
 							request.Name = "bootstrap-token-123456"
@@ -1690,12 +1520,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = []byte(`{]`)
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusBadRequest),
-										Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusBadRequest),
+									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 								},
 							}))
 						})
@@ -1707,12 +1535,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: fmt.Sprintf("unexpected secret type: %q", secret.Type),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: fmt.Sprintf("unexpected secret type: %q", secret.Type),
 								},
 							}))
 						})
@@ -1724,12 +1550,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: "\"usage-bootstrap-authentication\" must be set to 'true'",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: "\"usage-bootstrap-authentication\" must be set to 'true'",
 								},
 							}))
 						})
@@ -1741,12 +1565,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: "\"usage-bootstrap-signing\" must be set to 'true'",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: "\"usage-bootstrap-signing\" must be set to 'true'",
 								},
 							}))
 						})
@@ -1758,24 +1580,20 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusUnprocessableEntity),
-										Message: "\"auth-extra-groups\" must not be set",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusUnprocessableEntity),
+									Message: "\"auth-extra-groups\" must not be set",
 								},
 							}))
 						})
 
 						It("should forbid if the Gardenlet does not exist", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "gardenlets"}, gardenletName).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "gardenlets"}, gardenletName).Error(),
 								},
 							}))
 						})
@@ -1793,12 +1611,10 @@ var _ = Describe("handler", func() {
 							handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -1818,12 +1634,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, gardenlet)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -1831,18 +1645,14 @@ var _ = Describe("handler", func() {
 						It("should forbid if the seed does exist already", func() {
 							Expect(fakeClient.Create(ctx, gardenlet)).To(Succeed())
 							Expect(fakeClient.Create(ctx, &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: gardenletName,
-								},
+								Name: gardenletName,
 							})).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusBadRequest),
-										Message: "gardenlet " + gardenletNamespace + "/" + gardenletName + " is already bootstrapped",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusBadRequest),
+									Message: "gardenlet " + gardenletNamespace + "/" + gardenletName + " is already bootstrapped",
 								},
 							}))
 						})
@@ -1851,12 +1661,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, gardenlet)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "seeds"}, gardenletName).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "seeds"}, gardenletName).Error(),
 								},
 							}))
 						})
@@ -1864,9 +1672,7 @@ var _ = Describe("handler", func() {
 						It("should allow if the seed does exist but client cert is expired", func() {
 							Expect(fakeClient.Create(ctx, gardenlet)).To(Succeed())
 							Expect(fakeClient.Create(ctx, &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: gardenletName,
-								},
+								Name: gardenletName,
 								Status: gardencorev1beta1.SeedStatus{
 									ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)},
 								},
@@ -1880,9 +1686,7 @@ var _ = Describe("handler", func() {
 
 							Expect(fakeClient.Create(ctx, gardenlet)).To(Succeed())
 							Expect(fakeClient.Create(ctx, &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: gardenletName,
-								},
+								Name: gardenletName,
 							})).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(responseAllowed))
@@ -1896,12 +1700,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("gardenlet %s/%s does not belong to seed %q", gardenletNamespace, foreignName, seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("gardenlet %s/%s does not belong to seed %q", gardenletNamespace, foreignName, seedName),
 								},
 							}))
 						})
@@ -1914,12 +1716,10 @@ var _ = Describe("handler", func() {
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("gardenlet %s/%s does not belong to seed %q", foreignNamespace, gardenletName, seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("gardenlet %s/%s does not belong to seed %q", foreignNamespace, gardenletName, seedName),
 								},
 							}))
 						})
@@ -1936,18 +1736,14 @@ var _ = Describe("handler", func() {
 						BeforeEach(func() {
 							managedSeed1Namespace = "ns1"
 							shoot1 = &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Namespace: managedSeed1Namespace,
-									Name:      "shoot1",
-								},
-								Spec: gardencorev1beta1.ShootSpec{SeedName: new("some-other-seed-name")},
+								Namespace: managedSeed1Namespace,
+								Name:      "shoot1",
+								Spec:      gardencorev1beta1.ShootSpec{SeedName: new("some-other-seed-name")},
 							}
 							shoot2 = &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Namespace: managedSeed1Namespace,
-									Name:      "shoot2",
-								},
-								Spec: gardencorev1beta1.ShootSpec{SeedName: &seedName},
+								Namespace: managedSeed1Namespace,
+								Name:      "shoot2",
+								Spec:      gardencorev1beta1.ShootSpec{SeedName: &seedName},
 							}
 							seedConfig1 = &gardenletconfigv1alpha1.SeedConfig{
 								SeedTemplate: gardencorev1beta1.SeedTemplate{},
@@ -1957,7 +1753,7 @@ var _ = Describe("handler", func() {
 							}
 							managedSeeds = []seedmanagementv1alpha1.ManagedSeed{
 								{
-									ObjectMeta: metav1.ObjectMeta{Name: shoot1.Name, Namespace: managedSeed1Namespace},
+									Name: shoot1.Name, Namespace: managedSeed1Namespace,
 									Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 										Shoot: &seedmanagementv1alpha1.Shoot{Name: shoot1.Name},
 										Gardenlet: seedmanagementv1alpha1.GardenletConfig{
@@ -1970,7 +1766,7 @@ var _ = Describe("handler", func() {
 									},
 								},
 								{
-									ObjectMeta: metav1.ObjectMeta{Name: shoot2.Name, Namespace: managedSeed1Namespace},
+									Name: shoot2.Name, Namespace: managedSeed1Namespace,
 									Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 										Shoot: &seedmanagementv1alpha1.Shoot{Name: shoot2.Name},
 										Gardenlet: seedmanagementv1alpha1.GardenletConfig{
@@ -1995,12 +1791,10 @@ var _ = Describe("handler", func() {
 							handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -2011,12 +1805,10 @@ var _ = Describe("handler", func() {
 							}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shoot1.Name).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, shoot1.Name).Error(),
 								},
 							}))
 						})
@@ -2039,21 +1831,17 @@ var _ = Describe("handler", func() {
 
 							Expect(handler.Handle(ctx, request)).To(Or(
 								Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: `seed template is nil for ManagedSeed "shoot1"`,
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: `seed template is nil for ManagedSeed "shoot1"`,
 									},
 								}),
 								Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: `seed template is nil for ManagedSeed "shoot2"`,
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: `seed template is nil for ManagedSeed "shoot2"`,
 									},
 								}),
 							))
@@ -2084,12 +1872,10 @@ var _ = Describe("handler", func() {
 							Expect(fakeClient.Create(ctx, shoot2)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						})
@@ -2144,12 +1930,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -2165,12 +1949,10 @@ var _ = Describe("handler", func() {
 
 					It("should forbid the request because it's no expected internal secret", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
@@ -2183,12 +1965,10 @@ var _ = Describe("handler", func() {
 
 							It("should return an error because the related shoot was not found", func() {
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
 									},
 								}))
 							})
@@ -2206,45 +1986,37 @@ var _ = Describe("handler", func() {
 								handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
 
 							It("should forbid because the related shoot does not belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
-									Spec: gardencorev1beta1.ShootSpec{SeedName: new("some-different-seed")},
+									Name:      name,
+									Namespace: namespace,
+									Spec:      gardencorev1beta1.ShootSpec{SeedName: new("some-different-seed")},
 								}
 
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 									},
 								}))
 							})
 
 							It("should allow because the related shoot does belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
-									Spec: gardencorev1beta1.ShootSpec{SeedName: &seedName},
+									Name:      name,
+									Namespace: namespace,
+									Spec:      gardencorev1beta1.ShootSpec{SeedName: &seedName},
 								}
 
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
@@ -2278,12 +2050,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -2299,12 +2069,10 @@ var _ = Describe("handler", func() {
 
 					It("should forbid the request because it's no expected config map", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
@@ -2317,12 +2085,10 @@ var _ = Describe("handler", func() {
 
 							It("should return an error because the related shoot was not found", func() {
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: apierrors.NewNotFound(schema.GroupResource{Group: gardencorev1beta1.SchemeGroupVersion.Group, Resource: "shoots"}, name).Error(),
 									},
 								}))
 							})
@@ -2340,45 +2106,37 @@ var _ = Describe("handler", func() {
 								handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
 
 							It("should forbid because the related shoot does not belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
-									Spec: gardencorev1beta1.ShootSpec{SeedName: new("some-different-seed")},
+									Name:      name,
+									Namespace: namespace,
+									Spec:      gardencorev1beta1.ShootSpec{SeedName: new("some-different-seed")},
 								}
 
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 									},
 								}))
 							})
 
 							It("should allow because the related shoot does belong to gardenlet's seed", func() {
 								shoot := &gardencorev1beta1.Shoot{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      name,
-										Namespace: namespace,
-									},
-									Spec: gardencorev1beta1.ShootSpec{SeedName: &seedName},
+									Name:      name,
+									Namespace: namespace,
+									Spec:      gardencorev1beta1.ShootSpec{SeedName: &seedName},
 								}
 
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
@@ -2420,12 +2178,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -2443,22 +2199,18 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
 
 					It("should forbid the request because the CSR is not a valid seed-related CSR", func() {
 						objData, err := runtime.Encode(encoder, &certificatesv1.CertificateSigningRequest{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: certificatesv1.SchemeGroupVersion.String(),
-								Kind:       "CertificateSigningRequest",
-							},
+							APIVersion: certificatesv1.SchemeGroupVersion.String(),
+							Kind:       "CertificateSigningRequest",
 							Spec: certificatesv1.CertificateSigningRequestSpec{
 								Request: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIClzCCAX8CAQAwUjEkMCIGA1UEChMbZ2FyZGVuZXIuY2xvdWQ6c3lzdGVtOnNl
@@ -2482,22 +2234,18 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "can only create CSRs for seed clusters: key usages are not set to [key encipherment digital signature client auth]",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "can only create CSRs for seed clusters: key usages are not set to [key encipherment digital signature client auth]",
 							},
 						}))
 					})
 
 					It("should forbid the request because the seed name of the csr does not match", func() {
 						objData, err := runtime.Encode(encoder, &certificatesv1.CertificateSigningRequest{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: certificatesv1.SchemeGroupVersion.String(),
-								Kind:       "CertificateSigningRequest",
-							},
+							APIVersion: certificatesv1.SchemeGroupVersion.String(),
+							Kind:       "CertificateSigningRequest",
 							Spec: certificatesv1.CertificateSigningRequestSpec{
 								Request: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIClzCCAX8CAQAwUjEkMCIGA1UEChMbZ2FyZGVuZXIuY2xvdWQ6c3lzdGVtOnNl
@@ -2526,22 +2274,18 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
 
 					It("should allow the request because seed name matches", func() {
 						objData, err := runtime.Encode(encoder, &certificatesv1.CertificateSigningRequest{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: certificatesv1.SchemeGroupVersion.String(),
-								Kind:       "CertificateSigningRequest",
-							},
+							APIVersion: certificatesv1.SchemeGroupVersion.String(),
+							Kind:       "CertificateSigningRequest",
 							Spec: certificatesv1.CertificateSigningRequestSpec{
 								Request: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIClTCCAX0CAQAwUDEkMCIGA1UEChMbZ2FyZGVuZXIuY2xvdWQ6c3lzdGVtOnNl
@@ -2593,12 +2337,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -2614,12 +2356,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 
 					It("should forbid the request because name pattern does not match", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
@@ -2636,10 +2376,8 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 
 						BeforeEach(func() {
 							managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      managedSeedName,
-									Namespace: managedSeedNamespace,
-								},
+								Name:      managedSeedName,
+								Namespace: managedSeedNamespace,
 								Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 									Shoot: &seedmanagementv1alpha1.Shoot{
 										Name: shootName,
@@ -2647,10 +2385,8 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								},
 							}
 							shoot = &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootName,
-									Namespace: managedSeedNamespace,
-								},
+								Name:      shootName,
+								Namespace: managedSeedNamespace,
 								Spec: gardencorev1beta1.ShootSpec{
 									SeedName: &seedName,
 								},
@@ -2663,12 +2399,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							request.Object.Raw = []byte(`{]`)
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusBadRequest),
-										Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusBadRequest),
+									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 								},
 							}))
 						})
@@ -2683,12 +2417,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: "can only bindings referring to the bootstrapper role",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: "can only bindings referring to the bootstrapper role",
 								},
 							}))
 						})
@@ -2708,12 +2440,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 
 							It("should forbid if the managedseed does not exist", func() {
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "managedseeds"}, managedSeedName).Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "managedseeds"}, managedSeedName).Error(),
 									},
 								}))
 							})
@@ -2731,12 +2461,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
@@ -2756,12 +2484,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
@@ -2773,12 +2499,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusForbidden),
-											Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusForbidden),
+										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 									},
 								}))
 							})
@@ -2799,12 +2523,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusInternalServerError),
-											Message: fakeErr.Error(),
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusInternalServerError),
+										Message: fakeErr.Error(),
 									},
 								}))
 							})
@@ -2814,19 +2536,15 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								seed := &gardencorev1beta1.Seed{
-									ObjectMeta: metav1.ObjectMeta{
-										Name: managedSeedName,
-									},
+									Name: managedSeedName,
 								}
 								Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 
 								Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-									AdmissionResponse: admissionv1.AdmissionResponse{
-										Allowed: false,
-										Result: &metav1.Status{
-											Code:    int32(http.StatusBadRequest),
-											Message: "managed seed " + managedSeedNamespace + "/" + managedSeedName + " is already bootstrapped",
-										},
+									Allowed: false,
+									Result: &metav1.Status{
+										Code:    int32(http.StatusBadRequest),
+										Message: "managed seed " + managedSeedNamespace + "/" + managedSeedName + " is already bootstrapped",
 									},
 								}))
 							})
@@ -2843,9 +2561,7 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 								seed := &gardencorev1beta1.Seed{
-									ObjectMeta: metav1.ObjectMeta{
-										Name: managedSeedName,
-									},
+									Name: managedSeedName,
 									Status: gardencorev1beta1.SeedStatus{
 										ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)},
 									},
@@ -2879,12 +2595,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -2901,12 +2615,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 					It("should forbid the request because it does not belong to the seed", func() {
 						request.Name = "some-other-name"
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
@@ -2914,12 +2626,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 					It("should forbid the request because the namespace is not 'garden'", func() {
 						request.Namespace = "bar"
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: `object must be in namespace: "garden"`,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: `object must be in namespace: "garden"`,
 							},
 						}))
 					})
@@ -2950,12 +2660,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -2974,12 +2682,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							request.Name = seedNameInLease
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						},
@@ -3022,12 +2728,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -3048,12 +2752,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 
 					It("should forbid the request because name pattern does not match", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 							},
 						}))
 					})
@@ -3070,10 +2772,8 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 
 						BeforeEach(func() {
 							managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      managedSeedName,
-									Namespace: managedSeedNamespace,
-								},
+								Name:      managedSeedName,
+								Namespace: managedSeedNamespace,
 								Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 									Shoot: &seedmanagementv1alpha1.Shoot{
 										Name: shootName,
@@ -3081,10 +2781,8 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 								},
 							}
 							shoot = &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootName,
-									Namespace: managedSeedNamespace,
-								},
+								Name:      shootName,
+								Namespace: managedSeedNamespace,
 								Spec: gardencorev1beta1.ShootSpec{
 									SeedName: &seedName,
 								},
@@ -3096,12 +2794,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 
 						It("should forbid if the managedseed does not exist", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "managedseeds"}, managedSeedName).Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: apierrors.NewNotFound(schema.GroupResource{Group: seedmanagementv1alpha1.SchemeGroupVersion.Group, Resource: "managedseeds"}, managedSeedName).Error(),
 								},
 							}))
 						})
@@ -3119,12 +2815,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							handler = &Handler{Logger: log, Client: fakeClient, Decoder: decoder}
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -3144,12 +2838,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -3161,12 +2853,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to seed %q", seedName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to seed %q", seedName),
 								},
 							}))
 						})
@@ -3187,12 +2877,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusInternalServerError),
-										Message: fakeErr.Error(),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusInternalServerError),
+									Message: fakeErr.Error(),
 								},
 							}))
 						})
@@ -3202,20 +2890,16 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							seed := &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: managedSeedName,
-								},
+								Name: managedSeedName,
 							}
 
 							Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusBadRequest),
-										Message: "managed seed " + managedSeedNamespace + "/" + managedSeedName + " is already bootstrapped",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusBadRequest),
+									Message: "managed seed " + managedSeedNamespace + "/" + managedSeedName + " is already bootstrapped",
 								},
 							}))
 						})
@@ -3232,9 +2916,7 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 							seed := &gardencorev1beta1.Seed{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: managedSeedName,
-								},
+								Name: managedSeedName,
 								Status: gardencorev1beta1.SeedStatus{
 									ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)},
 								},
@@ -3276,12 +2958,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -3293,12 +2973,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 				It("should not allow create request", func() {
 					request.Operation = admissionv1.Create
 					Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-						AdmissionResponse: admissionv1.AdmissionResponse{
-							Allowed: false,
-							Result: &metav1.Status{
-								Code:    int32(http.StatusForbidden),
-								Message: "extension client may not create CertificateSigningRequests",
-							},
+						Allowed: false,
+						Result: &metav1.Status{
+							Code:    int32(http.StatusForbidden),
+							Message: "extension client may not create CertificateSigningRequests",
 						},
 					}))
 				})
@@ -3323,12 +3001,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -3340,12 +3016,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 				It("should not allow create request", func() {
 					request.Operation = admissionv1.Create
 					Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-						AdmissionResponse: admissionv1.AdmissionResponse{
-							Allowed: false,
-							Result: &metav1.Status{
-								Code:    int32(http.StatusForbidden),
-								Message: "extension client may not create ClusterRoleBindings",
-							},
+						Allowed: false,
+						Result: &metav1.Status{
+							Code:    int32(http.StatusForbidden),
+							Message: "extension client may not create ClusterRoleBindings",
 						},
 					}))
 				})
@@ -3371,12 +3045,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -3394,12 +3066,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Name = "gardenlet-leader-election"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("extension client can only create leases in the namespace for seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("extension client can only create leases in the namespace for seed %q", seedName),
 							},
 						}))
 					})
@@ -3409,12 +3079,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Namespace = "gardener-system-seed-lease"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("extension client can only create leases in the namespace for seed %q", seedName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("extension client can only create leases in the namespace for seed %q", seedName),
 							},
 						}))
 					})
@@ -3448,12 +3116,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -3465,12 +3131,10 @@ BkEao/FEz4eQuV5atSD0S78+aF4BriEtWKKjXECTCxMuqcA24vGOgHIrEbKd7zSC
 				It("should not allow create request", func() {
 					request.Operation = admissionv1.Create
 					Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-						AdmissionResponse: admissionv1.AdmissionResponse{
-							Allowed: false,
-							Result: &metav1.Status{
-								Code:    int32(http.StatusForbidden),
-								Message: "extension client may not create ServiceAccounts",
-							},
+						Allowed: false,
+						Result: &metav1.Status{
+							Code:    int32(http.StatusForbidden),
+							Message: "extension client may not create ServiceAccounts",
 						},
 					}))
 				})

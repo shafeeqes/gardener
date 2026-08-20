@@ -272,12 +272,10 @@ func (b *bootstrapper) getOperatorConfigConfigMap() (*corev1.ConfigMap, error) {
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidConfigMapOperatorConfigNamePrefix,
-			Namespace: b.namespace,
-			Labels:    b.labels(),
-		},
-		Data: map[string]string{druidConfigMapOperatorConfigDataKey: string(etcdOperatorConfigYAML)},
+		Name:      druidConfigMapOperatorConfigNamePrefix,
+		Namespace: b.namespace,
+		Labels:    b.labels(),
+		Data:      map[string]string{druidConfigMapOperatorConfigDataKey: string(etcdOperatorConfigYAML)},
 	}
 	utilruntime.Must(kubernetesutils.MakeUnique(configMap))
 	return configMap, nil
@@ -290,9 +288,7 @@ func (b *bootstrapper) getEtcdOperatorConfig() *druidconfigv1alpha1.OperatorConf
 		},
 		Server: druidconfigv1alpha1.ServerConfiguration{
 			Webhooks: &druidconfigv1alpha1.TLSServer{
-				Server: druidconfigv1alpha1.Server{
-					Port: webhookServerPort,
-				},
+				Port:          webhookServerPort,
 				ServerCertDir: webhookServerTLSCertMountPath,
 			},
 		},
@@ -349,21 +345,17 @@ func (b *bootstrapper) getEtcdOperatorConfig() *druidconfigv1alpha1.OperatorConf
 
 func (b *bootstrapper) getServiceAccount() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidServiceAccountName,
-			Namespace: b.namespace,
-			Labels:    b.labels(),
-		},
+		Name:                         druidServiceAccountName,
+		Namespace:                    b.namespace,
+		Labels:                       b.labels(),
 		AutomountServiceAccountToken: new(false),
 	}
 }
 
 func (b *bootstrapper) getClusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   druidRBACName,
-			Labels: b.labels(),
-		},
+		Name:   druidRBACName,
+		Labels: b.labels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{corev1.GroupName},
@@ -436,10 +428,8 @@ func (b *bootstrapper) getClusterRole() *rbacv1.ClusterRole {
 
 func (b *bootstrapper) getClusterRoleBinding(serviceAccount *corev1.ServiceAccount, clusterRole *rbacv1.ClusterRole) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   druidRBACName,
-			Labels: b.labels(),
-		},
+		Name:   druidRBACName,
+		Labels: b.labels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -457,23 +447,19 @@ func (b *bootstrapper) getClusterRoleBinding(serviceAccount *corev1.ServiceAccou
 
 func (b *bootstrapper) getImageVectorOverwriteConfigMap() *corev1.ConfigMap {
 	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidConfigMapImageVectorOverwriteNamePrefix,
-			Namespace: b.namespace,
-			Labels:    b.labels(),
-		},
-		Data: map[string]string{druidConfigMapImageVectorOverwriteDataKey: *b.imageVectorOverwrite},
+		Name:      druidConfigMapImageVectorOverwriteNamePrefix,
+		Namespace: b.namespace,
+		Labels:    b.labels(),
+		Data:      map[string]string{druidConfigMapImageVectorOverwriteDataKey: *b.imageVectorOverwrite},
 	}
 }
 
 func (b *bootstrapper) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 	updateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidVPAName,
-			Namespace: b.namespace,
-			Labels:    b.labels(),
-		},
+		Name:      druidVPAName,
+		Namespace: b.namespace,
+		Labels:    b.labels(),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -501,13 +487,11 @@ func (b *bootstrapper) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func (b *bootstrapper) getService() *corev1.Service {
 	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidServiceName,
-			Namespace: b.namespace,
-			Labels: utils.MergeStringMaps(map[string]string{
-				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-			}, b.labels()),
-		},
+		Name:      druidServiceName,
+		Namespace: b.namespace,
+		Labels: utils.MergeStringMaps(map[string]string{
+			resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+		}, b.labels()),
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: b.labels(),
@@ -543,11 +527,9 @@ func (b *bootstrapper) getValidatingWebhookConfiguration(caBundle []byte) *admis
 	}
 
 	return &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidWebhookName,
-			Namespace: b.namespace,
-			Labels:    b.labels(),
-		},
+		Name:      druidWebhookName,
+		Namespace: b.namespace,
+		Labels:    b.labels(),
 		Webhooks: []admissionregistrationv1.ValidatingWebhook{
 			{
 				Name:                    "etcdcomponents.webhooks.druid.gardener.cloud",
@@ -562,67 +544,53 @@ func (b *bootstrapper) getValidatingWebhookConfiguration(caBundle []byte) *admis
 				}},
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"serviceaccounts", "services", "configmaps"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opUpdateAndDelete,
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"serviceaccounts", "services", "configmaps"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opUpdateAndDelete,
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"persistentvolumeclaims"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opDelete,
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"persistentvolumeclaims"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opDelete,
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{rbacv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"roles", "rolebindings"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opUpdateAndDelete,
+						APIGroups:   []string{rbacv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"roles", "rolebindings"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opUpdateAndDelete,
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{appsv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"statefulsets"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opUpdateAndDelete,
+						APIGroups:   []string{appsv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"statefulsets"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opUpdateAndDelete,
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{policyv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"poddisruptionbudgets"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opUpdateAndDelete,
+						APIGroups:   []string{policyv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"poddisruptionbudgets"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opUpdateAndDelete,
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{batchv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"jobs"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opUpdateAndDelete,
+						APIGroups:   []string{batchv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"jobs"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opUpdateAndDelete,
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{coordinationv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"leases"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opDelete,
+						APIGroups:   []string{coordinationv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"leases"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opDelete,
 					},
 				},
 			},
@@ -639,13 +607,11 @@ func (b *bootstrapper) getValidatingWebhookConfiguration(caBundle []byte) *admis
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{appsv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"statefulsets/scale"},
-							Scope:       new(admissionregistrationv1.AllScopes),
-						},
-						Operations: opUpdateAndDelete,
+						APIGroups:   []string{appsv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"statefulsets/scale"},
+						Scope:       new(admissionregistrationv1.AllScopes),
+						Operations:  opUpdateAndDelete,
 					},
 				},
 			},
@@ -655,13 +621,11 @@ func (b *bootstrapper) getValidatingWebhookConfiguration(caBundle []byte) *admis
 
 func (b *bootstrapper) getDeployment(serverSecretName string, operatorConfigMapName string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidDeploymentName,
-			Namespace: b.namespace,
-			Labels: utils.MergeStringMaps(map[string]string{
-				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-			}, b.labels()),
-		},
+		Name:      druidDeploymentName,
+		Namespace: b.namespace,
+		Labels: utils.MergeStringMaps(map[string]string{
+			resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+		}, b.labels()),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(1)),
@@ -715,21 +679,15 @@ func (b *bootstrapper) getDeployment(serverSecretName string, operatorConfigMapN
 					Volumes: []corev1.Volume{
 						{
 							Name: webhookServerTLSCertVolumeName,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  serverSecretName,
-									DefaultMode: new(int32(420)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  serverSecretName,
+								DefaultMode: new(int32(420)),
 							},
 						},
 						{
 							Name: druidDeploymentVolumeNameOperatorConfig,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: operatorConfigMapName,
-									},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: operatorConfigMapName,
 							},
 						},
 					},
@@ -742,12 +700,8 @@ func (b *bootstrapper) getDeployment(serverSecretName string, operatorConfigMapN
 func (b *bootstrapper) injectImageVectorOverwrite(deployment *appsv1.Deployment, configMapName string) {
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name: druidDeploymentVolumeNameImageVectorOverwrite,
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: configMapName,
-				},
-			},
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			Name: configMapName,
 		},
 	})
 	deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -763,11 +717,9 @@ func (b *bootstrapper) injectImageVectorOverwrite(deployment *appsv1.Deployment,
 
 func (b *bootstrapper) getPDB(deployment *appsv1.Deployment) *policyv1.PodDisruptionBudget {
 	return &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      druidDeploymentName,
-			Namespace: deployment.Namespace,
-			Labels:    b.labels(),
-		},
+		Name:      druidDeploymentName,
+		Namespace: deployment.Namespace,
+		Labels:    b.labels(),
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             new(intstr.FromInt32(1)),
 			Selector:                   deployment.Spec.Selector,

@@ -18,7 +18,7 @@ func CentralServiceMonitors(wantsAlertmanager bool) []*monitoringv1.ServiceMonit
 
 	if wantsAlertmanager {
 		out = append(out, &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{Name: "alertmanager-shoot"},
+			Name: "alertmanager-shoot",
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: alertmanager.GetLabels("shoot")},
 				Endpoints: []monitoringv1.Endpoint{{

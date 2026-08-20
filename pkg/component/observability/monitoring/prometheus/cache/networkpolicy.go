@@ -20,10 +20,8 @@ import (
 // to create this custom policy for this network path.
 func NetworkPolicyToNodeExporter(namespace string, nodeCIDR *string) *networkingv1.NetworkPolicy {
 	networkPolicy := networkingv1.NetworkPolicy{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "egress-from-cache-prometheus-to-kube-system-node-exporter-tcp-16909",
-			Namespace: namespace,
-		},
+		Name:      "egress-from-cache-prometheus-to-kube-system-node-exporter-tcp-16909",
+		Namespace: namespace,
 		Spec: networkingv1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{
 				MatchLabels: monitoringutils.Labels(Label),
@@ -46,10 +44,8 @@ func NetworkPolicyToNodeExporter(namespace string, nodeCIDR *string) *networking
 // cache Prometheus to the kubelet process running on the nodes.
 func NetworkPolicyToKubelet(namespace string, nodeCIDR *string) *networkingv1.NetworkPolicy {
 	networkPolicy := networkingv1.NetworkPolicy{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "egress-from-cache-prometheus-to-kubelet-tcp-10250",
-			Namespace: namespace,
-		},
+		Name:      "egress-from-cache-prometheus-to-kubelet-tcp-10250",
+		Namespace: namespace,
 		Spec: networkingv1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{
 				MatchLabels: monitoringutils.Labels(Label),

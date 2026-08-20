@@ -111,10 +111,8 @@ func New(
 
 		dnsRecord: newDNSRecord(values),
 		secret: &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.SecretName,
-				Namespace: values.Namespace,
-			},
+			Name:      values.SecretName,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -164,10 +162,8 @@ func (d *dnsRecord) deploy(ctx context.Context, operation string) (extensionsv1a
 		}
 
 		d.dnsRecord.Spec = extensionsv1alpha1.DNSRecordSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:  d.values.Type,
-				Class: d.values.Class,
-			},
+			Type:  d.values.Type,
+			Class: d.values.Class,
 			SecretRef: corev1.SecretReference{
 				Name:      d.secret.Name,
 				Namespace: d.secret.Namespace,
@@ -374,10 +370,8 @@ func (d *dnsRecord) recordTypeChanged(oldType, newType extensionsv1alpha1.DNSRec
 
 func newDNSRecord(values *Values) *extensionsv1alpha1.DNSRecord {
 	return &extensionsv1alpha1.DNSRecord{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      values.Name,
-			Namespace: values.Namespace,
-		},
+		Name:      values.Name,
+		Namespace: values.Namespace,
 	}
 }
 

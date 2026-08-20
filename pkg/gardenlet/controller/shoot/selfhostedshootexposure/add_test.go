@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -100,7 +99,7 @@ var _ = Describe("NodePredicate", func() {
 		})
 
 		It("should reject updates with non-Node objects", func() {
-			Expect(p.Update(event.UpdateEvent{ObjectOld: &corev1.Pod{}, ObjectNew: &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "x"}}})).To(BeFalse())
+			Expect(p.Update(event.UpdateEvent{ObjectOld: &corev1.Pod{}, ObjectNew: &corev1.Pod{Name: "x"}})).To(BeFalse())
 		})
 	})
 })

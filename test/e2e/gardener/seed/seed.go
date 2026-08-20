@@ -29,10 +29,8 @@ func ItShouldInitializeSeedClient(s *SeedContext) {
 		Expect(s.Seed).NotTo(BeNil(), "ItShouldGetResponsibleSeed should be called first")
 
 		seedSecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "seed-" + s.Seed.Name,
-				Namespace: "garden",
-			},
+			Name:      "seed-" + s.Seed.Name,
+			Namespace: "garden",
 		}
 		Eventually(ctx, s.GardenKomega.Object(seedSecret)).Should(
 			HaveField("Data", HaveKey(kubernetes.KubeConfig)),

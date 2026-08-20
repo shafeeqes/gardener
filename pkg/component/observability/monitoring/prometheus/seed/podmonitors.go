@@ -6,16 +6,13 @@ package seed
 
 import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CentralPodMonitors returns the central PodMonitor resources for the seed prometheus.
 func CentralPodMonitors() []*monitoringv1.PodMonitor {
 	return []*monitoringv1.PodMonitor{
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "extensions",
-			},
+			Name: "extensions",
 			Spec: monitoringv1.PodMonitorSpec{
 				// Selector: metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{
 				// 	{Key: "prometheus.io/scrape", Values: []string{"true"}, Operator: metav1.LabelSelectorOpIn},
@@ -75,19 +72,15 @@ func CentralPodMonitors() []*monitoringv1.PodMonitor {
 			},
 		},
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden",
-			},
+			Name: "garden",
 			Spec: monitoringv1.PodMonitorSpec{
 				// Selector: metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{
 				// 	{Key: "prometheus.io/scrape", Values: []string{"true"}, Operator: metav1.LabelSelectorOpIn},
 				// 	{Key: "prometheus.io/port", Operator: metav1.LabelSelectorOpExists},
 				// }},
 				PodMetricsEndpoints: []monitoringv1.PodMetricsEndpoint{{
-					Scheme: new(monitoringv1.SchemeHTTPS),
-					HTTPConfigWithProxy: monitoringv1.HTTPConfigWithProxy{
-						HTTPConfig: monitoringv1.HTTPConfig{TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-					},
+					Scheme:    new(monitoringv1.SchemeHTTPS),
+					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 					RelabelConfigs: []monitoringv1.RelabelConfig{
 						// TODO: These annotations should actually be labels so that PodMonitorSpec.Selector can be used
 						//  instead of manually crafting this relabel config.

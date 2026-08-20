@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -121,10 +120,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create seed")
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "seed-",
-			Labels:       map[string]string{testID: testRunID},
-		},
+		GenerateName: "seed-",
+		Labels:       map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",
@@ -179,9 +176,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create seed namespace")
 	seedNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "seed-" + seed.Name,
-		},
+		Name: "seed-" + seed.Name,
 	}
 	Expect(testClient.Create(ctx, seedNamespace)).To(Succeed())
 	log.Info("Created seed namespace for test", "namespaceName", seedNamespace)
@@ -193,9 +188,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create garden namespace")
 	gardenNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "garden",
-		},
+		Name: "garden",
 	}
 	Expect(testClient.Create(ctx, gardenNamespace)).To(Succeed())
 	log.Info("Created garden namespace for test", "namespaceName", gardenNamespace)

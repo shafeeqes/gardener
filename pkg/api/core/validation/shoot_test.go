@@ -148,10 +148,8 @@ var _ = Describe("Shoot Validation Tests", func() {
 
 		BeforeEach(func() {
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot",
-					Namespace: shootNamespace,
-				},
+				Name:      "shoot",
+				Namespace: shootNamespace,
 				Spec: core.ShootSpec{
 					Addons: &core.Addons{
 						NginxIngress: &core.NginxIngress{
@@ -707,7 +705,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 
 			It("should forbid nginx ingress addon if feature gate is set", func() {
 				DeferCleanup(test.WithFeatureGate(features.DefaultFeatureGate, features.DisableNginxIngressInShoot, true))
-				shoot.Spec.Addons = &core.Addons{NginxIngress: &core.NginxIngress{Addon: core.Addon{Enabled: true}}}
+				shoot.Spec.Addons = &core.Addons{NginxIngress: &core.NginxIngress{Enabled: true}}
 
 				errorList := ValidateShoot(shoot)
 
@@ -723,7 +721,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 				shoot.Spec.Addons = nil
 
 				newShoot := prepareShootForUpdate(shoot)
-				newShoot.Spec.Addons = &core.Addons{NginxIngress: &core.NginxIngress{Addon: core.Addon{Enabled: true}}}
+				newShoot.Spec.Addons = &core.Addons{NginxIngress: &core.NginxIngress{Enabled: true}}
 
 				errorList := ValidateShootUpdate(newShoot, shoot)
 
@@ -736,7 +734,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 
 			It("should allow disabling nginx ingress addon if feature gate is set", func() {
 				DeferCleanup(test.WithFeatureGate(features.DefaultFeatureGate, features.DisableNginxIngressInShoot, true))
-				shoot.Spec.Addons = &core.Addons{NginxIngress: &core.NginxIngress{Addon: core.Addon{Enabled: true}}}
+				shoot.Spec.Addons = &core.Addons{NginxIngress: &core.NginxIngress{Enabled: true}}
 
 				newShoot := prepareShootForUpdate(shoot)
 				newShoot.Spec.Addons = nil
@@ -841,7 +839,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 			shoot.Spec.SecretBindingName = new("")
 			shoot.Spec.SeedName = new("")
 			shoot.Spec.SeedSelector = &core.SeedSelector{
-				LabelSelector: metav1.LabelSelector{MatchLabels: map[string]string{"foo": "no/slash/allowed"}},
+				MatchLabels: map[string]string{"foo": "no/slash/allowed"},
 			}
 			shoot.Spec.Provider.Type = ""
 
@@ -4283,9 +4281,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 			It("should prevent setting kubeproxy config for workerless shoots", func() {
 				shoot.Spec.Provider.Workers = []core.Worker{}
 				shoot.Spec.Kubernetes.KubeProxy = &core.KubeProxyConfig{
-					KubernetesConfig: core.KubernetesConfig{
-						FeatureGates: nil,
-					},
+					FeatureGates: nil,
 				}
 
 				errorList := ValidateShoot(shoot)
@@ -4992,21 +4988,15 @@ var _ = Describe("Shoot Validation Tests", func() {
 				shoot.Spec.Kubernetes.KubeAPIServer.FeatureGates = featureGates
 				shoot.Spec.Kubernetes.KubeControllerManager.FeatureGates = featureGates
 				shoot.Spec.Kubernetes.KubeScheduler = &core.KubeSchedulerConfig{
-					KubernetesConfig: core.KubernetesConfig{
-						FeatureGates: featureGates,
-					},
+					FeatureGates: featureGates,
 				}
 				proxyMode := core.ProxyModeIPTables
 				shoot.Spec.Kubernetes.KubeProxy = &core.KubeProxyConfig{
-					KubernetesConfig: core.KubernetesConfig{
-						FeatureGates: featureGates,
-					},
-					Mode: &proxyMode,
+					FeatureGates: featureGates,
+					Mode:         &proxyMode,
 				}
 				shoot.Spec.Kubernetes.Kubelet = &core.KubeletConfig{
-					KubernetesConfig: core.KubernetesConfig{
-						FeatureGates: featureGates,
-					},
+					FeatureGates: featureGates,
 				}
 
 				errorList := ValidateShoot(shoot)
@@ -8307,12 +8297,10 @@ var _ = Describe("Shoot Validation Tests", func() {
 		)
 		BeforeEach(func() {
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot",
-					Namespace: "my-namespace",
-				},
-				Spec:   core.ShootSpec{},
-				Status: core.ShootStatus{},
+				Name:      "shoot",
+				Namespace: "my-namespace",
+				Spec:      core.ShootSpec{},
+				Status:    core.ShootStatus{},
 			}
 
 			newShoot = prepareShootForUpdate(shoot)
@@ -9125,11 +9113,9 @@ var _ = Describe("Shoot Validation Tests", func() {
 				MaxUnavailable: &maxUnavailable,
 				Kubernetes: &core.WorkerKubernetes{
 					Kubelet: &core.KubeletConfig{
-						KubernetesConfig: core.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								"AnyVolumeDataSource": true,
-								"Foo":                 true,
-							},
+						FeatureGates: map[string]bool{
+							"AnyVolumeDataSource": true,
+							"Foo":                 true,
 						},
 					},
 				},
@@ -10126,9 +10112,7 @@ var _ = Describe("Shoot Validation Tests", func() {
 		DescribeTable("ImagePullCredentialsVerificationPolicy",
 			func(policy *string, featureGates map[string]bool, version string, matcher gomegatypes.GomegaMatcher) {
 				kubeletConfig := core.KubeletConfig{
-					KubernetesConfig: core.KubernetesConfig{
-						FeatureGates: featureGates,
-					},
+					FeatureGates: featureGates,
 				}
 				if policy != nil {
 					kubeletConfig.ImagePullCredentialsVerificationPolicy = (*core.ImagePullCredentialsVerificationPolicy)(policy)

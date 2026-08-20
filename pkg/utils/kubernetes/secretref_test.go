@@ -53,18 +53,16 @@ var _ = Describe("secretref", func() {
 			Namespace:  namespace,
 		}
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						APIVersion:         "core.gardener.cloud/v1beta1",
-						Kind:               "Shoot",
-						Name:               name,
-						UID:                "uid",
-						Controller:         new(true),
-						BlockOwnerDeletion: new(true),
-					},
+			Name:      name,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "core.gardener.cloud/v1beta1",
+					Kind:               "Shoot",
+					Name:               name,
+					UID:                "uid",
+					Controller:         new(true),
+					BlockOwnerDeletion: new(true),
 				},
 			},
 			Data: map[string][]byte{
@@ -73,18 +71,16 @@ var _ = Describe("secretref", func() {
 			Type: corev1.SecretTypeOpaque,
 		}
 		internalSecret = &gardencorev1beta1.InternalSecret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						APIVersion:         "core.gardener.cloud/v1beta1",
-						Kind:               "Shoot",
-						Name:               name,
-						UID:                "uid",
-						Controller:         new(true),
-						BlockOwnerDeletion: new(true),
-					},
+			Name:      name,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "core.gardener.cloud/v1beta1",
+					Kind:               "Shoot",
+					Name:               name,
+					UID:                "uid",
+					Controller:         new(true),
+					BlockOwnerDeletion: new(true),
 				},
 			},
 			Data: map[string][]byte{
@@ -93,10 +89,8 @@ var _ = Describe("secretref", func() {
 			Type: corev1.SecretTypeOpaque,
 		}
 		workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: securityv1alpha1.WorkloadIdentitySpec{
 				Audiences: []string{"aud"},
 				TargetSystem: securityv1alpha1.TargetSystem{
@@ -105,10 +99,8 @@ var _ = Describe("secretref", func() {
 			},
 		}
 		secretPartialObjectMeta = &metav1.PartialObjectMetadata{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Secret",
-				APIVersion: "v1",
-			},
+			Kind:       "Secret",
+			APIVersion: "v1",
 			ObjectMeta: *secret.ObjectMeta.DeepCopy(),
 		}
 		crossVersionRef = &autoscalingv1.CrossVersionObjectReference{
@@ -336,10 +328,8 @@ var _ = Describe("secretref", func() {
 	Describe("#DeleteSecretByReference", func() {
 		It("should delete the secret if it exists", func() {
 			secretToDelete := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 			}
 
 			Expect(fakeClient.Create(ctx, secretToDelete)).To(Succeed())
@@ -374,10 +364,8 @@ var _ = Describe("secretref", func() {
 	Describe("#DeleteSecretByObjectReference", func() {
 		It("should delete the secret if it exists", func() {
 			secretToDelete := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 			}
 
 			Expect(fakeClient.Create(ctx, secretToDelete)).To(Succeed())

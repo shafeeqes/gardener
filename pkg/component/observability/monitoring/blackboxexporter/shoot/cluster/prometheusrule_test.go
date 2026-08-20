@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	. "github.com/gardener/gardener/pkg/component/observability/monitoring/blackboxexporter/shoot/cluster"
@@ -21,11 +20,9 @@ var _ = Describe("PrometheusRule", func() {
 
 		It("should compute the scrape configs", func() {
 			expectedPrometheusRule := &monitoringv1.PrometheusRule{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-blackbox-exporter-k8s-service-check",
-					Namespace: namespace,
-					Labels:    map[string]string{"prometheus": "shoot"},
-				},
+				Name:      "shoot-blackbox-exporter-k8s-service-check",
+				Namespace: namespace,
+				Labels:    map[string]string{"prometheus": "shoot"},
 				Spec: monitoringv1.PrometheusRuleSpec{
 					Groups: []monitoringv1.RuleGroup{{
 						Name: "apiserver-connectivity-check.rules",

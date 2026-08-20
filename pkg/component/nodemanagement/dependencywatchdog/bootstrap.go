@@ -164,12 +164,10 @@ func (b *bootstrapper) getConfigMap() (*corev1.ConfigMap, error) {
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      b.name() + "-config",
-			Namespace: b.namespace,
-			Labels:    map[string]string{v1beta1constants.LabelApp: b.name()},
-		},
-		Data: map[string]string{configFileName: config},
+		Name:      b.name() + "-config",
+		Namespace: b.namespace,
+		Labels:    map[string]string{v1beta1constants.LabelApp: b.name()},
+		Data:      map[string]string{configFileName: config},
 	}
 	utilruntime.Must(kubernetesutils.MakeUnique(configMap))
 
@@ -178,19 +176,15 @@ func (b *bootstrapper) getConfigMap() (*corev1.ConfigMap, error) {
 
 func (b *bootstrapper) getServiceAccount() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      b.name(),
-			Namespace: b.namespace,
-		},
+		Name:                         b.name(),
+		Namespace:                    b.namespace,
 		AutomountServiceAccountToken: new(false),
 	}
 }
 
 func (b *bootstrapper) getClusterRole() *rbacv1.ClusterRole {
 	clusterRole := &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("gardener.cloud:%s", b.name()),
-		},
+		Name:  fmt.Sprintf("gardener.cloud:%s", b.name()),
 		Rules: b.getClusterRolePolicyRules(),
 	}
 	return clusterRole
@@ -198,9 +192,7 @@ func (b *bootstrapper) getClusterRole() *rbacv1.ClusterRole {
 
 func (b *bootstrapper) getClusterRoleBinding(serviceAccount *corev1.ServiceAccount, clusterRole *rbacv1.ClusterRole) *rbacv1.ClusterRoleBinding {
 	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("gardener.cloud:%s", b.name()),
-		},
+		Name: fmt.Sprintf("gardener.cloud:%s", b.name()),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -217,21 +209,17 @@ func (b *bootstrapper) getClusterRoleBinding(serviceAccount *corev1.ServiceAccou
 
 func (b *bootstrapper) getRole() *rbacv1.Role {
 	role := &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("gardener.cloud:%s", b.name()),
-			Namespace: b.namespace,
-		},
-		Rules: b.getRolePolicyRules(),
+		Name:      fmt.Sprintf("gardener.cloud:%s", b.name()),
+		Namespace: b.namespace,
+		Rules:     b.getRolePolicyRules(),
 	}
 	return role
 }
 
 func (b *bootstrapper) getRoleBinding(serviceAccount *corev1.ServiceAccount, role *rbacv1.Role) *rbacv1.RoleBinding {
 	roleBinding := &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("gardener.cloud:%s", b.name()),
-			Namespace: b.namespace,
-		},
+		Name:      fmt.Sprintf("gardener.cloud:%s", b.name()),
+		Namespace: b.namespace,
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "Role",
@@ -373,13 +361,11 @@ func (b *bootstrapper) getContainerCommand() []string {
 
 func (b *bootstrapper) getDeployment(serviceAccountName string, configMapName string) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      b.name(),
-			Namespace: b.namespace,
-			Labels: utils.MergeStringMaps(map[string]string{
-				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-			}, b.getLabels()),
-		},
+		Name:      b.name(),
+		Namespace: b.namespace,
+		Labels: utils.MergeStringMaps(map[string]string{
+			resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+		}, b.getLabels()),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -419,12 +405,8 @@ func (b *bootstrapper) getDeployment(serviceAccountName string, configMapName st
 					}},
 					Volumes: []corev1.Volume{{
 						Name: volumeName,
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: configMapName,
-								},
-							},
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							Name: configMapName,
 						},
 					}},
 				},
@@ -439,11 +421,9 @@ func (b *bootstrapper) getDeployment(serviceAccountName string, configMapName st
 
 func (b *bootstrapper) getPDB(deployment *appsv1.Deployment) *policyv1.PodDisruptionBudget {
 	pdb := &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      b.name(),
-			Namespace: deployment.Namespace,
-			Labels:    b.getLabels(),
-		},
+		Name:      b.name(),
+		Namespace: deployment.Namespace,
+		Labels:    b.getLabels(),
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             new(intstr.FromInt32(1)),
 			Selector:                   deployment.Spec.Selector,
@@ -465,10 +445,8 @@ func (b *bootstrapper) getVPA(deploymentName string) *vpaautoscalingv1.VerticalP
 	}
 
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      b.name(),
-			Namespace: b.namespace,
-		},
+		Name:      b.name(),
+		Namespace: b.namespace,
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				APIVersion: appsv1.SchemeGroupVersion.String(),

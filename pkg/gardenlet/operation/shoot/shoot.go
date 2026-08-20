@@ -341,7 +341,7 @@ func (b *Builder) Build(ctx context.Context, seedClientSet kubernetes.Interface,
 	if lastOperation := shootObject.Status.LastOperation; lastOperation != nil &&
 		lastOperation.Type == gardencorev1beta1.LastOperationTypeRestore &&
 		lastOperation.State != gardencorev1beta1.LastOperationStateSucceeded {
-		shootState := &gardencorev1beta1.ShootState{ObjectMeta: metav1.ObjectMeta{Name: shootObject.Name, Namespace: shootObject.Namespace}}
+		shootState := &gardencorev1beta1.ShootState{Name: shootObject.Name, Namespace: shootObject.Namespace}
 		if err := gardenReader.Get(ctx, client.ObjectKeyFromObject(shootState), shootState); err != nil {
 			return nil, err
 		}

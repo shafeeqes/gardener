@@ -71,30 +71,22 @@ var _ = Describe("ProjectRBAC", func() {
 		}
 
 		emptyExtensionRoleBinding1 = rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      extensionRolePrefix + extensionRole1,
-				Namespace: namespace,
-				Labels:    roleLabels,
-			},
+			Name:      extensionRolePrefix + extensionRole1,
+			Namespace: namespace,
+			Labels:    roleLabels,
 		}
 		emptyExtensionRoleBinding2 = rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      extensionRolePrefix + extensionRole2,
-				Namespace: namespace,
-				Labels:    roleLabels,
-			},
+			Name:      extensionRolePrefix + extensionRole2,
+			Namespace: namespace,
+			Labels:    roleLabels,
 		}
 		emptyExtensionClusterRole1 = rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   extensionRolePrefix + extensionRole1,
-				Labels: roleLabels,
-			},
+			Name:   extensionRolePrefix + extensionRole1,
+			Labels: roleLabels,
 		}
 		emptyExtensionClusterRole2 = rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   extensionRolePrefix + extensionRole2,
-				Labels: roleLabels,
-			},
+			Name:   extensionRolePrefix + extensionRole2,
+			Labels: roleLabels,
 		}
 	)
 
@@ -102,9 +94,7 @@ var _ = Describe("ProjectRBAC", func() {
 		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: projectName,
-			},
+			Name: projectName,
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: &namespace,
 			},
@@ -113,16 +103,14 @@ var _ = Describe("ProjectRBAC", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		clusterRoleProjectAdmin = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups:     []string{""},
@@ -139,16 +127,14 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		clusterRoleBindingProjectAdmin = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -157,16 +143,14 @@ var _ = Describe("ProjectRBAC", func() {
 		}
 
 		clusterRoleProjectUAM = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-uam:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project-uam:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups:     []string{gardencorev1beta1.SchemeGroupVersion.Group},
@@ -177,16 +161,14 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		clusterRoleBindingProjectUAM = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-uam:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project-uam:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -195,17 +177,15 @@ var _ = Describe("ProjectRBAC", func() {
 		}
 
 		roleBindingProjectServiceAccountManager = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:project-serviceaccountmanager",
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name:      "gardener.cloud:system:project-serviceaccountmanager",
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -214,16 +194,14 @@ var _ = Describe("ProjectRBAC", func() {
 		}
 
 		clusterRoleProjectMember = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-member:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project-member:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups:     []string{""},
@@ -240,16 +218,14 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		clusterRoleBindingProjectMember = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-member:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project-member:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -257,17 +233,15 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		roleBindingProjectMember = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:project-member",
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name:      "gardener.cloud:system:project-member",
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -276,16 +250,14 @@ var _ = Describe("ProjectRBAC", func() {
 		}
 
 		clusterRoleProjectViewer = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-viewer:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project-viewer:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups:     []string{""},
@@ -302,16 +274,14 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		clusterRoleBindingProjectViewer = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-viewer:" + projectName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name: "gardener.cloud:system:project-viewer:" + projectName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -319,17 +289,15 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		roleBindingProjectViewer = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:project-viewer",
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-			},
+			Name:      "gardener.cloud:system:project-viewer",
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -338,19 +306,17 @@ var _ = Describe("ProjectRBAC", func() {
 		}
 
 		clusterRoleProjectExtensionRole1 = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionRolePrefix + extensionRole1,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-				Labels: map[string]string{
-					"gardener.cloud/role":         "extension-project-role",
-					"project.gardener.cloud/name": projectName,
-				},
+			Name: extensionRolePrefix + extensionRole1,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
+			Labels: map[string]string{
+				"gardener.cloud/role":         "extension-project-role",
+				"project.gardener.cloud/name": projectName,
 			},
 			AggregationRule: &rbacv1.AggregationRule{
 				ClusterRoleSelectors: []metav1.LabelSelector{
@@ -359,20 +325,18 @@ var _ = Describe("ProjectRBAC", func() {
 			},
 		}
 		roleBindingProjectExtensionRole1 = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      extensionRolePrefix + extensionRole1,
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "core.gardener.cloud/v1beta1",
-					Kind:               "Project",
-					Name:               projectName,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(false),
-				}},
-				Labels: map[string]string{
-					"gardener.cloud/role":         "extension-project-role",
-					"project.gardener.cloud/name": projectName,
-				},
+			Name:      extensionRolePrefix + extensionRole1,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "core.gardener.cloud/v1beta1",
+				Kind:               "Project",
+				Name:               projectName,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(false),
+			}},
+			Labels: map[string]string{
+				"gardener.cloud/role":         "extension-project-role",
+				"project.gardener.cloud/name": projectName,
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",

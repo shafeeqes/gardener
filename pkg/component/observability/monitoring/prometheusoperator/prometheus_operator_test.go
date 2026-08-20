@@ -85,32 +85,24 @@ var _ = Describe("PrometheusOperator", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-operator",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "prometheus-operator"},
-			},
+			Name:                         "prometheus-operator",
+			Namespace:                    namespace,
+			Labels:                       map[string]string{"app": "prometheus-operator"},
 			AutomountServiceAccountToken: new(false),
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-operator",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "prometheus-operator"},
-			},
+			Name:      "prometheus-operator",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "prometheus-operator"},
 			Spec: corev1.ServiceSpec{
 				ClusterIP: corev1.ClusterIPNone,
 				Selector:  map[string]string{"app": "prometheus-operator"},
@@ -122,11 +114,9 @@ var _ = Describe("PrometheusOperator", func() {
 			},
 		}
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-operator",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "prometheus-operator"},
-			},
+			Name:      "prometheus-operator",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "prometheus-operator"},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(1)),
 				RevisionHistoryLimit: new(int32(2)),
@@ -187,11 +177,9 @@ var _ = Describe("PrometheusOperator", func() {
 		}
 		vpaUpdateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-operator",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "prometheus-operator"},
-			},
+			Name:      "prometheus-operator",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "prometheus-operator"},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -218,10 +206,8 @@ var _ = Describe("PrometheusOperator", func() {
 			},
 		}
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "prometheus-operator",
-				Labels: map[string]string{"app": "prometheus-operator"},
-			},
+			Name:   "prometheus-operator",
+			Labels: map[string]string{"app": "prometheus-operator"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"monitoring.coreos.com"},
@@ -302,10 +288,8 @@ var _ = Describe("PrometheusOperator", func() {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "prometheus-operator",
-				Labels: map[string]string{"app": "prometheus-operator"},
-			},
+			Name:   "prometheus-operator",
+			Labels: map[string]string{"app": "prometheus-operator"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.SchemeGroupVersion.Group,
 				Kind:     "ClusterRole",
@@ -318,9 +302,7 @@ var _ = Describe("PrometheusOperator", func() {
 			}},
 		}
 		clusterRolePrometheus = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "prometheus",
-			},
+			Name: "prometheus",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -350,10 +332,8 @@ var _ = Describe("PrometheusOperator", func() {
 			},
 		}
 		rolePrometheusShoot = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-shoot",
-				Namespace: namespace,
-			},
+			Name:      "prometheus-shoot",
+			Namespace: namespace,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -379,12 +359,10 @@ var _ = Describe("PrometheusOperator", func() {
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 			})
 
@@ -393,15 +371,13 @@ var _ = Describe("PrometheusOperator", func() {
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class:       new("seed"),
@@ -460,12 +436,10 @@ var _ = Describe("PrometheusOperator", func() {
 
 			It("should fail because the ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -473,11 +447,9 @@ var _ = Describe("PrometheusOperator", func() {
 
 			It("should succeed because the ManagedResource is healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

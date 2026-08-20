@@ -58,7 +58,7 @@ func (a *adminAccess) Deploy(ctx context.Context) error {
 }
 
 func (a *adminAccess) Destroy(ctx context.Context) error {
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenerutils.SecretNamePrefixShootAccess + ShootAccessSecretNameSuffix, Namespace: a.namespace}}
+	secret := &corev1.Secret{Name: gardenerutils.SecretNamePrefixShootAccess + ShootAccessSecretNameSuffix, Namespace: a.namespace}
 	if err := a.client.Delete(ctx, secret); client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("failed deleting secret %s: %w", client.ObjectKeyFromObject(secret), err)
 	}
@@ -88,9 +88,7 @@ func (a *adminAccess) computeResourcesData(serviceAccountName string) (map[strin
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		gardenerSystemClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:cluster-admin",
-			},
+			Name: "gardener.cloud:system:cluster-admin",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",

@@ -30,30 +30,22 @@ var _ = Describe("Extension Required Virtual controller tests", func() {
 
 	BeforeEach(func() {
 		extension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID,
-				Labels: map[string]string{
-					testID: testRunID,
-				},
+			Name: testRunID,
+			Labels: map[string]string{
+				testID: testRunID,
 			},
 		}
 
 		providerControllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID + "-1",
-			},
+			Name: testRunID + "-1",
 		}
 
 		providerControllerInstallation2 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID + "-2",
-			},
+			Name: testRunID + "-2",
 		}
 
 		dnsControllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID + "-3",
-			},
+			Name: testRunID + "-3",
 		}
 
 		DeferCleanup(func() {

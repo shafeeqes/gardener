@@ -106,10 +106,8 @@ var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
 
 func newPodForNamespace(namespace string) *corev1.Pod {
 	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "nginx",
-			Namespace: namespace,
-		},
+		Name:      "nginx",
+		Namespace: namespace,
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{

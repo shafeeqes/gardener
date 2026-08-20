@@ -9,7 +9,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	secretsutils "github.com/gardener/gardener/pkg/utils/secrets"
@@ -49,10 +48,8 @@ func (m *fakeManager) Get(name string, opts ...secretsmanager.GetOption) (*corev
 	}
 
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: m.namespace,
-		},
+		Name:      secretName,
+		Namespace: m.namespace,
 	}
 	if err := m.client.Get(context.TODO(), client.ObjectKeyFromObject(secret), secret); err != nil {
 		return nil, false

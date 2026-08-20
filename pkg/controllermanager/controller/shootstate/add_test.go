@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -53,24 +51,18 @@ var _ = Describe("Add", func() {
 
 		It("should return reconciliation request matching the shoot name", func() {
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: shootNamespace,
-				},
+				Name:      shootName,
+				Namespace: shootNamespace,
 			}
 
 			reconciliationRequest := reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      shootName,
-					Namespace: shootNamespace,
-				},
+				Name:      shootName,
+				Namespace: shootNamespace,
 			}
 
 			shootState := &gardencorev1beta1.ShootState{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: shootNamespace,
-				},
+				Name:      shootName,
+				Namespace: shootNamespace,
 			}
 			Expect(c.Create(ctx, shootState)).To(Succeed())
 
@@ -80,10 +72,8 @@ var _ = Describe("Add", func() {
 
 		It("should return nil if ShootState is not present", func() {
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: shootNamespace,
-				},
+				Name:      shootName,
+				Namespace: shootNamespace,
 			}
 			requests := reconciler.MapShootToShootState(log)(ctx, shoot)
 			Expect(requests).To(BeEmpty())
@@ -93,10 +83,8 @@ var _ = Describe("Add", func() {
 			deploymentName := "dep-1"
 			deploymentNamespace := "ns-1"
 			deployment := appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      deploymentName,
-					Namespace: deploymentNamespace,
-				},
+				Name:      deploymentName,
+				Namespace: deploymentNamespace,
 			}
 
 			requests := reconciler.MapShootToShootState(log)(ctx, &deployment)
@@ -119,10 +107,8 @@ var _ = Describe("Add", func() {
 
 			BeforeEach(func() {
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-",
-						Namespace: "ns-",
-					},
+					Name:      "shoot-",
+					Namespace: "ns-",
 				}
 
 				shootOld = shoot.DeepCopy()

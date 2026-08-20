@@ -55,7 +55,7 @@ func (b *GardenadmBotanist) WriteBootstrapToken(ctx context.Context) error {
 }
 
 func emptyTemporaryClusterAdminBinding() *rbacv1.ClusterRoleBinding {
-	return &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "zzz-temporary-cluster-admin-access-for-bootstrapping"}}
+	return &rbacv1.ClusterRoleBinding{Name: "zzz-temporary-cluster-admin-access-for-bootstrapping"}
 }
 
 func (b *GardenadmBotanist) reconcileTemporaryClusterAdminBindingForBootstrapping(ctx context.Context) error {
@@ -207,7 +207,7 @@ func (b *GardenadmBotanist) WaitUntilGardenerNodeAgentLeaseIsRenewed(ctx context
 	if node == nil {
 		return fmt.Errorf("node for host %q was not created yet", b.HostName)
 	}
-	lease := &coordinationv1.Lease{ObjectMeta: metav1.ObjectMeta{Name: gardenerutils.NodeAgentLeaseName(node.GetName()), Namespace: metav1.NamespaceSystem}}
+	lease := &coordinationv1.Lease{Name: gardenerutils.NodeAgentLeaseName(node.GetName()), Namespace: metav1.NamespaceSystem}
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, WaitForNodeAgentLeaseTimeout)
 	defer cancel()

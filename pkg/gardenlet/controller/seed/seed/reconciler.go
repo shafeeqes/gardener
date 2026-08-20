@@ -301,7 +301,7 @@ func selfHostedShootHasManagedInfrastructure(ctx context.Context, reader client.
 		return false, nil
 	}
 
-	cluster := &extensionsv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Name: metav1.NamespaceSystem}}
+	cluster := &extensionsv1alpha1.Cluster{Name: metav1.NamespaceSystem}
 	if err := reader.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		return false, fmt.Errorf("failed reading Cluster resource for self-hosted shoot: %w", err)
 	}

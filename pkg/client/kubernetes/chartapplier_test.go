@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
@@ -66,13 +65,11 @@ var _ = Describe("chart applier", func() {
 		mapper.Add(corev1.SchemeGroupVersion.WithKind("ConfigMap"), meta.RESTScopeNamespace)
 
 		expectedCM = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            configMapName,
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Labels:          map[string]string{"baz": "goo"},
-			},
-			Data: map[string]string{"key": "valz"},
+			Name:            configMapName,
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Labels:          map[string]string{"baz": "goo"},
+			Data:            map[string]string{"key": "valz"},
 		}
 
 		renderer = chartrenderer.NewWithServerVersion(&version.Info{})
@@ -97,10 +94,8 @@ var _ = Describe("chart applier", func() {
 				const newNS = "other-namespace"
 
 				existingCM := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      configMapName,
-						Namespace: newNS,
-					},
+					Name:      configMapName,
+					Namespace: newNS,
 				}
 				Expect(c.Create(ctx, existingCM)).To(Succeed(), "dummy configmap creation should succeed")
 
@@ -155,10 +150,8 @@ var _ = Describe("chart applier", func() {
 		test := func(chartPath string) {
 			It("deletes the chart with default values", func() {
 				existingCM := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      configMapName,
-						Namespace: namespace,
-					},
+					Name:      configMapName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, existingCM)).To(Succeed(), "dummy configmap creation should succeed")
 
@@ -171,10 +164,8 @@ var _ = Describe("chart applier", func() {
 				const newNS = "other-namespace"
 
 				existingCM := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      configMapName,
-						Namespace: newNS,
-					},
+					Name:      configMapName,
+					Namespace: newNS,
 				}
 
 				Expect(c.Create(ctx, existingCM)).To(Succeed(), "dummy configmap creation should succeed")
@@ -244,10 +235,8 @@ var _ = Describe("chart applier", func() {
 				const newNS = "other-namespace"
 
 				existingCM := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      configMapName,
-						Namespace: newNS,
-					},
+					Name:      configMapName,
+					Namespace: newNS,
 				}
 				Expect(c.Create(ctx, existingCM)).To(Succeed(), "dummy configmap creation should succeed")
 
@@ -301,10 +290,8 @@ var _ = Describe("chart applier", func() {
 		test := func(archive []byte) {
 			It("deletes the chart with default values", func() {
 				existingCM := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      configMapName,
-						Namespace: namespace,
-					},
+					Name:      configMapName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, existingCM)).To(Succeed(), "dummy configmap creation should succeed")
 
@@ -317,10 +304,8 @@ var _ = Describe("chart applier", func() {
 				const newNS = "other-namespace"
 
 				existingCM := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      configMapName,
-						Namespace: newNS,
-					},
+					Name:      configMapName,
+					Namespace: newNS,
 				}
 
 				Expect(c.Create(ctx, existingCM)).To(Succeed(), "dummy configmap creation should succeed")

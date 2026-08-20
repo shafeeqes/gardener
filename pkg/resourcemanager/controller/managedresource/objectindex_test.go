@@ -7,7 +7,6 @@ package managedresource
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -17,11 +16,11 @@ var _ = Describe("objectIndex", func() {
 	Describe("#NewObjectIndex, #Lookup", func() {
 		It("without equivalences", func() {
 			oldRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "name", Namespace: "ns", Kind: "kindA", APIVersion: "groupA/v2"},
+				Name: "name", Namespace: "ns", Kind: "kindA", APIVersion: "groupA/v2",
 			}
 
 			unusedRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "foo", Namespace: "bar", Kind: "kind", APIVersion: "group/v1"},
+				Name: "foo", Namespace: "bar", Kind: "kind", APIVersion: "group/v1",
 			}
 
 			existingRefs := []v1alpha1.ObjectReference{
@@ -32,7 +31,7 @@ var _ = Describe("objectIndex", func() {
 			index := NewObjectIndex(existingRefs, nil)
 
 			newRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "name", Namespace: "ns", Kind: "kindB", APIVersion: "groupB/v1"},
+				Name: "name", Namespace: "ns", Kind: "kindB", APIVersion: "groupB/v1",
 			}
 
 			_, found := index.Lookup(newRef)
@@ -48,11 +47,11 @@ var _ = Describe("objectIndex", func() {
 
 		It("with default equivalences", func() {
 			oldRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "name", Namespace: "ns", Kind: "Deployment", APIVersion: "extensions/v1beta1"},
+				Name: "name", Namespace: "ns", Kind: "Deployment", APIVersion: "extensions/v1beta1",
 			}
 
 			unusedRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "foo", Namespace: "bar", Kind: "kind", APIVersion: "group/v1"},
+				Name: "foo", Namespace: "bar", Kind: "kind", APIVersion: "group/v1",
 			}
 
 			existingRefs := []v1alpha1.ObjectReference{
@@ -63,7 +62,7 @@ var _ = Describe("objectIndex", func() {
 			index := NewObjectIndex(existingRefs, NewEquivalences())
 
 			newRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "name", Namespace: "ns", Kind: "Deployment", APIVersion: "apps/v1"},
+				Name: "name", Namespace: "ns", Kind: "Deployment", APIVersion: "apps/v1",
 			}
 
 			foundRef, found := index.Lookup(newRef)
@@ -83,11 +82,11 @@ var _ = Describe("objectIndex", func() {
 			}
 
 			oldRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "name", Namespace: "ns", Kind: "kindA", APIVersion: "groupA/v2"},
+				Name: "name", Namespace: "ns", Kind: "kindA", APIVersion: "groupA/v2",
 			}
 
 			unusedRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "foo", Namespace: "bar", Kind: "kind", APIVersion: "group/v1"},
+				Name: "foo", Namespace: "bar", Kind: "kind", APIVersion: "group/v1",
 			}
 			existingRefs := []v1alpha1.ObjectReference{
 				oldRef,
@@ -97,7 +96,7 @@ var _ = Describe("objectIndex", func() {
 			index := NewObjectIndex(existingRefs, NewEquivalences(equis...))
 
 			newRef := v1alpha1.ObjectReference{
-				ObjectReference: corev1.ObjectReference{Name: "name", Namespace: "ns", Kind: "kindB", APIVersion: "groupB/v1"},
+				Name: "name", Namespace: "ns", Kind: "kindB", APIVersion: "groupB/v1",
 			}
 
 			foundRef, found := index.Lookup(newRef)

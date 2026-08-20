@@ -26,10 +26,8 @@ var _ = Describe("validation", func() {
 
 		BeforeEach(func() {
 			shootState = &core.ShootState{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-foo",
-					Namespace: "project-foo",
-				},
+				Name:      "shoot-foo",
+				Namespace: "project-foo",
 			}
 		})
 

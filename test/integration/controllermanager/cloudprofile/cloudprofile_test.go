@@ -40,10 +40,8 @@ var _ = DescribeTableSubtree("CloudProfile controller tests", func(isCapabilitie
 		}
 
 		cloudProfile = &gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.CloudProfileSpec{
 				MachineCapabilities: CapabilityDefinition,
 				Type:                "some-provider",
@@ -54,7 +52,7 @@ var _ = DescribeTableSubtree("CloudProfile controller tests", func(isCapabilitie
 					{
 						Name: "some-image",
 						Versions: []gardencorev1beta1.MachineImageVersion{
-							{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.5.6"}},
+							{Version: "4.5.6"},
 						},
 					},
 				},
@@ -71,10 +69,8 @@ var _ = DescribeTableSubtree("CloudProfile controller tests", func(isCapabilitie
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: testID + "-",
+			Namespace:    testNamespace.Name,
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("my-provider-account"),
 				Region:            "foo-region",
@@ -226,10 +222,8 @@ var _ = DescribeTableSubtree("CloudProfile controller tests", func(isCapabilitie
 						Name: "some-other-image",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "5.6.7",
-									Classification: new(gardencorev1beta1.ClassificationPreview),
-								},
+								Version:        "5.6.7",
+								Classification: new(gardencorev1beta1.ClassificationPreview),
 							},
 						},
 					},
@@ -298,20 +292,18 @@ var _ = DescribeTableSubtree("CloudProfile controller tests", func(isCapabilitie
 						Name: "some-other-image",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "5.6.7",
-									Lifecycle: []gardencorev1beta1.LifecycleStage{
-										{
-											Classification: gardencorev1beta1.ClassificationPreview,
-										},
-										{
-											Classification: gardencorev1beta1.ClassificationSupported,
-											StartTime:      past,
-										},
-										{
-											Classification: gardencorev1beta1.ClassificationDeprecated,
-											StartTime:      future,
-										},
+								Version: "5.6.7",
+								Lifecycle: []gardencorev1beta1.LifecycleStage{
+									{
+										Classification: gardencorev1beta1.ClassificationPreview,
+									},
+									{
+										Classification: gardencorev1beta1.ClassificationSupported,
+										StartTime:      past,
+									},
+									{
+										Classification: gardencorev1beta1.ClassificationDeprecated,
+										StartTime:      future,
 									},
 								},
 							},

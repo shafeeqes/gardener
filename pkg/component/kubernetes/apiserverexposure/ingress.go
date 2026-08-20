@@ -11,7 +11,6 @@ import (
 	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -150,17 +149,17 @@ func (i *ingress) emptyDestinationRule() *istionetworkingv1beta1.DestinationRule
 	if i.values.ServiceNamespace != "" {
 		serviceNamespace = i.values.ServiceNamespace
 	}
-	return &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeAPIServer + "-ingress", Namespace: serviceNamespace}}
+	return &istionetworkingv1beta1.DestinationRule{Name: v1beta1constants.DeploymentNameKubeAPIServer + "-ingress", Namespace: serviceNamespace}
 }
 
 func (i *ingress) emptyGateway() *istionetworkingv1beta1.Gateway {
-	return &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeAPIServer + "-ingress", Namespace: i.namespace}}
+	return &istionetworkingv1beta1.Gateway{Name: v1beta1constants.DeploymentNameKubeAPIServer + "-ingress", Namespace: i.namespace}
 }
 
 func (i *ingress) emptyVirtualService() *istionetworkingv1beta1.VirtualService {
-	return &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeAPIServer + "-ingress", Namespace: i.namespace}}
+	return &istionetworkingv1beta1.VirtualService{Name: v1beta1constants.DeploymentNameKubeAPIServer + "-ingress", Namespace: i.namespace}
 }
 
 func (i *ingress) emptyWildcardSecret() *corev1.Secret {
-	return &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: *i.values.TLSSecretName, Namespace: i.values.IstioIngressGatewayNamespaceFunc()}}
+	return &corev1.Secret{Name: *i.values.TLSSecretName, Namespace: i.values.IstioIngressGatewayNamespaceFunc()}
 }

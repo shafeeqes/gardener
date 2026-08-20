@@ -18,7 +18,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -170,7 +169,7 @@ func (r *Reconciler) LeasePredicate(ctx context.Context, log logr.Logger) predic
 			}
 
 			nodeIsUpToDate := func() bool {
-				secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: newLease.GetName(), Namespace: newLease.GetNamespace()}}
+				secret := &corev1.Secret{Name: newLease.GetName(), Namespace: newLease.GetNamespace()}
 				if err := r.Client.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 					log.Error(err, "Failed to get secret containing OperatingSystemConfig, assuming node is outdated")
 					return false
@@ -197,10 +196,9 @@ func (r *Reconciler) LeasePredicate(ctx context.Context, log logr.Logger) predic
 }
 
 func reconcileRequest(obj client.Object) reconcile.Request {
-	return reconcile.Request{NamespacedName: types.NamespacedName{
+	return reconcile.Request{
 		Name:      obj.GetName(),
-		Namespace: obj.GetNamespace(),
-	}}
+		Namespace: obj.GetNamespace()}
 }
 
 // EnqueueWithJitterDelay returns handler.Funcs which enqueues the object with a random jitter duration for 'Update'
@@ -247,7 +245,7 @@ func (r *Reconciler) EnqueueWithJitterDelay(ctx context.Context, log logr.Logger
 // LeaseToSecretMapper returns a mapper that returns requests for a secret based on a leader election Lease.
 func (r *Reconciler) LeaseToSecretMapper() handler.MapFunc {
 	return func(_ context.Context, obj client.Object) []reconcile.Request {
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}}}
+		return []reconcile.Request{{Name: obj.GetName(), Namespace: obj.GetNamespace()}}
 	}
 }
 
@@ -264,7 +262,7 @@ func (r *Reconciler) NodeToSecretMapper() handler.MapFunc {
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: secretName, Namespace: metav1.NamespaceSystem}}}
+		return []reconcile.Request{{Name: secretName, Namespace: metav1.NamespaceSystem}}
 	}
 }
 
@@ -321,7 +319,7 @@ func (d *delayer) fetch(ctx context.Context, nodeName string) time.Duration {
 		return 0
 	}
 
-	node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: nodeName}}
+	node := &corev1.Node{Name: nodeName}
 	if err := d.client.Get(ctx, client.ObjectKeyFromObject(node), node); err != nil {
 		d.log.Error(err, "Failed to read node for getting reconciliation delay, falling back to previously fetched delay", "nodeName", nodeName)
 		return d.delay

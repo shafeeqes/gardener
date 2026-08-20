@@ -12,7 +12,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/events"
 	"k8s.io/utils/clock"
@@ -180,7 +179,7 @@ func (r *Reconciler) cleanupKubeconfigSecret(ctx context.Context, log logr.Logge
 	}
 
 	log.Info("Deleting kubeconfig secret and removing reference in spec")
-	if err := kubernetesutils.DeleteObject(ctx, r.VirtualClient, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenlet.Spec.KubeconfigSecretRef.Name, Namespace: gardenlet.Namespace}}); err != nil {
+	if err := kubernetesutils.DeleteObject(ctx, r.VirtualClient, &corev1.Secret{Name: gardenlet.Spec.KubeconfigSecretRef.Name, Namespace: gardenlet.Namespace}); err != nil {
 		return fmt.Errorf("could not delete kubeconfig secret: %w", err)
 	}
 

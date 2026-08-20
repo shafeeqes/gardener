@@ -11,7 +11,6 @@ import (
 
 	druidcorev1alpha1 "github.com/gardener/etcd-druid/api/core/v1alpha1"
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
@@ -86,10 +85,8 @@ func New(
 		waitSevereThreshold,
 		waitTimeout,
 		&druidcorev1alpha1.EtcdCopyBackupsTask{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }

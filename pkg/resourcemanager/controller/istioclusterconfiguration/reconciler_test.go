@@ -15,7 +15,6 @@ import (
 	istionetworkingv1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -52,27 +51,21 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		sourceNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "shoot--project--my-shoot",
-				UID:  "source-ns-uid",
-			},
+			Name: "shoot--project--my-shoot",
+			UID:  "source-ns-uid",
 		}
 
 		istioIngressNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "istio-ingress",
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-				},
+			Name: "istio-ingress",
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 			},
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "kube-apiserver",
-				Namespace:   sourceNamespace.Name,
-				Annotations: map[string]string{"networking.istio.io/exportTo": "*"},
-			},
+			Name:        "kube-apiserver",
+			Namespace:   sourceNamespace.Name,
+			Annotations: map[string]string{"networking.istio.io/exportTo": "*"},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
 					{
@@ -84,10 +77,8 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		destinationRule = &istionetworkingv1beta1.DestinationRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver",
-				Namespace: sourceNamespace.Name,
-			},
+			Name:      "kube-apiserver",
+			Namespace: sourceNamespace.Name,
 			Spec: istioapinetworkingv1beta1.DestinationRule{
 				Host:     service.Name + "." + service.Namespace + ".svc.cluster.local",
 				ExportTo: []string{"*"},
@@ -106,7 +97,7 @@ var _ = Describe("Reconciler", func() {
 
 	Describe("#Reconcile", func() {
 		It("should create an EnvoyFilter with buffer limit only when port is not HTTP/2", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -132,7 +123,7 @@ var _ = Describe("Reconciler", func() {
 			service.Spec.Ports[0].Name = "grpc-main"
 			Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -163,7 +154,7 @@ var _ = Describe("Reconciler", func() {
 			service.Spec.Ports[0].Name = "http2-server"
 			Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -179,7 +170,7 @@ var _ = Describe("Reconciler", func() {
 			service.Spec.Ports[0].AppProtocol = new("kubernetes.io/h2c")
 			Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -201,7 +192,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -223,7 +214,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -254,7 +245,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -287,7 +278,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -307,7 +298,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -326,11 +317,9 @@ var _ = Describe("Reconciler", func() {
 
 		It("should handle multiple DestinationRules in one namespace", func() {
 			service2 := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "vpn-seed-server",
-					Namespace:   sourceNamespace.Name,
-					Annotations: map[string]string{"networking.istio.io/exportTo": "*"},
-				},
+				Name:        "vpn-seed-server",
+				Namespace:   sourceNamespace.Name,
+				Annotations: map[string]string{"networking.istio.io/exportTo": "*"},
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{
 						{Name: "grpc-tunnel", Port: 9443},
@@ -340,10 +329,8 @@ var _ = Describe("Reconciler", func() {
 			Expect(fakeClient.Create(ctx, service2)).To(Succeed())
 
 			destinationRule2 := &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-seed-server",
-					Namespace: sourceNamespace.Name,
-				},
+				Name:      "vpn-seed-server",
+				Namespace: sourceNamespace.Name,
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host:     "vpn-seed-server." + sourceNamespace.Name + ".svc.cluster.local",
 					ExportTo: []string{"*"},
@@ -351,7 +338,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Create(ctx, destinationRule2)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -383,7 +370,7 @@ var _ = Describe("Reconciler", func() {
 			destinationRule.Spec.Host = "non-existent.other-ns.svc.cluster.local"
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -396,7 +383,7 @@ var _ = Describe("Reconciler", func() {
 			destinationRule.Spec.Host = "external.example.com"
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -409,7 +396,7 @@ var _ = Describe("Reconciler", func() {
 			destinationRule.Spec.Host = service.Name
 			Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(reconcile.Result{}))
 
@@ -425,11 +412,9 @@ var _ = Describe("Reconciler", func() {
 
 			BeforeEach(func() {
 				exposureClassNamespace = &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "istio-ingress--exposure-class",
-						Labels: map[string]string{
-							v1beta1constants.LabelExposureClassHandlerName: "my-exposure-class",
-						},
+					Name: "istio-ingress--exposure-class",
+					Labels: map[string]string{
+						v1beta1constants.LabelExposureClassHandlerName: "my-exposure-class",
 					},
 				}
 			})
@@ -442,7 +427,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = []string{"*"}
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -456,7 +441,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = []string{"*"}
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -473,7 +458,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = []string{exposureClassNamespace.Name}
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -492,11 +477,9 @@ var _ = Describe("Reconciler", func() {
 
 			BeforeEach(func() {
 				istioIngressNamespace2 = &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "istio-ingress--extra",
-						Labels: map[string]string{
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-						},
+					Name: "istio-ingress--extra",
+					Labels: map[string]string{
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 					},
 				}
 			})
@@ -509,7 +492,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = []string{"*"}
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -526,7 +509,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = nil
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -541,7 +524,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = []string{istioIngressNamespace.Name}
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -558,7 +541,7 @@ var _ = Describe("Reconciler", func() {
 				destinationRule.Spec.ExportTo = []string{"."}
 				Expect(fakeClient.Update(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -576,11 +559,9 @@ var _ = Describe("Reconciler", func() {
 
 			BeforeEach(func() {
 				istioIngressNamespace2 = &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "istio-ingress--extra",
-						Labels: map[string]string{
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-						},
+					Name: "istio-ingress--extra",
+					Labels: map[string]string{
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 					},
 				}
 			})
@@ -593,7 +574,7 @@ var _ = Describe("Reconciler", func() {
 				delete(service.Annotations, "networking.istio.io/exportTo")
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -606,7 +587,7 @@ var _ = Describe("Reconciler", func() {
 				service.Annotations["networking.istio.io/exportTo"] = "~"
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -619,7 +600,7 @@ var _ = Describe("Reconciler", func() {
 				service.Annotations["networking.istio.io/exportTo"] = "*"
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -636,7 +617,7 @@ var _ = Describe("Reconciler", func() {
 				service.Annotations["networking.istio.io/exportTo"] = istioIngressNamespace.Name
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -655,7 +636,7 @@ var _ = Describe("Reconciler", func() {
 				service.Annotations["networking.istio.io/exportTo"] = istioIngressNamespace2.Name
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -668,12 +649,10 @@ var _ = Describe("Reconciler", func() {
 		Context("cleanup", func() {
 			It("should delete EnvoyFilter when no DestinationRules exist in the source namespace", func() {
 				existingEnvoyFilter := &istionetworkingv1alpha3.EnvoyFilter{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      envoyFilterName,
-						Namespace: istioIngressNamespace.Name,
-						Labels: map[string]string{
-							"resources.gardener.cloud/managed-by": "istio-cluster-configuration",
-						},
+					Name:      envoyFilterName,
+					Namespace: istioIngressNamespace.Name,
+					Labels: map[string]string{
+						"resources.gardener.cloud/managed-by": "istio-cluster-configuration",
 					},
 					Spec: istioapinetworkingv1alpha3.EnvoyFilter{
 						ConfigPatches: []*istioapinetworkingv1alpha3.EnvoyFilter_EnvoyConfigObjectPatch{
@@ -691,7 +670,7 @@ var _ = Describe("Reconciler", func() {
 
 				Expect(fakeClient.Delete(ctx, destinationRule)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -706,7 +685,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].Name = "grpc-web"
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -719,7 +698,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].Name = "grpc-web-extra"
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -732,7 +711,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].Name = "grpc-webinar"
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -745,7 +724,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].Name = "tcp-main"
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -760,7 +739,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].AppProtocol = new("grpc")
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -773,7 +752,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].AppProtocol = new("http")
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 
@@ -787,7 +766,7 @@ var _ = Describe("Reconciler", func() {
 				service.Spec.Ports[0].AppProtocol = new("http")
 				Expect(fakeClient.Update(ctx, service)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: sourceNamespace.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: sourceNamespace.Name})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(reconcile.Result{}))
 

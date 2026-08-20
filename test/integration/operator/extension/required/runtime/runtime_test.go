@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -37,11 +36,9 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 		extensionProvider = "ext-local"
 
 		providerExtension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionPrefix + "-provider",
-				Labels: map[string]string{
-					testID: testRunID,
-				},
+			Name: extensionPrefix + "-provider",
+			Labels: map[string]string{
+				testID: testRunID,
 			},
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
@@ -58,11 +55,9 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 		}
 
 		dnsExtension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionPrefix + "-dns",
-				Labels: map[string]string{
-					testID: testRunID,
-				},
+			Name: extensionPrefix + "-dns",
+			Labels: map[string]string{
+				testID: testRunID,
 			},
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
@@ -75,11 +70,9 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 		}
 
 		extension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionPrefix + "-generic",
-				Labels: map[string]string{
-					testID: testRunID,
-				},
+			Name: extensionPrefix + "-generic",
+			Labels: map[string]string{
+				testID: testRunID,
 			},
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
@@ -92,10 +85,8 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 		}
 
 		extextension = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      extensionProvider,
-				Namespace: testNamespace.Name,
-			},
+			Name:      extensionProvider,
+			Namespace: testNamespace.Name,
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Class: new(extensionsv1alpha1.ExtensionClassGarden),
@@ -105,13 +96,11 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 		}
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testNamespace.Name,
-				Labels: map[string]string{
-					testID: testRunID,
-				},
-				Finalizers: []string{"gardener"},
+			Name: testNamespace.Name,
+			Labels: map[string]string{
+				testID: testRunID,
 			},
+			Finalizers: []string{"gardener"},
 			Spec: operatorv1alpha1.GardenSpec{
 				DNS: &operatorv1alpha1.DNSManagement{
 					Providers: []operatorv1alpha1.DNSProvider{
@@ -273,9 +262,7 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 
 	It("should report dns extension as not required during garden deletion", func() {
 		backupBucket := &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionPrefix + "-bucket",
-			},
+			Name: extensionPrefix + "-bucket",
 			Spec: extensionsv1alpha1.BackupBucketSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Class: new(extensionsv1alpha1.ExtensionClass("garden")),
@@ -289,9 +276,7 @@ var _ = Describe("Extension Required Runtime controller tests", Ordered, func() 
 		}
 
 		backupEntry := &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionPrefix + "-entry",
-			},
+			Name: extensionPrefix + "-entry",
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Class: new(extensionsv1alpha1.ExtensionClass("garden")),

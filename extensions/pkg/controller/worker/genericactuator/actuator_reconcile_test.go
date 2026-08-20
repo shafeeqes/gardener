@@ -77,10 +77,8 @@ var _ = Describe("ActuatorReconcile", func() {
 				md.Strategy = machinev1alpha1.MachineDeploymentStrategy{
 					Type: machinev1alpha1.RollingUpdateMachineDeploymentStrategyType,
 					RollingUpdate: &machinev1alpha1.RollingUpdateMachineDeployment{
-						UpdateConfiguration: machinev1alpha1.UpdateConfiguration{
-							MaxSurge:       new(intstr.FromInt32(1)),
-							MaxUnavailable: new(intstr.FromInt32(0)),
-						},
+						MaxSurge:       new(intstr.FromInt32(1)),
+						MaxUnavailable: new(intstr.FromInt32(0)),
 					},
 				}
 			}
@@ -89,10 +87,8 @@ var _ = Describe("ActuatorReconcile", func() {
 				md.Strategy = machinev1alpha1.MachineDeploymentStrategy{
 					Type: machinev1alpha1.InPlaceUpdateMachineDeploymentStrategyType,
 					InPlaceUpdate: &machinev1alpha1.InPlaceUpdateMachineDeployment{
-						UpdateConfiguration: machinev1alpha1.UpdateConfiguration{
-							MaxSurge:       new(intstr.FromInt32(1)),
-							MaxUnavailable: new(intstr.FromInt32(0)),
-						},
+						MaxSurge:       new(intstr.FromInt32(1)),
+						MaxUnavailable: new(intstr.FromInt32(0)),
 					},
 				}
 			}
@@ -112,14 +108,12 @@ var _ = Describe("ActuatorReconcile", func() {
 			}
 
 			md := &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      machineDeployment.Name,
-					Labels: map[string]string{
-						"worker.gardener.cloud/pool": machineDeployment.PoolName,
-					},
-					ResourceVersion: resourceVersion,
+				Namespace: namespace,
+				Name:      machineDeployment.Name,
+				Labels: map[string]string{
+					"worker.gardener.cloud/pool": machineDeployment.PoolName,
 				},
+				ResourceVersion: resourceVersion,
 				Spec: machinev1alpha1.MachineDeploymentSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: map[string]string{
@@ -174,10 +168,8 @@ var _ = Describe("ActuatorReconcile", func() {
 			ctx = context.Background()
 
 			worker = &extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "worker",
-					Namespace: "namespace",
-				},
+				Name:      "worker",
+				Namespace: "namespace",
 				Spec: extensionsv1alpha1.WorkerSpec{
 					Pools: []extensionsv1alpha1.WorkerPool{
 						{
@@ -274,19 +266,17 @@ var _ = Describe("ActuatorReconcile", func() {
 		When("there are existing MachineDeployments", func() {
 			BeforeEach(func() {
 				testDeployment = &machinev1alpha1.MachineDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      wantedMachineDeployments[0].Name,
-						Namespace: worker.Namespace,
-						Labels: map[string]string{
-							"worker.gardener.cloud/pool": "pool1",
-						},
-						Annotations: map[string]string{
-							"autoscaler.gardener.cloud/scale-down-utilization-threshold":     "0.3",
-							"autoscaler.gardener.cloud/scale-down-gpu-utilization-threshold": "",
-							"autoscaler.gardener.cloud/scale-down-unneeded-time":             "10m",
-							"autoscaler.gardener.cloud/scale-down-unready-time":              "",
-							"autoscaler.gardener.cloud/max-node-provision-time":              "",
-						},
+					Name:      wantedMachineDeployments[0].Name,
+					Namespace: worker.Namespace,
+					Labels: map[string]string{
+						"worker.gardener.cloud/pool": "pool1",
+					},
+					Annotations: map[string]string{
+						"autoscaler.gardener.cloud/scale-down-utilization-threshold":     "0.3",
+						"autoscaler.gardener.cloud/scale-down-gpu-utilization-threshold": "",
+						"autoscaler.gardener.cloud/scale-down-unneeded-time":             "10m",
+						"autoscaler.gardener.cloud/scale-down-unready-time":              "",
+						"autoscaler.gardener.cloud/max-node-provision-time":              "",
 					},
 					Spec: machinev1alpha1.MachineDeploymentSpec{
 						Replicas: 4,
@@ -394,28 +384,22 @@ var _ = Describe("ActuatorReconcile", func() {
 
 			It("should mark all machines for forceful deletion when shoot is hibernated", func() {
 				machine1 := &machinev1alpha1.Machine{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "machine-1",
-						Namespace: worker.Namespace,
-					},
+					Name:      "machine-1",
+					Namespace: worker.Namespace,
 				}
 				machine2 := &machinev1alpha1.Machine{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "machine-2",
-						Namespace: worker.Namespace,
-						Labels: map[string]string{
-							"worker.gardener.cloud/name": worker.Name,
-						},
+					Name:      "machine-2",
+					Namespace: worker.Namespace,
+					Labels: map[string]string{
+						"worker.gardener.cloud/name": worker.Name,
 					},
 				}
 				machine3 := &machinev1alpha1.Machine{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "machine-3",
-						Namespace: worker.Namespace,
-						Labels: map[string]string{
-							"worker.gardener.cloud/name": worker.Name,
-							"force-deletion":             "True",
-						},
+					Name:      "machine-3",
+					Namespace: worker.Namespace,
+					Labels: map[string]string{
+						"worker.gardener.cloud/name": worker.Name,
+						"force-deletion":             "True",
 					},
 				}
 
@@ -468,10 +452,8 @@ var _ = Describe("ActuatorReconcile", func() {
 			}
 
 			worker = &extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "worker",
-					Namespace: "namespace",
-				},
+				Name:      "worker",
+				Namespace: "namespace",
 				Spec: extensionsv1alpha1.WorkerSpec{
 					Pools: []extensionsv1alpha1.WorkerPool{
 						{
@@ -503,13 +485,11 @@ var _ = Describe("ActuatorReconcile", func() {
 			Expect(seedClient.Create(ctx, worker)).To(Succeed())
 
 			machineDeployment1 = &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machine-deployment1",
-					Namespace: worker.Namespace,
-					Labels: map[string]string{
-						"worker.gardener.cloud/name": worker.Name,
-						"worker.gardener.cloud/pool": "pool2",
-					},
+				Name:      "machine-deployment1",
+				Namespace: worker.Namespace,
+				Labels: map[string]string{
+					"worker.gardener.cloud/name": worker.Name,
+					"worker.gardener.cloud/pool": "pool2",
 				},
 				Status: machinev1alpha1.MachineDeploymentStatus{
 					Replicas:        2,
@@ -519,13 +499,11 @@ var _ = Describe("ActuatorReconcile", func() {
 			Expect(seedClient.Create(ctx, machineDeployment1)).To(Succeed())
 
 			machineDeployment2 = &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machine-deployment2",
-					Namespace: worker.Namespace,
-					Labels: map[string]string{
-						"worker.gardener.cloud/name": worker.Name,
-						"worker.gardener.cloud/pool": "pool2",
-					},
+				Name:      "machine-deployment2",
+				Namespace: worker.Namespace,
+				Labels: map[string]string{
+					"worker.gardener.cloud/name": worker.Name,
+					"worker.gardener.cloud/pool": "pool2",
 				},
 				Status: machinev1alpha1.MachineDeploymentStatus{
 					Replicas:        3,
@@ -671,10 +649,8 @@ var _ = Describe("ActuatorReconcile", func() {
 
 		buildMachineDeployment := func(status machinev1alpha1.MachineDeploymentStatus) {
 			mcd := &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      deploymentName,
-					Namespace: namespace,
-				},
+				Name:      deploymentName,
+				Namespace: namespace,
 				Spec: machinev1alpha1.MachineDeploymentSpec{
 					Replicas: status.Replicas,
 					Template: machinev1alpha1.MachineTemplateSpec{
@@ -693,12 +669,10 @@ var _ = Describe("ActuatorReconcile", func() {
 
 		buildMachineSet := func(name, className string) {
 			ms := &machinev1alpha1.MachineSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{Name: deploymentName, Kind: "MachineDeployment"},
-					},
+				Name:      name,
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{Name: deploymentName, Kind: "MachineDeployment"},
 				},
 				Spec: machinev1alpha1.MachineSetSpec{
 					Template: machinev1alpha1.MachineTemplateSpec{
@@ -729,10 +703,8 @@ var _ = Describe("ActuatorReconcile", func() {
 			actuator = &genericActuator{seedClient: seedClient}
 
 			worker = &extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "worker",
-					Namespace: namespace,
-				},
+				Name:      "worker",
+				Namespace: namespace,
 			}
 
 			cluster = &extensionscontroller.Cluster{

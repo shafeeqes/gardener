@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
-	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	. "github.com/gardener/gardener/pkg/gardenlet/bootstrap/util"
 	"github.com/gardener/gardener/pkg/utils"
@@ -65,10 +64,8 @@ var _ = Describe("Util", func() {
 				kubeconfigContent := []byte("testing")
 
 				Expect(c.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      secretKey.Name,
-						Namespace: secretKey.Namespace,
-					},
+					Name:      secretKey.Name,
+					Namespace: secretKey.Namespace,
 					Data: map[string][]byte{
 						kubernetes.KubeConfig: kubeconfigContent,
 					},
@@ -87,10 +84,9 @@ var _ = Describe("Util", func() {
 			)
 
 			BeforeEach(func() {
-				certClientConfig = &rest.Config{Host: "testhost", TLSClientConfig: rest.TLSClientConfig{
+				certClientConfig = &rest.Config{Host: "testhost",
 					Insecure: false,
-					CAFile:   "filepath",
-				}}
+					CAFile:   "filepath"}
 			})
 
 			It("should create the kubeconfig secret", func() {
@@ -109,11 +105,9 @@ var _ = Describe("Util", func() {
 			It("should update the kubeconfig secret", func() {
 				// Create existing secret with renew annotation
 				existingSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        secretKey.Name,
-						Namespace:   secretKey.Namespace,
-						Annotations: map[string]string{"gardener.cloud/operation": "renew"},
-					},
+					Name:        secretKey.Name,
+					Namespace:   secretKey.Namespace,
+					Annotations: map[string]string{"gardener.cloud/operation": "renew"},
 				}
 				Expect(c.Create(ctx, existingSecret)).To(Succeed())
 
@@ -139,10 +133,9 @@ var _ = Describe("Util", func() {
 			)
 
 			BeforeEach(func() {
-				certClientConfig = &rest.Config{Host: "testhost", TLSClientConfig: rest.TLSClientConfig{
+				certClientConfig = &rest.Config{Host: "testhost",
 					Insecure: false,
-					CAData:   []byte("foo"),
-				}}
+					CAData:   []byte("foo")}
 
 				gardenClientConnection = &gardenletconfigv1alpha1.GardenClientConnection{
 					KubeconfigSecret: &corev1.SecretReference{
@@ -157,29 +150,24 @@ var _ = Describe("Util", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				caConfigMap := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "kube-root-ca.crt",
-						Namespace: "gardener-system-public",
-					},
+					Name:      "kube-root-ca.crt",
+					Namespace: "gardener-system-public",
 					Data: map[string]string{
 						"ca.crt": "bar",
 					},
 				}
 
-				updatedCertClientConfig := &rest.Config{Host: "testhost", TLSClientConfig: rest.TLSClientConfig{
+				updatedCertClientConfig := &rest.Config{Host: "testhost",
 					Insecure: false,
-					CAData:   []byte(caConfigMap.Data["ca.crt"]),
-				}}
+					CAData:   []byte(caConfigMap.Data["ca.crt"])}
 				expectedUpdatedKubeconfig, err := CreateKubeconfigWithClientCertificate(updatedCertClientConfig, nil, nil)
 				Expect(err).ToNot(HaveOccurred())
 
 				// Create secret with original kubeconfig
 				Expect(c.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      secretKey.Name,
-						Namespace: secretKey.Namespace,
-					},
-					Data: map[string][]byte{kubernetes.KubeConfig: expectedKubeconfig},
+					Name:      secretKey.Name,
+					Namespace: secretKey.Namespace,
+					Data:      map[string][]byte{kubernetes.KubeConfig: expectedKubeconfig},
 				})).To(Succeed())
 
 				// Create the CA configmap in garden cluster
@@ -209,10 +197,8 @@ var _ = Describe("Util", func() {
 			It("should successfully refresh the bootstrap token", func() {
 				// Create bootstrap token secret with expired timestamp
 				Expect(c.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenSecretName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenSecretName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenExpirationKey: []byte(timestampInThePast),
 					},
@@ -227,10 +213,8 @@ var _ = Describe("Util", func() {
 				Expect(rest.Host).To(Equal(restConfig.Host))
 
 				bootstrapSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenSecretName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenSecretName,
+					Namespace: metav1.NamespaceSystem,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(bootstrapSecret), bootstrapSecret)).To(Succeed())
 				Expect(bootstrapSecret.Type).To(Equal(bootstraptokenapi.SecretTypeBootstrapToken))
@@ -246,10 +230,8 @@ var _ = Describe("Util", func() {
 			It("should reuse existing bootstrap token", func() {
 				// Create bootstrap token secret with future expiration
 				Expect(c.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenSecretName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenSecretName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenExpirationKey: []byte(timestampInTheFuture),
 						bootstraptokenapi.BootstrapTokenIDKey:         []byte("dummy"),
@@ -266,10 +248,8 @@ var _ = Describe("Util", func() {
 				Expect(rest.Host).To(Equal(restConfig.Host))
 
 				bootstrapSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenSecretName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenSecretName,
+					Namespace: metav1.NamespaceSystem,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(bootstrapSecret), bootstrapSecret)).To(Succeed())
 				Expect(bootstrapSecret.Data[bootstraptokenapi.BootstrapTokenIDKey]).To(Equal([]byte("dummy")))
@@ -284,10 +264,8 @@ var _ = Describe("Util", func() {
 						Host: "apiserver.dummy",
 					}
 					serviceAccount = &corev1.ServiceAccount{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "gardenlet",
-							Namespace: "garden",
-						},
+						Name:      "gardenlet",
+						Namespace: "garden",
 					}
 					fakeClient = fakeclient.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
 						SubResourceCreate: func(ctx context.Context, c client.Client, _ string, obj client.Object, subResource client.Object, _ ...client.SubResourceCreateOption) error {
@@ -336,9 +314,7 @@ var _ = Describe("Util", func() {
 		It("should return the configured name", func() {
 			name := "test-name"
 			result := GetSeedName(&gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{Name: name},
-				},
+				Name: name,
 			})
 			Expect(result).To(Equal("test-name"))
 		})

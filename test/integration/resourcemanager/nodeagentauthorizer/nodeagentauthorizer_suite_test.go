@@ -177,10 +177,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			Name: testNamespaceName,
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		Name: testNamespaceName,
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created test Namespace in test cluster", "namespaceName", testNamespace.Name)
@@ -287,10 +285,8 @@ func createKubeconfigFileForAuthorizationWebhook(address string, port int) (stri
 
 func createAuthorizationConfigurationFile(kubeconfigFileNameMachine, kubeconfigFileNameNode string) (string, error) {
 	authorizationConfiguration := &apiserverv1beta1.AuthorizationConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
-			Kind:       "AuthorizationConfiguration",
-		},
+		APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
+		Kind:       "AuthorizationConfiguration",
 		Authorizers: []apiserverv1beta1.AuthorizerConfiguration{
 			{Type: "RBAC", Name: "rbac"},
 			{

@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/afero"
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	kubernetesfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
@@ -56,10 +55,8 @@ var _ = Describe("Temporary Client", func() {
 			fakeFS = afero.Afero{Fs: afero.NewMemMapFs()}
 
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-shoot",
-					Namespace: "test-namespace",
-				},
+				Name:      "test-shoot",
+				Namespace: "test-namespace",
 			}
 
 			b = &botanist.GardenadmBotanist{
@@ -82,10 +79,8 @@ var _ = Describe("Temporary Client", func() {
 
 			cachedPath = filepath.Join(fakeFS.GetTempDir(""), "gardenadm-bootstrap-kubeconfig")
 			csr = &certificatesv1.CertificateSigningRequest{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardenadm-csr-test",
-					UID:  "test-uid",
-				},
+				Name: "gardenadm-csr-test",
+				UID:  "test-uid",
 				Spec: certificatesv1.CertificateSigningRequestSpec{
 					Request: []byte("fake-csr-request"),
 				},
@@ -155,10 +150,8 @@ users:
 			It("should fail when CSR is denied", func() {
 				fakeKubernetesClientset.PrependReactor("create", "certificatesigningrequests", func(testing.Action) (bool, runtime.Object, error) {
 					csr := &certificatesv1.CertificateSigningRequest{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardenadm-csr-test",
-							UID:  "test-uid",
-						},
+						Name: "gardenadm-csr-test",
+						UID:  "test-uid",
 					}
 					return true, csr, nil
 				})
@@ -212,10 +205,8 @@ users:
 				fakeKubernetesClientset.PrependReactor("create", "certificatesigningrequests", func(testing.Action) (bool, runtime.Object, error) {
 					csrCalled = true
 					csr := &certificatesv1.CertificateSigningRequest{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardenadm-csr-test",
-							UID:  "test-uid",
-						},
+						Name: "gardenadm-csr-test",
+						UID:  "test-uid",
 					}
 					return true, csr, nil
 				})
@@ -309,10 +300,8 @@ users:
 					capturedSubject = expectedSubject
 
 					csr := &certificatesv1.CertificateSigningRequest{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardenadm-csr-test",
-							UID:  "test-uid",
-						},
+						Name: "gardenadm-csr-test",
+						UID:  "test-uid",
 					}
 					return true, csr, nil
 				})

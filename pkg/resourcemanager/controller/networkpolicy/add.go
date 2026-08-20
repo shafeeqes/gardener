@@ -260,10 +260,9 @@ func (r *Reconciler) MapNetworkPolicyToService(_ context.Context, obj client.Obj
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{
+	return []reconcile.Request{{
 		Name:      obj.GetLabels()[resourcesv1alpha1.NetworkingServiceName],
-		Namespace: obj.GetLabels()[resourcesv1alpha1.NetworkingServiceNamespace],
-	}}}
+		Namespace: obj.GetLabels()[resourcesv1alpha1.NetworkingServiceNamespace]}}
 }
 
 // EventHandlerForNamespace returns an EventHandler that enqueues reconcile requests for Services
@@ -310,7 +309,7 @@ func (r *Reconciler) getRelevantServiceForNamespace(ctx context.Context, namespa
 		return nil
 	}
 	for _, service := range sameNsServiceList.Items {
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: service.Name, Namespace: service.Namespace}})
+		requests = append(requests, reconcile.Request{Name: service.Name, Namespace: service.Namespace})
 	}
 
 	// Enqueue cross-namespace services that have namespace-selectors matching this namespace (uses the field index).
@@ -341,7 +340,7 @@ func (r *Reconciler) getRelevantServiceForNamespace(ctx context.Context, namespa
 			}
 
 			if selector.Matches(labels.Set(namespace.GetLabels())) {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: service.Name, Namespace: service.Namespace}})
+				requests = append(requests, reconcile.Request{Name: service.Name, Namespace: service.Namespace})
 				break
 			}
 		}
@@ -366,7 +365,7 @@ func (r *Reconciler) MapIngressToServices(_ context.Context, obj client.Object) 
 
 		for _, path := range rule.HTTP.Paths {
 			if path.Backend.Service != nil {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: path.Backend.Service.Name, Namespace: ingress.Namespace}})
+				requests = append(requests, reconcile.Request{Name: path.Backend.Service.Name, Namespace: ingress.Namespace})
 			}
 		}
 	}
@@ -406,7 +405,7 @@ func (r *Reconciler) EventHandlerForPod(log logr.Logger) handler.EventHandler {
 		namespaceNameToPodLabelKeys = make(map[string]sets.Set[string])
 
 		enqueueForNamespace = func(ctx context.Context, namespaceName string, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-			namespace := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{Name: namespaceName}}
+			namespace := &metav1.PartialObjectMetadata{Name: namespaceName}
 			namespace.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Namespace"))
 			if err := r.TargetClient.Get(ctx, client.ObjectKeyFromObject(namespace), namespace); err != nil {
 				log.Error(err, "Failed to get namespace for pod", "namespace", namespaceName)

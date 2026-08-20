@@ -46,9 +46,7 @@ var _ = Describe("quotavalidator", func() {
 			volumeTypeName          = "pd-standard"
 
 			cloudProfileBase = gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "profile",
-				},
+				Name: "profile",
 				Spec: gardencorev1beta1.CloudProfileSpec{
 					MachineTypes: []gardencorev1beta1.MachineType{
 						{
@@ -78,10 +76,8 @@ var _ = Describe("quotavalidator", func() {
 
 			quotaProjectLifetime int32 = 1
 			quotaProjectBase           = gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: trialNamespace,
-					Name:      "project-quota",
-				},
+				Namespace: trialNamespace,
+				Name:      "project-quota",
 				Spec: gardencorev1beta1.QuotaSpec{
 					ClusterLifetimeDays: &quotaProjectLifetime,
 					Scope: corev1.ObjectReference{
@@ -101,10 +97,8 @@ var _ = Describe("quotavalidator", func() {
 
 			quotaSecretLifetime int32 = 7
 			quotaSecretBase           = gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: trialNamespace,
-					Name:      "secret-quota",
-				},
+				Namespace: trialNamespace,
+				Name:      "secret-quota",
 				Spec: gardencorev1beta1.QuotaSpec{
 					ClusterLifetimeDays: &quotaSecretLifetime,
 					Scope: corev1.ObjectReference{
@@ -123,10 +117,8 @@ var _ = Describe("quotavalidator", func() {
 			}
 
 			secretBindingBase = gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      "test-binding",
-				},
+				Namespace: namespace,
+				Name:      "test-binding",
 				Quotas: []corev1.ObjectReference{
 					{
 						Namespace: trialNamespace,
@@ -139,10 +131,8 @@ var _ = Describe("quotavalidator", func() {
 				},
 			}
 			credentialsBindingBase = securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      "test-credentials-binding",
-				},
+				Namespace: namespace,
+				Name:      "test-credentials-binding",
 				Quotas: []corev1.ObjectReference{
 					{
 						Namespace: trialNamespace,
@@ -198,10 +188,8 @@ var _ = Describe("quotavalidator", func() {
 			}
 
 			shootBase = core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      "test-shoot",
-				},
+				Namespace: namespace,
+				Name:      "test-shoot",
 				Spec: core.ShootSpec{
 					CloudProfileName:  new("profile"),
 					SecretBindingName: new("test-binding"),
@@ -213,19 +201,15 @@ var _ = Describe("quotavalidator", func() {
 					},
 					Addons: &core.Addons{
 						NginxIngress: &core.NginxIngress{
-							Addon: core.Addon{
-								Enabled: true,
-							},
+							Enabled: true,
 						},
 					},
 				},
 			}
 
 			versionedShootBase = gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      "test-shoot",
-				},
+				Namespace: namespace,
+				Name:      "test-shoot",
 				Spec: gardencorev1beta1.ShootSpec{
 					CloudProfileName:  new("profile"),
 					SecretBindingName: new("test-binding"),
@@ -250,9 +234,7 @@ var _ = Describe("quotavalidator", func() {
 					},
 					Addons: &gardencorev1beta1.Addons{
 						NginxIngress: &gardencorev1beta1.NginxIngress{
-							Addon: gardencorev1beta1.Addon{
-								Enabled: true,
-							},
+							Enabled: true,
 						},
 					},
 				},
@@ -402,10 +384,8 @@ var _ = Describe("quotavalidator", func() {
 			It("should pass shoots secret binding having quota with no metrics", func() {
 				emptyQuotaName := "empty-quota"
 				emptyQuota := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: trialNamespace,
-						Name:      emptyQuotaName,
-					},
+					Namespace: trialNamespace,
+					Name:      emptyQuotaName,
 					Spec: gardencorev1beta1.QuotaSpec{
 						ClusterLifetimeDays: &quotaProjectLifetime,
 						Scope: corev1.ObjectReference{

@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/api/extensions/v1alpha1/helper"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -91,8 +90,8 @@ var _ = Describe("Helper", func() {
 	Describe("#DNSValuesFromNodes", func() {
 		node := func(name string, addresses ...corev1.NodeAddress) corev1.Node {
 			return corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
-				Status:     corev1.NodeStatus{Addresses: addresses},
+				Name:   name,
+				Status: corev1.NodeStatus{Addresses: addresses},
 			}
 		}
 		externalIP := func(address string) corev1.NodeAddress {

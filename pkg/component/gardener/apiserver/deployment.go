@@ -64,11 +64,9 @@ func (g *gardenerAPIServer) deployment(
 	}
 
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      DeploymentName,
-			Namespace: g.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      DeploymentName,
+		Namespace: g.namespace,
+		Labels:    GetLabels(),
 		Spec: appsv1.DeploymentSpec{
 			MinReadySeconds:      30,
 			RevisionHistoryLimit: new(int32(2)),
@@ -115,12 +113,10 @@ func (g *gardenerAPIServer) deployment(
 						}},
 						Resources: g.values.Autoscaling.APIServerResources,
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/livez",
-									Scheme: corev1.URISchemeHTTPS,
-									Port:   intstr.FromInt32(port),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/livez",
+								Scheme: corev1.URISchemeHTTPS,
+								Port:   intstr.FromInt32(port),
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    3,
@@ -129,12 +125,10 @@ func (g *gardenerAPIServer) deployment(
 							TimeoutSeconds:      15,
 						},
 						ReadinessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/readyz",
-									Scheme: corev1.URISchemeHTTPS,
-									Port:   intstr.FromInt32(port),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/readyz",
+								Scheme: corev1.URISchemeHTTPS,
+								Port:   intstr.FromInt32(port),
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    3,
@@ -188,14 +182,12 @@ func injectWorkloadIdentitySettings(deployment *appsv1.Deployment, issuer string
 		deployment.Spec.Template.Spec.Volumes,
 		corev1.Volume{
 			Name: volumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secret.Name,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  secretsutils.DataKeyRSAPrivateKey,
-							Path: fileName,
-						},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secret.Name,
+				Items: []corev1.KeyToPath{
+					{
+						Key:  secretsutils.DataKeyRSAPrivateKey,
+						Path: fileName,
 					},
 				},
 			},

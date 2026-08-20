@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -65,11 +64,9 @@ var _ = Describe("Bash", func() {
 			)
 
 			Expect(fakeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"bar": []byte("bar-content")},
+				Name:      "foo",
+				Namespace: namespace,
+				Data:      map[string][]byte{"bar": []byte("bar-content")},
 			})).To(Succeed())
 
 			files := []extensionsv1alpha1.File{

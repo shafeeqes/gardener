@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -82,10 +81,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: testID + "-",
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: testID + "-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -139,9 +136,7 @@ var _ = BeforeSuite(func() {
 
 func getValidatingWebhookConfig() *admissionregistrationv1.ValidatingWebhookConfiguration {
 	return &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener-resource-manager",
-		},
+		Name: "gardener-resource-manager",
 		Webhooks: resourcemanager.NewCRDDeletionProtectionValidatingWebhooks(nil, func(_ *corev1.Secret, path string) admissionregistrationv1.WebhookClientConfig {
 			return admissionregistrationv1.WebhookClientConfig{
 				Service: &admissionregistrationv1.ServiceReference{

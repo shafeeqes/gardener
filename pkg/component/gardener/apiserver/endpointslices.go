@@ -29,13 +29,11 @@ func GetAddressType(ip string) discoveryv1.AddressType {
 
 func (g *gardenerAPIServer) endpointSlice(clusterIP string) *discoveryv1.EndpointSlice {
 	return &discoveryv1.EndpointSlice{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceName,
-			Namespace: metav1.NamespaceSystem,
-			Labels: utils.MergeStringMaps(GetLabels(), map[string]string{
-				discoveryv1.LabelServiceName: serviceName,
-			}),
-		},
+		Name:      serviceName,
+		Namespace: metav1.NamespaceSystem,
+		Labels: utils.MergeStringMaps(GetLabels(), map[string]string{
+			discoveryv1.LabelServiceName: serviceName,
+		}),
 		AddressType: GetAddressType(clusterIP),
 		Ports: []discoveryv1.EndpointPort{{
 			Port:     new(int32(servicePort)),

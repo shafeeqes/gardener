@@ -110,19 +110,15 @@ func (c *nodeProblemDetector) computeResourcesData() (map[string][]byte, error) 
 		registry             = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 		hostPathFileOrCreate = corev1.HostPathFileOrCreate
 		serviceAccount       = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceAccountName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getLabels(),
-			},
+			Name:                         serviceAccountName,
+			Namespace:                    metav1.NamespaceSystem,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   clusterRoleName,
-				Labels: getLabels(),
-			},
+			Name:   clusterRoleName,
+			Labels: getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -143,11 +139,9 @@ func (c *nodeProblemDetector) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        clusterRoleBindingName,
-				Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
-				Labels:      getLabels(),
-			},
+			Name:        clusterRoleBindingName,
+			Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
+			Labels:      getLabels(),
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -161,14 +155,12 @@ func (c *nodeProblemDetector) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		daemonSet = &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      daemonSetName,
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
-					v1beta1constants.GardenRole:     v1beta1constants.GardenRoleSystemComponent,
-				}),
-			},
+			Name:      daemonSetName,
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
+				v1beta1constants.GardenRole:     v1beta1constants.GardenRoleSystemComponent,
+			}),
 			Spec: appsv1.DaemonSetSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: utils.MergeStringMaps(getLabels(), map[string]string{
@@ -264,27 +256,21 @@ func (c *nodeProblemDetector) computeResourcesData() (map[string][]byte, error) 
 						Volumes: []corev1.Volume{
 							{
 								Name: "log",
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: "/var/log/journal",
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/var/log/journal",
 								},
 							},
 							{
 								Name: "localtime",
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: "/etc/localtime",
-										Type: &hostPathFileOrCreate,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/etc/localtime",
+									Type: &hostPathFileOrCreate,
 								},
 							},
 							{
 								Name: "kmsg",
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: "/dev/kmsg",
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/dev/kmsg",
 								},
 							},
 						},
@@ -294,14 +280,12 @@ func (c *nodeProblemDetector) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					v1beta1constants.LabelApp:   labelValue,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleSystemComponent,
-				}),
-			},
+			Name:      serviceName,
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				v1beta1constants.LabelApp:   labelValue,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleSystemComponent,
+			}),
 			Spec: corev1.ServiceSpec{
 				Selector: getLabels(),
 				Ports: []corev1.ServicePort{
@@ -321,10 +305,8 @@ func (c *nodeProblemDetector) computeResourcesData() (map[string][]byte, error) 
 		updateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		controlledValues := vpaautoscalingv1.ContainerControlledValuesRequestsOnly
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      vpaName,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      vpaName,
+			Namespace: metav1.NamespaceSystem,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),

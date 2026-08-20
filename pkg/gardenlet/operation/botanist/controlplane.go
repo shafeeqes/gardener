@@ -68,7 +68,7 @@ func (b *Botanist) determineControllerReplicas(ctx context.Context, deploymentNa
 
 // If the deployment is controlled by dependency-watchdog, then it has the annotation dependency-watchdog.gardener.cloud/meltdown-protection set.
 func (b *Botanist) isControlledByDependencyWatchdog(ctx context.Context, deploymentName string) (bool, error) {
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: b.Shoot.ControlPlaneNamespace}}
+	deployment := &appsv1.Deployment{Name: deploymentName, Namespace: b.Shoot.ControlPlaneNamespace}
 	if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(deployment), deployment); err != nil && !apierrors.IsNotFound(err) {
 		return false, err
 	}
@@ -213,10 +213,8 @@ func waitUntilNoPodsExistAnymore(ctx context.Context, c client.Client, namespace
 	fns := make([]flow.TaskFn, 0, len(deployments))
 	for _, deploymentName := range deployments {
 		deployment := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      deploymentName,
-				Namespace: namespace,
-			},
+			Name:      deploymentName,
+			Namespace: namespace,
 		}
 		fns = append(fns, func(ctx context.Context) error {
 			if err := c.Get(ctx, client.ObjectKeyFromObject(deployment), deployment); err != nil {

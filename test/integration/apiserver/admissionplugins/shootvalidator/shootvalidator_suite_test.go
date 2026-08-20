@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -83,10 +82,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: "garden-",
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: "garden-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -98,9 +95,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create Project")
 	project := &gardencorev1beta1.Project{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "test-",
-		},
+		GenerateName: "test-",
 		Spec: gardencorev1beta1.ProjectSpec{
 			Namespace: &testNamespace.Name,
 		},
@@ -115,10 +110,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create member role and RoleBinding")
 	roleMember = &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "project-member",
-			Namespace: testNamespace.Name,
-		},
+		Name:      "project-member",
+		Namespace: testNamespace.Name,
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"core.gardener.cloud"},
@@ -134,10 +127,8 @@ var _ = BeforeSuite(func() {
 		},
 	}
 	roleBindingMember = &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "project-member",
-			Namespace: testNamespace.Name,
-		},
+		Name:      "project-member",
+		Namespace: testNamespace.Name,
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "Role",
@@ -162,10 +153,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create admin role and RoleBinding")
 	roleAdmin = &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "project-admin",
-			Namespace: testNamespace.Name,
-		},
+		Name:      "project-admin",
+		Namespace: testNamespace.Name,
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"core.gardener.cloud"},
@@ -190,10 +179,8 @@ var _ = BeforeSuite(func() {
 		},
 	}
 	roleBindingAdmin = &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "project-admin",
-			Namespace: testNamespace.Name,
-		},
+		Name:      "project-admin",
+		Namespace: testNamespace.Name,
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "Role",
@@ -218,9 +205,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create CloudProfile")
 	cloudProfile = &gardencorev1beta1.CloudProfile{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: testID + "-",
-		},
+		GenerateName: testID + "-",
 		Spec: gardencorev1beta1.CloudProfileSpec{
 			Kubernetes: gardencorev1beta1.KubernetesSettings{
 				Versions: []gardencorev1beta1.ExpirableVersion{{Version: "1.31.1"}},
@@ -230,7 +215,7 @@ var _ = BeforeSuite(func() {
 					Name: "some-OS",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.1"},
+							Version: "1.1.1",
 							CRI: []gardencorev1beta1.CRI{
 								{
 									Name: gardencorev1beta1.CRINameContainerD,
@@ -255,10 +240,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create SecretBinding")
 	testSecret = &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "test-",
-			Namespace:    testNamespace.Name,
-		},
+		GenerateName: "test-",
+		Namespace:    testNamespace.Name,
 	}
 	Expect(testClient.Create(ctx, testSecret)).To(Succeed())
 	log.Info("Created Secret for test", "secret", client.ObjectKeyFromObject(testSecret))
@@ -269,10 +252,8 @@ var _ = BeforeSuite(func() {
 	})
 
 	testSecretBinding = &gardencorev1beta1.SecretBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "test-",
-			Namespace:    testNamespace.Name,
-		},
+		GenerateName: "test-",
+		Namespace:    testNamespace.Name,
 		Provider: &gardencorev1beta1.SecretBindingProvider{
 			Type: "provider-type",
 		},
@@ -291,9 +272,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create Seed")
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: testID + "-",
-		},
+		GenerateName: testID + "-",
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",

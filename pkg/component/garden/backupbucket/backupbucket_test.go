@@ -70,7 +70,7 @@ var _ = Describe("BackupBucket", func() {
 		deployer = New(log, fakeClient, values, 50*time.Millisecond, 200*time.Millisecond)
 
 		expectedBackupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{Name: backupBucketName},
+			Name: backupBucketName,
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				Provider: gardencorev1beta1.BackupBucketProvider{
 					Type:   providerType,
@@ -95,7 +95,7 @@ var _ = Describe("BackupBucket", func() {
 		It("should create correct BackupBucket (newly created)", func() {
 			Expect(deployer.Deploy(ctx)).To(Succeed())
 
-			actual := &gardencorev1beta1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: backupBucketName}}
+			actual := &gardencorev1beta1.BackupBucket{Name: backupBucketName}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actual), actual)).To(Succeed())
 
 			metav1.SetMetaDataAnnotation(&expectedBackupBucket.ObjectMeta, "gardener.cloud/operation", "reconcile")
@@ -152,13 +152,13 @@ var _ = Describe("BackupBucket", func() {
 		When("seed is present and region is overridden", func() {
 			BeforeEach(func() {
 				backupConfig.Region = new("overridden-region")
-				values.Seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed"}}
+				values.Seed = &gardencorev1beta1.Seed{Name: "seed"}
 			})
 
 			It("should create correct BackupBucket (newly created)", func() {
 				Expect(deployer.Deploy(ctx)).To(Succeed())
 
-				actual := &gardencorev1beta1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: backupBucketName}}
+				actual := &gardencorev1beta1.BackupBucket{Name: backupBucketName}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actual), actual)).To(Succeed())
 
 				expectedBackupBucket.OwnerReferences = []metav1.OwnerReference{{
@@ -178,13 +178,13 @@ var _ = Describe("BackupBucket", func() {
 
 		When("shoot is present", func() {
 			BeforeEach(func() {
-				values.Shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot-name", Namespace: "shoot-namespace"}}
+				values.Shoot = &gardencorev1beta1.Shoot{Name: "shoot-name", Namespace: "shoot-namespace"}
 			})
 
 			It("should create correct BackupBucket (newly created)", func() {
 				Expect(deployer.Deploy(ctx)).To(Succeed())
 
-				actual := &gardencorev1beta1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: backupBucketName}}
+				actual := &gardencorev1beta1.BackupBucket{Name: backupBucketName}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actual), actual)).To(Succeed())
 
 				expectedBackupBucket.Spec.ShootRef = &corev1.ObjectReference{

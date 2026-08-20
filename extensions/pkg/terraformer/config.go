@@ -135,10 +135,8 @@ func (t *terraformer) InitializeWith(ctx context.Context, initializer Initialize
 
 func createOrUpdateConfigMap(ctx context.Context, c client.Client, namespace, name string, values map[string]string, ownerRef *metav1.OwnerReference) (*corev1.ConfigMap, error) {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		Namespace: namespace,
+		Name:      name,
 	}
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, c, configMap, func() error {
 		if configMap.Data == nil {
@@ -176,10 +174,8 @@ func CreateOrUpdateConfigurationConfigMap(ctx context.Context, c client.Client, 
 // Deprecated: This function is deprecated and will be removed after v1.154 has been released.
 func CreateOrUpdateTFVarsSecret(ctx context.Context, c client.Client, namespace, name string, tfvars []byte, ownerRef *metav1.OwnerReference) (*corev1.Secret, error) {
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		Namespace: namespace,
+		Name:      name,
 	}
 
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, c, secret, func() error {
@@ -264,17 +260,17 @@ func (t *terraformer) CleanupConfiguration(ctx context.Context) error {
 	t.logger.Info("Cleaning up all terraformer configuration")
 
 	t.logger.V(1).Info("Deleting Terraform state ConfigMap", "name", t.stateName)
-	if err := t.client.Delete(ctx, &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.stateName}}); client.IgnoreNotFound(err) != nil {
+	if err := t.client.Delete(ctx, &corev1.ConfigMap{Namespace: t.namespace, Name: t.stateName}); client.IgnoreNotFound(err) != nil {
 		return err
 	}
 
 	t.logger.V(1).Info("Deleting Terraform variables Secret", "name", t.variablesName)
-	if err := t.client.Delete(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.variablesName}}); client.IgnoreNotFound(err) != nil {
+	if err := t.client.Delete(ctx, &corev1.Secret{Namespace: t.namespace, Name: t.variablesName}); client.IgnoreNotFound(err) != nil {
 		return err
 	}
 
 	t.logger.V(1).Info("Deleting Terraform configuration ConfigMap", "name", t.configName)
-	if err := t.client.Delete(ctx, &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.configName}}); client.IgnoreNotFound(err) != nil {
+	if err := t.client.Delete(ctx, &corev1.ConfigMap{Namespace: t.namespace, Name: t.configName}); client.IgnoreNotFound(err) != nil {
 		return err
 	}
 
@@ -284,9 +280,9 @@ func (t *terraformer) CleanupConfiguration(ctx context.Context) error {
 // RemoveTerraformerFinalizerFromConfig deletes the terraformer finalizer from the two ConfigMaps and the Secret which store the Terraform configuration and state.
 func (t *terraformer) RemoveTerraformerFinalizerFromConfig(ctx context.Context) error {
 	for _, obj := range []client.Object{
-		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.variablesName}},
-		&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.stateName}},
-		&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: t.configName}},
+		&corev1.Secret{Namespace: t.namespace, Name: t.variablesName},
+		&corev1.ConfigMap{Namespace: t.namespace, Name: t.stateName},
+		&corev1.ConfigMap{Namespace: t.namespace, Name: t.configName},
 	} {
 		if err := t.client.Get(ctx, client.ObjectKey{Namespace: t.namespace, Name: obj.GetName()}, obj); client.IgnoreNotFound(err) != nil {
 			return err

@@ -86,7 +86,7 @@ func addCustomMachineImage(namespacedCloudProfile *gardencorev1beta1.NamespacedC
 			Name:           "nscpfl-machine-image-1",
 			UpdateStrategy: new(gardencorev1beta1.UpdateStrategyMinor),
 			Versions: []gardencorev1beta1.MachineImageVersion{
-				{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1"}, Architectures: []string{"amd64"}, CRI: []gardencorev1beta1.CRI{{Name: "containerd"}}},
+				{Version: "1.1", Architectures: []string{"amd64"}, CRI: []gardencorev1beta1.CRI{{Name: "containerd"}}},
 			},
 		},
 	}

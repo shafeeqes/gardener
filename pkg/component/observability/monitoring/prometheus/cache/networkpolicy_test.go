@@ -19,10 +19,8 @@ var _ = Describe("NetworkPolicy", func() {
 	Describe("#NetworkPolicyToNodeExporter", func() {
 		It("should return the expected network policy", func() {
 			Expect(cache.NetworkPolicyToNodeExporter("foo", nil)).To(Equal(&networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "egress-from-cache-prometheus-to-kube-system-node-exporter-tcp-16909",
-					Namespace: "foo",
-				},
+				Name:      "egress-from-cache-prometheus-to-kube-system-node-exporter-tcp-16909",
+				Namespace: "foo",
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{
 						MatchLabels: map[string]string{"prometheus": "cache"},
@@ -42,10 +40,8 @@ var _ = Describe("NetworkPolicy", func() {
 				nodeCIDR = "172.18.0.0/16"
 			)
 			Expect(cache.NetworkPolicyToNodeExporter("foo", &nodeCIDR)).To(Equal(&networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "egress-from-cache-prometheus-to-kube-system-node-exporter-tcp-16909",
-					Namespace: "foo",
-				},
+				Name:      "egress-from-cache-prometheus-to-kube-system-node-exporter-tcp-16909",
+				Namespace: "foo",
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{
 						MatchLabels: map[string]string{"prometheus": "cache"},
@@ -64,10 +60,8 @@ var _ = Describe("NetworkPolicy", func() {
 	Describe("#NetworkPolicyToKubelet", func() {
 		It("should return the expected network policy", func() {
 			Expect(cache.NetworkPolicyToKubelet("foo", nil)).To(Equal(&networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "egress-from-cache-prometheus-to-kubelet-tcp-10250",
-					Namespace: "foo",
-				},
+				Name:      "egress-from-cache-prometheus-to-kubelet-tcp-10250",
+				Namespace: "foo",
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{
 						MatchLabels: map[string]string{"prometheus": "cache"},
@@ -87,10 +81,8 @@ var _ = Describe("NetworkPolicy", func() {
 				nodeCIDR = "172.18.0.0/16"
 			)
 			Expect(cache.NetworkPolicyToKubelet("foo", &nodeCIDR)).To(Equal(&networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "egress-from-cache-prometheus-to-kubelet-tcp-10250",
-					Namespace: "foo",
-				},
+				Name:      "egress-from-cache-prometheus-to-kubelet-tcp-10250",
+				Namespace: "foo",
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{
 						MatchLabels: map[string]string{"prometheus": "cache"},

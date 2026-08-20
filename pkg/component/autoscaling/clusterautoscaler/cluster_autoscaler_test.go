@@ -174,7 +174,7 @@ var _ = Describe("ClusterAutoscaler", func() {
 		containerName                    = "cluster-autoscaler"
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{Name: vpaName, Namespace: namespace, ResourceVersion: "1"},
+			Name: vpaName, Namespace: namespace, ResourceVersion: "1",
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -200,15 +200,13 @@ var _ = Describe("ClusterAutoscaler", func() {
 		}
 		pdbMaxUnavailable = intstr.FromInt32(1)
 		pdb               = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      pdbName,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "cluster-autoscaler",
-				},
-				ResourceVersion: "1",
+			Name:      pdbName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "cluster-autoscaler",
 			},
+			ResourceVersion: "1",
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &pdbMaxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -221,18 +219,16 @@ var _ = Describe("ClusterAutoscaler", func() {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterRoleBindingName,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion:         "v1",
-					Kind:               "Namespace",
-					Name:               namespace,
-					UID:                namespaceUID,
-					Controller:         new(true),
-					BlockOwnerDeletion: new(true),
-				}},
-				ResourceVersion: "1",
-			},
+			Name: clusterRoleBindingName,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         "v1",
+				Kind:               "Namespace",
+				Name:               namespace,
+				UID:                namespaceUID,
+				Controller:         new(true),
+				BlockOwnerDeletion: new(true),
+			}},
+			ResourceVersion: "1",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -245,26 +241,22 @@ var _ = Describe("ClusterAutoscaler", func() {
 			}},
 		}
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            serviceAccountName,
-				Namespace:       namespace,
-				ResourceVersion: "1",
-			},
+			Name:                         serviceAccountName,
+			Namespace:                    namespace,
+			ResourceVersion:              "1",
 			AutomountServiceAccountToken: new(false),
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "cluster-autoscaler",
-				},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8085}]`,
-				},
-				ResourceVersion: "1",
+			Name:      serviceName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "cluster-autoscaler",
 			},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8085}]`,
+			},
+			ResourceVersion: "1",
 			Spec: corev1.ServiceSpec{
 				Selector: map[string]string{
 					"app":  "kubernetes",
@@ -282,20 +274,18 @@ var _ = Describe("ClusterAutoscaler", func() {
 			},
 		}
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: namespace,
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "cluster-autoscaler",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				ResourceVersion: "1",
+			Name:      secretName,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "cluster-autoscaler",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
-			Type: corev1.SecretTypeOpaque,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			ResourceVersion: "1",
+			Type:            corev1.SecretTypeOpaque,
 		}
 		deploymentFor = func(withConfig, withWorkerPriority, withAutoPreservation bool) *appsv1.Deployment {
 			var commandConfigFlags []string
@@ -383,18 +373,16 @@ var _ = Describe("ClusterAutoscaler", func() {
 			}
 
 			deploy := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      deploymentName,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 "kubernetes",
-						"role":                "cluster-autoscaler",
-						"gardener.cloud/role": "controlplane",
-						"high-availability-config.resources.gardener.cloud/type":             "controller",
-						"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-					},
-					ResourceVersion: "1",
+				Name:      deploymentName,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 "kubernetes",
+					"role":                "cluster-autoscaler",
+					"gardener.cloud/role": "controlplane",
+					"high-availability-config.resources.gardener.cloud/type":             "controller",
+					"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 				},
+				ResourceVersion: "1",
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             &replicas,
 					RevisionHistoryLimit: new(int32(1)),
@@ -463,12 +451,10 @@ var _ = Describe("ClusterAutoscaler", func() {
 			return deploy
 		}
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-cluster-autoscaler",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-cluster-autoscaler",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "cluster-autoscaler.rules",
@@ -490,12 +476,10 @@ var _ = Describe("ClusterAutoscaler", func() {
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-cluster-autoscaler",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-cluster-autoscaler",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":  "kubernetes",
@@ -518,9 +502,7 @@ var _ = Describe("ClusterAutoscaler", func() {
 
 		clusterRoleShootFor = func(k8sVersionGreaterEqual135 bool) *rbacv1.ClusterRole {
 			clusterRole := &rbacv1.ClusterRole{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener.cloud:target:cluster-autoscaler",
-				},
+				Name: "gardener.cloud:target:cluster-autoscaler",
 				Rules: []rbacv1.PolicyRule{
 					{
 						APIGroups: []string{""},
@@ -604,9 +586,7 @@ var _ = Describe("ClusterAutoscaler", func() {
 		}
 
 		clusterRoleBindingShoot = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:cluster-autoscaler",
-			},
+			Name: "gardener.cloud:target:cluster-autoscaler",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -622,10 +602,8 @@ var _ = Describe("ClusterAutoscaler", func() {
 		}
 
 		roleShoot = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:cluster-autoscaler",
-				Namespace: "kube-system",
-			},
+			Name:      "gardener.cloud:target:cluster-autoscaler",
+			Namespace: "kube-system",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -642,10 +620,8 @@ var _ = Describe("ClusterAutoscaler", func() {
 		}
 
 		roleBindingShoot = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:cluster-autoscaler",
-				Namespace: "kube-system",
-			},
+			Name:      "gardener.cloud:target:cluster-autoscaler",
+			Namespace: "kube-system",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "Role",
@@ -660,22 +636,18 @@ var _ = Describe("ClusterAutoscaler", func() {
 		}
 
 		priorityExpanderConfigMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "cluster-autoscaler-priority-expander",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "cluster-autoscaler-priority-expander",
+			Namespace: metav1.NamespaceSystem,
 			Data: map[string]string{
 				"priorities": "0:\n- pool1\n- pool3\n- irregular-machine-deployment-name\n40:\n- pool2\n50:\n- pool4\n",
 			},
 		}
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            managedResourceName,
-				Namespace:       namespace,
-				Labels:          map[string]string{"origin": "gardener"},
-				ResourceVersion: "1",
-			},
+			Name:            managedResourceName,
+			Namespace:       namespace,
+			Labels:          map[string]string{"origin": "gardener"},
+			ResourceVersion: "1",
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs:   []corev1.LocalObjectReference{},
 				InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -690,7 +662,7 @@ var _ = Describe("ClusterAutoscaler", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 
 		clusterAutoscaler = New(fakeClient, namespace, sm, image, replicas, nil, workerConfig, nil, semver.MustParse("1.35.0"))
 		clusterAutoscaler.SetNamespaceUID(namespaceUID)

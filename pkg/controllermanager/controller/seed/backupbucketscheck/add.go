@@ -7,7 +7,6 @@ package backupbucketscheck
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -98,5 +97,5 @@ func (r *Reconciler) MapBackupBucketToSeed(_ context.Context, obj client.Object)
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: *backupBucket.Spec.SeedName}}}
+	return []reconcile.Request{{Name: *backupBucket.Spec.SeedName}}
 }

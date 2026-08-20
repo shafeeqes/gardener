@@ -28,7 +28,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/test/framework"
@@ -91,7 +90,7 @@ var _ = ginkgo.Describe("Shoot network testing", func() {
 		framework.ExpectNoError(allErrs)
 	}, networkTestTimeout, framework.WithCAfterTest(func(ctx context.Context) {
 		ginkgo.By("Cleanup network test daemonset")
-		err := f.ShootClient.Client().Delete(ctx, &appsv1.DaemonSet{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: f.Namespace}})
+		err := f.ShootClient.Client().Delete(ctx, &appsv1.DaemonSet{Name: name, Namespace: f.Namespace})
 		if err != nil {
 			if !apierrors.IsNotFound(err) {
 				framework.ExpectNoError(err)

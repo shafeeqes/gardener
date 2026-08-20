@@ -11,7 +11,6 @@ import (
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
@@ -153,7 +152,7 @@ func (c *cleaner) DeleteCluster(ctx context.Context) error {
 }
 
 func (c *cleaner) getEmptyCluster() *extensionsv1alpha1.Cluster {
-	return &extensionsv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Name: c.seedNamespace}}
+	return &extensionsv1alpha1.Cluster{Name: c.seedNamespace}
 }
 
 func (c *cleaner) removeFinalizersFromObjects(ctx context.Context, objectList client.ObjectList) error {

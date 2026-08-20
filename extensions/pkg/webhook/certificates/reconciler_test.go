@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -62,9 +61,7 @@ var _ = Describe("Reconciler", func() {
 			Mode:                     extensionswebhook.ModeService,
 			SourceWebhookConfigs: extensionswebhook.Configs{
 				MutatingWebhookConfig: &admissionregistrationv1.MutatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "gardener-extension-provider-test",
-					},
+					Name: "gardener-extension-provider-test",
 					Webhooks: []admissionregistrationv1.MutatingWebhook{{
 						Name: "test-webhook",
 						ClientConfig: admissionregistrationv1.WebhookClientConfig{
@@ -114,9 +111,7 @@ var _ = Describe("Reconciler", func() {
 		It("should handle validating webhook configs", func() {
 			r.SourceWebhookConfigs = extensionswebhook.Configs{
 				ValidatingWebhookConfig: &admissionregistrationv1.ValidatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "gardener-extension-provider-test-validating",
-					},
+					Name: "gardener-extension-provider-test-validating",
 					Webhooks: []admissionregistrationv1.ValidatingWebhook{{
 						Name: "test-validating-webhook",
 						ClientConfig: admissionregistrationv1.WebhookClientConfig{
@@ -140,17 +135,13 @@ var _ = Describe("Reconciler", func() {
 		It("should handle both mutating and validating webhook configs", func() {
 			r.SourceWebhookConfigs = extensionswebhook.Configs{
 				MutatingWebhookConfig: &admissionregistrationv1.MutatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "gardener-extension-provider-test",
-					},
+					Name: "gardener-extension-provider-test",
 					Webhooks: []admissionregistrationv1.MutatingWebhook{{
 						Name: "test-webhook",
 					}},
 				},
 				ValidatingWebhookConfig: &admissionregistrationv1.ValidatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "gardener-extension-provider-test-validating",
-					},
+					Name: "gardener-extension-provider-test-validating",
 					Webhooks: []admissionregistrationv1.ValidatingWebhook{{
 						Name: "test-validating-webhook",
 					}},
@@ -196,9 +187,7 @@ var _ = Describe("Reconciler", func() {
 			BeforeEach(func() {
 				r.ShootWebhookConfigs = &extensionswebhook.Configs{
 					MutatingWebhookConfig: &admissionregistrationv1.MutatingWebhookConfiguration{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardener-extension-provider-test-shoot",
-						},
+						Name: "gardener-extension-provider-test-shoot",
 						Webhooks: []admissionregistrationv1.MutatingWebhook{{
 							Name: "test-shoot-webhook",
 							ClientConfig: admissionregistrationv1.WebhookClientConfig{
@@ -269,10 +258,8 @@ var _ = Describe("Reconciler", func() {
 
 		BeforeEach(func() {
 			caBundleSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ca-bundle-secret",
-					Namespace: namespace,
-				},
+				Name:      "ca-bundle-secret",
+				Namespace: namespace,
 				Data: map[string][]byte{
 					secretsutils.DataKeyCertificateBundle: []byte("new-ca-bundle"),
 				},
@@ -284,9 +271,7 @@ var _ = Describe("Reconciler", func() {
 
 			BeforeEach(func() {
 				sourceWebhookConfig = &admissionregistrationv1.MutatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-mutating-config",
-					},
+					Name: "test-mutating-config",
 					Webhooks: []admissionregistrationv1.MutatingWebhook{{
 						Name: "webhook-1",
 						ClientConfig: admissionregistrationv1.WebhookClientConfig{
@@ -321,9 +306,7 @@ var _ = Describe("Reconciler", func() {
 			It("should overwrite webhooks and inject CA bundle when patching", func() {
 				// Create existing config with different webhooks
 				existing := &admissionregistrationv1.MutatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-mutating-config",
-					},
+					Name: "test-mutating-config",
 					Webhooks: []admissionregistrationv1.MutatingWebhook{{
 						Name: "old-webhook",
 						ClientConfig: admissionregistrationv1.WebhookClientConfig{
@@ -348,9 +331,7 @@ var _ = Describe("Reconciler", func() {
 
 			BeforeEach(func() {
 				sourceWebhookConfig = &admissionregistrationv1.ValidatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-validating-config",
-					},
+					Name: "test-validating-config",
 					Webhooks: []admissionregistrationv1.ValidatingWebhook{{
 						Name: "validating-webhook-1",
 						ClientConfig: admissionregistrationv1.WebhookClientConfig{

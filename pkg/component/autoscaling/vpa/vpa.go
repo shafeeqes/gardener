@@ -209,35 +209,35 @@ func (v *vpa) managedResourceName() string {
 }
 
 func (v *vpa) emptyService(name string) *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: v.namespace}}
+	return &corev1.Service{Name: name, Namespace: v.namespace}
 }
 
 func (v *vpa) emptyServiceAccount(name string) *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: v.namespace}}
+	return &corev1.ServiceAccount{Name: name, Namespace: v.namespace}
 }
 
 func (v *vpa) emptyClusterRole(name string) *rbacv1.ClusterRole {
-	return &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{Name: v.rbacNamePrefix() + name}}
+	return &rbacv1.ClusterRole{Name: v.rbacNamePrefix() + name}
 }
 
 func (v *vpa) emptyClusterRoleBinding(name string) *rbacv1.ClusterRoleBinding {
-	return &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: v.rbacNamePrefix() + name}}
+	return &rbacv1.ClusterRoleBinding{Name: v.rbacNamePrefix() + name}
 }
 
 func (v *vpa) emptyRole(name string) *rbacv1.Role {
-	return &rbacv1.Role{ObjectMeta: metav1.ObjectMeta{Name: v.rbacNamePrefix() + name, Namespace: v.namespaceForApplicationClassResource()}}
+	return &rbacv1.Role{Name: v.rbacNamePrefix() + name, Namespace: v.namespaceForApplicationClassResource()}
 }
 
 func (v *vpa) emptyRoleBinding(name string) *rbacv1.RoleBinding {
-	return &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Name: v.rbacNamePrefix() + name, Namespace: v.namespaceForApplicationClassResource()}}
+	return &rbacv1.RoleBinding{Name: v.rbacNamePrefix() + name, Namespace: v.namespaceForApplicationClassResource()}
 }
 
 func (v *vpa) emptyDeployment(name string) *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: v.namespace}}
+	return &appsv1.Deployment{Name: name, Namespace: v.namespace}
 }
 
 func (v *vpa) emptyPodDisruptionBudget(name string) *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: v.namespace}}
+	return &policyv1.PodDisruptionBudget{Name: name, Namespace: v.namespace}
 }
 
 func (v *vpa) emptyServiceMonitor(name string) *monitoringv1.ServiceMonitor {
@@ -245,7 +245,7 @@ func (v *vpa) emptyServiceMonitor(name string) *monitoringv1.ServiceMonitor {
 }
 
 func (v *vpa) emptyVerticalPodAutoscaler(name string) *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: v.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: name, Namespace: v.namespace}
 }
 
 func (v *vpa) emptyMutatingWebhookConfiguration() *admissionregistrationv1.MutatingWebhookConfiguration {
@@ -258,7 +258,7 @@ func (v *vpa) emptyMutatingWebhookConfiguration() *admissionregistrationv1.Mutat
 	// starts with 'zzz', such that it is called after all other webhooks which inject containers. All containers
 	// injected by webhooks that are called _after_ the vpa webhook will not be under control of vpa.
 	// See also the `gardener.cloud/description` annotation on the MutatingWebhook.
-	return &admissionregistrationv1.MutatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{Name: "zzz-vpa-webhook-config-" + suffix}}
+	return &admissionregistrationv1.MutatingWebhookConfiguration{Name: "zzz-vpa-webhook-config-" + suffix}
 }
 
 func (v *vpa) rbacNamePrefix() string {

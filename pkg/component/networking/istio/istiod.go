@@ -133,7 +133,7 @@ func (i *istiod) deployIstiod(ctx context.Context) error {
 		return nil
 	}
 
-	istiodNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: i.values.Istiod.Namespace}}
+	istiodNamespace := &corev1.Namespace{Name: i.values.Istiod.Namespace}
 	if _, err := controllerutils.CreateOrGetAndMergePatch(ctx, i.client, istiodNamespace, func() error {
 		metav1.SetMetaDataLabel(&istiodNamespace.ObjectMeta, "istio-operator-managed", "Reconcile")
 		metav1.SetMetaDataLabel(&istiodNamespace.ObjectMeta, "istio-injection", "disabled")
@@ -218,7 +218,7 @@ func (i *istiod) Deploy(ctx context.Context) error {
 	for _, ingressGateway := range i.values.IngressGateway {
 		for _, filterName := range []string{"tcp-stats-filter-1.11", "stats-filter-1.11", "tcp-stats-filter-1.12", "stats-filter-1.12"} {
 			if err := client.IgnoreNotFound(i.client.Delete(ctx, &networkingv1alpha3.EnvoyFilter{
-				ObjectMeta: metav1.ObjectMeta{Name: filterName, Namespace: ingressGateway.Namespace},
+				Name: filterName, Namespace: ingressGateway.Namespace,
 			})); err != nil {
 				return err
 			}
@@ -228,7 +228,7 @@ func (i *istiod) Deploy(ctx context.Context) error {
 	registry := managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 	for _, istioIngressGateway := range i.values.IngressGateway {
-		gatewayNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: istioIngressGateway.Namespace}}
+		gatewayNamespace := &corev1.Namespace{Name: istioIngressGateway.Namespace}
 
 		metav1.SetMetaDataLabel(&gatewayNamespace.ObjectMeta, "istio-operator-managed", "Reconcile")
 		metav1.SetMetaDataLabel(&gatewayNamespace.ObjectMeta, "istio-injection", "disabled")
@@ -358,9 +358,7 @@ func (i *istiod) Destroy(ctx context.Context) error {
 
 	if i.values.Istiod.Enabled {
 		if err := i.client.Delete(ctx, &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: i.values.Istiod.Namespace,
-			},
+			Name: i.values.Istiod.Namespace,
 		}); client.IgnoreNotFound(err) != nil {
 			return err
 		}

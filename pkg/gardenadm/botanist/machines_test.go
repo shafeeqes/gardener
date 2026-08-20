@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/gardener/gardener/pkg/client/kubernetes"
@@ -34,16 +33,12 @@ var _ = Describe("Machines", func() {
 			ctx = context.Background()
 
 			machineClass = &machinev1alpha1.MachineClass{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-class",
-					Namespace: "test-ns",
-				},
+				Name:      "my-class",
+				Namespace: "test-ns",
 			}
 			machine = &machinev1alpha1.Machine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-machine",
-					Namespace: "test-ns",
-				},
+				Name:      "my-machine",
+				Namespace: "test-ns",
 				Spec: machinev1alpha1.MachineSpec{
 					Class: machinev1alpha1.ClassSpec{
 						Name: "my-class",

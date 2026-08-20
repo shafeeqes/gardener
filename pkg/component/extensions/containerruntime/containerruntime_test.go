@@ -85,13 +85,11 @@ var _ = Describe("#ContainerRuntime", func() {
 		for _, name := range workerNames {
 			for _, runtimeType := range containerRuntimeTypes {
 				expected = append(expected, &extensionsv1alpha1.ContainerRuntime{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      fmt.Sprintf("%s-%s", runtimeType, name),
-						Namespace: namespace,
-						Annotations: map[string]string{
-							v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-							v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-						},
+					Name:      fmt.Sprintf("%s-%s", runtimeType, name),
+					Namespace: namespace,
+					Annotations: map[string]string{
+						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
 					},
 					Spec: extensionsv1alpha1.ContainerRuntimeSpec{
 						BinaryPath: extensionsv1alpha1.ContainerDRuntimeContainersBinFolder,
@@ -255,10 +253,8 @@ var _ = Describe("#ContainerRuntime", func() {
 
 			// Pre-create the container runtime resource
 			Expect(c.Create(ctx, &extensionsv1alpha1.ContainerRuntime{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      containerRuntimeName,
-					Namespace: namespace,
-				},
+				Name:      containerRuntimeName,
+				Namespace: namespace,
 			})).To(Succeed())
 
 			defaultDepWaiter = containerruntime.New(log, c, &containerruntime.Values{

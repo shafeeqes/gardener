@@ -24,10 +24,8 @@ var _ = Describe("ControllerInstallation Care controller tests", func() {
 	BeforeEach(func() {
 		By("Create ControllerInstallation")
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "foo-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "foo-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: "foo-seed",
@@ -68,10 +66,8 @@ var _ = Describe("ControllerInstallation Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create ManagedResource")
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      controllerInstallation.Name,
-					Namespace: gardenNamespace.Name,
-				},
+				Name:      controllerInstallation.Name,
+				Namespace: gardenNamespace.Name,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{{
 						Name: "foo-secret",
@@ -158,10 +154,8 @@ var _ = Describe("ControllerInstallation Care controller tests (self-hosted shoo
 	BeforeEach(func() {
 		By("Create ControllerInstallation with ShootRef")
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "foo-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "foo-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				ShootRef: &corev1.ObjectReference{
 					Name:      "shoot1",
@@ -187,13 +181,11 @@ var _ = Describe("ControllerInstallation Care controller tests (self-hosted shoo
 	It("should look up ManagedResource by RegistrationRef name", func() {
 		By("Create ManagedResource with RegistrationRef name and stale labels")
 		managedResource := &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-extension",
-				Namespace: gardenNamespace.Name,
-				Labels: map[string]string{
-					"controllerinstallation-name": "my-extension",
-					"controllerregistration-name": "my-extension",
-				},
+			Name:      "my-extension",
+			Namespace: gardenNamespace.Name,
+			Labels: map[string]string{
+				"controllerinstallation-name": "my-extension",
+				"controllerregistration-name": "my-extension",
 			},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{{Name: "foo-secret"}},

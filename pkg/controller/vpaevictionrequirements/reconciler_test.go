@@ -15,7 +15,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	vpaautoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -63,12 +62,10 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-vpa",
-				Namespace: "test-namespace",
-				Labels: map[string]string{
-					constants.LabelVPAEvictionRequirementsController: constants.EvictionRequirementManagedByController,
-				},
+			Name:      "test-vpa",
+			Namespace: "test-namespace",
+			Labels: map[string]string{
+				constants.LabelVPAEvictionRequirementsController: constants.EvictionRequirementManagedByController,
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				UpdatePolicy: &vpaautoscalingv1.PodUpdatePolicy{},
@@ -80,10 +77,8 @@ var _ = Describe("Reconciler", func() {
 		Expect(seedClient.Create(ctx, vpa)).To(Succeed())
 
 		request = reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Name:      vpa.Name,
-				Namespace: vpa.Namespace,
-			},
+			Name:      vpa.Name,
+			Namespace: vpa.Namespace,
 		}
 	})
 

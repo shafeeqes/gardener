@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/observability/monitoring/blackboxexporter/shoot/controlplane"
 )
@@ -24,11 +23,9 @@ var _ = Describe("ScrapeConfig", func() {
 		It("should compute the scrape configs", func() {
 			Expect(ScrapeConfig(namespace, kubeAPIServerTarget)).To(ContainElements(
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-blackbox-apiserver",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "shoot"},
-					},
+					Name:      "shoot-blackbox-apiserver",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "shoot"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_apiserver"}},
 						MetricsPath: new("/probe"),

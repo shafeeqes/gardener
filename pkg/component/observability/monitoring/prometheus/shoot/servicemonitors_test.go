@@ -17,7 +17,7 @@ var _ = Describe("ServiceMonitors", func() {
 	Describe("#CentralServiceMonitors", func() {
 		When("alertmanager is wanted", func() {
 			Expect(shoot.CentralServiceMonitors(true)).To(HaveExactElements(&monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{Name: "alertmanager-shoot"},
+				Name: "alertmanager-shoot",
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 						"component":    "alertmanager",

@@ -40,24 +40,18 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 
 	BeforeEach(func() {
 		seedNamespace1 = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "seed-bar",
-				Labels: map[string]string{testID: testRunID, "gardener.cloud/role": "seed"},
-			},
+			Name:   "seed-bar",
+			Labels: map[string]string{testID: testRunID, "gardener.cloud/role": "seed"},
 		}
 		serviceAccount1SeedNamespace1 = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "service-account1",
-				Namespace: seedNamespace1.Name,
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "service-account1",
+			Namespace: seedNamespace1.Name,
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 		serviceAccount2SeedNamespace1 = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "service-account2",
-				Namespace: seedNamespace1.Name,
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "service-account2",
+			Namespace: seedNamespace1.Name,
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 
 		By("Create Seed Namespace 1 and ServiceAccounts")
@@ -82,24 +76,18 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 		})
 
 		seedNamespace2 = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "seed-foo",
-				Labels: map[string]string{testID: testRunID, "gardener.cloud/role": "seed"},
-			},
+			Name:   "seed-foo",
+			Labels: map[string]string{testID: testRunID, "gardener.cloud/role": "seed"},
 		}
 		serviceAccount1SeedNamespace2 = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "service-account1",
-				Namespace: seedNamespace2.Name,
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "service-account1",
+			Namespace: seedNamespace2.Name,
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 		serviceAccount2SeedNamespace2 = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "default",
-				Namespace: seedNamespace2.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      "default",
+			Namespace: seedNamespace2.Name,
+			Labels:    map[string]string{testID: testRunID},
 		}
 
 		By("Create Seed Namespace 2 and ServiceAccounts")
@@ -124,17 +112,13 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 		})
 
 		nonSeedNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "garden-foo",
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "garden-foo",
+			Labels: map[string]string{testID: testRunID},
 		}
 		serviceAccount1NonSeedNamespace = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "service-account1",
-				Namespace: nonSeedNamespace.Name,
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "service-account1",
+			Namespace: nonSeedNamespace.Name,
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 
 		By("Create non-Seed Namespace and ServiceAccount")
@@ -156,11 +140,9 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 
 		// Extension SA in the garden namespace (not garden-* project namespace).
 		extensionSAGardenNamespace = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-shoot--my-shoot--foo",
-				Namespace: "garden",
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "extension-shoot--my-shoot--foo",
+			Namespace: "garden",
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 
 		By("Create extension ServiceAccount in garden namespace")
@@ -173,26 +155,20 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 		})
 
 		projectNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "garden-my-project",
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "garden-my-project",
+			Labels: map[string]string{testID: testRunID},
 		}
 		// Extension SA: prefixed with "extension-shoot--", should be included in binding subjects.
 		extensionSAProjectNamespace = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-shoot--my-shoot--foo",
-				Namespace: projectNamespace.Name,
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "extension-shoot--my-shoot--foo",
+			Namespace: projectNamespace.Name,
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 		// Non-extension SA: no "extension-shoot--" prefix, must be excluded even though labels match.
 		nonExtensionSAProjectNamespace = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "non-extension-sa",
-				Namespace: projectNamespace.Name,
-				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-			},
+			Name:      "non-extension-sa",
+			Namespace: projectNamespace.Name,
+			Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 		}
 
 		By("Create project Namespace and ServiceAccounts")
@@ -217,15 +193,13 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 		})
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID,
-				Annotations: map[string]string{
-					"authorization.gardener.cloud/extensions-serviceaccount-selector": `{"matchLabels":{"relevant":"true"}}`,
-				},
-				Labels: map[string]string{
-					"authorization.gardener.cloud/custom-extensions-permissions": "true",
-					testID: testRunID,
-				},
+			Name: testRunID,
+			Annotations: map[string]string{
+				"authorization.gardener.cloud/extensions-serviceaccount-selector": `{"matchLabels":{"relevant":"true"}}`,
+			},
+			Labels: map[string]string{
+				"authorization.gardener.cloud/custom-extensions-permissions": "true",
+				testID: testRunID,
 			},
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups: []string{""},
@@ -243,7 +217,7 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 			return mgrClient.Get(ctx, client.ObjectKeyFromObject(clusterRole), &rbacv1.ClusterRole{})
 		}).Should(Succeed())
 
-		clusterRoleBinding = &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: clusterRole.Name}}
+		clusterRoleBinding = &rbacv1.ClusterRoleBinding{Name: clusterRole.Name}
 
 		DeferCleanup(func() {
 			By("Delete ClusterRole")
@@ -312,11 +286,9 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 	When("a ServiceAccount is added or deleted", func() {
 		It("should adjust the subjects", func() {
 			serviceAccount3SeedNamespace1 := &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "new",
-					Namespace: seedNamespace1.Name,
-					Labels:    map[string]string{testID: testRunID, "relevant": "true"},
-				},
+				Name:      "new",
+				Namespace: seedNamespace1.Name,
+				Labels:    map[string]string{testID: testRunID, "relevant": "true"},
 			}
 
 			By("Create ServiceAccount")
@@ -413,11 +385,9 @@ var _ = Describe("ExtensionClusterRole controller tests", func() {
 			}).Should(Succeed())
 
 			serviceAccount3SeedNamespace2 := &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "hb23b",
-					Namespace: seedNamespace2.Name,
-					Labels:    map[string]string{testID: testRunID, "new-relevant": "true"},
-				},
+				Name:      "hb23b",
+				Namespace: seedNamespace2.Name,
+				Labels:    map[string]string{testID: testRunID, "new-relevant": "true"},
 			}
 
 			By("Create ServiceAccount")

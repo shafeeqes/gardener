@@ -16,7 +16,6 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
 	certificatesclientv1 "k8s.io/client-go/kubernetes/typed/certificates/v1"
 	certutil "k8s.io/client-go/util/cert"
@@ -52,10 +51,8 @@ var _ = Describe("Reconciler", func() {
 
 		privateKey, _ = secretsutils.FakeGenerateKey(rand.Reader, 4096)
 		csr = &certificatesv1.CertificateSigningRequest{
-			TypeMeta: metav1.TypeMeta{Kind: "CertificateSigningRequest"},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-csr",
-			},
+			Kind: "CertificateSigningRequest",
+			Name: "test-csr",
 			Spec: certificatesv1.CertificateSigningRequestSpec{
 				Usages: []certificatesv1.KeyUsage{
 					certificatesv1.UsageDigitalSignature,
@@ -71,7 +68,7 @@ var _ = Describe("Reconciler", func() {
 	})
 
 	It("should return nil because object not found", func() {
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -81,7 +78,7 @@ var _ = Describe("Reconciler", func() {
 			csr.Status.Certificate = []byte("test-certificate")
 			Expect(c.Create(ctx, csr.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -92,7 +89,7 @@ var _ = Describe("Reconciler", func() {
 			})
 			Expect(c.Create(ctx, csr.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -111,7 +108,7 @@ var _ = Describe("Reconciler", func() {
 		})
 
 		It("should ignore the csr because csr does not match the requirements for a client certificate for a seed", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -154,7 +151,7 @@ var _ = Describe("Reconciler", func() {
 
 			Expect(c.Create(ctx, csrObj)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("recognized CSR but SubjectAccessReview was not allowed")))
 		})
@@ -168,7 +165,7 @@ var _ = Describe("Reconciler", func() {
 
 			Expect(c.Create(ctx, csrObj)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -228,7 +225,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -252,7 +249,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -279,7 +276,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -294,10 +291,8 @@ var _ = Describe("Reconciler", func() {
 		When("bootstrap token secret has invalid description", func() {
 			It("should lead to denial of the CSR when description does not have self-hosted shoot prefix", func() {
 				bootstrapTokenSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenDescriptionKey: []byte("Invalid description"),
 					},
@@ -316,7 +311,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -329,10 +324,8 @@ var _ = Describe("Reconciler", func() {
 
 			It("should lead to denial of the CSR when description has invalid shoot metadata format", func() {
 				bootstrapTokenSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenDescriptionKey: []byte(bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix + "invalid-format"),
 					},
@@ -351,7 +344,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -377,10 +370,8 @@ var _ = Describe("Reconciler", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				bootstrapTokenSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenDescriptionKey: []byte(bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix + shootNamespace + "/" + shootName),
 					},
@@ -397,7 +388,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -412,10 +403,8 @@ var _ = Describe("Reconciler", func() {
 		When("user does not have authorization for shootclient subresource", func() {
 			It("should lead to denial of the CSR when sar.Status.Allowed is false", func() {
 				bootstrapTokenSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenDescriptionKey: []byte(bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix + shootNamespace + "/" + shootName),
 					},
@@ -434,7 +423,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -449,10 +438,8 @@ var _ = Describe("Reconciler", func() {
 		When("all requirements are met", func() {
 			It("should approve the csr when user has authorization for shootclient subresource", func() {
 				bootstrapTokenSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      bootstrapTokenName,
-						Namespace: metav1.NamespaceSystem,
-					},
+					Name:      bootstrapTokenName,
+					Namespace: metav1.NamespaceSystem,
 					Data: map[string][]byte{
 						bootstraptokenapi.BootstrapTokenDescriptionKey: []byte(bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix + shootNamespace + "/" + shootName),
 					},
@@ -471,7 +458,7 @@ var _ = Describe("Reconciler", func() {
 
 				reconciler = &Reconciler{Client: c, CertificatesClient: fakeCertificatesClient}
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: csr.Name}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: csr.Name})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 

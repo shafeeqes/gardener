@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -80,8 +79,8 @@ var _ = Describe("Node", func() {
 	Describe("FilterHealthyNodes", func() {
 		node := func(name string, conditions ...corev1.NodeCondition) corev1.Node {
 			return corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
-				Status:     corev1.NodeStatus{Conditions: conditions},
+				Name:   name,
+				Status: corev1.NodeStatus{Conditions: conditions},
 			}
 		}
 

@@ -82,9 +82,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create garden namespace")
 	gardenNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "garden",
-		},
+		Name: "garden",
 	}
 	Expect(testClient.Create(ctx, gardenNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "gardenNamespace", client.ObjectKeyFromObject(gardenNamespace))

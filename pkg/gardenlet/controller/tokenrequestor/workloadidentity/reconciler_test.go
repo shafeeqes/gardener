@@ -15,7 +15,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/testing"
 	"k8s.io/utils/clock"
 	testclock "k8s.io/utils/clock/testing"
@@ -112,23 +111,19 @@ var _ = Describe("Reconciler", func() {
 			token = "foo"
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: metav1.NamespaceDefault,
-					Annotations: map[string]string{
-						"workloadidentity.security.gardener.cloud/name":      workloadIdentityName,
-						"workloadidentity.security.gardener.cloud/namespace": workloadIdentityNamespace,
-					},
-					Labels: map[string]string{
-						"security.gardener.cloud/purpose": "workload-identity-token-requestor",
-					},
+				Name:      secretName,
+				Namespace: metav1.NamespaceDefault,
+				Annotations: map[string]string{
+					"workloadidentity.security.gardener.cloud/name":      workloadIdentityName,
+					"workloadidentity.security.gardener.cloud/namespace": workloadIdentityNamespace,
+				},
+				Labels: map[string]string{
+					"security.gardener.cloud/purpose": "workload-identity-token-requestor",
 				},
 			}
 			workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      workloadIdentityName,
-					Namespace: workloadIdentityNamespace,
-				},
+				Name:      workloadIdentityName,
+				Namespace: workloadIdentityNamespace,
 				Spec: securityv1alpha1.WorkloadIdentitySpec{
 					Audiences: []string{"target-audience"},
 					TargetSystem: securityv1alpha1.TargetSystem{
@@ -136,10 +131,9 @@ var _ = Describe("Reconciler", func() {
 					},
 				},
 			}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{
+			request = reconcile.Request{
 				Name:      secret.Name,
-				Namespace: secret.Namespace,
-			}}
+				Namespace: secret.Namespace}
 		})
 
 		It("should generate a new token and requeue", func() {

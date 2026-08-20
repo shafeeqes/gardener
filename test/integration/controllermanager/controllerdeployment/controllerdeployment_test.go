@@ -7,7 +7,6 @@ package controllerdeployment_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1 "github.com/gardener/gardener/pkg/apis/core/v1"
@@ -23,20 +22,16 @@ var _ = Describe("ControllerDeployment controller tests", func() {
 
 	BeforeEach(func() {
 		controllerDeployment = &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Helm: &gardencorev1.HelmControllerDeployment{
 				RawChart: []byte("foo"),
 			},
 		}
 
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 		}
 	})
 

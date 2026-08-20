@@ -10,7 +10,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -57,10 +56,9 @@ func ObjectListToRequests(list client.ObjectList, predicates ...func(client.Obje
 			}
 		}
 
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{
+		requests = append(requests, reconcile.Request{
 			Name:      obj.GetName(),
-			Namespace: obj.GetNamespace(),
-		}})
+			Namespace: obj.GetNamespace()})
 
 		return nil
 	}))

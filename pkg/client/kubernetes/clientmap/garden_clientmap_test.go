@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	componentbaseconfigv1alpha1 "k8s.io/component-base/config/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -54,9 +53,7 @@ var _ = Describe("GardenClientMap", func() {
 		fakeRuntimeClient = fake.NewClientBuilder().WithScheme(scheme).Build()
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden-eden",
-			},
+			Name: "garden-eden",
 		}
 
 		key = keys.ForGarden(garden)
@@ -88,10 +85,8 @@ var _ = Describe("GardenClientMap", func() {
 			fakeCS := fakekubernetes.NewClientSet()
 
 			Expect(fakeRuntimeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: "garden",
-				},
+				Name:      "gardener-internal",
+				Namespace: "garden",
 			})).To(Succeed())
 
 			NewClientFromSecretObject = func(secret *corev1.Secret, fns ...kubernetes.ConfigFunc) (kubernetes.Interface, error) {
@@ -114,11 +109,9 @@ var _ = Describe("GardenClientMap", func() {
 			fakeCS := fakekubernetes.NewClientSet()
 
 			Expect(fakeRuntimeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: "garden",
-				},
-				Data: dataWithPopulatedToken(),
+				Name:      "gardener-internal",
+				Namespace: "garden",
+				Data:      dataWithPopulatedToken(),
 			})).To(Succeed())
 
 			NewClientFromSecretObject = func(secret *corev1.Secret, fns ...kubernetes.ConfigFunc) (kubernetes.Interface, error) {
@@ -168,10 +161,8 @@ var _ = Describe("GardenClientMap", func() {
 
 		It("should correctly calculate hash", func() {
 			Expect(fakeRuntimeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: "garden",
-				},
+				Name:      "gardener-internal",
+				Namespace: "garden",
 			})).To(Succeed())
 
 			hash, err := factory.CalculateClientSetHash(ctx, key)

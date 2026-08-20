@@ -74,10 +74,8 @@ func New(
 		WaitTimeout:         5 * time.Minute,
 
 		exposure: &extensionsv1alpha1.SelfHostedShootExposure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -90,10 +88,8 @@ func (s *SelfHostedShootExposure) Deploy(ctx context.Context) error {
 		metav1.SetMetaDataAnnotation(&s.exposure.ObjectMeta, v1beta1constants.GardenerTimestamp, s.clock.Now().UTC().Format(time.RFC3339Nano))
 
 		s.exposure.Spec = extensionsv1alpha1.SelfHostedShootExposureSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:  s.Values.Type,
-				Class: s.Values.Class,
-			},
+			Type:           s.Values.Type,
+			Class:          s.Values.Class,
 			CredentialsRef: s.Values.CredentialsRef,
 			Port:           kubeapiserverconstants.Port,
 			Endpoints:      s.Values.Endpoints,

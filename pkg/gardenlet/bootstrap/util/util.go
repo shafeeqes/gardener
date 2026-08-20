@@ -59,10 +59,8 @@ func UpdateGardenKubeconfigSecret(ctx context.Context, certClientConfig *rest.Co
 	}
 
 	kubeconfigSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      kubeconfigKey.Name,
-			Namespace: kubeconfigKey.Namespace,
-		},
+		Name:      kubeconfigKey.Name,
+		Namespace: kubeconfigKey.Namespace,
 	}
 
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, seedClient, kubeconfigSecret, func() error {
@@ -103,7 +101,7 @@ func UpdateGardenKubeconfigCAIfChanged(ctx context.Context, log logr.Logger, gar
 	}
 
 	log.Info("Getting CA from the garden cluster")
-	kubeRootCA := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: core.GardenerSystemPublicNamespace, Name: "kube-root-ca.crt"}}
+	kubeRootCA := &corev1.ConfigMap{Namespace: core.GardenerSystemPublicNamespace, Name: "kube-root-ca.crt"}
 	if err := gardenAPIReader.Get(ctx, client.ObjectKeyFromObject(kubeRootCA), kubeRootCA); err != nil {
 		return nil, fmt.Errorf("unable to get %q configmap: %w", kubeRootCA.Name, err)
 	}
@@ -126,11 +124,9 @@ func UpdateGardenKubeconfigCAIfChanged(ctx context.Context, log logr.Logger, gar
 	// extract data from existing kubeconfig and reuse UpdateGardenKubeconfigSecret function
 	return UpdateGardenKubeconfigSecret(ctx, &rest.Config{
 		Host: curCluster.Server,
-		TLSClientConfig: rest.TLSClientConfig{
-			// Insecure is only possible if no CAData are specified.
-			Insecure: len(gardenClusterCACert) == 0,
-			CAData:   gardenClusterCACert,
-		},
+		// Insecure is only possible if no CAData are specified.
+		Insecure: len(gardenClusterCACert) == 0,
+		CAData:   gardenClusterCACert,
 	}, curAuth.ClientCertificateData, curAuth.ClientKeyData, seedClient, kubeconfigKey)
 }
 
@@ -215,10 +211,8 @@ func ComputeGardenletKubeconfigWithBootstrapToken(ctx context.Context, gardenCli
 func ComputeGardenletKubeconfigWithServiceAccountToken(ctx context.Context, gardenClient client.Client, gardenClientRestConfig *rest.Config, serviceAccountName, serviceAccountNamespace string) ([]byte, error) {
 	// Create a temporary service account
 	serviceAccount := &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceAccountName,
-			Namespace: serviceAccountNamespace,
-		},
+		Name:      serviceAccountName,
+		Namespace: serviceAccountNamespace,
 	}
 	if _, err := controllerutils.CreateOrGetAndStrategicMergePatch(ctx, gardenClient, serviceAccount, func() error { return nil }); err != nil {
 		return nil, err
@@ -236,9 +230,7 @@ func ComputeGardenletKubeconfigWithServiceAccountToken(ctx context.Context, gard
 
 	// Create a ClusterRoleBinding
 	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: ClusterRoleBindingName(serviceAccount.Namespace, serviceAccount.Name),
-		},
+		Name: ClusterRoleBindingName(serviceAccount.Namespace, serviceAccount.Name),
 	}
 	if _, err := controllerutils.CreateOrGetAndStrategicMergePatch(ctx, gardenClient, clusterRoleBinding, func() error {
 		clusterRoleBinding.RoleRef = rbacv1.RoleRef{

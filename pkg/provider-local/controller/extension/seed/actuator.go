@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -97,11 +96,9 @@ func getSeedResources(namespace string) (map[string][]byte, error) {
 	registry := managedresources.NewRegistry(kubernetesclient.SeedScheme, kubernetesclient.SeedCodec, kubernetesclient.SeedSerializer)
 	return registry.AddAllAndSerialize(
 		&corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ApplicationName,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:                         ApplicationName,
+			Namespace:                    namespace,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		},
 	)

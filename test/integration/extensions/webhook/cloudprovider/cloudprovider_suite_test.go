@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -90,12 +89,10 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: testID + "-",
-			Labels: map[string]string{
-				v1beta1constants.LabelShootProvider: providerName,
-			},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: testID + "-",
+		Labels: map[string]string{
+			v1beta1constants.LabelShootProvider: providerName,
 		},
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
@@ -142,9 +139,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create Cluster")
 	cluster = &extensionsv1alpha1.Cluster{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: testNamespace.Name,
-		},
+		Name: testNamespace.Name,
 		Spec: extensionsv1alpha1.ClusterSpec{
 			CloudProfile: runtime.RawExtension{Raw: []byte("{}")},
 			Seed:         &runtime.RawExtension{Raw: []byte("{}")},

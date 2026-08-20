@@ -121,13 +121,11 @@ func (s *seedSystem) computeResourcesData() (map[string][]byte, error) {
 func (s *seedSystem) addReserveExcessCapacityDeployment(registry *managedresources.Registry, name string, config gardencorev1beta1.SeedSettingExcessCapacityReservationConfig) error {
 	return registry.Add(
 		&appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: s.namespace,
-				Labels:    getExcessCapacityReservationLabels(),
-				Annotations: map[string]string{
-					resourcesv1alpha1.SkipHealthCheck: "true",
-				},
+			Name:      name,
+			Namespace: s.namespace,
+			Labels:    getExcessCapacityReservationLabels(),
+			Annotations: map[string]string{
+				resourcesv1alpha1.SkipHealthCheck: "true",
 			},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             &s.values.ReserveExcessCapacity.Replicas,
@@ -181,9 +179,7 @@ var gardenletManagedPriorityClasses = []struct {
 func addPriorityClasses(registry *managedresources.Registry) error {
 	for _, class := range gardenletManagedPriorityClasses {
 		if err := registry.Add(&schedulingv1.PriorityClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: class.name,
-			},
+			Name:          class.name,
 			Description:   class.description,
 			GlobalDefault: false,
 			Value:         class.value,

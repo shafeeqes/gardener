@@ -55,9 +55,7 @@ func ValidateGardenletChartPriorityClass(ctx context.Context, c client.Client) {
 
 func getEmptyPriorityClass() *schedulingv1.PriorityClass {
 	return &schedulingv1.PriorityClass{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: v1beta1constants.PriorityClassNameSeedSystemCritical,
-		},
+		Name: v1beta1constants.PriorityClassNameSeedSystemCritical,
 	}
 }
 
@@ -122,11 +120,9 @@ func ValidateGardenletChartRBAC(ctx context.Context, c client.Client, expectedLa
 
 func getGardenletClusterRole(labels map[string]string) *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet",
+		Labels:          labels,
+		ResourceVersion: "1",
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"operator.gardener.cloud"},
@@ -390,11 +386,9 @@ func getGardenletClusterRole(labels map[string]string) *rbacv1.ClusterRole {
 
 func getAPIServerSNIClusterRole(labels map[string]string) *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet:apiserver-sni",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet:apiserver-sni",
+		Labels:          labels,
+		ResourceVersion: "1",
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"networking.istio.io"},
@@ -419,11 +413,9 @@ func getAPIServerSNIClusterRole(labels map[string]string) *rbacv1.ClusterRole {
 
 func getManagedIstioClusterRole(labels map[string]string) *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet:managed-istio",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet:managed-istio",
+		Labels:          labels,
+		ResourceVersion: "1",
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"networking.istio.io"},
@@ -453,11 +445,9 @@ func getManagedIstioClusterRole(labels map[string]string) *rbacv1.ClusterRole {
 
 func getGardenletClusterRoleBinding(labels map[string]string, serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet",
+		Labels:          labels,
+		ResourceVersion: "1",
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "ClusterRole",
@@ -475,11 +465,9 @@ func getGardenletClusterRoleBinding(labels map[string]string, serviceAccountName
 
 func getAPIServerSNIClusterRoleBinding(labels map[string]string, serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet:apiserver-sni",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet:apiserver-sni",
+		Labels:          labels,
+		ResourceVersion: "1",
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "ClusterRole",
@@ -497,11 +485,9 @@ func getAPIServerSNIClusterRoleBinding(labels map[string]string, serviceAccountN
 
 func getManagedIstioClusterRoleBinding(labels map[string]string, serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet:managed-istio",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet:managed-istio",
+		Labels:          labels,
+		ResourceVersion: "1",
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "ClusterRole",
@@ -519,12 +505,10 @@ func getManagedIstioClusterRoleBinding(labels map[string]string, serviceAccountN
 
 func getGardenGardenletRole(labels map[string]string) *rbacv1.Role {
 	return &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet",
-			Namespace:       "garden",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet",
+		Namespace:       "garden",
+		Labels:          labels,
+		ResourceVersion: "1",
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"apps"},
@@ -537,12 +521,10 @@ func getGardenGardenletRole(labels map[string]string) *rbacv1.Role {
 
 func getGardenGardenletRoleBinding(labels map[string]string, serviceAccountName string) *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "gardener.cloud:system:gardenlet",
-			Namespace:       "garden",
-			Labels:          labels,
-			ResourceVersion: "1",
-		},
+		Name:            "gardener.cloud:system:gardenlet",
+		Namespace:       "garden",
+		Labels:          labels,
+		ResourceVersion: "1",
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "Role",
@@ -561,10 +543,8 @@ func getGardenGardenletRoleBinding(labels map[string]string, serviceAccountName 
 // ValidateGardenletChartServiceAccount validates the Service Account of the Gardenlet chart.
 func ValidateGardenletChartServiceAccount(ctx context.Context, c client.Client, hasSeedClientConnectionKubeconfig bool, expectedLabels map[string]string, serviceAccountName string) {
 	serviceAccount := &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceAccountName,
-			Namespace: v1beta1constants.GardenNamespace,
-		},
+		Name:      serviceAccountName,
+		Namespace: v1beta1constants.GardenNamespace,
 	}
 
 	if hasSeedClientConnectionKubeconfig {
@@ -594,10 +574,8 @@ func ValidateGardenletChartPodDisruptionBudget(ctx context.Context, c client.Cli
 	maxUnavailable := intstr.FromInt32(1)
 
 	pdb := &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardenlet",
-			Namespace: v1beta1constants.GardenNamespace,
-		},
+		Name:      "gardenlet",
+		Namespace: v1beta1constants.GardenNamespace,
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             &maxUnavailable,
 			Selector:                   &metav1.LabelSelector{},
@@ -641,31 +619,23 @@ func ComputeExpectedGardenletConfiguration(
 	)
 
 	config := gardenletconfigv1alpha1.GardenletConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "GardenletConfiguration",
-			APIVersion: "gardenlet.config.gardener.cloud/v1alpha1",
-		},
+		Kind:       "GardenletConfiguration",
+		APIVersion: "gardenlet.config.gardener.cloud/v1alpha1",
 		GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
-			ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-				QPS:   100,
-				Burst: 130,
-			},
+			QPS:   100,
+			Burst: 130,
 			KubeconfigValidity: &gardenletconfigv1alpha1.KubeconfigValidity{
 				AutoRotationJitterPercentageMin: new(int32(70)),
 				AutoRotationJitterPercentageMax: new(int32(90)),
 			},
 		},
 		SeedClientConnection: &gardenletconfigv1alpha1.SeedClientConnection{
-			ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-				QPS:   100,
-				Burst: 130,
-			},
+			QPS:   100,
+			Burst: 130,
 		},
 		ShootClientConnection: &gardenletconfigv1alpha1.ShootClientConnection{
-			ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-				QPS:   25,
-				Burst: 50,
-			},
+			QPS:   25,
+			Burst: 50,
 		},
 		Controllers: &gardenletconfigv1alpha1.GardenletControllerConfiguration{
 			CacheSyncTimeout: &metav1.Duration{Duration: 2 * time.Minute},
@@ -940,10 +910,8 @@ func VerifyGardenletComponentConfigConfigMap(
 
 func getEmptyGardenletConfigMap() *corev1.ConfigMap {
 	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardenlet-configmap",
-			Namespace: v1beta1constants.GardenNamespace,
-		},
+		Name:      "gardenlet-configmap",
+		Namespace: v1beta1constants.GardenNamespace,
 	}
 }
 
@@ -1000,23 +968,19 @@ func ComputeExpectedGardenletDeploymentSpec(
 							"--config=/etc/gardenlet/config/config.yaml",
 						},
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/healthz",
-									Port:   intstr.IntOrString{IntVal: 2728},
-									Scheme: corev1.URISchemeHTTP,
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/healthz",
+								Port:   intstr.IntOrString{IntVal: 2728},
+								Scheme: corev1.URISchemeHTTP,
 							},
 							InitialDelaySeconds: 15,
 							TimeoutSeconds:      5,
 						},
 						ReadinessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/readyz",
-									Port:   intstr.IntOrString{IntVal: 2728},
-									Scheme: corev1.URISchemeHTTP,
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/readyz",
+								Port:   intstr.IntOrString{IntVal: 2728},
+								Scheme: corev1.URISchemeHTTP,
 							},
 							InitialDelaySeconds: 10,
 							TimeoutSeconds:      5,
@@ -1055,33 +1019,29 @@ func ComputeExpectedGardenletDeploymentSpec(
 				},
 				Volumes: []corev1.Volume{{
 					Name: "kube-api-access-gardener",
-					VolumeSource: corev1.VolumeSource{
-						Projected: &corev1.ProjectedVolumeSource{
-							DefaultMode: new(int32(420)),
-							Sources: []corev1.VolumeProjection{
-								{ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
-									Path:              "token",
-									ExpirationSeconds: new(int64(43200)),
+					Projected: &corev1.ProjectedVolumeSource{
+						DefaultMode: new(int32(420)),
+						Sources: []corev1.VolumeProjection{
+							{ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+								Path:              "token",
+								ExpirationSeconds: new(int64(43200)),
+							}},
+							{ConfigMap: &corev1.ConfigMapProjection{
+								Name: "kube-root-ca.crt",
+								Items: []corev1.KeyToPath{{
+									Key:  "ca.crt",
+									Path: "ca.crt",
 								}},
-								{ConfigMap: &corev1.ConfigMapProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "kube-root-ca.crt",
+							}},
+							{DownwardAPI: &corev1.DownwardAPIProjection{
+								Items: []corev1.DownwardAPIVolumeFile{{
+									Path: "namespace",
+									FieldRef: &corev1.ObjectFieldSelector{
+										APIVersion: "v1",
+										FieldPath:  "metadata.namespace",
 									},
-									Items: []corev1.KeyToPath{{
-										Key:  "ca.crt",
-										Path: "ca.crt",
-									}},
 								}},
-								{DownwardAPI: &corev1.DownwardAPIProjection{
-									Items: []corev1.DownwardAPIVolumeFile{{
-										Path: "namespace",
-										FieldRef: &corev1.ObjectFieldSelector{
-											APIVersion: "v1",
-											FieldPath:  "metadata.namespace",
-										},
-									}},
-								}},
-							},
+							}},
 						},
 					},
 				}},
@@ -1182,12 +1142,8 @@ func ComputeExpectedGardenletDeploymentSpec(
 		})
 		deployment.Template.Spec.Volumes = append(deployment.Template.Spec.Volumes, corev1.Volume{
 			Name: "gardenlet-imagevector-overwrite",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: uniqueName["gardenlet-imagevector-overwrite"],
-					},
-				},
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				Name: uniqueName["gardenlet-imagevector-overwrite"],
 			},
 		})
 	}
@@ -1204,12 +1160,8 @@ func ComputeExpectedGardenletDeploymentSpec(
 		})
 		deployment.Template.Spec.Volumes = append(deployment.Template.Spec.Volumes, corev1.Volume{
 			Name: "gardenlet-imagevector-overwrite-components",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: uniqueName["gardenlet-imagevector-overwrite-components"],
-					},
-				},
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				Name: uniqueName["gardenlet-imagevector-overwrite-components"],
 			},
 		})
 	}
@@ -1222,10 +1174,8 @@ func ComputeExpectedGardenletDeploymentSpec(
 		})
 		deployment.Template.Spec.Volumes = append(deployment.Template.Spec.Volumes, corev1.Volume{
 			Name: "gardenlet-kubeconfig-garden",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: uniqueName["gardenlet-kubeconfig-garden"],
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: uniqueName["gardenlet-kubeconfig-garden"],
 			},
 		})
 	}
@@ -1238,10 +1188,8 @@ func ComputeExpectedGardenletDeploymentSpec(
 		})
 		deployment.Template.Spec.Volumes = append(deployment.Template.Spec.Volumes, corev1.Volume{
 			Name: "gardenlet-kubeconfig-seed",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: uniqueName["gardenlet-kubeconfig-seed"],
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: uniqueName["gardenlet-kubeconfig-seed"],
 			},
 		})
 		deployment.Template.Spec.ServiceAccountName = ""
@@ -1255,12 +1203,8 @@ func ComputeExpectedGardenletDeploymentSpec(
 
 	deployment.Template.Spec.Volumes = append(deployment.Template.Spec.Volumes, corev1.Volume{
 		Name: "gardenlet-config",
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: uniqueName["gardenlet-configmap"],
-				},
-			},
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			Name: uniqueName["gardenlet-configmap"],
 		},
 	})
 
@@ -1342,9 +1286,7 @@ func assertResourceReferenceExists(secretName, prefix string, annotations map[st
 
 func getEmptyGardenletDeployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardenlet",
-			Namespace: v1beta1constants.GardenNamespace,
-		},
+		Name:      "gardenlet",
+		Namespace: v1beta1constants.GardenNamespace,
 	}
 }

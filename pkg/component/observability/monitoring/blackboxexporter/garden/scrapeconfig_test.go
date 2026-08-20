@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/observability/monitoring/blackboxexporter/garden"
 )
@@ -25,11 +24,9 @@ var _ = Describe("ScrapeConfig", func() {
 		It("should compute the scrape configs when discovery server is disabled", func() {
 			Expect(ScrapeConfig(namespace, kubeAPIServerTargets, gardenerDashboardTarget, false)).To(ConsistOf(
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-gardener-apiserver",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-gardener-apiserver",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_gardener_apiserver"}},
 						MetricsPath: new("/probe"),
@@ -75,11 +72,9 @@ var _ = Describe("ScrapeConfig", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-apiserver",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-apiserver",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_kube_apiserver"}},
 						MetricsPath: new("/probe"),
@@ -133,11 +128,9 @@ var _ = Describe("ScrapeConfig", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-dashboard",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-dashboard",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_gardener_dashboard"}},
 						MetricsPath: new("/probe"),
@@ -188,11 +181,9 @@ var _ = Describe("ScrapeConfig", func() {
 		It("should compute the scrape configs when discovery server is enabled", func() {
 			Expect(ScrapeConfig(namespace, kubeAPIServerTargets, gardenerDashboardTarget, true)).To(ConsistOf(
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-gardener-apiserver",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-gardener-apiserver",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_gardener_apiserver"}},
 						MetricsPath: new("/probe"),
@@ -238,11 +229,9 @@ var _ = Describe("ScrapeConfig", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-apiserver",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-apiserver",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_kube_apiserver"}},
 						MetricsPath: new("/probe"),
@@ -296,11 +285,9 @@ var _ = Describe("ScrapeConfig", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-dashboard",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-dashboard",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_gardener_dashboard"}},
 						MetricsPath: new("/probe"),
@@ -346,11 +333,9 @@ var _ = Describe("ScrapeConfig", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "garden-blackbox-discovery-server",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "garden"},
-					},
+					Name:      "garden-blackbox-discovery-server",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "garden"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						Params:      map[string][]string{"module": {"http_gardener_discovery_server"}},
 						MetricsPath: new("/probe"),

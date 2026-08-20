@@ -113,7 +113,7 @@ var _ = Describe("ExposureClass Validation Tests ", func() {
 
 		It("should fail as exposure class has an invalid seed selector", func() {
 			exposureClass.Scheduling.SeedSelector = &core.SeedSelector{
-				LabelSelector: metav1.LabelSelector{MatchLabels: map[string]string{"foo": "no/slash/allowed"}},
+				MatchLabels: map[string]string{"foo": "no/slash/allowed"},
 			}
 			errorList := ValidateExposureClass(exposureClass)
 
@@ -189,16 +189,12 @@ var _ = Describe("ExposureClass Validation Tests ", func() {
 
 func makeDefaultExposureClass() *core.ExposureClass {
 	return &core.ExposureClass{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test",
-		},
+		Name:    "test",
 		Handler: "test-exposure-class-handler-name",
 		Scheduling: &core.ExposureClassScheduling{
 			SeedSelector: &core.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"test": "foo",
-					},
+				MatchLabels: map[string]string{
+					"test": "foo",
 				},
 			},
 		},

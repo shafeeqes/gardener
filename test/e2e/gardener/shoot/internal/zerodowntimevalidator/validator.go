@@ -34,7 +34,7 @@ func (j *Job) ItShouldDeployJob(s *ShootContext) {
 
 	It("Deploy zero-downtime validator job to ensure no API server downtime while upgrading Gardener", func(ctx SpecContext) {
 		By("Fetch kube-apiserver auth token")
-		deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeAPIServer, Namespace: s.Shoot.Status.TechnicalID}}
+		deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameKubeAPIServer, Namespace: s.Shoot.Status.TechnicalID}
 		Eventually(s.SeedKomega.Get(deployment)).Should(Succeed())
 		authToken := deployment.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.HTTPHeaders[0].Value
 

@@ -30,13 +30,11 @@ const (
 
 func (g *gardenerScheduler) deployment(secretGenericTokenKubeconfig, secretVirtualGardenAccess, configMapSchedulerConfig string) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      DeploymentName,
-			Namespace: g.namespace,
-			Labels: utils.MergeStringMaps(GetLabels(), map[string]string{
-				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-			}),
-		},
+		Name:      DeploymentName,
+		Namespace: g.namespace,
+		Labels: utils.MergeStringMaps(GetLabels(), map[string]string{
+			resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+		}),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -74,23 +72,19 @@ func (g *gardenerScheduler) deployment(secretGenericTokenKubeconfig, secretVirtu
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromInt32(probePort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   intstr.FromInt32(probePort),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 15,
 								TimeoutSeconds:      5,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromInt32(probePort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/readyz",
+									Port:   intstr.FromInt32(probePort),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 10,
 								TimeoutSeconds:      5,
@@ -109,10 +103,8 @@ func (g *gardenerScheduler) deployment(secretGenericTokenKubeconfig, secretVirtu
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeNameConfig,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapSchedulerConfig},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: configMapSchedulerConfig,
 							},
 						},
 					},

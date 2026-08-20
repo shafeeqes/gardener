@@ -131,14 +131,10 @@ func (r *Reconciler) reconcileBackupEntry(
 		component         = r.newExtensionComponent(log, backupEntry)
 
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Spec.BucketName,
-			},
+			Name: backupEntry.Spec.BucketName,
 		}
 		extensionBackupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Name,
-			},
+			Name: backupEntry.Name,
 		}
 	)
 
@@ -199,11 +195,9 @@ func (r *Reconciler) reconcileBackupEntry(
 	}
 
 	extensionBackupEntrySpec := extensionsv1alpha1.BackupEntrySpec{
-		DefaultSpec: extensionsv1alpha1.DefaultSpec{
-			Type:           backupBucket.Spec.Provider.Type,
-			ProviderConfig: backupBucket.Spec.ProviderConfig,
-		},
-		Region: backupBucket.Spec.Provider.Region,
+		Type:           backupBucket.Spec.Provider.Type,
+		ProviderConfig: backupBucket.Spec.ProviderConfig,
+		Region:         backupBucket.Spec.Provider.Region,
 		SecretRef: corev1.SecretReference{
 			Name:      extensionSecret.Name,
 			Namespace: extensionSecret.Namespace,
@@ -317,9 +311,7 @@ func (r *Reconciler) deleteBackupEntry(
 
 		extensionSecret := r.emptyExtensionSecret(backupEntry)
 		backupBucket := &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Spec.BucketName,
-			},
+			Name: backupEntry.Spec.BucketName,
 		}
 
 		if err := r.checkIfBackupBucketIsHealthy(gardenCtx, backupBucket); err != nil {
@@ -353,9 +345,7 @@ func (r *Reconciler) deleteBackupEntry(
 		}
 
 		extensionBackupEntry := &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Name,
-			},
+			Name: backupEntry.Name,
 		}
 
 		if err := r.SeedClient.Get(seedCtx, client.ObjectKeyFromObject(extensionBackupEntry), extensionBackupEntry); err != nil {
@@ -429,9 +419,7 @@ func (r *Reconciler) migrateBackupEntry(
 		component       = r.newExtensionComponent(log, backupEntry)
 
 		extensionBackupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Name,
-			},
+			Name: backupEntry.Name,
 		}
 	)
 
@@ -604,10 +592,8 @@ func (r *Reconciler) updateBackupEntryStatusPending(ctx context.Context, be *gar
 
 func (r *Reconciler) emptyExtensionSecret(backupEntry *gardencorev1beta1.BackupEntry) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "entry-" + backupEntry.Name,
-			Namespace: r.GardenNamespace,
-		},
+		Name:      "entry-" + backupEntry.Name,
+		Namespace: r.GardenNamespace,
 	}
 }
 

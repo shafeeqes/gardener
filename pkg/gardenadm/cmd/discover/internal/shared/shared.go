@@ -132,11 +132,11 @@ func RunForShoot(
 func secretBindingForShoot(ctx context.Context, c client.Client, shoot *gardencorev1beta1.Shoot) (client.Object, error) {
 	switch {
 	case shoot.Spec.SecretBindingName != nil:
-		secretBinding := &gardencorev1beta1.SecretBinding{ObjectMeta: metav1.ObjectMeta{Name: *shoot.Spec.SecretBindingName, Namespace: shoot.Namespace}}
+		secretBinding := &gardencorev1beta1.SecretBinding{Name: *shoot.Spec.SecretBindingName, Namespace: shoot.Namespace}
 		return secretBinding, c.Get(ctx, client.ObjectKeyFromObject(secretBinding), secretBinding)
 
 	case shoot.Spec.CredentialsBindingName != nil:
-		credentialsBinding := &securityv1alpha1.CredentialsBinding{ObjectMeta: metav1.ObjectMeta{Name: *shoot.Spec.CredentialsBindingName, Namespace: shoot.Namespace}}
+		credentialsBinding := &securityv1alpha1.CredentialsBinding{Name: *shoot.Spec.CredentialsBindingName, Namespace: shoot.Namespace}
 		return credentialsBinding, c.Get(ctx, client.ObjectKeyFromObject(credentialsBinding), credentialsBinding)
 
 	default:

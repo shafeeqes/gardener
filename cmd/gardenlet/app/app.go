@@ -185,7 +185,7 @@ func run(ctx context.Context, cancel context.CancelFunc, log logr.Logger, cfg *g
 
 	var selfHostedShootInfo *gardenlet.SelfHostedShootInfo
 	if gardenlet.IsResponsibleForSelfHostedShoot() {
-		configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.ConfigMapNameShootInfo, Namespace: metav1.NamespaceSystem}}
+		configMap := &corev1.ConfigMap{Name: v1beta1constants.ConfigMapNameShootInfo, Namespace: metav1.NamespaceSystem}
 		if err := mgr.GetAPIReader().Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 			return fmt.Errorf("failed reading ConfigMap %s: %w", client.ObjectKeyFromObject(configMap), err)
 		}
@@ -486,7 +486,7 @@ func (g *garden) Start(ctx context.Context) error {
 			// garden namespace (for now), so the name is sufficient to identify the Shoot.
 			// Use the API reader here because the cache only sees Shoots with the seed's label selector, but this
 			// self-hosted Shoot will never get this label.
-			shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: g.config.SeedConfig.Name, Namespace: v1beta1constants.GardenNamespace}}
+			shoot := &gardencorev1beta1.Shoot{Name: g.config.SeedConfig.Name, Namespace: v1beta1constants.GardenNamespace}
 			if err := gardenCluster.GetAPIReader().Get(ctx, client.ObjectKeyFromObject(shoot), shoot); err != nil {
 				if apierrors.IsNotFound(err) {
 					return fmt.Errorf("seed cluster is a self-hosted shoot but the corresponding Shoot %q does not yet exist in namespace %q; run `gardenadm connect` first", g.config.SeedConfig.Name, v1beta1constants.GardenNamespace)
@@ -577,7 +577,7 @@ func (g *garden) Start(ctx context.Context) error {
 
 	var shoot *gardencorev1beta1.Shoot
 	if gardenlet.IsResponsibleForSelfHostedShoot() {
-		shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: g.selfHostedShootInfo.Meta.Name, Namespace: g.selfHostedShootInfo.Meta.Namespace}}
+		shoot = &gardencorev1beta1.Shoot{Name: g.selfHostedShootInfo.Meta.Name, Namespace: g.selfHostedShootInfo.Meta.Namespace}
 		if err := retry.Until(ctx, 5*time.Second, func(ctx context.Context) (done bool, err error) {
 			if err := gardenCluster.GetClient().Get(ctx, client.ObjectKeyFromObject(shoot), shoot); err != nil {
 				if !apierrors.IsNotFound(err) {
@@ -614,9 +614,7 @@ func (g *garden) Start(ctx context.Context) error {
 
 func (g *garden) registerSeed(ctx context.Context, gardenClient client.Client, isSelfHostedShoot bool) error {
 	seed := &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: g.config.SeedConfig.Name,
-		},
+		Name: g.config.SeedConfig.Name,
 	}
 
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, gardenClient, seed, func() error {
@@ -717,7 +715,7 @@ func init() {
 }
 
 func (g *garden) createSelfUpgradeConfig(ctx context.Context, log logr.Logger, gardenClient client.Client) error {
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "gardenlet-selfupgrade-config", Namespace: os.Getenv("NAMESPACE")}}
+	configMap := &corev1.ConfigMap{Name: "gardenlet-selfupgrade-config", Namespace: os.Getenv("NAMESPACE")}
 	if err := g.mgr.GetClient().Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return fmt.Errorf("failed checking whether ConfigMap %q with seedmanagement.gardener.cloud/v1alpha1.Gardenlet object for self-upgrades exists: %w", client.ObjectKeyFromObject(configMap), err)
@@ -788,10 +786,8 @@ func (g *garden) overwriteGardenHostWhenDeployedInRuntimeCluster(ctx context.Con
 
 	// Verify that virtual-garden-kube-apiserver service exists before we consider overwriting the garden REST config host.
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: v1beta1constants.GardenNamespace,
-			Name:      virtualGardenService,
-		},
+		Namespace: v1beta1constants.GardenNamespace,
+		Name:      virtualGardenService,
 	}
 	if err := g.mgr.GetClient().Get(ctx, client.ObjectKeyFromObject(service), &corev1.Service{}); apierrors.IsNotFound(err) {
 		return nil
@@ -802,10 +798,8 @@ func (g *garden) overwriteGardenHostWhenDeployedInRuntimeCluster(ctx context.Con
 	// Only overwrite the garden REST config host if the mutual TLS service does not exist, which means that L7 load
 	// balancing is not active. If it is active, we keep the original host that the gardenlet requests are load balanced.
 	mtlsService := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: v1beta1constants.GardenNamespace,
-			Name:      virtualGardenService + kubeapiserverexposure.MutualTLSServiceNameSuffix,
-		},
+		Namespace: v1beta1constants.GardenNamespace,
+		Name:      virtualGardenService + kubeapiserverexposure.MutualTLSServiceNameSuffix,
 	}
 	if err := g.mgr.GetClient().Get(ctx, client.ObjectKeyFromObject(mtlsService), &corev1.Service{}); apierrors.IsNotFound(err) {
 		gardenRESTConfig.Host = fmt.Sprintf("https://%s.%s.svc.cluster.local", virtualGardenService, v1beta1constants.GardenNamespace)

@@ -392,10 +392,10 @@ var _ = Describe("Machines", func() {
 
 		BeforeEach(func() {
 			pool.UserDataSecretRef = corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{Name: secretName},
-				Key:                  key,
+				Name: secretName,
+				Key:  key,
 			}
-			secret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace}}
+			secret = &corev1.Secret{Name: secretName, Namespace: namespace}
 		})
 
 		It("should fail because the referenced secret is not found", func() {

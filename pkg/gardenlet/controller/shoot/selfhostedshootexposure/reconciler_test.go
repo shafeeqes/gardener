@@ -45,10 +45,8 @@ var _ = Describe("Reconciler", func() {
 		// controlPlaneNode returns a healthy control-plane Node with the given addresses.
 		controlPlaneNode = func(name string, addresses ...corev1.NodeAddress) *corev1.Node {
 			return &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   name,
-					Labels: map[string]string{"node-role.kubernetes.io/control-plane": ""},
-				},
+				Name:   name,
+				Labels: map[string]string{"node-role.kubernetes.io/control-plane": ""},
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}},
 					Addresses:  addresses,
@@ -62,7 +60,7 @@ var _ = Describe("Reconciler", func() {
 
 	BeforeEach(func() {
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: "garden-project"},
+			Name: shootName, Namespace: "garden-project",
 			Spec: gardencorev1beta1.ShootSpec{
 				Provider: gardencorev1beta1.Provider{
 					Type: "local",
@@ -82,10 +80,8 @@ var _ = Describe("Reconciler", func() {
 
 		// The external DNSRecord already exists (created during bootstrapping), the controller only keeps it in sync.
 		dnsRecord = &extensionsv1alpha1.DNSRecord{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName + "-" + v1beta1constants.DNSRecordExternalName,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      shootName + "-" + v1beta1constants.DNSRecordExternalName,
+			Namespace: metav1.NamespaceSystem,
 		}
 
 		gardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).WithObjects(shoot).Build()
@@ -182,7 +178,7 @@ var _ = Describe("Reconciler", func() {
 
 		It("should delete a SelfHostedShootExposure left over from a previous extension-based exposure", func() {
 			leftover := &extensionsv1alpha1.SelfHostedShootExposure{
-				ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: metav1.NamespaceSystem},
+				Name: shootName, Namespace: metav1.NamespaceSystem,
 			}
 			Expect(shootClient.Create(ctx, leftover)).To(Succeed())
 			Expect(shootClient.Create(ctx, controlPlaneNode("cp-1", externalIP("1.2.3.4")))).To(Succeed())
@@ -271,7 +267,7 @@ var _ = Describe("Reconciler", func() {
 
 		JustBeforeEach(func() {
 			controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "provider-local"},
+				Name: "provider-local",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{{
 						Kind:                     extensionsv1alpha1.SelfHostedShootExposureResource,
@@ -282,7 +278,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			// The controller derives the ControllerRegistration from the shoot's ControllerInstallations.
 			controllerInstallation := &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{Name: "provider-local"},
+				Name: "provider-local",
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					RegistrationRef: corev1.ObjectReference{Name: controllerRegistration.Name},
 					ShootRef:        &corev1.ObjectReference{Name: shoot.Name, Namespace: shoot.Namespace},
@@ -342,7 +338,7 @@ var _ = Describe("Reconciler", func() {
 
 			// An already-reconciled exposure targeting the same endpoints, reporting a distinct ingress.
 			exposure := &extensionsv1alpha1.SelfHostedShootExposure{
-				ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: metav1.NamespaceSystem},
+				Name: shootName, Namespace: metav1.NamespaceSystem,
 				Spec: extensionsv1alpha1.SelfHostedShootExposureSpec{
 					DefaultSpec: extensionsv1alpha1.DefaultSpec{Type: exposureType},
 					Endpoints: []extensionsv1alpha1.ControlPlaneEndpoint{
@@ -397,7 +393,7 @@ var _ = Describe("Reconciler", func() {
 
 		It("should flip the DNSRecord to the node addresses and delete the SelfHostedShootExposure", func() {
 			exposure := &extensionsv1alpha1.SelfHostedShootExposure{
-				ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: metav1.NamespaceSystem},
+				Name: shootName, Namespace: metav1.NamespaceSystem,
 			}
 			Expect(shootClient.Create(ctx, exposure)).To(Succeed())
 			Expect(shootClient.Create(ctx, controlPlaneNode("cp-1", corev1.NodeAddress{Type: corev1.NodeInternalIP, Address: "10.0.0.1"}))).To(Succeed())

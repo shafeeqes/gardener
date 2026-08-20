@@ -58,12 +58,10 @@ var _ = Describe("Reconciler", func() {
 		recorder = events.NewFakeRecorder(1)
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"kubernetes.io/os": "linux",
-				},
-				Name: "node-1",
+			Labels: map[string]string{
+				"kubernetes.io/os": "linux",
 			},
+			Name: "node-1",
 		}
 	})
 
@@ -77,12 +75,10 @@ var _ = Describe("Reconciler", func() {
 			pods = nil
 			criticalDaemonSets = []appsv1.DaemonSet{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "critical1",
-						Namespace: "kube-system",
-						Labels: map[string]string{
-							"node.gardener.cloud/critical-component": "true",
-						},
+					Name:      "critical1",
+					Namespace: "kube-system",
+					Labels: map[string]string{
+						"node.gardener.cloud/critical-component": "true",
 					},
 					Spec: appsv1.DaemonSetSpec{
 						Template: corev1.PodTemplateSpec{
@@ -95,12 +91,10 @@ var _ = Describe("Reconciler", func() {
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "critical2",
-						Namespace: "default",
-						Labels: map[string]string{
-							"node.gardener.cloud/critical-component": "true",
-						},
+					Name:      "critical2",
+					Namespace: "default",
+					Labels: map[string]string{
+						"node.gardener.cloud/critical-component": "true",
 					},
 					Spec: appsv1.DaemonSetSpec{
 						Template: corev1.PodTemplateSpec{
@@ -115,12 +109,10 @@ var _ = Describe("Reconciler", func() {
 			}
 			nonCriticalDaemonSets = []appsv1.DaemonSet{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "non-critical1",
-						Namespace: "kube-system",
-						Labels: map[string]string{
-							"node.gardener.cloud/critical-component": "false",
-						},
+					Name:      "non-critical1",
+					Namespace: "kube-system",
+					Labels: map[string]string{
+						"node.gardener.cloud/critical-component": "false",
 					},
 					Spec: appsv1.DaemonSetSpec{
 						Template: corev1.PodTemplateSpec{
@@ -133,10 +125,8 @@ var _ = Describe("Reconciler", func() {
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "non-critical2",
-						Namespace: "kube-system",
-					},
+					Name:      "non-critical2",
+					Namespace: "kube-system",
 					Spec: appsv1.DaemonSetSpec{
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
@@ -193,10 +183,8 @@ var _ = Describe("Reconciler", func() {
 
 		BeforeEach(func() {
 			pod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pod1",
-					Namespace: "foo",
-				},
+				Name:      "pod1",
+				Namespace: "foo",
 				Status: corev1.PodStatus{
 					Conditions: []corev1.PodCondition{{
 						Type:   corev1.PodReady,
@@ -231,10 +219,8 @@ var _ = Describe("Reconciler", func() {
 
 		BeforeEach(func() {
 			pod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pod1",
-					Namespace: "foo",
-				},
+				Name:      "pod1",
+				Namespace: "foo",
 			}
 
 			pod2 := pod.DeepCopy()
@@ -361,9 +347,7 @@ var _ = Describe("Reconciler", func() {
 			ctx = context.Background()
 
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				Name: "foo",
 				Spec: corev1.NodeSpec{
 					Taints: []corev1.Taint{
 						{
@@ -442,10 +426,8 @@ func nonDaemonPod() corev1.Pod {
 	Expect(err).NotTo(HaveOccurred())
 
 	return corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-" + nameSuffix,
-			Namespace: "foo",
-		},
+		Name:      "test-" + nameSuffix,
+		Namespace: "foo",
 	}
 }
 
@@ -454,10 +436,8 @@ func daemonPodFor(daemonSet *appsv1.DaemonSet) corev1.Pod {
 	Expect(err).NotTo(HaveOccurred())
 
 	pod := corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      daemonSet.Name + "-" + nameSuffix,
-			Namespace: daemonSet.Namespace,
-		},
+		Name:      daemonSet.Name + "-" + nameSuffix,
+		Namespace: daemonSet.Namespace,
 	}
 
 	daemonSet.UID = uuid.NewUUID()

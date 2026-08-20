@@ -95,13 +95,11 @@ var _ = Describe("BackupEntry controller tests", func() {
 				lastOperationState = gardencorev1beta1.LastOperationStateError
 			}
 			extensionBackupEntry.Status = extensionsv1alpha1.BackupEntryStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					ObservedGeneration: extensionBackupEntry.Generation,
-					ProviderStatus:     providerStatus,
-					LastOperation: &gardencorev1beta1.LastOperation{
-						State:          lastOperationState,
-						LastUpdateTime: metav1.NewTime(fakeClock.Now()),
-					},
+				ObservedGeneration: extensionBackupEntry.Generation,
+				ProviderStatus:     providerStatus,
+				LastOperation: &gardencorev1beta1.LastOperation{
+					State:          lastOperationState,
+					LastUpdateTime: metav1.NewTime(fakeClock.Now()),
 				},
 			}
 			if operationType != "" {
@@ -143,11 +141,9 @@ var _ = Describe("BackupEntry controller tests", func() {
 
 		By("Create BackupBucket secret in garden")
 		gardenSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-secret-",
-				Namespace:    gardenNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-secret-",
+			Namespace:    gardenNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
@@ -163,10 +159,8 @@ var _ = Describe("BackupEntry controller tests", func() {
 
 		By("Create BackupBucket")
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "foo-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "foo-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				Provider: gardencorev1beta1.BackupBucketProvider{
 					Type:   "provider-type",
@@ -199,11 +193,9 @@ var _ = Describe("BackupEntry controller tests", func() {
 		By("Create Shoot")
 		shootName := "shoot-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: testNamespace.Name,
-				UID:       "foo",
-			},
+			Name:      shootName,
+			Namespace: testNamespace.Name,
+			UID:       "foo",
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("test-sb"),
 				CloudProfileName:  new("test-cloudprofile"),
@@ -250,9 +242,7 @@ var _ = Describe("BackupEntry controller tests", func() {
 
 		By("Create Shoot Namespace")
 		shootNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootTechnicalID,
-			},
+			Name: shootTechnicalID,
 		}
 
 		Expect(testClient.Create(ctx, shootNamespace)).To(Succeed())
@@ -265,10 +255,8 @@ var _ = Describe("BackupEntry controller tests", func() {
 
 		By("Create Cluster resource")
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootTechnicalID,
-				Namespace: shootNamespace.Name,
-			},
+			Name:      shootTechnicalID,
+			Namespace: shootNamespace.Name,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot: runtime.RawExtension{
 					Object: shoot,
@@ -297,16 +285,14 @@ var _ = Describe("BackupEntry controller tests", func() {
 
 		By("Create BackupEntry")
 		backupEntry = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: shootTechnicalID + "--",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-				Annotations: utils.MergeStringMaps(annotations, map[string]string{
-					v1beta1constants.ShootPurpose: shootPurpose,
-				}),
-				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(shoot, gardencorev1beta1.SchemeGroupVersion.WithKind("Shoot")),
-				},
+			GenerateName: shootTechnicalID + "--",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
+			Annotations: utils.MergeStringMaps(annotations, map[string]string{
+				v1beta1constants.ShootPurpose: shootPurpose,
+			}),
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(shoot, gardencorev1beta1.SchemeGroupVersion.WithKind("Shoot")),
 			},
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				BucketName: backupBucket.Name,
@@ -324,10 +310,8 @@ var _ = Describe("BackupEntry controller tests", func() {
 
 		By("Create Shoot state in project namespace")
 		shootState = &gardencorev1beta1.ShootState{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shoot.Name,
-				Namespace: testNamespace.Name,
-			},
+			Name:      shoot.Name,
+			Namespace: testNamespace.Name,
 			Spec: gardencorev1beta1.ShootStateSpec{
 				Gardener: []gardencorev1beta1.GardenerResourceData{
 					{
@@ -346,16 +330,12 @@ var _ = Describe("BackupEntry controller tests", func() {
 		})
 
 		extensionSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "entry-" + backupEntry.Name,
-				Namespace: seedGardenNamespace.Name,
-			},
+			Name:      "entry-" + backupEntry.Name,
+			Namespace: seedGardenNamespace.Name,
 		}
 
 		extensionBackupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Name,
-			},
+			Name: backupEntry.Name,
 		}
 
 		By("Ensure finalizer got added")
@@ -417,10 +397,8 @@ var _ = Describe("BackupEntry controller tests", func() {
 		BeforeEach(func() {
 			By("Create seed")
 			targetSeed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "seed-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "seed-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.SeedSpec{
 					Provider: gardencorev1beta1.SeedProvider{
 						Region: "region",

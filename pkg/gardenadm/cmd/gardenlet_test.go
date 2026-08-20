@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -39,7 +38,7 @@ var _ = Describe("IsGardenletDeployed", func() {
 
 	When("gardenlet deployment exists", func() {
 		BeforeEach(func() {
-			Expect(c.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardenlet", Namespace: namespace}})).NotTo(HaveOccurred())
+			Expect(c.Create(ctx, &appsv1.Deployment{Name: "gardenlet", Namespace: namespace})).NotTo(HaveOccurred())
 		})
 
 		When("kubeconfig secret does not exist", func() {
@@ -52,7 +51,7 @@ var _ = Describe("IsGardenletDeployed", func() {
 
 		When("kubeconfig secret exists", func() {
 			BeforeEach(func() {
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "gardenlet-kubeconfig", Namespace: namespace}})).NotTo(HaveOccurred())
+				Expect(c.Create(ctx, &corev1.Secret{Name: "gardenlet-kubeconfig", Namespace: namespace})).NotTo(HaveOccurred())
 			})
 
 			It("should return true if both deployment and kubeconfig secret exist", func() {

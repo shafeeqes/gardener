@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -41,10 +39,8 @@ var _ = Describe("Mapper", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		worker = &extensionsv1alpha1.Worker{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "worker",
-				Namespace: namespace,
-			},
+			Name:      "worker",
+			Namespace: namespace,
 			Spec: extensionsv1alpha1.WorkerSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: "local",
@@ -53,12 +49,10 @@ var _ = Describe("Mapper", func() {
 		}
 
 		machine = &machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine",
-				Namespace: namespace,
-				Labels: map[string]string{
-					v1beta1constants.LabelWorkerName: worker.Name,
-				},
+			Name:      "machine",
+			Namespace: namespace,
+			Labels: map[string]string{
+				v1beta1constants.LabelWorkerName: worker.Name,
 			},
 		}
 	})
@@ -99,10 +93,8 @@ var _ = Describe("Mapper", func() {
 
 			Expect(mapper(ctx, machine)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      worker.Name,
-						Namespace: namespace,
-					},
+					Name:      worker.Name,
+					Namespace: namespace,
 				}))
 		})
 	})

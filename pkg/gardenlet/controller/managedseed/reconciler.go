@@ -62,7 +62,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	// Get shoot
-	shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: ms.Spec.Shoot.Name, Namespace: ms.Namespace}}
+	shoot := &gardencorev1beta1.Shoot{Name: ms.Spec.Shoot.Name, Namespace: ms.Namespace}
 	if err := r.GardenAPIReader.Get(ctx, client.ObjectKeyFromObject(shoot), shoot); err != nil {
 		return reconcile.Result{}, fmt.Errorf("could not get shoot %s: %w", client.ObjectKeyFromObject(shoot), err)
 	}
@@ -87,7 +87,7 @@ func (r *Reconciler) newActuator(ctx context.Context, shoot *gardencorev1beta1.S
 		return Actuator, nil
 	}
 
-	kubeconfigSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: r.GardenNamespaceSeed, Name: gardenletdeployer.GardenletDefaultKubeconfigSecretName}}
+	kubeconfigSecret := &corev1.Secret{Namespace: r.GardenNamespaceSeed, Name: gardenletdeployer.GardenletDefaultKubeconfigSecretName}
 	if err := r.SeedClient.Get(ctx, client.ObjectKeyFromObject(kubeconfigSecret), kubeconfigSecret); err != nil {
 		return nil, fmt.Errorf("could not get kubeconfig secret %q: %w", client.ObjectKeyFromObject(kubeconfigSecret), err)
 	}

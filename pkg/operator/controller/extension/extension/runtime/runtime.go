@@ -160,9 +160,7 @@ func (d *deployer) ensureNamespace(ctx context.Context, name string, extension *
 		return err
 	}
 	namespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 	}
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, d.runtimeClientSet.Client(), namespace, func() error {
 		metav1.SetMetaDataLabel(&namespace.ObjectMeta, v1beta1constants.GardenRole, v1beta1constants.GardenRoleExtension)
@@ -190,9 +188,7 @@ func (d *deployer) ensureNamespace(ctx context.Context, name string, extension *
 
 func (d *deployer) deleteNamespace(ctx context.Context, name string) error {
 	namespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 	}
 	if err := client.IgnoreNotFound(d.runtimeClientSet.Client().Delete(ctx, namespace)); err != nil {
 		return err

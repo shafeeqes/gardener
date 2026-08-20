@@ -195,7 +195,7 @@ func getInternalAPIServerAddress(shoot *gardencorev1beta1.Shoot) string {
 func getInClusterAPIServerAddress(ctx context.Context, s *ShootContext) string {
 	GinkgoHelper()
 
-	service := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: "kubernetes", Namespace: metav1.NamespaceDefault}}
+	service := &corev1.Service{Name: "kubernetes", Namespace: metav1.NamespaceDefault}
 	Eventually(ctx, s.ShootKomega.Get(service)).Should(Succeed())
 
 	clusterIP := service.Spec.ClusterIP
@@ -248,11 +248,9 @@ func getPods(kubernetesVersion string) []*corev1.Pod {
 	Expect(err).NotTo(HaveOccurred())
 
 	podDirect := &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: podNameDirect,
-			Namespace:    namespace,
-			Labels:       maps.Clone(labels),
-		},
+		GenerateName: podNameDirect,
+		Namespace:    namespace,
+		Labels:       maps.Clone(labels),
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{
 				Name:  containerName,
@@ -304,21 +302,17 @@ func getRBACObjects() []client.Object {
 	var objects []client.Object
 
 	serviceAccount := &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    maps.Clone(labels),
-		},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    maps.Clone(labels),
 	}
 	objects = append(objects, serviceAccount)
 
 	// permissions used by the test command: kubectl get service kubernetes
 	role := &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    maps.Clone(labels),
-		},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    maps.Clone(labels),
 		Rules: []rbacv1.PolicyRule{{
 			APIGroups: []string{""},
 			Resources: []string{"services"},
@@ -328,11 +322,9 @@ func getRBACObjects() []client.Object {
 	objects = append(objects, role)
 
 	roleBinding := &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    maps.Clone(labels),
-		},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    maps.Clone(labels),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "Role",

@@ -207,20 +207,14 @@ func InjectAdmissionSettings(deployment *appsv1.Deployment, configMapAdmissionCo
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes,
 		corev1.Volume{
 			Name: volumeNameAdmissionConfiguration,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: configMapAdmissionConfigs.Name,
-					},
-				},
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				Name: configMapAdmissionConfigs.Name,
 			},
 		},
 		corev1.Volume{
 			Name: volumeNameAdmissionKubeconfigSecrets,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretAdmissionKubeconfigs.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretAdmissionKubeconfigs.Name,
 			},
 		},
 	)

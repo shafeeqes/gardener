@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -70,7 +69,7 @@ var _ = Describe("#CRDs", func() {
 
 		DescribeTable("should re-create CRD if it is deleted",
 			func(crdName string) {
-				Expect(c.Delete(ctx, &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: crdName}})).To(Succeed())
+				Expect(c.Delete(ctx, &apiextensionsv1.CustomResourceDefinition{Name: crdName})).To(Succeed())
 				Expect(c.Get(ctx, client.ObjectKey{Name: crdName}, &apiextensionsv1.CustomResourceDefinition{})).To(BeNotFoundError())
 				Expect(crdDeployer.Deploy(ctx)).To(Succeed())
 				Expect(c.Get(ctx, client.ObjectKey{Name: crdName}, &apiextensionsv1.CustomResourceDefinition{})).To(Succeed())
@@ -120,7 +119,7 @@ var _ = Describe("#CRDs", func() {
 
 		DescribeTable("should re-create CRD if it is deleted",
 			func(crdName string, matcher gomegatypes.GomegaMatcher) {
-				Expect(c.Delete(ctx, &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: crdName}})).To(Or(Succeed(), BeNotFoundError()))
+				Expect(c.Delete(ctx, &apiextensionsv1.CustomResourceDefinition{Name: crdName})).To(Or(Succeed(), BeNotFoundError()))
 				Expect(c.Get(ctx, client.ObjectKey{Name: crdName}, &apiextensionsv1.CustomResourceDefinition{})).To(BeNotFoundError())
 				Expect(crdDeployer.Deploy(ctx)).To(Succeed())
 				Expect(c.Get(ctx, client.ObjectKey{Name: crdName}, &apiextensionsv1.CustomResourceDefinition{})).To(matcher)
@@ -170,7 +169,7 @@ var _ = Describe("#CRDs", func() {
 
 		DescribeTable("should re-create CRD if it is deleted",
 			func(crdName string, matcher gomegatypes.GomegaMatcher) {
-				Expect(c.Delete(ctx, &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: crdName}})).To(Or(Succeed(), BeNotFoundError()))
+				Expect(c.Delete(ctx, &apiextensionsv1.CustomResourceDefinition{Name: crdName})).To(Or(Succeed(), BeNotFoundError()))
 				Expect(c.Get(ctx, client.ObjectKey{Name: crdName}, &apiextensionsv1.CustomResourceDefinition{})).To(BeNotFoundError())
 				Expect(crdDeployer.Deploy(ctx)).To(Succeed())
 				Expect(c.Get(ctx, client.ObjectKey{Name: crdName}, &apiextensionsv1.CustomResourceDefinition{})).To(matcher)

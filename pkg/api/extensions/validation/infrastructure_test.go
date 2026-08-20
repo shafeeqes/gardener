@@ -22,10 +22,8 @@ var _ = Describe("Infrastructure validation tests", func() {
 
 	BeforeEach(func() {
 		infra = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-infra",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-infra",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.InfrastructureSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           "provider",

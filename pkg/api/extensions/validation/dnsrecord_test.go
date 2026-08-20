@@ -21,10 +21,8 @@ var _ = Describe("DNSRecord validation tests", func() {
 
 	BeforeEach(func() {
 		dns = &extensionsv1alpha1.DNSRecord{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-dns",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-dns",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: "provider",

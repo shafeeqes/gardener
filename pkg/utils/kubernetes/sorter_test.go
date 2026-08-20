@@ -21,28 +21,22 @@ var _ = Describe("Sort", func() {
 		listObj = &corev1.PodList{}
 
 		pod1 = corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:              "pod1",
-				CreationTimestamp: metav1.Now(),
-			},
+			Name:              "pod1",
+			CreationTimestamp: metav1.Now(),
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{{}, {}},
 			},
 		}
 		pod2 = corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:              "pod2",
-				CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)},
-			},
+			Name:              "pod2",
+			CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)},
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{{}},
 			},
 		}
 		pod3 = corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:              "pod3",
-				CreationTimestamp: metav1.Time{Time: time.Now().Add(time.Hour)},
-			},
+			Name:              "pod3",
+			CreationTimestamp: metav1.Time{Time: time.Now().Add(time.Hour)},
 		}
 	)
 

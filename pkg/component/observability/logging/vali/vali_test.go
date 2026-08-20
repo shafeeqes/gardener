@@ -94,34 +94,26 @@ var _ = Describe("Vali", func() {
 			DeferCleanup(testutils.WithFeatureGate(features.DefaultFeatureGate, features.OpenTelemetryCollector, false))
 
 			By("Create secrets managed outside of this package for which secretsmanager.Get() will be called")
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 		})
 
 		JustBeforeEach(func() {
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: namespace,
-				},
+				Name:      managedResourceName,
+				Namespace: namespace,
 			}
 			managedResourceSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceSecretName,
-					Namespace: namespace,
-				},
+				Name:      managedResourceSecretName,
+				Namespace: namespace,
 			}
 
 			managedResourceTarget = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceNameTarget,
-					Namespace: namespace,
-				},
+				Name:      managedResourceNameTarget,
+				Namespace: namespace,
 			}
 			managedResourceSecretTarget = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceSecretNameTarget,
-					Namespace: namespace,
-				},
+				Name:      managedResourceSecretNameTarget,
+				Namespace: namespace,
 			}
 		})
 
@@ -158,20 +150,16 @@ var _ = Describe("Vali", func() {
 				Expect(c.Get(ctx, client.ObjectKey{Name: kubeRBACProxyShootAccessSecretName, Namespace: namespace}, &corev1.Secret{})).To(Succeed())
 
 				tlsSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "vali-tls",
-						Namespace: namespace,
-					},
+					Name:      "vali-tls",
+					Namespace: namespace,
 				}
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)).To(Succeed())
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceName,
-						Namespace:       namespace,
-						Labels:          map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
-						ResourceVersion: "1",
-					},
+					Name:            managedResourceName,
+					Namespace:       namespace,
+					Labels:          map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -204,12 +192,10 @@ var _ = Describe("Vali", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceTarget), managedResourceTarget)).To(Succeed())
 				expectedTargetMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceNameTarget,
-						Namespace:       namespace,
-						ResourceVersion: "1",
-						Labels:          map[string]string{"origin": "gardener"},
-					},
+					Name:            managedResourceNameTarget,
+					Namespace:       namespace,
+					ResourceVersion: "1",
+					Labels:          map[string]string{"origin": "gardener"},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -271,12 +257,10 @@ var _ = Describe("Vali", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceName,
-						Namespace:       namespace,
-						Labels:          map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
-						ResourceVersion: "1",
-					},
+					Name:            managedResourceName,
+					Namespace:       namespace,
+					Labels:          map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -328,10 +312,10 @@ var _ = Describe("Vali", func() {
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(BeNotFoundError())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(BeNotFoundError())
 
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: valitailShootAccessSecretName, Namespace: namespace}})).To(Succeed())
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: kubeRBACProxyShootAccessSecretName, Namespace: namespace}})).To(Succeed())
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResourceSecretNameTarget, Namespace: namespace}})).To(Succeed())
-			Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceNameTarget, Namespace: namespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: valitailShootAccessSecretName, Namespace: namespace})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: kubeRBACProxyShootAccessSecretName, Namespace: namespace})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: managedResourceSecretNameTarget, Namespace: namespace})).To(Succeed())
+			Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceNameTarget, Namespace: namespace})).To(Succeed())
 
 			Expect(valiDeployer.Deploy(ctx)).To(Succeed())
 
@@ -342,12 +326,10 @@ var _ = Describe("Vali", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceName,
-					Namespace:       namespace,
-					Labels:          map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
-					ResourceVersion: "1",
-				},
+				Name:            managedResourceName,
+				Namespace:       namespace,
+				Labels:          map[string]string{"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy"},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -445,10 +427,8 @@ var _ = Describe("Vali", func() {
 
 		BeforeEach(func() {
 			valiPVC = &corev1.PersistentVolumeClaim{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      valiPVCName,
-					Namespace: gardenNamespace,
-				},
+				Name:      valiPVCName,
+				Namespace: gardenNamespace,
 				Spec: corev1.PersistentVolumeClaimSpec{
 					Resources: corev1.VolumeResourceRequirements{
 						Requests: map[corev1.ResourceName]resource.Quantity{
@@ -459,12 +439,12 @@ var _ = Describe("Vali", func() {
 			}
 
 			sts = &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{Name: valiStatefulSetName, Namespace: gardenNamespace, Generation: 2},
-				Spec:       appsv1.StatefulSetSpec{Replicas: new(int32(2))},
+				Name: valiStatefulSetName, Namespace: gardenNamespace, Generation: 2,
+				Spec: appsv1.StatefulSetSpec{Replicas: new(int32(2))},
 			}
 
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: gardenNamespace},
+				Name: managedResourceName, Namespace: gardenNamespace,
 			}
 
 			fakeClient = fakeclient.NewClientBuilder().
@@ -743,12 +723,10 @@ var _ = Describe("Vali", func() {
 
 func getService(isRBACProxyEnabled bool, clusterType string) *corev1.Service {
 	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        "logging",
-			Namespace:   namespace,
-			Labels:      getLabels(),
-			Annotations: map[string]string{"networking.istio.io/exportTo": "istio-ingress"},
-		},
+		Name:        "logging",
+		Namespace:   namespace,
+		Labels:      getLabels(),
+		Annotations: map[string]string{"networking.istio.io/exportTo": "istio-ingress"},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeClusterIP,
 			Ports: []corev1.ServicePort{
@@ -802,11 +780,9 @@ func getService(isRBACProxyEnabled bool, clusterType string) *corev1.Service {
 
 func getServiceMonitor(label string, withTelegraf bool) *monitoringv1.ServiceMonitor {
 	obj := &monitoringv1.ServiceMonitor{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      label + "-vali",
-			Namespace: namespace,
-			Labels:    map[string]string{"prometheus": label},
-		},
+		Name:      label + "-vali",
+		Namespace: namespace,
+		Labels:    map[string]string{"prometheus": label},
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Selector: metav1.LabelSelector{MatchLabels: getLabels()},
 			Endpoints: []monitoringv1.Endpoint{{
@@ -865,11 +841,9 @@ func getPrometheusRule(label string) *monitoringv1.PrometheusRule {
 	}
 
 	return &monitoringv1.PrometheusRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      label + "-vali",
-			Namespace: namespace,
-			Labels:    map[string]string{"prometheus": label},
-		},
+		Name:      label + "-vali",
+		Namespace: namespace,
+		Labels:    map[string]string{"prometheus": label},
 		Spec: monitoringv1.PrometheusRuleSpec{
 			Groups: []monitoringv1.RuleGroup{{
 				Name: "vali.rules",
@@ -895,11 +869,9 @@ func getPrometheusRule(label string) *monitoringv1.PrometheusRule {
 
 func getValiConfigMap() *corev1.ConfigMap {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "vali-config",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "vali-config",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Data: map[string]string{
 			"vali.yaml": `auth_enabled: false
 ingester:
@@ -976,11 +948,9 @@ tune2fs -O large_dir $(mount | gawk '{if($3=="/data") {print $1}}')
 
 func getTelegrafConfigMap() *corev1.ConfigMap {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "telegraf-config",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "telegraf-config",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Data: map[string]string{
 			"telegraf.conf": `[[outputs.prometheus_client]]
 ## Address to listen on.
@@ -1017,13 +987,11 @@ wait
 
 func getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 	vpa := &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      valiName + "-vpa",
-			Namespace: namespace,
-			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-				v1beta1constants.LabelObservabilityApplication: valiName,
-			}),
-		},
+		Name:      valiName + "-vpa",
+		Namespace: namespace,
+		Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+			v1beta1constants.LabelObservabilityApplication: valiName,
+		}),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				Kind:       "StatefulSet",
@@ -1053,11 +1021,9 @@ func getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func getGateway() *istionetworkingv1beta1.Gateway {
 	return &istionetworkingv1beta1.Gateway{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "vali",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "vali",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: istionetworkingv1alpha3.Gateway{
 			Servers: []*istionetworkingv1alpha3.Server{{
 				Port: &istionetworkingv1alpha3.Port{
@@ -1077,11 +1043,9 @@ func getGateway() *istionetworkingv1beta1.Gateway {
 
 func getVirtualService() *istionetworkingv1beta1.VirtualService {
 	return &istionetworkingv1beta1.VirtualService{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "vali",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "vali",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: istionetworkingv1alpha3.VirtualService{
 			ExportTo: []string{"istio-ingress"},
 			Gateways: []string{"vali"},
@@ -1105,11 +1069,9 @@ func getVirtualService() *istionetworkingv1beta1.VirtualService {
 
 func getDestinationRule() *istionetworkingv1beta1.DestinationRule {
 	return &istionetworkingv1beta1.DestinationRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "vali",
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "vali",
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: istionetworkingv1alpha3.DestinationRule{
 			ExportTo: []string{"istio-ingress"},
 			Host:     "logging.shoot--foo--bar.svc.cluster.local",
@@ -1138,23 +1100,19 @@ func getDestinationRule() *istionetworkingv1beta1.DestinationRule {
 
 func getTLSSecret(tlsSecret *corev1.Secret) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "shoot--foo--bar-vali-vali-tls",
-			Namespace: "istio-ingress",
-			Labels:    getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      "shoot--foo--bar-vali-vali-tls",
+		Namespace: "istio-ingress",
+		Labels:    getLabels(),
+		Data:      tlsSecret.Data,
 	}
 }
 
 func getStatefulSet(isRBACProxyEnabled bool) *appsv1.StatefulSet {
 	fsGroupChangeOnRootMismatch := corev1.FSGroupChangeOnRootMismatch
 	sts := &appsv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      valiName,
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      valiName,
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: appsv1.StatefulSetSpec{
 			Replicas: new(int32(1)),
 			Selector: &metav1.LabelSelector{
@@ -1227,21 +1185,17 @@ func getStatefulSet(isRBACProxyEnabled bool) *appsv1.StatefulSet {
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/ready",
-										Port: intstr.FromString("metrics"),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/ready",
+									Port: intstr.FromString("metrics"),
 								},
 								InitialDelaySeconds: 120,
 								FailureThreshold:    5,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/ready",
-										Port: intstr.FromString("metrics"),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/ready",
+									Port: intstr.FromString("metrics"),
 								},
 								FailureThreshold: 7,
 							},
@@ -1301,13 +1255,9 @@ func getStatefulSet(isRBACProxyEnabled bool) *appsv1.StatefulSet {
 					Volumes: []corev1.Volume{
 						{
 							Name: "config",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: valiConfigMapName,
-									},
-									DefaultMode: new(int32(0520)),
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name:        valiConfigMapName,
+								DefaultMode: new(int32(0520)),
 							},
 						},
 					},
@@ -1315,9 +1265,7 @@ func getStatefulSet(isRBACProxyEnabled bool) *appsv1.StatefulSet {
 			},
 			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "vali",
-					},
+					Name: "vali",
 					Spec: corev1.PersistentVolumeClaimSpec{
 						AccessModes: []corev1.PersistentVolumeAccessMode{
 							"ReadWriteOnce",
@@ -1429,47 +1377,37 @@ wait
 		sts.Spec.Template.Spec.Volumes = append(sts.Spec.Template.Spec.Volumes, []corev1.Volume{
 			{
 				Name: "telegraf-config-volume",
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: telegrafConfigMapName,
-						},
-					},
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					Name: telegrafConfigMapName,
 				},
 			},
 			{
 				Name: "kubeconfig",
-				VolumeSource: corev1.VolumeSource{
-					Projected: &corev1.ProjectedVolumeSource{
-						DefaultMode: new(int32(420)),
-						Sources: []corev1.VolumeProjection{
-							{
-								Secret: &corev1.SecretProjection{
-									Items: []corev1.KeyToPath{
-										{
-											Key:  "kubeconfig",
-											Path: "kubeconfig",
-										},
+				Projected: &corev1.ProjectedVolumeSource{
+					DefaultMode: new(int32(420)),
+					Sources: []corev1.VolumeProjection{
+						{
+							Secret: &corev1.SecretProjection{
+								Items: []corev1.KeyToPath{
+									{
+										Key:  "kubeconfig",
+										Path: "kubeconfig",
 									},
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "generic-token-kubeconfig",
-									},
-									Optional: new(false),
 								},
+								Name:     "generic-token-kubeconfig",
+								Optional: new(false),
 							},
-							{
-								Secret: &corev1.SecretProjection{
-									Items: []corev1.KeyToPath{
-										{
-											Key:  "token",
-											Path: "token",
-										},
+						},
+						{
+							Secret: &corev1.SecretProjection{
+								Items: []corev1.KeyToPath{
+									{
+										Key:  "token",
+										Path: "token",
 									},
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "shoot-access-kube-rbac-proxy",
-									},
-									Optional: new(false),
 								},
+								Name:     "shoot-access-kube-rbac-proxy",
+								Optional: new(false),
 							},
 						},
 					},
@@ -1485,10 +1423,8 @@ wait
 
 func getKubeRBACProxyClusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:logging:kube-rbac-proxy",
-			Labels: map[string]string{"app": "kube-rbac-proxy"},
-		},
+		Name:   "gardener.cloud:logging:kube-rbac-proxy",
+		Labels: map[string]string{"app": "kube-rbac-proxy"},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",
@@ -1504,10 +1440,8 @@ func getKubeRBACProxyClusterRoleBinding() *rbacv1.ClusterRoleBinding {
 
 func getValitailClusterRole(name, appName, path string) *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: map[string]string{"app": appName},
-		},
+		Name:   name,
+		Labels: map[string]string{"app": appName},
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"", "apps"},
@@ -1535,10 +1469,8 @@ func getValitailClusterRole(name, appName, path string) *rbacv1.ClusterRole {
 
 func getValitailClusterRoleBinding(name, appName, roleName, subjectName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: map[string]string{"app": appName},
-		},
+		Name:   name,
+		Labels: map[string]string{"app": appName},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",
@@ -1562,11 +1494,9 @@ func getLabels() map[string]string {
 
 func getPVCA(maxCapacity resource.Quantity, autoscalerName string) *pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler {
 	return &pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      valiName,
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      valiName,
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscalerSpec{
 			AutoscalerName: autoscalerName,
 			TargetRef: autoscalingv1.CrossVersionObjectReference{

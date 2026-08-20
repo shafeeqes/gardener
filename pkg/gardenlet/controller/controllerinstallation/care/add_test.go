@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -36,10 +34,8 @@ var _ = Describe("Add", func() {
 	BeforeEach(func() {
 		reconciler = &Reconciler{ManagedResourceNamespace: "garden"}
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "garden",
-				Labels:    map[string]string{"controllerinstallation-name": "foo"},
-			},
+			Namespace: "garden",
+			Labels:    map[string]string{"controllerinstallation-name": "foo"},
 		}
 	})
 
@@ -111,7 +107,7 @@ var _ = Describe("Add", func() {
 
 		It("should return a request with the controller installation name", func() {
 			Expect(mapFn(ctx, managedResource)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo"}},
+				reconcile.Request{Name: "foo"},
 			))
 		})
 
@@ -135,7 +131,7 @@ var _ = Describe("Add", func() {
 					WithIndex(&gardencorev1beta1.ControllerInstallation{}, gardencore.RegistrationRefName, indexer.ControllerInstallationRegistrationRefNameIndexerFunc).
 					WithObjects(
 						&gardencorev1beta1.ControllerInstallation{
-							ObjectMeta: metav1.ObjectMeta{Name: "my-extension-abc12"},
+							Name: "my-extension-abc12",
 							Spec: gardencorev1beta1.ControllerInstallationSpec{
 								RegistrationRef: corev1.ObjectReference{Name: "my-extension"},
 								ShootRef:        &corev1.ObjectReference{Name: "shoot1", Namespace: "garden"},
@@ -145,7 +141,7 @@ var _ = Describe("Add", func() {
 				mapFn = reconciler.MapManagedResourceToControllerInstallation(logr.Discard())
 
 				Expect(mapFn(ctx, managedResource)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: "my-extension-abc12"}},
+					reconcile.Request{Name: "my-extension-abc12"},
 				))
 			})
 		})
@@ -156,7 +152,7 @@ var _ = Describe("Add", func() {
 				managedResource.Labels["controllerregistration-name"] = "my-extension"
 
 				Expect(mapFn(ctx, managedResource)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: "my-extension-abc12"}},
+					reconcile.Request{Name: "my-extension-abc12"},
 				))
 			})
 		})

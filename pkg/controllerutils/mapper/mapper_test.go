@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -47,17 +45,13 @@ var _ = Describe("Controller Mapper", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
+			Name: namespace,
 		}
 
 		newObjListFunc = func() client.ObjectList { return &extensionsv1alpha1.InfrastructureList{} }
 		infra = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "infra",
-				Namespace: namespace,
-			},
+			Name:      "infra",
+			Namespace: namespace,
 		}
 	})
 
@@ -72,10 +66,8 @@ var _ = Describe("Controller Mapper", func() {
 			Expect(fakeClient.Create(ctx, infra)).To(Succeed())
 
 			Expect(mapper(ctx, cluster)).To(ConsistOf(reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      infra.Name,
-					Namespace: infra.Namespace,
-				},
+				Name:      infra.Name,
+				Namespace: infra.Namespace,
 			}))
 		})
 
@@ -103,25 +95,25 @@ var _ = Describe("Controller Mapper", func() {
 	Describe("#ObjectListToRequests", func() {
 		list := &corev1.SecretList{
 			Items: []corev1.Secret{
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: "namespace1"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: "namespace2"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret2", Namespace: "namespace2"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: "namespace3"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: "namespace4"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: "namespace5"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: "namespace6"}},
+				{Name: "secret1", Namespace: "namespace1"},
+				{Name: "secret1", Namespace: "namespace2"},
+				{Name: "secret2", Namespace: "namespace2"},
+				{Name: "secret1", Namespace: "namespace3"},
+				{Name: "secret1", Namespace: "namespace4"},
+				{Name: "secret1", Namespace: "namespace5"},
+				{Name: "secret1", Namespace: "namespace6"},
 			},
 		}
 
 		It("should return the correct requests w/p predicates", func() {
 			Expect(ObjectListToRequests(list)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace1"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace2"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret2", Namespace: "namespace2"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace3"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace4"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace5"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace6"}},
+				reconcile.Request{Name: "secret1", Namespace: "namespace1"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace2"},
+				reconcile.Request{Name: "secret2", Namespace: "namespace2"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace3"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace4"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace5"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace6"},
 			))
 		})
 
@@ -132,11 +124,11 @@ var _ = Describe("Controller Mapper", func() {
 			)
 
 			Expect(ObjectListToRequests(list, predicate1, predicate2)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace1"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace2"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret2", Namespace: "namespace2"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace4"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "secret1", Namespace: "namespace6"}},
+				reconcile.Request{Name: "secret1", Namespace: "namespace1"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace2"},
+				reconcile.Request{Name: "secret2", Namespace: "namespace2"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace4"},
+				reconcile.Request{Name: "secret1", Namespace: "namespace6"},
 			))
 		})
 	})

@@ -73,7 +73,7 @@ func run(ctx context.Context, opts *Options) error {
 	}
 
 	for _, tokenID := range opts.TokenIDs {
-		if err := clientSet.Client().Delete(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: bootstraptokenutil.BootstrapTokenSecretName(tokenID), Namespace: metav1.NamespaceSystem}}); err != nil {
+		if err := clientSet.Client().Delete(ctx, &corev1.Secret{Name: bootstraptokenutil.BootstrapTokenSecretName(tokenID), Namespace: metav1.NamespaceSystem}); err != nil {
 			if !apierrors.IsNotFound(err) {
 				return fmt.Errorf("failed deleting bootstrap token secret with ID %q: %w", tokenID, err)
 			}

@@ -8,11 +8,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	componentbaseconfigv1alpha1 "k8s.io/component-base/config/v1alpha1"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
-	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	seedmanagementv1alpha1 "github.com/gardener/gardener/pkg/apis/seedmanagement/v1alpha1"
 	gardenletfeatures "github.com/gardener/gardener/pkg/gardenlet/features"
@@ -55,26 +52,22 @@ var _ = Describe("ValuesHelper", func() {
 
 		parentConfig = &gardenletconfigv1alpha1.GardenletConfiguration{
 			GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
-				ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-					Kubeconfig:         gardenKubeconfigPath,
-					AcceptContentTypes: "application/json",
-					ContentType:        "application/json",
-					QPS:                100,
-					Burst:              130,
-				},
+				Kubeconfig:         gardenKubeconfigPath,
+				AcceptContentTypes: "application/json",
+				ContentType:        "application/json",
+				QPS:                100,
+				Burst:              130,
 				BootstrapKubeconfig: &corev1.SecretReference{
 					Name:      "gardenlet-kubeconfig-bootstrap",
 					Namespace: v1beta1constants.GardenNamespace,
 				},
 			},
 			SeedClientConnection: &gardenletconfigv1alpha1.SeedClientConnection{
-				ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-					Kubeconfig:         seedKubeconfigPath,
-					AcceptContentTypes: "application/json",
-					ContentType:        "application/json",
-					QPS:                100,
-					Burst:              130,
-				},
+				Kubeconfig:         seedKubeconfigPath,
+				AcceptContentTypes: "application/json",
+				ContentType:        "application/json",
+				QPS:                100,
+				Burst:              130,
 			},
 			Server: gardenletconfigv1alpha1.ServerConfiguration{
 				HealthProbes: &gardenletconfigv1alpha1.Server{
@@ -94,11 +87,7 @@ var _ = Describe("ValuesHelper", func() {
 				Enabled: new(true),
 			},
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "bar",
-					},
-				},
+				Name: "bar",
 			},
 		}
 
@@ -115,10 +104,8 @@ var _ = Describe("ValuesHelper", func() {
 			},
 		}
 		gardenletConfig = &gardenletconfigv1alpha1.GardenletConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "GardenletConfiguration",
-			},
+			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "GardenletConfiguration",
 			FeatureGates: map[string]bool{
 				"FooFeature": false,
 			},
@@ -152,28 +139,22 @@ var _ = Describe("ValuesHelper", func() {
 				kubeconfigPath = gardenKubeconfigPath
 			}
 			return &gardenletconfigv1alpha1.GardenletConfiguration{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-					Kind:       "GardenletConfiguration",
-				},
+				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "GardenletConfiguration",
 				GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
-					ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-						Kubeconfig:         kubeconfigPath,
-						AcceptContentTypes: "application/json",
-						ContentType:        "application/json",
-						QPS:                100,
-						Burst:              130,
-					},
+					Kubeconfig:          kubeconfigPath,
+					AcceptContentTypes:  "application/json",
+					ContentType:         "application/json",
+					QPS:                 100,
+					Burst:               130,
 					BootstrapKubeconfig: bootstrapKubeconfig,
 					KubeconfigSecret:    kubeconfigSecret,
 				},
 				SeedClientConnection: &gardenletconfigv1alpha1.SeedClientConnection{
-					ClientConnectionConfiguration: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
-						AcceptContentTypes: "application/json",
-						ContentType:        "application/json",
-						QPS:                100,
-						Burst:              130,
-					},
+					AcceptContentTypes: "application/json",
+					ContentType:        "application/json",
+					QPS:                100,
+					Burst:              130,
 				},
 				Server: gardenletconfigv1alpha1.ServerConfiguration{
 					HealthProbes: &gardenletconfigv1alpha1.Server{

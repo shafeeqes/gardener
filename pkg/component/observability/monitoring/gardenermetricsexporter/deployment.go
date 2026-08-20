@@ -24,11 +24,9 @@ import (
 
 func (g *gardenerMetricsExporter) deployment(secretGenericTokenKubeconfig, secretVirtualGardenAccess string) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: g.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      deploymentName,
+		Namespace: g.namespace,
+		Labels:    GetLabels(),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -74,34 +72,28 @@ func (g *gardenerMetricsExporter) deployment(secretGenericTokenKubeconfig, secre
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/",
-										Port:   intstr.FromInt32(probePort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/",
+									Port:   intstr.FromInt32(probePort),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								PeriodSeconds: 5,
 							},
 							StartupProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/",
-										Port:   intstr.FromInt32(probePort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/",
+									Port:   intstr.FromInt32(probePort),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								// Wait for 2 minutes to allow the informer cache to sync
 								PeriodSeconds:    5,
 								FailureThreshold: 24,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/metrics",
-										Port:   intstr.FromInt32(probePort),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/metrics",
+									Port:   intstr.FromInt32(probePort),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								PeriodSeconds:  15,
 								TimeoutSeconds: 10,

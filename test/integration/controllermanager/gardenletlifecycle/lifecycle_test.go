@@ -33,11 +33,9 @@ var _ = Describe("Gardenlet Lifecycle controller tests", func() {
 		fakeClock.SetTime(time.Now())
 
 		lease = &coordinationv1.Lease{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 		}
 
 		By("Create Lease")
@@ -49,9 +47,7 @@ var _ = Describe("Gardenlet Lifecycle controller tests", func() {
 		})
 
 		gardenNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden",
-			},
+			Name: "garden",
 		}
 	})
 
@@ -61,10 +57,8 @@ var _ = Describe("Gardenlet Lifecycle controller tests", func() {
 		log.Info("Created garden Namespace", "namespace", client.ObjectKeyFromObject(gardenNamespace))
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   lease.Name,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   lease.Name,
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -118,11 +112,9 @@ var _ = Describe("Gardenlet Lifecycle controller tests", func() {
 		})
 
 		managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      seed.Name,
-				Namespace: gardenNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      seed.Name,
+			Namespace: gardenNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Shoot:     &seedmanagementv1alpha1.Shoot{Name: "foo"},
 				Gardenlet: seedmanagementv1alpha1.GardenletConfig{},
@@ -130,11 +122,9 @@ var _ = Describe("Gardenlet Lifecycle controller tests", func() {
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    managedSeed.Namespace,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    managedSeed.Namespace,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("my-provider-account"),
 				CloudProfileName:  new("cloudprofile1"),

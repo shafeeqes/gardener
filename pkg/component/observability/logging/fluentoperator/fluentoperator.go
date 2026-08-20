@@ -66,18 +66,14 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 		registry = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: f.namespace,
-				Labels:    getLabels(),
-			},
+			Name:                         name,
+			Namespace:                    f.namespace,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   roleName,
-				Labels: getLabels(),
-			},
+			Name:   roleName,
+			Labels: getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"fluentbit.fluent.io"},
@@ -127,10 +123,8 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: getLabels(),
-			},
+			Name:   name,
+			Labels: getLabels(),
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -143,10 +137,8 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 			}},
 		}
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      roleName,
-				Namespace: f.namespace,
-			},
+			Name:      roleName,
+			Namespace: f.namespace,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"coordination.k8s.io"},
@@ -171,10 +163,8 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 			},
 		}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      role.Name,
-				Namespace: f.namespace,
-			},
+			Name:      role.Name,
+			Namespace: f.namespace,
 			Subjects: []rbacv1.Subject{
 				{
 					Kind:      rbacv1.ServiceAccountKind,
@@ -189,13 +179,11 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 			},
 		}
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.DeploymentNameFluentOperator,
-				Namespace: f.namespace,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-				}),
-			},
+			Name:      v1beta1constants.DeploymentNameFluentOperator,
+			Namespace: f.namespace,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+			}),
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Replicas:             new(int32(1)),
@@ -257,10 +245,8 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 						},
 						Volumes: []corev1.Volume{
 							{
-								Name: "env",
-								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{},
-								},
+								Name:     "env",
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
 						},
 					},
@@ -269,10 +255,8 @@ func (f *fluentOperator) Deploy(ctx context.Context) error {
 		}
 		vpaUpdateMode = vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		vpa           = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: f.namespace,
-			},
+			Name:      name,
+			Namespace: f.namespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),

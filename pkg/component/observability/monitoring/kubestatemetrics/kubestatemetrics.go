@@ -137,10 +137,8 @@ func (k *kubeStateMetrics) getResourcesForShootTarget(shootAccessSecret *gardene
 	return []client.Object{
 		clusterRole,
 		k.clusterRoleBinding(clusterRole, &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootAccessSecret.ServiceAccountName,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      shootAccessSecret.ServiceAccountName,
+			Namespace: metav1.NamespaceSystem,
 		}),
 	}
 }

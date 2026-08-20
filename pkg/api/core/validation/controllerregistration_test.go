@@ -32,9 +32,7 @@ var _ = Describe("validation", func() {
 			Type: "my-os",
 		}
 		controllerRegistration = &core.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "extension-abc",
-			},
+			Name: "extension-abc",
 			Spec: core.ControllerRegistrationSpec{
 				Resources: []core.ControllerResource{
 					ctrlResource,

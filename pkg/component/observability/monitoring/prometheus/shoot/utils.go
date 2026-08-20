@@ -65,16 +65,16 @@ func ClusterComponentScrapeConfigSpec(jobName string, sdConfig KubernetesService
 		// This is needed because we do not fetch the correct cluster CA bundle right now
 		TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 		Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-			LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-			Key:                  resourcesv1alpha1.DataKeyToken,
+			Name: AccessSecretName,
+			Key:  resourcesv1alpha1.DataKeyToken,
 		}},
 		KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 			Role:       sdConfig.Role,
 			APIServer:  new("https://" + v1beta1constants.DeploymentNameKubeAPIServer),
 			Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 			Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-				Key:                  resourcesv1alpha1.DataKeyToken,
+				Name: AccessSecretName,
+				Key:  resourcesv1alpha1.DataKeyToken,
 			}},
 			// This is needed because we do not fetch the correct cluster CA bundle right now
 			TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},

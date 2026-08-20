@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -43,13 +42,13 @@ var _ = Describe("Botanist", func() {
 		gardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).WithStatusSubresource(&gardencorev1beta1.Shoot{}).Build()
 		botanist.GardenClient = gardenClient
 
-		gardenNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "garden-local"}}
+		gardenNamespace = &corev1.Namespace{Name: "garden-local"}
 		Expect(gardenClient.Create(ctx, gardenNamespace)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(gardenClient.Delete(ctx, gardenNamespace)).To(Succeed())
 		})
 
-		seedNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{GenerateName: "botanist-"}}
+		seedNamespace = &corev1.Namespace{GenerateName: "botanist-"}
 		Expect(seedClient.Create(ctx, seedNamespace)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(seedClient.Delete(ctx, seedNamespace)).To(Succeed())
@@ -61,7 +60,7 @@ var _ = Describe("Botanist", func() {
 			KubernetesVersion:     semver.MustParse("v1.31.0"),
 		}
 
-		resourceManagerDeployment = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager", Namespace: seedNamespace.Name}}
+		resourceManagerDeployment = &appsv1.Deployment{Name: "gardener-resource-manager", Namespace: seedNamespace.Name}
 		Expect(seedClient.Create(ctx, resourceManagerDeployment)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(seedClient.Delete(ctx, resourceManagerDeployment)).To(Succeed())
@@ -89,10 +88,8 @@ var _ = Describe("Botanist", func() {
 
 		BeforeEach(func(ctx context.Context) {
 			worker = &extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "worker",
-					Namespace: seedNamespace.Name,
-				},
+				Name:      "worker",
+				Namespace: seedNamespace.Name,
 				Spec: extensionsv1alpha1.WorkerSpec{
 					Pools: []extensionsv1alpha1.WorkerPool{
 						{
@@ -124,10 +121,8 @@ var _ = Describe("Botanist", func() {
 			}
 
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot",
-					Namespace: gardenNamespace.Name,
-				},
+				Name:      "shoot",
+				Namespace: gardenNamespace.Name,
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						Version: "1.32.0",

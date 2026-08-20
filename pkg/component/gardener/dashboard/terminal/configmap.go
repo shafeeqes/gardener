@@ -28,11 +28,9 @@ func (t *terminal) configMap() (*corev1.ConfigMap, error) {
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: t.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      name,
+		Namespace: t.namespace,
+		Labels:    getLabels(),
 		Data: map[string]string{dataKeyConfig: `apiVersion: dashboard.gardener.cloud/v1alpha1
 kind: ControllerManagerConfiguration
 allowedAPIServerURLs: ` + string(allowedAPIServerURLs) + `

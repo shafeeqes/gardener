@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -59,14 +58,12 @@ var _ = Describe("Reconciler", func() {
 		reconciler = &Reconciler{Client: fakeClient, Recorder: &events.FakeRecorder{}, Clock: fakeClock}
 
 		cloudProfile = &gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: cloudProfileName,
-			},
+			Name: cloudProfileName,
 		}
 	})
 
 	It("should return nil because object not found", func() {
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -82,7 +79,7 @@ var _ = Describe("Reconciler", func() {
 			Build()
 		reconciler = &Reconciler{Client: fakeClient, Recorder: &events.FakeRecorder{}}
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).To(MatchError(fakeErr))
 	})
@@ -107,14 +104,14 @@ var _ = Describe("Reconciler", func() {
 
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(HaveOccurred())
 			Expect(patchCalls).To(Equal(1))
 		})
 
 		It("should ensure the finalizer", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -136,28 +133,28 @@ var _ = Describe("Reconciler", func() {
 			cloudProfile.Finalizers = nil
 			Expect(fakeClient.Patch(ctx, cloudProfile, client.MergeFrom(cloudProfile))).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should return an error because Shoot referencing CloudProfile exists", func() {
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-shoot", Namespace: "test-namespace"},
+				Name: "test-shoot", Namespace: "test-namespace",
 				Spec: gardencorev1beta1.ShootSpec{
 					CloudProfileName: &cloudProfileName,
 				},
 			}
 			Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("Cannot delete CloudProfile")))
 		})
 
 		It("should return an error because NamespacedCloudProfile referencing CloudProfile exists", func() {
 			ncpProfile := &gardencorev1beta1.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-namespacedprofile", Namespace: "test-namespace"},
+				Name: "test-namespacedprofile", Namespace: "test-namespace",
 				Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 					Parent: gardencorev1beta1.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -167,7 +164,7 @@ var _ = Describe("Reconciler", func() {
 			}
 			Expect(fakeClient.Create(ctx, ncpProfile)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("Cannot delete CloudProfile")))
 		})
@@ -194,13 +191,13 @@ var _ = Describe("Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cp)).To(Succeed())
 			Expect(fakeClient.Delete(ctx, cp.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(fakeErr))
 		})
 
 		It("should remove the finalizer (no error)", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -217,7 +214,7 @@ var _ = Describe("Reconciler", func() {
 
 			testStatus = func(wantStatus gardencorev1beta1.CloudProfileStatus) reconcile.Result {
 				Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: cloudProfileName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: cloudProfileName})
 				Expect(err).NotTo(HaveOccurred())
 
 				got := &gardencorev1beta1.CloudProfile{}

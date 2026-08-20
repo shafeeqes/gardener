@@ -319,35 +319,29 @@ status: {}
 			}
 		}
 		dummyVirtualService = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dummy-virtual-service",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "dummy"},
-			},
+			Name:      "dummy-virtual-service",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "dummy"},
 		}
 		virtualServiceWithManagedSecret = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vs-with-managed-secret",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app": "dummy",
-					"reference.gardener.cloud/basic-auth-secret-name":    secret1,
-					"reference.gardener.cloud/basic-auth-secret-managed": "true",
-				},
+			Name:      "vs-with-managed-secret",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "dummy",
+				"reference.gardener.cloud/basic-auth-secret-name":    secret1,
+				"reference.gardener.cloud/basic-auth-secret-managed": "true",
 			},
 			Spec: istioapinetworkingv1beta1.VirtualService{
 				Hosts: []string{host1},
 			},
 		}
 		virtualServiceWithVerbatimSecret = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vs-with-verbatim-secret",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app": "dummy",
-					"reference.gardener.cloud/basic-auth-secret-name":    secret2,
-					"reference.gardener.cloud/basic-auth-secret-managed": "false",
-				},
+			Name:      "vs-with-verbatim-secret",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "dummy",
+				"reference.gardener.cloud/basic-auth-secret-name":    secret2,
+				"reference.gardener.cloud/basic-auth-secret-managed": "false",
 			},
 			Spec: istioapinetworkingv1beta1.VirtualService{
 				Hosts: []string{host2, host3},
@@ -358,8 +352,8 @@ status: {}
 	BeforeEach(func() {
 		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 		fakeSecretManager = fakesecretsmanager.New(c, namespace)
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-istio-basic-auth-server", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-virtual-garden-istio-basic-auth-server", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-istio-basic-auth-server", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-virtual-garden-istio-basic-auth-server", Namespace: namespace})).To(Succeed())
 
 		apiReader = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
@@ -373,16 +367,12 @@ status: {}
 		component = New(c, apiReader, namespace, fakeSecretManager, values)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -397,18 +387,16 @@ status: {}
 				managedResource.Name = "virtual-garden-" + managedResourceName
 				managedResourceSecret.Name = "managedresource-" + managedResource.Name
 			}
-			Expect(c.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Namespace{Name: namespace})).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(BeNotFoundError())
 			Expect(component.Deploy(ctx)).To(Succeed())
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-					ResourceVersion: "1",
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -474,7 +462,7 @@ status: {}
 				}
 
 				Expect(c.Create(ctx, dummyVirtualService.DeepCopy())).To(Succeed())
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secret1, Namespace: namespace}})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: secret1, Namespace: namespace})).To(Succeed())
 
 				create(virtualServiceWithManagedSecret.DeepCopy())
 				create(virtualServiceWithVerbatimSecret.DeepCopy())
@@ -539,7 +527,7 @@ status: {}
 
 			Context("managed secret", func() {
 				BeforeEach(func() {
-					Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secret1, Namespace: namespace}})).To(Succeed())
+					Expect(c.Create(ctx, &corev1.Secret{Name: secret1, Namespace: namespace})).To(Succeed())
 
 					managedVS := virtualServiceWithManagedSecret.DeepCopy()
 					managedVS.Labels["reference.gardener.cloud/basic-auth-server-name"] = "istio-basic-auth-server"
@@ -564,7 +552,7 @@ status: {}
 
 	Context("When secret references are misconfigured", func() {
 		BeforeEach(func() {
-			Expect(c.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Namespace{Name: namespace})).To(Succeed())
 		})
 
 		It("should fail when the managed label has a non-boolean value", func() {
@@ -630,11 +618,9 @@ status: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -657,11 +643,9 @@ status: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

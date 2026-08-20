@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -402,11 +401,9 @@ var _ = Describe("shoot", func() {
 
 				uid := "057cf3ec-1b86-40b3-abc2-47ac71abbe85"
 				s := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "garden-bar",
-						UID:       types.UID(uid),
-					},
+					Name:      "foo",
+					Namespace: "garden-bar",
+					UID:       types.UID(uid),
 					Spec: gardencorev1beta1.ShootSpec{
 						DNS: &gardencorev1beta1.DNS{
 							Domain: new("shoot.example.com"),
@@ -456,12 +453,10 @@ var _ = Describe("shoot", func() {
 		Describe("#UpdateInfo", func() {
 			It("should apply the mutation, carry .resourceVersion and .status from server, but not other server-side fields", func() {
 				shootObj := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            "foo",
-						Namespace:       "garden-bar",
-						Generation:      1,
-						ResourceVersion: "1",
-					},
+					Name:            "foo",
+					Namespace:       "garden-bar",
+					Generation:      1,
+					ResourceVersion: "1",
 				}
 				s := &Shoot{}
 				s.SetInfo(shootObj)
@@ -503,12 +498,10 @@ var _ = Describe("shoot", func() {
 		Describe("#UpdateInfoStatus", func() {
 			It("should apply the mutation, carry .resourceVersion and full .status from server", func() {
 				shootObj := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            "foo",
-						Namespace:       "garden-bar",
-						Generation:      1,
-						ResourceVersion: "1",
-					},
+					Name:            "foo",
+					Namespace:       "garden-bar",
+					Generation:      1,
+					ResourceVersion: "1",
 				}
 				s := &Shoot{}
 				s.SetInfo(shootObj)

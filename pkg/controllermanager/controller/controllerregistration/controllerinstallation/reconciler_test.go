@@ -58,9 +58,7 @@ var _ = Describe("Reconciler", func() {
 		sourceType = "sourceType"
 
 		backupBucket1 = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "bb1",
-			},
+			Name: "bb1",
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				SeedName: &seedName,
 				Provider: gardencorev1beta1.BackupBucketProvider{
@@ -69,9 +67,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		backupBucket2 = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "bb2",
-			},
+			Name: "bb2",
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				SeedName: &seedName,
 				Provider: gardencorev1beta1.BackupBucketProvider{
@@ -80,9 +76,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		sourceBackupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "sourceBackupBucket",
-			},
+			Name: "sourceBackupBucket",
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				SeedName: &sourceSeedName,
 				Provider: gardencorev1beta1.BackupBucketProvider{
@@ -98,27 +92,21 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		backupEntry2 = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "be2",
-			},
+			Name: "be2",
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				SeedName:   &seedName,
 				BucketName: backupBucket1.Name,
 			},
 		}
 		backupEntry3 = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "be3",
-			},
+			Name: "be3",
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				SeedName:   &seedName,
 				BucketName: backupBucket1.Name,
 			},
 		}
 		sourceBackupEntry = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "sourceBackupEntry",
-			},
+			Name: "sourceBackupEntry",
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				SeedName:   &seedName,
 				BucketName: sourceBackupBucket.Name,
@@ -133,10 +121,8 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   seedName,
-				Labels: seedLabels,
-			},
+			Name:   seedName,
+			Labels: seedLabels,
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Type: type11,
@@ -159,9 +145,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		shoot1 = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "s1",
-			},
+			Name: "s1",
 			Spec: gardencorev1beta1.ShootSpec{
 				Provider: gardencorev1beta1.Provider{
 					Type: type1,
@@ -169,9 +153,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		shoot2 = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "s2",
-			},
+			Name: "s2",
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: &seedName,
 				Provider: gardencorev1beta1.Provider{
@@ -195,9 +177,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		shoot3 = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "s3",
-			},
+			Name: "s3",
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: &seedName,
 				Provider: gardencorev1beta1.Provider{
@@ -224,18 +204,14 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		controllerDeployment = &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "fooDeployment",
-			},
+			Name: "fooDeployment",
 			Helm: &gardencorev1.HelmControllerDeployment{
 				RawChart: []byte("foo"),
 			},
 		}
 
 		controllerRegistration1 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr1",
-			},
+			Name: "cr1",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -256,9 +232,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerRegistration2 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr2",
-			},
+			Name: "cr2",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -279,9 +253,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerRegistration3 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr3",
-			},
+			Name: "cr3",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -303,9 +275,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerRegistration4 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr4",
-			},
+			Name: "cr4",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 					Policy: &alwaysPolicy,
@@ -313,9 +283,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerRegistration5 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr5",
-			},
+			Name: "cr5",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 					Policy: &alwaysPolicy,
@@ -328,14 +296,10 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerRegistration6 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr6",
-			},
+			Name: "cr6",
 		}
 		controllerRegistration7 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr7",
-			},
+			Name: "cr7",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 					Policy: &onDemandPolicy,
@@ -343,9 +307,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerRegistration8 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cr8",
-			},
+			Name: "cr8",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 					Policy: &alwaysIfShootsPolicy,
@@ -376,9 +338,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		controllerInstallation1 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ci1",
-			},
+			Name: "ci1",
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: "another-seed",
@@ -389,9 +349,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerInstallation2 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ci2",
-			},
+			Name: "ci2",
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: seedName,
@@ -405,9 +363,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerInstallation3 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ci3",
-			},
+			Name: "ci3",
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: seedName,
@@ -418,9 +374,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerInstallation4 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ci4",
-			},
+			Name: "ci4",
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: seedName,
@@ -431,9 +385,7 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		controllerInstallation7 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ci7",
-			},
+			Name: "ci7",
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: seedName,
@@ -465,7 +417,7 @@ var _ = Describe("Reconciler", func() {
 	BeforeEach(func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: seed.Spec.DNS.Internal.CredentialsRef.Name, Namespace: seed.Spec.DNS.Internal.CredentialsRef.Namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: seed.Spec.DNS.Internal.CredentialsRef.Name, Namespace: seed.Spec.DNS.Internal.CredentialsRef.Namespace})).To(Succeed())
 	})
 
 	Describe("#computeKindTypesForBackupBuckets", func() {
@@ -557,9 +509,7 @@ var _ = Describe("Reconciler", func() {
 		It("should correctly compute types for shoot that has the Seed's name as status not spec", func() {
 			shootList = []gardencorev1beta1.Shoot{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "s4",
-					},
+					Name: "s4",
 					Spec: gardencorev1beta1.ShootSpec{
 						SeedName: new("anotherSeed"),
 						Provider: gardencorev1beta1.Provider{
@@ -622,7 +572,7 @@ var _ = Describe("Reconciler", func() {
 			})
 
 			It("should correctly compute the result", func() {
-				shootWithDeletionTimestamp := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{DeletionTimestamp: &metav1.Time{}}}
+				shootWithDeletionTimestamp := &gardencorev1beta1.Shoot{DeletionTimestamp: &metav1.Time{}}
 				Expect(computeKindTypesForHostedShoots(ctx, log, fakeClient, shootWithDeletionTimestamp, ShootKind, controllerRegistrationList, shootList)).To(BeEmpty())
 			})
 		})
@@ -658,9 +608,7 @@ var _ = Describe("Reconciler", func() {
 		It("should not add an extension if Seed has a deletion timestamp", func() {
 			deletionTimestamp := metav1.Now()
 			seed := &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					DeletionTimestamp: &deletionTimestamp,
-				},
+				DeletionTimestamp: &deletionTimestamp,
 				Spec: gardencorev1beta1.SeedSpec{
 					DNS: gardencorev1beta1.SeedDNS{
 						Provider: &gardencorev1beta1.SeedDNSProvider{
@@ -752,10 +700,8 @@ var _ = Describe("Reconciler", func() {
 			// installedAndRequired (controllerInstallation7 is Required=true with seedRef=seedName) — both must be
 			// excluded so the shoot reconciler remains the sole owner.
 			selfHostedShoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      seedName,
-					Namespace: "garden",
-				},
+				Name:      seedName,
+				Namespace: "garden",
 			}
 			wantedKindTypeCombinations := sets.New[string]()
 
@@ -1163,7 +1109,7 @@ var _ = Describe("Reconciler", func() {
 				installation.Spec.SeedRef = &corev1.ObjectReference{Name: seedName}
 				installation.Spec.ShootRef = &corev1.ObjectReference{Name: "shoot", Namespace: v1beta1constants.GardenNamespace}
 
-				selfHostedShoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: seedName, Namespace: v1beta1constants.GardenNamespace}}
+				selfHostedShoot := &gardencorev1beta1.Shoot{Name: seedName, Namespace: v1beta1constants.GardenNamespace}
 
 				var (
 					wantedControllerRegistrationNames = sets.New[string]()

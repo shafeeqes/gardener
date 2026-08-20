@@ -7,7 +7,6 @@ package managedresource
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -20,20 +19,16 @@ var _ = Describe("Sorter", func() {
 		BeforeEach(func() {
 			refsBase = []resourcesv1alpha1.ObjectReference{
 				{
-					ObjectReference: corev1.ObjectReference{
-						APIVersion: "v1",
-						Kind:       "ConfigMap",
-						Name:       "foo",
-						Namespace:  "bar",
-					},
+					APIVersion: "v1",
+					Kind:       "ConfigMap",
+					Name:       "foo",
+					Namespace:  "bar",
 				},
 				{
-					ObjectReference: corev1.ObjectReference{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-						Name:       "nginx",
-						Namespace:  "web",
-					},
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "web",
 				},
 			}
 

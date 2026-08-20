@@ -10,7 +10,6 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus/garden"
 )
@@ -88,7 +87,7 @@ metric_relabel_configs:
 	Describe("#CentralScrapeConfigs", func() {
 		var (
 			scrapeConfigPrometheus = &monitoringv1alpha1.ScrapeConfig{
-				ObjectMeta: metav1.ObjectMeta{Name: "prometheus-garden"},
+				Name: "prometheus-garden",
 				Spec: monitoringv1alpha1.ScrapeConfigSpec{
 					StaticConfigs: []monitoringv1alpha1.StaticConfig{{
 						Targets: []monitoringv1alpha1.Target{"localhost:9090"},
@@ -117,7 +116,7 @@ metric_relabel_configs:
 			var (
 				prometheusAggregateTargets        = []monitoringv1alpha1.Target{"foo", "bar"}
 				prometheusAggregateIngressTargets = []monitoringv1alpha1.Target{"ingress-foo", "ingress-bar"}
-				globalMonitoringSecret            = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "global-monitoring-secret"}}
+				globalMonitoringSecret            = &corev1.Secret{Name: "global-monitoring-secret"}
 			)
 
 			When("there are no aggregate targets", func() {
@@ -130,7 +129,7 @@ metric_relabel_configs:
 				Expect(garden.CentralScrapeConfigs(prometheusAggregateTargets, prometheusAggregateIngressTargets, globalMonitoringSecret)).To(HaveExactElements(
 					scrapeConfigPrometheus,
 					&monitoringv1alpha1.ScrapeConfig{
-						ObjectMeta: metav1.ObjectMeta{Name: "prometheus-aggregate"},
+						Name: "prometheus-aggregate",
 						Spec: monitoringv1alpha1.ScrapeConfigSpec{
 							HonorLabels:     new(true),
 							HonorTimestamps: new(false),
@@ -166,7 +165,7 @@ metric_relabel_configs:
 						},
 					},
 					&monitoringv1alpha1.ScrapeConfig{
-						ObjectMeta: metav1.ObjectMeta{Name: "prometheus-aggregate-ingress"},
+						Name: "prometheus-aggregate-ingress",
 						Spec: monitoringv1alpha1.ScrapeConfigSpec{
 							HonorLabels:     new(true),
 							HonorTimestamps: new(false),

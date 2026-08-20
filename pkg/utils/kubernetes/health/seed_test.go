@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
@@ -65,9 +64,7 @@ var _ = Describe("Seed", func() {
 				},
 			}, &gardencorev1beta1.Gardener{}, HaveOccurred()),
 			Entry("not observed at latest generation", &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 1,
-				},
+				Generation: 1,
 				Status: gardencorev1beta1.SeedStatus{
 					Conditions: []gardencorev1beta1.Condition{
 						{Type: gardencorev1beta1.GardenletReady, Status: gardencorev1beta1.ConditionTrue},
@@ -110,9 +107,7 @@ var _ = Describe("Seed", func() {
 			),
 			Entry("up-to-date with matching generation",
 				&gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Generation: 5,
-					},
+					Generation: 5,
 					Status: gardencorev1beta1.SeedStatus{
 						Gardener:           &gardencorev1beta1.Gardener{},
 						ObservedGeneration: 5,
@@ -151,9 +146,7 @@ var _ = Describe("Seed", func() {
 			),
 			Entry("outdated - observed generation behind",
 				&gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Generation: 10,
-					},
+					Generation: 10,
 					Status: gardencorev1beta1.SeedStatus{
 						Gardener:           &gardencorev1beta1.Gardener{},
 						ObservedGeneration: 9,
@@ -164,9 +157,7 @@ var _ = Describe("Seed", func() {
 			),
 			Entry("outdated - zero observed generation",
 				&gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Generation: 1,
-					},
+					Generation: 1,
 					Status: gardencorev1beta1.SeedStatus{
 						Gardener:           &gardencorev1beta1.Gardener{},
 						ObservedGeneration: 0,

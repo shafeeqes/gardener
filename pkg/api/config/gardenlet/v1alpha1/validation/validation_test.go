@@ -62,48 +62,44 @@ var _ = Describe("GardenletConfiguration", func() {
 			},
 			FeatureGates: map[string]bool{},
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"foo": "bar",
+				Labels: map[string]string{
+					"foo": "bar",
+				},
+				Spec: gardencorev1beta1.SeedSpec{
+					DNS: gardencorev1beta1.SeedDNS{
+						Provider: &gardencorev1beta1.SeedDNSProvider{
+							Type: "foo",
+							CredentialsRef: &corev1.ObjectReference{
+								APIVersion: "v1",
+								Kind:       "Secret",
+								Name:       "secret",
+								Namespace:  "namespace",
+							},
+						},
+						Internal: &gardencorev1beta1.SeedDNSProviderConfig{
+							Type:   "foo",
+							Domain: "test.internal.example.com",
+							CredentialsRef: corev1.ObjectReference{
+								APIVersion: "v1",
+								Kind:       "Secret",
+								Name:       "secret",
+								Namespace:  "namespace",
+							},
 						},
 					},
-					Spec: gardencorev1beta1.SeedSpec{
-						DNS: gardencorev1beta1.SeedDNS{
-							Provider: &gardencorev1beta1.SeedDNSProvider{
-								Type: "foo",
-								CredentialsRef: &corev1.ObjectReference{
-									APIVersion: "v1",
-									Kind:       "Secret",
-									Name:       "secret",
-									Namespace:  "namespace",
-								},
-							},
-							Internal: &gardencorev1beta1.SeedDNSProviderConfig{
-								Type:   "foo",
-								Domain: "test.internal.example.com",
-								CredentialsRef: corev1.ObjectReference{
-									APIVersion: "v1",
-									Kind:       "Secret",
-									Name:       "secret",
-									Namespace:  "namespace",
-								},
-							},
+					Ingress: &gardencorev1beta1.Ingress{
+						Domain: "ingress.test.example.com",
+						Controller: gardencorev1beta1.IngressController{
+							Kind: "nginx",
 						},
-						Ingress: &gardencorev1beta1.Ingress{
-							Domain: "ingress.test.example.com",
-							Controller: gardencorev1beta1.IngressController{
-								Kind: "nginx",
-							},
-						},
-						Networks: gardencorev1beta1.SeedNetworks{
-							Pods:     "100.96.0.0/11",
-							Services: "100.64.0.0/13",
-						},
-						Provider: gardencorev1beta1.SeedProvider{
-							Type:   "foo",
-							Region: "some-region",
-						},
+					},
+					Networks: gardencorev1beta1.SeedNetworks{
+						Pods:     "100.96.0.0/11",
+						Services: "100.64.0.0/13",
+					},
+					Provider: gardencorev1beta1.SeedProvider{
+						Type:   "foo",
+						Region: "some-region",
 					},
 				},
 			},

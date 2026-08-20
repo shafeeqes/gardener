@@ -10,7 +10,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -46,9 +45,9 @@ var _ = Describe("RenewGardenAccess", func() {
 		gardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 
 		seeds = []gardencorev1beta1.Seed{
-			{ObjectMeta: metav1.ObjectMeta{Name: "seed1"}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "seed2"}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "seed3"}},
+			{Name: "seed1"},
+			{Name: "seed2"},
+			{Name: "seed3"},
 		}
 	})
 
@@ -158,9 +157,9 @@ var _ = Describe("RenewGardenAccess", func() {
 
 		BeforeEach(func() {
 			gardenlets = []seedmanagementv1alpha1.Gardenlet{
-				{ObjectMeta: metav1.ObjectMeta{Name: "self-hosted-shoot-g1", Namespace: "garden"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "self-hosted-shoot-g2", Namespace: "garden"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "self-hosted-shoot-g3", Namespace: "garden"}},
+				{Name: "self-hosted-shoot-g1", Namespace: "garden"},
+				{Name: "self-hosted-shoot-g2", Namespace: "garden"},
+				{Name: "self-hosted-shoot-g3", Namespace: "garden"},
 			}
 		})
 
@@ -206,7 +205,7 @@ var _ = Describe("RenewGardenAccess", func() {
 		})
 
 		It("should skip gardenlets not related to self-hosted shoots", func() {
-			nonSelfHosted := seedmanagementv1alpha1.Gardenlet{ObjectMeta: metav1.ObjectMeta{Name: "managed-seed-gardenlet", Namespace: "garden"}}
+			nonSelfHosted := seedmanagementv1alpha1.Gardenlet{Name: "managed-seed-gardenlet", Namespace: "garden"}
 			Expect(gardenClient.Create(ctx, &nonSelfHosted)).To(Succeed())
 			Expect(createGardenlets()).To(Succeed())
 
@@ -223,8 +222,8 @@ var _ = Describe("RenewGardenAccess", func() {
 
 		BeforeEach(func() {
 			gardenlets = []seedmanagementv1alpha1.Gardenlet{
-				{ObjectMeta: metav1.ObjectMeta{Name: "self-hosted-shoot-g1", Namespace: "garden"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "self-hosted-shoot-g2", Namespace: "garden"}},
+				{Name: "self-hosted-shoot-g1", Namespace: "garden"},
+				{Name: "self-hosted-shoot-g2", Namespace: "garden"},
 			}
 		})
 
@@ -258,11 +257,10 @@ var _ = Describe("RenewGardenAccess", func() {
 		})
 
 		It("should succeed if only non-self-hosted-shoot gardenlets are still annotated with `renew-kubeconfig`", func() {
-			nonSelfHosted := seedmanagementv1alpha1.Gardenlet{ObjectMeta: metav1.ObjectMeta{
+			nonSelfHosted := seedmanagementv1alpha1.Gardenlet{
 				Name:        "managed-seed-gardenlet",
 				Namespace:   "garden",
-				Annotations: map[string]string{"gardener.cloud/operation": renewKubeconfig},
-			}}
+				Annotations: map[string]string{"gardener.cloud/operation": renewKubeconfig}}
 			Expect(gardenClient.Create(ctx, &nonSelfHosted)).To(Succeed())
 			Expect(createGardenlets()).To(Succeed())
 

@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	clientcmdv1 "k8s.io/client-go/tools/clientcmd/api/v1"
@@ -50,10 +49,8 @@ var _ = Describe("ShootClientMap", func() {
 		fakeSeedClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "garden-eden",
-				Name:      "forbidden-fruit",
-			},
+			Namespace: "garden-eden",
+			Name:      "forbidden-fruit",
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: new("apple-seed"),
 			},
@@ -108,10 +105,8 @@ var _ = Describe("ShootClientMap", func() {
 
 			Expect(fakeGardenClient.Create(ctx, shoot)).To(Succeed())
 			Expect(fakeSeedClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: shoot.Status.TechnicalID,
-				},
+				Name:      "gardener-internal",
+				Namespace: shoot.Status.TechnicalID,
 			})).To(Succeed())
 
 			NewClientFromSecretObject = func(secret *corev1.Secret, fns ...kubernetes.ConfigFunc) (kubernetes.Interface, error) {
@@ -136,20 +131,16 @@ var _ = Describe("ShootClientMap", func() {
 
 			Expect(fakeGardenClient.Create(ctx, shoot)).To(Succeed())
 			Expect(fakeSeedClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: shoot.Status.TechnicalID,
-				},
-				Data: dataWithPopulatedToken(),
+				Name:      "gardener-internal",
+				Namespace: shoot.Status.TechnicalID,
+				Data:      dataWithPopulatedToken(),
 			})).To(Succeed())
 
 			// Also pre-create the secret for changedTechnicalID namespace (used after InvalidateClient)
 			Expect(fakeSeedClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: changedTechnicalID,
-				},
-				Data: dataWithPopulatedToken(),
+				Name:      "gardener-internal",
+				Namespace: changedTechnicalID,
+				Data:      dataWithPopulatedToken(),
 			})).To(Succeed())
 
 			NewClientFromSecretObject = func(secret *corev1.Secret, fns ...kubernetes.ConfigFunc) (kubernetes.Interface, error) {
@@ -201,16 +192,12 @@ var _ = Describe("ShootClientMap", func() {
 
 			Expect(fakeGardenClient.Create(ctx, shoot)).To(Succeed())
 			Expect(fakeSeedClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: shoot.Status.TechnicalID,
-				},
+				Name:      "gardener-internal",
+				Namespace: shoot.Status.TechnicalID,
 			})).To(Succeed())
 			Expect(fakeSeedClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-internal",
-					Namespace: changedTechnicalID,
-				},
+				Name:      "gardener-internal",
+				Namespace: changedTechnicalID,
 			})).To(Succeed())
 
 			hash, err := factory.CalculateClientSetHash(ctx, key)

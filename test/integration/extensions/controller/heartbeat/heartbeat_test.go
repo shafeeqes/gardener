@@ -22,10 +22,8 @@ var _ = Describe("Extensions Heartbeat Controller tests", func() {
 		fakeClock.SetTime(time.Now())
 
 		lease = &coordinationv1.Lease{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-extension-heartbeat",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "gardener-extension-heartbeat",
+			Namespace: testNamespace.Name,
 		}
 	})
 

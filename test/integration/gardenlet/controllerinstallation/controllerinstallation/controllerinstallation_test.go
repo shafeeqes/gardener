@@ -51,10 +51,8 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 	BeforeEach(func() {
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "registration-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "registration-",
+			Labels:       map[string]string{testID: testRunID},
 		}
 
 		// created via the following commands in the ./testdata/chart-* directories:
@@ -67,21 +65,17 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		controllerDeployment = &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "deploy-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "deploy-",
+			Labels:       map[string]string{testID: testRunID},
 			Helm: &gardencorev1.HelmControllerDeployment{
 				RawChart: chartWithGardenKubeconfig,
 			},
 			InjectGardenKubeconfig: new(true),
 		}
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "installation-",
-				Labels:       map[string]string{testID: testRunID},
-				Annotations:  map[string]string{"security.gardener.cloud/pod-security-enforce": "privileged"},
-			},
+			GenerateName: "installation-",
+			Labels:       map[string]string{testID: testRunID},
+			Annotations:  map[string]string{"security.gardener.cloud/pod-security-enforce": "privileged"},
 		}
 	})
 
@@ -541,13 +535,11 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 			BeforeEach(func() {
 				referencedSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "ref-secret-",
-						Namespace:    gardenNamespace.Name,
-						Labels: map[string]string{
-							testID:                      testRunID,
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-						},
+					GenerateName: "ref-secret-",
+					Namespace:    gardenNamespace.Name,
+					Labels: map[string]string{
+						testID:                      testRunID,
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 					},
 					Data: map[string][]byte{
 						"token": []byte("s3cret-t0ken"),
@@ -559,13 +551,11 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				})
 
 				referencedConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "ref-config-",
-						Namespace:    gardenNamespace.Name,
-						Labels: map[string]string{
-							testID:                      testRunID,
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-						},
+					GenerateName: "ref-config-",
+					Namespace:    gardenNamespace.Name,
+					Labels: map[string]string{
+						testID:                      testRunID,
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 					},
 					Data: map[string]string{
 						"endpoint": "https://example.com",
@@ -705,10 +695,8 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 			BeforeEach(func() {
 				selfHostedShoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      selfHostedShootName,
-						Namespace: gardenNamespace.Name,
-					},
+					Name:      selfHostedShootName,
+					Namespace: gardenNamespace.Name,
 					Spec: gardencorev1beta1.ShootSpec{
 						CloudProfileName: new("test-cloudprofile"),
 						Region:           "foo-region",
@@ -736,9 +724,7 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				})
 
 				selfHostedControllerDeployment = &gardencorev1.ControllerDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "deploy-sh-",
-					},
+					GenerateName: "deploy-sh-",
 					Helm: &gardencorev1.HelmControllerDeployment{
 						RawChart: chartWithGardenKubeconfig,
 					},
@@ -750,9 +736,7 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				})
 
 				selfHostedControllerInstall = &gardencorev1beta1.ControllerInstallation{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "install-sh-",
-					},
+					GenerateName: "install-sh-",
 				}
 
 				r = &controllerinstallation.Reconciler{
@@ -792,13 +776,13 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 			It("should deploy with correct namespace, ManagedResource name, Helm values, and garden access secret", func() {
 				By("Reconcile the self-hosted ControllerInstallation")
-				_, err := r.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: selfHostedControllerInstall.Name}})
+				_, err := r.Reconcile(ctx, reconcile.Request{Name: selfHostedControllerInstall.Name})
 				Expect(err).NotTo(HaveOccurred())
 
 				extensionNamespace := "extension-" + controllerRegistration.Name
 
 				By("Ensure namespace uses the registration name")
-				namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: extensionNamespace}}
+				namespace := &corev1.Namespace{Name: extensionNamespace}
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(namespace), namespace)).To(Succeed())
 				Expect(namespace.Labels).To(And(
 					HaveKeyWithValue("gardener.cloud/role", "extension"),
@@ -808,7 +792,7 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				Expect(namespace.Annotations).To(HaveKeyWithValue("high-availability-config.resources.gardener.cloud/zones", "zone-a"))
 
 				By("Ensure garden access secret has self-hosted shoot SA name and namespace annotation")
-				secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "garden-access-extension", Namespace: extensionNamespace}}
+				secret := &corev1.Secret{Name: "garden-access-extension", Namespace: extensionNamespace}
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 				Expect(secret.Annotations).To(And(
 					HaveKeyWithValue("serviceaccount.resources.gardener.cloud/name", v1beta1constants.ExtensionShootServiceAccountPrefix+selfHostedShootName+"--"+selfHostedControllerInstall.Name),
@@ -816,11 +800,11 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				))
 
 				By("Ensure ManagedResource uses the registration name")
-				managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: controllerRegistration.Name, Namespace: "garden"}}
+				managedResource := &resourcesv1alpha1.ManagedResource{Name: controllerRegistration.Name, Namespace: "garden"}
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
 				By("Ensure chart was deployed with correct Helm values")
-				mrSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: managedResource.Namespace}}
+				mrSecret := &corev1.Secret{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: managedResource.Namespace}
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(mrSecret), mrSecret)).To(Succeed())
 
 				values := make(map[string]any)
@@ -853,20 +837,19 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 			It("should properly clean up on deletion", func() {
 				By("Reconcile the self-hosted ControllerInstallation")
-				_, err := r.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: selfHostedControllerInstall.Name}})
+				_, err := r.Reconcile(ctx, reconcile.Request{Name: selfHostedControllerInstall.Name})
 				Expect(err).NotTo(HaveOccurred())
 
 				extensionNamespace := "extension-" + controllerRegistration.Name
 
 				By("Ensure resources were created")
-				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: extensionNamespace}}), &corev1.Namespace{})).To(Succeed())
-				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: controllerRegistration.Name, Namespace: "garden"}}), &resourcesv1alpha1.ManagedResource{})).To(Succeed())
+				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&corev1.Namespace{Name: extensionNamespace}), &corev1.Namespace{})).To(Succeed())
+				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&resourcesv1alpha1.ManagedResource{Name: controllerRegistration.Name, Namespace: "garden"}), &resourcesv1alpha1.ManagedResource{})).To(Succeed())
 
 				By("Create ServiceAccount for garden access secret")
-				gardenClusterServiceAccount := &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{
+				gardenClusterServiceAccount := &corev1.ServiceAccount{
 					Name:      v1beta1constants.ExtensionShootServiceAccountPrefix + selfHostedShootName + "--" + selfHostedControllerInstall.Name,
-					Namespace: gardenNamespace.Name,
-				}}
+					Namespace: gardenNamespace.Name}
 				Expect(testClient.Create(ctx, gardenClusterServiceAccount)).To(Succeed())
 
 				By("Delete the self-hosted ControllerInstallation")
@@ -874,14 +857,14 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 				By("Reconcile the deletion")
 				Eventually(func(g Gomega) {
-					result, err := r.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: selfHostedControllerInstall.Name}})
+					result, err := r.Reconcile(ctx, reconcile.Request{Name: selfHostedControllerInstall.Name})
 					g.Expect(err).NotTo(HaveOccurred())
 					g.Expect(result).To(Equal(reconcile.Result{}))
 				}).Should(Succeed())
 
 				By("Verify controller artefacts were removed")
-				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: extensionNamespace}}), &corev1.Namespace{})).To(BeNotFoundError())
-				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: controllerRegistration.Name, Namespace: "garden"}}), &resourcesv1alpha1.ManagedResource{})).To(BeNotFoundError())
+				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&corev1.Namespace{Name: extensionNamespace}), &corev1.Namespace{})).To(BeNotFoundError())
+				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(&resourcesv1alpha1.ManagedResource{Name: controllerRegistration.Name, Namespace: "garden"}), &resourcesv1alpha1.ManagedResource{})).To(BeNotFoundError())
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(gardenClusterServiceAccount), gardenClusterServiceAccount)).To(BeNotFoundError())
 			})
 		})
@@ -896,9 +879,7 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 
 			BeforeEach(func() {
 				projectNamespace = &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "garden-",
-					},
+					GenerateName: "garden-",
 				}
 				Expect(testClient.Create(ctx, projectNamespace)).To(Succeed())
 				DeferCleanup(func() {
@@ -906,10 +887,8 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				})
 
 				selfHostedShoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "my-shoot",
-						Namespace: projectNamespace.Name,
-					},
+					Name:      "my-shoot",
+					Namespace: projectNamespace.Name,
 					Spec: gardencorev1beta1.ShootSpec{
 						CloudProfileName: new("test-cloudprofile"),
 						Region:           "foo-region",
@@ -981,7 +960,7 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 				}
 
 				By("Reconcile the self-hosted ControllerInstallation")
-				_, err := r.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: selfHostedControllerInstall.Name}})
+				_, err := r.Reconcile(ctx, reconcile.Request{Name: selfHostedControllerInstall.Name})
 				Expect(err).NotTo(HaveOccurred())
 
 				By("Ensure garden access secret has self-hosted shoot SA name and namespace annotation")
@@ -1011,10 +990,9 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 			By("Create ServiceAccount for garden access secret")
 			// This ServiceAccount is typically created by the token-requestor controller which does not run in this
 			// integration test, so let's fake it here.
-			gardenClusterServiceAccount := &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{
+			gardenClusterServiceAccount := &corev1.ServiceAccount{
 				Name:      "extension-" + controllerInstallation.Name,
-				Namespace: seedNamespace.Name,
-			}}
+				Namespace: seedNamespace.Name}
 			Expect(testClient.Create(ctx, gardenClusterServiceAccount)).To(Succeed())
 
 			By("Delete ControllerInstallation")
@@ -1054,7 +1032,7 @@ var _ = Describe("ControllerInstallation controller tests", func() {
 		Context("when seed is garden at the same time", func() {
 			BeforeEach(func() {
 				garden := &operatorv1alpha1.Garden{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "garden-"},
+					GenerateName: "garden-",
 					Spec: operatorv1alpha1.GardenSpec{
 						RuntimeCluster: operatorv1alpha1.RuntimeCluster{
 							Networking: operatorv1alpha1.RuntimeNetworking{

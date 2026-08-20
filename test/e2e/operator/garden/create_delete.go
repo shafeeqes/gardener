@@ -14,7 +14,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -62,17 +61,13 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 
 		It("Verify 'gardener-system-public' namespace and 'gardener-info' configmap exist", func(ctx SpecContext) {
 			namespace := &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: gardencorev1beta1.GardenerSystemPublicNamespace,
-				},
+				Name: gardencorev1beta1.GardenerSystemPublicNamespace,
 			}
 			Eventually(ctx, s.VirtualClusterKomega.Get(namespace)).Should(Succeed())
 
 			configMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener-info",
-					Namespace: gardencorev1beta1.GardenerSystemPublicNamespace,
-				},
+				Name:      "gardener-info",
+				Namespace: gardencorev1beta1.GardenerSystemPublicNamespace,
 			}
 			Eventually(ctx, s.VirtualClusterKomega.Get(configMap)).Should(Succeed())
 			Expect(configMap.Data).To(HaveKey("gardenerAPIServer"))
@@ -103,10 +98,8 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 
 		It("Verify gardener-resource-manager was deleted", func(ctx SpecContext) {
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameGardenerResourceManager,
-					Namespace: v1beta1constants.GardenNamespace,
-				},
+				Name:      v1beta1constants.DeploymentNameGardenerResourceManager,
+				Namespace: v1beta1constants.GardenNamespace,
 			}
 
 			Eventually(ctx, s.GardenKomega.Get(deployment)).Should(BeNotFoundError())
@@ -119,11 +112,9 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 
 func itShouldVerifyPrometheusHealthCheck(s *GardenContext, prometheusName string) {
 	rule := &monitoringv1.PrometheusRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      prometheusName + "-test-job-down",
-			Namespace: "garden",
-			Labels:    map[string]string{"prometheus": prometheusName},
-		},
+		Name:      prometheusName + "-test-job-down",
+		Namespace: "garden",
+		Labels:    map[string]string{"prometheus": prometheusName},
 		Spec: monitoringv1.PrometheusRuleSpec{
 			Groups: []monitoringv1.RuleGroup{
 				{

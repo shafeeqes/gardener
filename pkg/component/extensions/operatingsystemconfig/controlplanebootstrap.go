@@ -67,10 +67,9 @@ func NewControlPlaneBootstrap(
 		waitTimeout:         waitTimeout,
 
 		osc: Data{
-			Object: &extensionsv1alpha1.OperatingSystemConfig{ObjectMeta: metav1.ObjectMeta{
+			Object: &extensionsv1alpha1.OperatingSystemConfig{
 				Name:      "gardenadm-" + values.Worker.Name,
-				Namespace: values.Namespace,
-			}},
+				Namespace: values.Namespace},
 		},
 	}
 }
@@ -126,10 +125,9 @@ func (c *controlPlaneBootstrap) Wait(ctx context.Context) error {
 				return fmt.Errorf("no cloud config information provided in status")
 			}
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Namespace: c.osc.Object.Status.CloudConfig.SecretRef.Namespace,
-				Name:      c.osc.Object.Status.CloudConfig.SecretRef.Name,
-			}}
+				Name:      c.osc.Object.Status.CloudConfig.SecretRef.Name}
 			if err := c.client.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 				return fmt.Errorf("failed getting cloud config secret %q: %w", client.ObjectKeyFromObject(secret), err)
 			}

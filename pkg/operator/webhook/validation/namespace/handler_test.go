@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -32,7 +31,7 @@ var _ = Describe("Handler", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.RuntimeScheme).Build()
 		handler = &Handler{RuntimeClient: fakeClient}
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+			Name: "foo",
 		}
 	})
 
@@ -60,7 +59,7 @@ var _ = Describe("Handler", func() {
 		})
 
 		It("should prevent deletion because a Garden exists", func() {
-			Expect(fakeClient.Create(ctx, &operatorv1alpha1.Garden{ObjectMeta: metav1.ObjectMeta{Name: "foo"}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &operatorv1alpha1.Garden{Name: "foo"})).To(Succeed())
 
 			warning, err := handler.ValidateDelete(ctx, namespace)
 			Expect(warning).To(BeNil())

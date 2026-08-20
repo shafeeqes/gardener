@@ -96,10 +96,8 @@ func (d *dependencyWatchdogAccess) createManagedResource(ctx context.Context) er
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:" + prefixDependencyWatchdog,
-				Namespace: corev1.NamespaceNodeLease,
-			},
+			Name:      "gardener.cloud:target:" + prefixDependencyWatchdog,
+			Namespace: corev1.NamespaceNodeLease,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"coordination.k8s.io"},
@@ -109,10 +107,8 @@ func (d *dependencyWatchdogAccess) createManagedResource(ctx context.Context) er
 			},
 		}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:" + prefixDependencyWatchdog,
-				Namespace: corev1.NamespaceNodeLease,
-			},
+			Name:      "gardener.cloud:target:" + prefixDependencyWatchdog,
+			Namespace: corev1.NamespaceNodeLease,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "Role",
@@ -125,9 +121,7 @@ func (d *dependencyWatchdogAccess) createManagedResource(ctx context.Context) er
 			}},
 		}
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:" + prefixDependencyWatchdog,
-			},
+			Name: "gardener.cloud:target:" + prefixDependencyWatchdog,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -137,9 +131,7 @@ func (d *dependencyWatchdogAccess) createManagedResource(ctx context.Context) er
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:" + prefixDependencyWatchdog,
-			},
+			Name: "gardener.cloud:target:" + prefixDependencyWatchdog,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -171,6 +163,6 @@ func (d *dependencyWatchdogAccess) Destroy(ctx context.Context) error {
 		return err
 	}
 	return kubernetesutils.DeleteObjects(ctx, d.client,
-		&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: KubeConfigSecretName, Namespace: d.namespace}},
+		&corev1.Secret{Name: KubeConfigSecretName, Namespace: d.namespace},
 	)
 }

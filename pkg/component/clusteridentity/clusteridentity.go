@@ -86,10 +86,8 @@ func NewForShoot(c client.Client, namespace, identity string) Interface {
 
 func (c *clusterIdentity) Deploy(ctx context.Context) error {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      v1beta1constants.ClusterIdentity,
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      v1beta1constants.ClusterIdentity,
+		Namespace: metav1.NamespaceSystem,
 		Immutable: new(true),
 		Data: map[string]string{
 			v1beta1constants.ClusterIdentity:       c.identity,

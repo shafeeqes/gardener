@@ -172,8 +172,8 @@ var _ = Describe("Utils", func() {
 			log = logr.Discard()
 			condition = gardencorev1beta1.Condition{Type: "Foo"}
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{Name: "seed"},
-				Status:     gardencorev1beta1.SeedStatus{Conditions: []gardencorev1beta1.Condition{condition}},
+				Name:   "seed",
+				Status: gardencorev1beta1.SeedStatus{Conditions: []gardencorev1beta1.Condition{condition}},
 			}
 
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).WithStatusSubresource(&gardencorev1beta1.Seed{}).Build()

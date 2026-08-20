@@ -36,12 +36,10 @@ var _ = Describe("Translator", func() {
 
 			BeforeEach(func() {
 				deployment = &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        "foo",
-						Namespace:   "bar",
-						Labels:      map[string]string{"will": "be-ignored"},
-						Annotations: map[string]string{"this-as": "well"},
-					},
+					Name:        "foo",
+					Namespace:   "bar",
+					Labels:      map[string]string{"will": "be-ignored"},
+					Annotations: map[string]string{"this-as": "well"},
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
@@ -190,7 +188,7 @@ status: {}
 
 			It("should fail translate a deployment whose ConfigMap volumes refer to non-existing objects", func() {
 				deployment.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "some-configmap"}}}},
+					{Name: "foo", ConfigMap: &corev1.ConfigMapVolumeSource{Name: "some-configmap"}},
 				}
 
 				Expect(Translate(ctx, fakeClient, deployment, nil)).Error().To(MatchError(ContainSubstring("failed reading ConfigMap")))
@@ -198,7 +196,7 @@ status: {}
 
 			It("should fail translate a deployment whose Secret volumes refer to non-existing objects", func() {
 				deployment.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "some-secret"}}},
+					{Name: "foo", Secret: &corev1.SecretVolumeSource{SecretName: "some-secret"}},
 				}
 
 				Expect(Translate(ctx, fakeClient, deployment, nil)).Error().To(MatchError(ContainSubstring("failed reading Secret")))
@@ -206,7 +204,7 @@ status: {}
 
 			It("should fail translate a deployment whose projected ConfigMap volumes refer to non-existing objects", func() {
 				deployment.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{ConfigMap: &corev1.ConfigMapProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "some-configmap"}}}}}}},
+					{Name: "foo", Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{ConfigMap: &corev1.ConfigMapProjection{Name: "some-configmap"}}}}},
 				}
 
 				Expect(Translate(ctx, fakeClient, deployment, nil)).Error().To(MatchError(ContainSubstring("failed reading ConfigMap")))
@@ -214,7 +212,7 @@ status: {}
 
 			It("should fail translate a deployment whose Secret volumes refer to non-existing objects", func() {
 				deployment.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{Secret: &corev1.SecretProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "some-secret"}}}}}}},
+					{Name: "foo", Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{Secret: &corev1.SecretProjection{Name: "some-secret"}}}}},
 				}
 
 				Expect(Translate(ctx, fakeClient, deployment, nil)).Error().To(MatchError(ContainSubstring("failed reading Secret")))
@@ -222,13 +220,13 @@ status: {}
 
 			It("should produce different hashes when Secret names change (same HostPath)", func() {
 				secret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "secret-v1", Namespace: deployment.Namespace},
-					Data:       map[string][]byte{"token": []byte("old-token")},
+					Name: "secret-v1", Namespace: deployment.Namespace,
+					Data: map[string][]byte{"token": []byte("old-token")},
 				}
 				Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
 				deployment.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "token", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "secret-v1"}}},
+					{Name: "token", Secret: &corev1.SecretVolumeSource{SecretName: "secret-v1"}},
 				}
 
 				_, hash1, err := Translate(ctx, fakeClient, deployment, nil)
@@ -236,8 +234,8 @@ status: {}
 
 				// Rename the secret (simulates secrets-manager rotating to a new secret name).
 				secret2 := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "secret-v2", Namespace: deployment.Namespace},
-					Data:       map[string][]byte{"token": []byte("new-token")},
+					Name: "secret-v2", Namespace: deployment.Namespace,
+					Data: map[string][]byte{"token": []byte("new-token")},
 				}
 				Expect(fakeClient.Create(ctx, secret2)).To(Succeed())
 
@@ -252,11 +250,11 @@ status: {}
 			It("should successfully translate a deployment w/ volumes", func() {
 				var (
 					configMap1 = &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "cm1", Namespace: deployment.Namespace},
-						Data:       map[string]string{"cm1file1.txt": "some-content", "cm1file2.txt": "more-content"},
+						Name: "cm1", Namespace: deployment.Namespace,
+						Data: map[string]string{"cm1file1.txt": "some-content", "cm1file2.txt": "more-content"},
 					}
 					configMap2 = &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "cm2", Namespace: deployment.Namespace},
+						Name: "cm2", Namespace: deployment.Namespace,
 						Data: map[string]string{"cm2file1.txt": "even-more-content", "cm2file2.txt": `apiVersion: v1
 clusters:
 - cluster:
@@ -266,12 +264,12 @@ kind: Config
 `},
 					}
 					secret1 = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: deployment.Namespace},
-						Data:       map[string][]byte{"secret1file1.txt": []byte("very-secret"), "secret1file2.txt": []byte("super-secret")},
+						Name: "secret1", Namespace: deployment.Namespace,
+						Data: map[string][]byte{"secret1file1.txt": []byte("very-secret"), "secret1file2.txt": []byte("super-secret")},
 					}
 					secret2 = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "secret2", Namespace: deployment.Namespace},
-						Data:       map[string][]byte{"secret2file1.txt": []byte("highly-secret"), "secret2file2.txt": []byte("please-dont-detect")},
+						Name: "secret2", Namespace: deployment.Namespace,
+						Data: map[string][]byte{"secret2file1.txt": []byte("highly-secret"), "secret2file2.txt": []byte("please-dont-detect")},
 					}
 				)
 
@@ -281,18 +279,18 @@ kind: Config
 				Expect(fakeClient.Create(ctx, secret2)).To(Succeed())
 
 				deployment.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "v1", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "cm1"}}}},
-					{Name: "v2", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "secret1"}}},
-					{Name: "v3", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{
+					{Name: "v1", ConfigMap: &corev1.ConfigMapVolumeSource{Name: "cm1"}},
+					{Name: "v2", Secret: &corev1.SecretVolumeSource{SecretName: "secret1"}},
+					{Name: "v3", Projected: &corev1.ProjectedVolumeSource{
 						Sources: []corev1.VolumeProjection{
-							{ConfigMap: &corev1.ConfigMapProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "cm2"}}},
+							{ConfigMap: &corev1.ConfigMapProjection{Name: "cm2"}},
 							{Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "secret2"},
-								Items:                []corev1.KeyToPath{{Key: "secret2file2.txt", Path: "mystery.txt"}},
+								Name:  "secret2",
+								Items: []corev1.KeyToPath{{Key: "secret2file2.txt", Path: "mystery.txt"}},
 							}},
 						},
 						DefaultMode: new(int32(0666)),
-					}}},
+					}},
 				}
 
 				files, hash, err := Translate(ctx, fakeClient, deployment, nil)
@@ -395,12 +393,10 @@ kind: Config
 
 			BeforeEach(func() {
 				statefulSet = &appsv1.StatefulSet{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        "foo",
-						Namespace:   "bar",
-						Labels:      map[string]string{"will": "be-ignored"},
-						Annotations: map[string]string{"this-as": "well"},
-					},
+					Name:        "foo",
+					Namespace:   "bar",
+					Labels:      map[string]string{"will": "be-ignored"},
+					Annotations: map[string]string{"this-as": "well"},
 					Spec: appsv1.StatefulSetSpec{
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
@@ -414,8 +410,8 @@ kind: Config
 							},
 						},
 						VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
-							{ObjectMeta: metav1.ObjectMeta{Name: "pvc1"}, Spec: corev1.PersistentVolumeClaimSpec{VolumeName: "foo"}},
-							{ObjectMeta: metav1.ObjectMeta{Name: "pvc2"}, Spec: corev1.PersistentVolumeClaimSpec{VolumeName: "bar"}},
+							{Name: "pvc1", Spec: corev1.PersistentVolumeClaimSpec{VolumeName: "foo"}},
+							{Name: "pvc2", Spec: corev1.PersistentVolumeClaimSpec{VolumeName: "bar"}},
 						},
 					},
 				}
@@ -522,7 +518,7 @@ status: {}
 
 			It("should fail translate a statefulSet whose ConfigMap volumes refer to non-existing objects", func() {
 				statefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "some-configmap"}}}},
+					{Name: "foo", ConfigMap: &corev1.ConfigMapVolumeSource{Name: "some-configmap"}},
 				}
 
 				Expect(Translate(ctx, fakeClient, statefulSet, nil)).Error().To(MatchError(ContainSubstring("failed reading ConfigMap")))
@@ -530,7 +526,7 @@ status: {}
 
 			It("should fail translate a statefulSet whose Secret volumes refer to non-existing objects", func() {
 				statefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "some-secret"}}},
+					{Name: "foo", Secret: &corev1.SecretVolumeSource{SecretName: "some-secret"}},
 				}
 
 				Expect(Translate(ctx, fakeClient, statefulSet, nil)).Error().To(MatchError(ContainSubstring("failed reading Secret")))
@@ -538,7 +534,7 @@ status: {}
 
 			It("should fail translate a statefulSet whose projected ConfigMap volumes refer to non-existing objects", func() {
 				statefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{ConfigMap: &corev1.ConfigMapProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "some-configmap"}}}}}}},
+					{Name: "foo", Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{ConfigMap: &corev1.ConfigMapProjection{Name: "some-configmap"}}}}},
 				}
 
 				Expect(Translate(ctx, fakeClient, statefulSet, nil)).Error().To(MatchError(ContainSubstring("failed reading ConfigMap")))
@@ -546,7 +542,7 @@ status: {}
 
 			It("should fail translate a statefulSet whose Secret volumes refer to non-existing objects", func() {
 				statefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{Secret: &corev1.SecretProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "some-secret"}}}}}}},
+					{Name: "foo", Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{Secret: &corev1.SecretProjection{Name: "some-secret"}}}}},
 				}
 
 				Expect(Translate(ctx, fakeClient, statefulSet, nil)).Error().To(MatchError(ContainSubstring("failed reading Secret")))
@@ -555,11 +551,11 @@ status: {}
 			It("should successfully translate a statefulSet w/ volumes", func() {
 				var (
 					configMap1 = &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "cm1", Namespace: statefulSet.Namespace},
-						Data:       map[string]string{"cm1file1.txt": "some-content", "cm1file2.txt": "more-content"},
+						Name: "cm1", Namespace: statefulSet.Namespace,
+						Data: map[string]string{"cm1file1.txt": "some-content", "cm1file2.txt": "more-content"},
 					}
 					configMap2 = &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "cm2", Namespace: statefulSet.Namespace},
+						Name: "cm2", Namespace: statefulSet.Namespace,
 						Data: map[string]string{"cm2file1.txt": "even-more-content", "cm2file2.txt": `apiVersion: v1
 clusters:
 - cluster:
@@ -569,12 +565,12 @@ kind: Config
 `},
 					}
 					secret1 = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: statefulSet.Namespace},
-						Data:       map[string][]byte{"secret1file1.txt": []byte("very-secret"), "secret1file2.txt": []byte("super-secret")},
+						Name: "secret1", Namespace: statefulSet.Namespace,
+						Data: map[string][]byte{"secret1file1.txt": []byte("very-secret"), "secret1file2.txt": []byte("super-secret")},
 					}
 					secret2 = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "secret2", Namespace: statefulSet.Namespace},
-						Data:       map[string][]byte{"secret2file1.txt": []byte("highly-secret"), "secret2file2.txt": []byte("please-dont-detect")},
+						Name: "secret2", Namespace: statefulSet.Namespace,
+						Data: map[string][]byte{"secret2file1.txt": []byte("highly-secret"), "secret2file2.txt": []byte("please-dont-detect")},
 					}
 				)
 
@@ -584,18 +580,18 @@ kind: Config
 				Expect(fakeClient.Create(ctx, secret2)).To(Succeed())
 
 				statefulSet.Spec.Template.Spec.Volumes = []corev1.Volume{
-					{Name: "v1", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "cm1"}}}},
-					{Name: "v2", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "secret1"}}},
-					{Name: "v3", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{
+					{Name: "v1", ConfigMap: &corev1.ConfigMapVolumeSource{Name: "cm1"}},
+					{Name: "v2", Secret: &corev1.SecretVolumeSource{SecretName: "secret1"}},
+					{Name: "v3", Projected: &corev1.ProjectedVolumeSource{
 						Sources: []corev1.VolumeProjection{
-							{ConfigMap: &corev1.ConfigMapProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "cm2"}}},
+							{ConfigMap: &corev1.ConfigMapProjection{Name: "cm2"}},
 							{Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "secret2"},
-								Items:                []corev1.KeyToPath{{Key: "secret2file2.txt", Path: "mystery.txt"}},
+								Name:  "secret2",
+								Items: []corev1.KeyToPath{{Key: "secret2file2.txt", Path: "mystery.txt"}},
 							}},
 						},
 						DefaultMode: new(int32(0666)),
-					}}},
+					}},
 				}
 
 				files, hash, err := Translate(ctx, fakeClient, statefulSet, nil)
@@ -704,14 +700,12 @@ kind: Config
 
 			BeforeEach(func() {
 				pod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels:          map[string]string{"baz": "foo"},
-						Annotations:     map[string]string{"bar": "baz"},
-						Name:            "foo",
-						ResourceVersion: "1",
-						Finalizers:      []string{"bar"},
-						OwnerReferences: []metav1.OwnerReference{{}},
-					},
+					Labels:          map[string]string{"baz": "foo"},
+					Annotations:     map[string]string{"bar": "baz"},
+					Name:            "foo",
+					ResourceVersion: "1",
+					Finalizers:      []string{"bar"},
+					OwnerReferences: []metav1.OwnerReference{{}},
 					Spec: corev1.PodSpec{
 						ServiceAccountName:       "remove-me",
 						DeprecatedServiceAccount: "remove-me",
@@ -802,7 +796,7 @@ status: {}
 
 			It("should fail translate a pod whose ConfigMap volumes refer to non-existing objects", func() {
 				pod.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "some-configmap"}}}},
+					{Name: "foo", ConfigMap: &corev1.ConfigMapVolumeSource{Name: "some-configmap"}},
 				}
 
 				Expect(Translate(ctx, fakeClient, pod, nil)).Error().To(MatchError(ContainSubstring("failed reading ConfigMap")))
@@ -810,7 +804,7 @@ status: {}
 
 			It("should fail translate a pod whose Secret volumes refer to non-existing objects", func() {
 				pod.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "some-secret"}}},
+					{Name: "foo", Secret: &corev1.SecretVolumeSource{SecretName: "some-secret"}},
 				}
 
 				Expect(Translate(ctx, fakeClient, pod, nil)).Error().To(MatchError(ContainSubstring("failed reading Secret")))
@@ -818,7 +812,7 @@ status: {}
 
 			It("should fail translate a pod whose projected ConfigMap volumes refer to non-existing objects", func() {
 				pod.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{ConfigMap: &corev1.ConfigMapProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "some-configmap"}}}}}}},
+					{Name: "foo", Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{ConfigMap: &corev1.ConfigMapProjection{Name: "some-configmap"}}}}},
 				}
 
 				Expect(Translate(ctx, fakeClient, pod, nil)).Error().To(MatchError(ContainSubstring("failed reading ConfigMap")))
@@ -826,7 +820,7 @@ status: {}
 
 			It("should fail translate a pod whose Secret volumes refer to non-existing objects", func() {
 				pod.Spec.Volumes = []corev1.Volume{
-					{Name: "foo", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{Secret: &corev1.SecretProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "some-secret"}}}}}}},
+					{Name: "foo", Projected: &corev1.ProjectedVolumeSource{Sources: []corev1.VolumeProjection{{Secret: &corev1.SecretProjection{Name: "some-secret"}}}}},
 				}
 
 				Expect(Translate(ctx, fakeClient, pod, nil)).Error().To(MatchError(ContainSubstring("failed reading Secret")))
@@ -835,11 +829,11 @@ status: {}
 			It("should successfully translate a pod w/ volumes", func() {
 				var (
 					configMap1 = &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "cm1", Namespace: pod.Namespace},
-						Data:       map[string]string{"cm1file1.txt": "some-content", "cm1file2.txt": "more-content"},
+						Name: "cm1", Namespace: pod.Namespace,
+						Data: map[string]string{"cm1file1.txt": "some-content", "cm1file2.txt": "more-content"},
 					}
 					configMap2 = &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "cm2", Namespace: pod.Namespace},
+						Name: "cm2", Namespace: pod.Namespace,
 						Data: map[string]string{"cm2file1.txt": "even-more-content", "cm2file2.txt": `apiVersion: v1
 clusters:
 - cluster:
@@ -849,12 +843,12 @@ kind: Config
 `},
 					}
 					secret1 = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: pod.Namespace},
-						Data:       map[string][]byte{"secret1file1.txt": []byte("very-secret"), "secret1file2.txt": []byte("super-secret")},
+						Name: "secret1", Namespace: pod.Namespace,
+						Data: map[string][]byte{"secret1file1.txt": []byte("very-secret"), "secret1file2.txt": []byte("super-secret")},
 					}
 					secret2 = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{Name: "secret2", Namespace: pod.Namespace},
-						Data:       map[string][]byte{"secret2file1.txt": []byte("highly-secret"), "secret2file2.txt": []byte("please-dont-detect")},
+						Name: "secret2", Namespace: pod.Namespace,
+						Data: map[string][]byte{"secret2file1.txt": []byte("highly-secret"), "secret2file2.txt": []byte("please-dont-detect")},
 					}
 				)
 
@@ -864,18 +858,18 @@ kind: Config
 				Expect(fakeClient.Create(ctx, secret2)).To(Succeed())
 
 				pod.Spec.Volumes = []corev1.Volume{
-					{Name: "v1", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "cm1"}}}},
-					{Name: "v2", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "secret1"}}},
-					{Name: "v3", VolumeSource: corev1.VolumeSource{Projected: &corev1.ProjectedVolumeSource{
+					{Name: "v1", ConfigMap: &corev1.ConfigMapVolumeSource{Name: "cm1"}},
+					{Name: "v2", Secret: &corev1.SecretVolumeSource{SecretName: "secret1"}},
+					{Name: "v3", Projected: &corev1.ProjectedVolumeSource{
 						Sources: []corev1.VolumeProjection{
-							{ConfigMap: &corev1.ConfigMapProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "cm2"}}},
+							{ConfigMap: &corev1.ConfigMapProjection{Name: "cm2"}},
 							{Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "secret2"},
-								Items:                []corev1.KeyToPath{{Key: "secret2file2.txt", Path: "mystery.txt"}},
+								Name:  "secret2",
+								Items: []corev1.KeyToPath{{Key: "secret2file2.txt", Path: "mystery.txt"}},
 							}},
 						},
 						DefaultMode: new(int32(0666)),
-					}}},
+					}},
 				}
 
 				files, hash, err := Translate(ctx, fakeClient, pod, nil)

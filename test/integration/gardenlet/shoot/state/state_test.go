@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -39,11 +38,9 @@ var _ = Describe("Shoot State controller tests", func() {
 		))
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "shoot-",
-				Namespace:    projectNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "shoot-",
+			Namespace:    projectNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				Region:           "local",
 				CloudProfileName: new("local"),
@@ -58,13 +55,11 @@ var _ = Describe("Shoot State controller tests", func() {
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "some-secret",
-				Namespace: seedNamespace.Name,
-				Labels: map[string]string{
-					testID:    testRunID,
-					"persist": "true",
-				},
+			Name:      "some-secret",
+			Namespace: seedNamespace.Name,
+			Labels: map[string]string{
+				testID:    testRunID,
+				"persist": "true",
 			},
 		}
 	})

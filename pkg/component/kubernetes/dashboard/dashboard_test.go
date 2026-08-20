@@ -52,21 +52,17 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		managedResourceSecret *corev1.Secret
 
 		namespaces = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"gardener.cloud/purpose": "kubernetes-dashboard",
-				},
+			Name: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"gardener.cloud/purpose": "kubernetes-dashboard",
 			},
 		}
 
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -119,15 +115,13 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name:      "kubernetes-dashboard",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -144,11 +138,9 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -160,11 +152,9 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "kubernetes-dashboard",
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "kubernetes-dashboard",
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -181,34 +171,28 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 
 		secretCerts = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-certs",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard-certs",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 
 		secretCSRF = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-csrf",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard-csrf",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			Data: map[string][]byte{
 				"csrf": []byte(""),
@@ -217,36 +201,30 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		secretKeyHolder = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-key-holder",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard-key-holder",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-settings",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard-settings",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 		}
 
 		deploymentDashboardFor = func(apiserverHost *string, authenticationMode string) *appsv1.Deployment {
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kubernetes-dashboard",
-					Namespace: "kubernetes-dashboard",
-					Labels: map[string]string{
-						"gardener.cloud/role": "optional-addon",
-						"k8s-app":             "kubernetes-dashboard",
-						"origin":              "gardener",
-					},
+				Name:      "kubernetes-dashboard",
+				Namespace: "kubernetes-dashboard",
+				Labels: map[string]string{
+					"gardener.cloud/role": "optional-addon",
+					"k8s-app":             "kubernetes-dashboard",
+					"origin":              "gardener",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -302,12 +280,10 @@ var _ = Describe("Kubernetes Dashboard", func() {
 										ReadOnlyRootFilesystem:   new(true),
 									},
 									LivenessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/",
-												Port:   intstr.IntOrString{IntVal: 8443},
-												Scheme: corev1.URISchemeHTTPS,
-											},
+										HTTPGet: &corev1.HTTPGetAction{
+											Path:   "/",
+											Port:   intstr.IntOrString{IntVal: 8443},
+											Scheme: corev1.URISchemeHTTPS,
 										},
 										InitialDelaySeconds: 30,
 										TimeoutSeconds:      30,
@@ -338,15 +314,13 @@ var _ = Describe("Kubernetes Dashboard", func() {
 							Volumes: []corev1.Volume{
 								{
 									Name: "kubernetes-dashboard-certs",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName: "kubernetes-dashboard-certs",
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: "kubernetes-dashboard-certs",
 									},
 								},
 								{
-									Name:         "tmp-volume",
-									VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+									Name:     "tmp-volume",
+									EmptyDir: &corev1.EmptyDirVolumeSource{},
 								},
 							},
 						},
@@ -365,14 +339,12 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		deploymentMetricsScraper = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dashboard-metrics-scraper",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"gardener.cloud/role": "optional-addon",
-					"k8s-app":             "dashboard-metrics-scraper",
-					"origin":              "gardener",
-				},
+			Name:      "dashboard-metrics-scraper",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"gardener.cloud/role": "optional-addon",
+				"k8s-app":             "dashboard-metrics-scraper",
+				"origin":              "gardener",
 			},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(1)),
@@ -397,12 +369,10 @@ var _ = Describe("Kubernetes Dashboard", func() {
 								Name:  "dashboard-metrics-scraper",
 								Image: "scraper-image:scraper-tag",
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path:   "/",
-											Port:   intstr.IntOrString{IntVal: 8000},
-											Scheme: corev1.URISchemeHTTP,
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path:   "/",
+										Port:   intstr.IntOrString{IntVal: 8000},
+										Scheme: corev1.URISchemeHTTP,
 									},
 									InitialDelaySeconds: 30,
 									TimeoutSeconds:      30,
@@ -433,7 +403,7 @@ var _ = Describe("Kubernetes Dashboard", func() {
 						},
 						ServiceAccountName: "kubernetes-dashboard",
 						Volumes: []corev1.Volume{
-							{Name: "tmp-volume", VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}},
+							{Name: "tmp-volume", EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
 					},
 				},
@@ -441,12 +411,10 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		serviceDashboard = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "kubernetes-dashboard",
-				},
+			Name:      "kubernetes-dashboard",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "kubernetes-dashboard",
 			},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
@@ -462,12 +430,10 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		serviceMetricsScraper = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dashboard-metrics-scraper",
-				Namespace: "kubernetes-dashboard",
-				Labels: map[string]string{
-					"k8s-app": "dashboard-metrics-scraper",
-				},
+			Name:      "dashboard-metrics-scraper",
+			Namespace: "kubernetes-dashboard",
+			Labels: map[string]string{
+				"k8s-app": "dashboard-metrics-scraper",
 			},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
@@ -483,10 +449,8 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard",
-				Namespace: "kubernetes-dashboard",
-			},
+			Name:      "kubernetes-dashboard",
+			Namespace: "kubernetes-dashboard",
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				ResourcePolicy: &vpaautoscalingv1.PodResourcePolicy{
 					ContainerPolicies: []vpaautoscalingv1.ContainerResourcePolicy{
@@ -522,16 +486,12 @@ var _ = Describe("Kubernetes Dashboard", func() {
 		component = New(c, namespace, values)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -553,12 +513,10 @@ var _ = Describe("Kubernetes Dashboard", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -664,11 +622,9 @@ var _ = Describe("Kubernetes Dashboard", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -691,11 +647,9 @@ var _ = Describe("Kubernetes Dashboard", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

@@ -21,11 +21,9 @@ import (
 func (p *prometheus) service() *corev1.Service {
 	var port = servicePorts.Web.TargetPort.IntVal
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.name(),
-			Namespace: p.namespace,
-			Labels:    p.getLabels(),
-		},
+		Name:      p.name(),
+		Namespace: p.namespace,
+		Labels:    p.getLabels(),
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: map[string]string{"prometheus": p.values.Name},

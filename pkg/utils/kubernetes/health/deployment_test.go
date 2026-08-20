@@ -48,7 +48,7 @@ var _ = Describe("Deployment", func() {
 			}},
 		}, BeNil()),
 		Entry("not observed at latest version", &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 		}, HaveOccurred()),
 		Entry("not available", &appsv1.Deployment{
 			Status: appsv1.DeploymentStatus{Conditions: []appsv1.DeploymentCondition{
@@ -82,9 +82,7 @@ var _ = Describe("Deployment", func() {
 
 		BeforeEach(func() {
 			deployment = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 42,
-				},
+				Generation: 42,
 				Status: appsv1.DeploymentStatus{
 					ObservedGeneration: 42,
 					Conditions: []appsv1.DeploymentCondition{{
@@ -157,10 +155,8 @@ var _ = Describe("Deployment", func() {
 		BeforeEach(func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 			deployment = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "deploy",
-					Namespace: "namespace",
-				},
+				Name:      "deploy",
+				Namespace: "namespace",
 				Spec: appsv1.DeploymentSpec{
 					Replicas: new(int32(1)),
 					Selector: &metav1.LabelSelector{MatchLabels: labels},
@@ -183,11 +179,9 @@ var _ = Describe("Deployment", func() {
 			Expect(fakeClient.Create(ctx, deployment)).To(Succeed())
 
 			Expect(fakeClient.Create(ctx, &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pod",
-					Namespace: deployment.Namespace,
-					Labels:    labels,
-				},
+				Name:      "pod",
+				Namespace: deployment.Namespace,
+				Labels:    labels,
 			})).To(Succeed())
 
 			ok, err := health.IsDeploymentUpdated(fakeClient, deployment)(ctx)
@@ -211,11 +205,9 @@ var _ = Describe("Deployment", func() {
 
 			for i := range 2 {
 				Expect(fakeClient.Create(ctx, &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      fmt.Sprintf("pod%d", i),
-						Namespace: deployment.Namespace,
-						Labels:    labels,
-					},
+					Name:      fmt.Sprintf("pod%d", i),
+					Namespace: deployment.Namespace,
+					Labels:    labels,
 				})).To(Succeed())
 			}
 
@@ -274,21 +266,17 @@ var _ = Describe("Deployment", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 			deployment = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "deploy",
-					Namespace: "namespace",
-				},
+				Name:      "deploy",
+				Namespace: "namespace",
 				Spec: appsv1.DeploymentSpec{
 					Replicas: new(int32(1)),
 					Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"foo": "bar"}},
 				},
 			}
 			pod = &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "pod-",
-					Namespace:    deployment.Namespace,
-					Labels:       deployment.Spec.Selector.MatchLabels,
-				},
+				GenerateName: "pod-",
+				Namespace:    deployment.Namespace,
+				Labels:       deployment.Spec.Selector.MatchLabels,
 			}
 
 			Expect(fakeClient.Create(ctx, deployment)).To(Succeed())

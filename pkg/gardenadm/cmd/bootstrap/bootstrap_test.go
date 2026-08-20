@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -61,14 +60,14 @@ var _ = Describe("Bootstrap", func() {
 		Describe("safety check", func() {
 			It("should abort the execution if gardener-operator is deployed on the targeted cluster", func() {
 				Expect(fakeClient.Create(ctx, &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "garden", Name: "gardener-operator"},
+					Namespace: "garden", Name: "gardener-operator",
 				})).To(Succeed())
 				Expect(command.RunE(command, nil)).To(MatchError(ContainSubstring(`deployment "garden/gardener-operator" exists on the targeted cluster`)))
 			})
 
 			It("should abort the execution if gardenlet is deployed on the targeted cluster", func() {
 				Expect(fakeClient.Create(ctx, &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "garden", Name: "gardenlet"},
+					Namespace: "garden", Name: "gardenlet",
 				})).To(Succeed())
 				Expect(command.RunE(command, nil)).To(MatchError(ContainSubstring(`deployment "garden/gardenlet" exists on the targeted cluster`)))
 			})

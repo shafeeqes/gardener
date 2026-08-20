@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/gardener/gardener/pkg/api/indexer"
@@ -52,7 +51,7 @@ var _ = Describe("Kubernetes", func() {
 		Entry("no Service", &corev1.Secret{}, BeNil()),
 		Entry("Service w/o annotation", &corev1.Service{}, BeNil()),
 		Entry("Service w/ annotation",
-			&corev1.Service{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{"networking.resources.gardener.cloud/namespace-selectors": `[{"matchLabels":{"foo":"bar"}}]`}}},
+			&corev1.Service{Annotations: map[string]string{"networking.resources.gardener.cloud/namespace-selectors": `[{"matchLabels":{"foo":"bar"}}]`}},
 			ConsistOf("true"),
 		),
 	)

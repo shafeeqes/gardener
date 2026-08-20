@@ -447,56 +447,52 @@ func (s *sni) Wait(ctx context.Context) error {
 func (s *sni) WaitCleanup(_ context.Context) error { return nil }
 
 func (s *sni) emptyDestinationRule() *istionetworkingv1beta1.DestinationRule {
-	return &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: s.name, Namespace: s.namespace}}
+	return &istionetworkingv1beta1.DestinationRule{Name: s.name, Namespace: s.namespace}
 }
 
 func (s *sni) emptyMTLSDestinationRule() *istionetworkingv1beta1.DestinationRule {
-	return &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: s.name + "-mtls", Namespace: s.namespace}}
+	return &istionetworkingv1beta1.DestinationRule{Name: s.name + "-mtls", Namespace: s.namespace}
 }
 
 func (s *sni) emptyConnectionUpgradeDestinationRule() *istionetworkingv1beta1.DestinationRule {
-	return &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: s.name + ConnectionUpgradeServiceNameSuffix, Namespace: s.namespace}}
+	return &istionetworkingv1beta1.DestinationRule{Name: s.name + ConnectionUpgradeServiceNameSuffix, Namespace: s.namespace}
 }
 
 func (s *sni) emptyEnvoyFilterAPIServerProxy() *istionetworkingv1alpha3.EnvoyFilter {
-	return &istionetworkingv1alpha3.EnvoyFilter{ObjectMeta: metav1.ObjectMeta{Name: s.namespace + "-apiserver-proxy", Namespace: s.valuesFunc().IstioIngressGateway.Namespace}}
+	return &istionetworkingv1alpha3.EnvoyFilter{Name: s.namespace + "-apiserver-proxy", Namespace: s.valuesFunc().IstioIngressGateway.Namespace}
 }
 
 func (s *sni) emptyEnvoyFilterIstioTLSTermination(namespace string) *istionetworkingv1alpha3.EnvoyFilter {
-	return &istionetworkingv1alpha3.EnvoyFilter{ObjectMeta: metav1.ObjectMeta{Name: s.namespace + IstioTLSTerminationEnvoyFilterSuffix, Namespace: namespace}}
+	return &istionetworkingv1alpha3.EnvoyFilter{Name: s.namespace + IstioTLSTerminationEnvoyFilterSuffix, Namespace: namespace}
 }
 
 func (s *sni) emptyGateway() *istionetworkingv1beta1.Gateway {
-	return &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: s.name, Namespace: s.namespace}}
+	return &istionetworkingv1beta1.Gateway{Name: s.name, Namespace: s.namespace}
 }
 
 func (s *sni) emptyWildcardGateway() *istionetworkingv1beta1.Gateway {
-	return &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: s.name + "-wildcard", Namespace: s.namespace}}
+	return &istionetworkingv1beta1.Gateway{Name: s.name + "-wildcard", Namespace: s.namespace}
 }
 
 func (s *sni) emptyVirtualService() *istionetworkingv1beta1.VirtualService {
-	return &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: s.name, Namespace: s.namespace}}
+	return &istionetworkingv1beta1.VirtualService{Name: s.name, Namespace: s.namespace}
 }
 
 func (s *sni) emptyWildcardVirtualService() *istionetworkingv1beta1.VirtualService {
-	return &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: s.name + "-wildcard", Namespace: s.namespace}}
+	return &istionetworkingv1beta1.VirtualService{Name: s.name + "-wildcard", Namespace: s.namespace}
 }
 
 func (s *sni) emptyIstioMTLSSecret() *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.namespace + istioMTLSSecretSuffix,
-			Namespace: s.valuesFunc().IstioIngressGateway.Namespace,
-		},
+		Name:      s.namespace + istioMTLSSecretSuffix,
+		Namespace: s.valuesFunc().IstioIngressGateway.Namespace,
 	}
 }
 
 func (s *sni) emptyIstioTLSSecret() *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.namespace + istioTLSSecretSuffix,
-			Namespace: s.valuesFunc().IstioIngressGateway.Namespace,
-		},
+		Name:      s.namespace + istioTLSSecretSuffix,
+		Namespace: s.valuesFunc().IstioIngressGateway.Namespace,
 	}
 }
 
@@ -507,10 +503,8 @@ func (s *sni) emptyIstioWildcardTLSSecret() *corev1.Secret {
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.namespace + istioWildcardTLSSecretSuffix,
-			Namespace: namespace,
-		},
+		Name:      s.namespace + istioWildcardTLSSecretSuffix,
+		Namespace: namespace,
 	}
 }
 
@@ -641,10 +635,8 @@ func GetAPIServerProxyTargetClusterName(controlPlaneNamespace string) string {
 // ReconcileIstioInternalLoadBalancingConfigMap reconciles the configmap for istio internal load balancing.
 func ReconcileIstioInternalLoadBalancingConfigMap(ctx context.Context, c client.Client, namespace, istioNamespace string, hosts []string, istioTLSTerminationActive bool) error {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      resourcemanagerconfigv1alpha1.IstioInternalLoadBalancingConfigMapName,
-		},
+		Namespace: namespace,
+		Name:      resourcemanagerconfigv1alpha1.IstioInternalLoadBalancingConfigMapName,
 	}
 
 	if !istioTLSTerminationActive {

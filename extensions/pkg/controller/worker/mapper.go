@@ -48,9 +48,8 @@ func MachineToWorkerMapper(reader client.Reader, predicates []predicate.Predicat
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{
+		return []reconcile.Request{{
 			Name:      workerName,
-			Namespace: machine.Namespace,
-		}}}
+			Namespace: machine.Namespace}}
 	}
 }

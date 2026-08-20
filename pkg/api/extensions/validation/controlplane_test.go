@@ -22,10 +22,8 @@ var _ = Describe("ControlPlane validation tests", func() {
 
 	BeforeEach(func() {
 		cp = &extensionsv1alpha1.ControlPlane{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-cp",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-cp",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.ControlPlaneSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           "provider",

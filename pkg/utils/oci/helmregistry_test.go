@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -43,19 +42,15 @@ var _ = Describe("helmregistry", func() {
 		rc = &recordingCache{cache: newCache()}
 
 		caBundleSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      caBundleSecretName,
-				Namespace: v1beta1constants.GardenNamespace,
-			},
+			Name:      caBundleSecretName,
+			Namespace: v1beta1constants.GardenNamespace,
 			Data: map[string][]byte{
 				"bundle.crt": testCACert,
 			},
 		}
 		pullSecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: v1beta1constants.GardenNamespace,
-				Name:      "pull-secret",
-			},
+			Namespace: v1beta1constants.GardenNamespace,
+			Name:      "pull-secret",
 			Data: map[string][]byte{
 				corev1.DockerConfigJsonKey: fmt.Appendf(nil, "{\"auths\":{\"%s\":{\"username\":\"foo\",\"password\":\"bar\"}}}", registryAddress),
 			},
@@ -160,10 +155,8 @@ var _ = Describe("helmregistry", func() {
 		hr := &HelmRegistry{
 			cache: rc,
 			client: fake.NewFakeClient(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: v1beta1constants.GardenNamespace,
-					Name:      "pull-secret",
-				},
+				Namespace: v1beta1constants.GardenNamespace,
+				Name:      "pull-secret",
 				Data: map[string][]byte{
 					corev1.DockerConfigJsonKey: fmt.Appendf(nil, "{\"auths\":{\"%s\":{\"username\":\"foo\",\"password\":\"bar\"}}}", "other-"+registryAddress),
 				},
@@ -192,10 +185,8 @@ var _ = Describe("helmregistry", func() {
 
 	It("should return error when CA bundle secret contains invalid PEM", func() {
 		invalidCABundleSecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "invalid-ca-bundle",
-				Namespace: v1beta1constants.GardenNamespace,
-			},
+			Name:      "invalid-ca-bundle",
+			Namespace: v1beta1constants.GardenNamespace,
 			Data: map[string][]byte{
 				"bundle.crt": []byte("invalid-pem-data"),
 			},
@@ -242,10 +233,8 @@ var _ = Describe("helmregistry", func() {
 		wrongCAData := wrongCA.SecretData()
 
 		wrongCASecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "wrong-ca-bundle",
-				Namespace: v1beta1constants.GardenNamespace,
-			},
+			Name:      "wrong-ca-bundle",
+			Namespace: v1beta1constants.GardenNamespace,
 			Data: map[string][]byte{
 				secretsutils.DataKeyCertificateBundle: wrongCAData[secretsutils.DataKeyCertificateCA],
 			},

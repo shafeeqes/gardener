@@ -24,20 +24,16 @@ import (
 var _ = Describe("Miscellaneous", func() {
 	var (
 		shoot1 = gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot1",
-				Namespace: "garden-pr1",
-			},
+			Name:      "shoot1",
+			Namespace: "garden-pr1",
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: new("seed1"),
 			},
 		}
 
 		shoot2 = gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot2",
-				Namespace: "garden-pr1",
-			},
+			Name:      "shoot2",
+			Namespace: "garden-pr1",
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: new("seed1"),
 			},
@@ -47,10 +43,8 @@ var _ = Describe("Miscellaneous", func() {
 		}
 
 		shoot3 = gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot3",
-				Namespace: "garden-pr1",
-			},
+			Name:      "shoot3",
+			Namespace: "garden-pr1",
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: nil,
 			},
@@ -364,16 +358,14 @@ var _ = Describe("Miscellaneous", func() {
 				oldSeedSpec.DNS.Defaults = nil
 
 				globalDefaultSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "default-domain-secret",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels: map[string]string{
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
-						},
-						Annotations: map[string]string{
-							"dns.gardener.cloud/domain":   "global-default.com",
-							"dns.gardener.cloud/provider": "aws-route53",
-						},
+					Name:      "default-domain-secret",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels: map[string]string{
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleDefaultDomain,
+					},
+					Annotations: map[string]string{
+						"dns.gardener.cloud/domain":   "global-default.com",
+						"dns.gardener.cloud/provider": "aws-route53",
 					},
 				}
 			})

@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/gardener/gardener/pkg/component/test"
@@ -90,7 +89,7 @@ var _ = ginkgo.Describe("PrometheusRules", func() {
 						"ObjectMeta": MatchFields(IgnoreExtras, Fields{"Name": Equal("pvc")}),
 					})),
 					Equal(&monitoringv1.PrometheusRule{
-						ObjectMeta: metav1.ObjectMeta{Name: "seed"},
+						Name: "seed",
 						Spec: monitoringv1.PrometheusRuleSpec{
 							Groups: []monitoringv1.RuleGroup{{
 								Name:  "seed.rules",
@@ -148,7 +147,7 @@ var _ = ginkgo.Describe("PrometheusRules", func() {
 						"ObjectMeta": MatchFields(IgnoreExtras, Fields{"Name": Equal("pvc")}),
 					})),
 					Equal(&monitoringv1.PrometheusRule{
-						ObjectMeta: metav1.ObjectMeta{Name: "seed"},
+						Name: "seed",
 						Spec: monitoringv1.PrometheusRuleSpec{
 							Groups: []monitoringv1.RuleGroup{{
 								Name:  "seed.rules",

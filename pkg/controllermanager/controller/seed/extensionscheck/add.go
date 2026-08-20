@@ -7,7 +7,6 @@ package extensionscheck
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -64,5 +63,5 @@ func (r *Reconciler) MapControllerInstallationToSeed(_ context.Context, obj clie
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.SeedRef.Name}}}
+	return []reconcile.Request{{Name: controllerInstallation.Spec.SeedRef.Name}}
 }

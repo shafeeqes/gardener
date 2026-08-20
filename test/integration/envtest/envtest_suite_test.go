@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -67,10 +66,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: "garden-",
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: "garden-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -81,9 +78,7 @@ var _ = BeforeSuite(func() {
 	})
 
 	project := &gardencorev1beta1.Project{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "test-",
-		},
+		GenerateName: "test-",
 		Spec: gardencorev1beta1.ProjectSpec{
 			Namespace: &testNamespace.Name,
 		},
@@ -100,6 +95,6 @@ var _ = BeforeSuite(func() {
 	})
 
 	By("Ensure that garden namespace exists")
-	Expect(testClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "garden"}})).
+	Expect(testClient.Create(ctx, &corev1.Namespace{Name: "garden"})).
 		To(Succeed())
 })

@@ -13,7 +13,6 @@ import (
 	coordinationv1 "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -93,23 +92,17 @@ var _ = Describe("Add", func() {
 
 			hostName = "test-host"
 			lease = &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "osc-secret",
-					Namespace: "kube-system",
-				},
+				Name:      "osc-secret",
+				Namespace: "kube-system",
 			}
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "osc-secret",
-					Namespace:   "kube-system",
-					Annotations: map[string]string{"checksum/data-script": "downloaded-checksum"},
-				},
+				Name:        "osc-secret",
+				Namespace:   "kube-system",
+				Annotations: map[string]string{"checksum/data-script": "downloaded-checksum"},
 			}
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "test-node",
-					Annotations: map[string]string{"checksum/cloud-config-data": "applied-checksum"},
-				},
+				Name:        "test-node",
+				Annotations: map[string]string{"checksum/cloud-config-data": "applied-checksum"},
 			}
 		})
 
@@ -243,8 +236,8 @@ var _ = Describe("Add", func() {
 				NodeName: nodeName,
 			}).EnqueueWithJitterDelay(ctx, log)
 			queue = &test.FakeQueue[reconcile.Request]{}
-			obj = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "osc-secret", Namespace: "namespace"}}
-			req = reconcile.Request{NamespacedName: types.NamespacedName{Name: obj.Name, Namespace: obj.Namespace}}
+			obj = &corev1.Secret{Name: "osc-secret", Namespace: "namespace"}
+			req = reconcile.Request{Name: obj.Name, Namespace: obj.Namespace}
 		})
 
 		Context("Create events", func() {
@@ -305,7 +298,7 @@ var _ = Describe("Add", func() {
 						var node *corev1.Node
 
 						BeforeEach(func() {
-							node = &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: nodeName}}
+							node = &corev1.Node{Name: nodeName}
 						})
 
 						JustBeforeEach(func() {
@@ -416,15 +409,13 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			mapper = (&Reconciler{}).LeaseToSecretMapper()
 			lease = &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "some-name",
-					Namespace: "some-namespace",
-				},
+				Name:      "some-name",
+				Namespace: "some-namespace",
 			}
 		})
 
 		It("should map the node to the secret", func() {
-			Expect(mapper(ctx, lease)).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: "some-name", Namespace: "some-namespace"}}))
+			Expect(mapper(ctx, lease)).To(ConsistOf(reconcile.Request{Name: "some-name", Namespace: "some-namespace"}))
 		})
 	})
 
@@ -437,11 +428,9 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			mapper = (&Reconciler{}).NodeToSecretMapper()
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "node",
-					Labels: map[string]string{
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "secret-1",
-					},
+				Name: "node",
+				Labels: map[string]string{
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "secret-1",
 				},
 			}
 		})
@@ -459,10 +448,8 @@ var _ = Describe("Add", func() {
 		It("should map the node to the secret", func() {
 			Expect(mapper(ctx, node)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      "secret-1",
-						Namespace: "kube-system",
-					},
+					Name:      "secret-1",
+					Namespace: "kube-system",
 				}),
 			)
 		})

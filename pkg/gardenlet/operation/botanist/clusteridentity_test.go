@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -60,10 +59,8 @@ var _ = Describe("ClusterIdentity", func() {
 		clusterIdentity = mockclusteridentity.NewMockInterface(ctrl)
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			Name:      shootName,
+			Namespace: shootNamespace,
 			Status: gardencorev1beta1.ShootStatus{
 				UID: shootUID,
 			},
@@ -77,9 +74,7 @@ var _ = Describe("ClusterIdentity", func() {
 		Expect(gardencorev1beta1.AddToScheme(s)).To(Succeed())
 
 		cluster := &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootControlPlaneNamespace,
-			},
+			Name: shootControlPlaneNamespace,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot: runtime.RawExtension{Object: shoot},
 			},

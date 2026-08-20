@@ -289,12 +289,10 @@ func virtualDeploymentSpecified(extension *operatorv1alpha1.Extension) bool {
 
 func virtualNamespace(extension *operatorv1alpha1.Extension) *corev1.Namespace {
 	return &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("extension-%s", extension.Name),
-			Annotations: map[string]string{
-				v1beta1constants.GardenRole:               v1beta1constants.GardenRoleExtension,
-				"extensions.operator.gardener.cloud/name": extension.Name,
-			},
+		Name: fmt.Sprintf("extension-%s", extension.Name),
+		Annotations: map[string]string{
+			v1beta1constants.GardenRole:               v1beta1constants.GardenRoleExtension,
+			"extensions.operator.gardener.cloud/name": extension.Name,
 		},
 	}
 }

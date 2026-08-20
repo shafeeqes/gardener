@@ -31,10 +31,8 @@ var _ = Describe("CriticalComponents tests", func() {
 		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   resourceName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   resourceName,
+			Labels: map[string]string{testID: testRunID},
 			Spec: corev1.NodeSpec{
 				Taints: []corev1.Taint{
 					{
@@ -46,10 +44,8 @@ var _ = Describe("CriticalComponents tests", func() {
 		}
 
 		daemonSet = &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-daemon-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-daemon-",
+			Namespace:    testNamespace.Name,
 			Spec: appsv1.DaemonSetSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{"app": "test-daemon"},
@@ -73,10 +69,8 @@ var _ = Describe("CriticalComponents tests", func() {
 		}
 
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-pod-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-pod-",
+			Namespace:    testNamespace.Name,
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{{
 					Name:  "app",
@@ -256,9 +250,7 @@ func patchPodReady(pod *corev1.Pod) {
 func createRequiredCSINodeObject(nodeName, driverName string) {
 	By("Creating required CSINode object")
 	csiNode := storagev1.CSINode{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: nodeName,
-		},
+		Name: nodeName,
 		Spec: storagev1.CSINodeSpec{
 			Drivers: []storagev1.CSINodeDriver{
 				{

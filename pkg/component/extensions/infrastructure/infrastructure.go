@@ -94,10 +94,8 @@ func New(
 		waitTimeout:         waitTimeout,
 
 		infrastructure: &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -141,12 +139,10 @@ func (i *infrastructure) deploy(ctx context.Context, operation string) (extensio
 		}
 
 		i.infrastructure.Spec = extensionsv1alpha1.InfrastructureSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           i.values.Type,
-				ProviderConfig: providerConfig,
-			},
-			Region:       i.values.Region,
-			SSHPublicKey: i.values.SSHPublicKey,
+			Type:           i.values.Type,
+			ProviderConfig: providerConfig,
+			Region:         i.values.Region,
+			SSHPublicKey:   i.values.SSHPublicKey,
 			SecretRef: corev1.SecretReference{
 				Name:      v1beta1constants.SecretNameCloudProvider,
 				Namespace: i.infrastructure.Namespace,

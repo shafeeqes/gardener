@@ -289,20 +289,16 @@ func (n *nodeExporter) computeResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "node-exporter",
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getLabels(),
-			},
+			Name:                         "node-exporter",
+			Namespace:                    metav1.NamespaceSystem,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getLabels(),
-			},
+			Name:      name,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    getLabels(),
 			Spec: corev1.ServiceSpec{
 				Type:      corev1.ServiceTypeClusterIP,
 				ClusterIP: corev1.ClusterIPNone,
@@ -318,14 +314,12 @@ func (n *nodeExporter) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		daemonSet = &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					v1beta1constants.GardenRole:     v1beta1constants.GardenRoleMonitoring,
-					managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
-				}),
-			},
+			Name:      name,
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				v1beta1constants.GardenRole:     v1beta1constants.GardenRoleMonitoring,
+				managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
+			}),
 			Spec: appsv1.DaemonSetSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: getLabels(),
@@ -404,21 +398,17 @@ func (n *nodeExporter) computeResourcesData() (map[string][]byte, error) {
 									},
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/",
-											Port: intstr.FromInt32(portMetrics),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/",
+										Port: intstr.FromInt32(portMetrics),
 									},
 									InitialDelaySeconds: 5,
 									TimeoutSeconds:      5,
 								},
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/",
-											Port: intstr.FromInt32(portMetrics),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/",
+										Port: intstr.FromInt32(portMetrics),
 									},
 									InitialDelaySeconds: 5,
 									TimeoutSeconds:      5,
@@ -449,18 +439,14 @@ func (n *nodeExporter) computeResourcesData() (map[string][]byte, error) {
 						Volumes: []corev1.Volume{
 							{
 								Name: volumeNameHost,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: "/",
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/",
 								},
 							},
 							{
 								Name: volumeNameTextFileCollector,
-								VolumeSource: corev1.VolumeSource{
-									HostPath: &corev1.HostPathVolumeSource{
-										Path: hostPathTextFileCollector,
-									},
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: hostPathTextFileCollector,
 								},
 							},
 						},
@@ -477,10 +463,8 @@ func (n *nodeExporter) computeResourcesData() (map[string][]byte, error) {
 		vpaControlledValues := vpaautoscalingv1.ContainerControlledValuesRequestsOnly
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "node-exporter",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "node-exporter",
+			Namespace: metav1.NamespaceSystem,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				ResourcePolicy: &vpaautoscalingv1.PodResourcePolicy{
 					ContainerPolicies: []vpaautoscalingv1.ContainerResourcePolicy{

@@ -7,7 +7,6 @@ package care
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -69,10 +68,9 @@ func (r *Reconciler) EventHandler() handler.EventHandler {
 				return
 			}
 
-			req := reconcile.Request{NamespacedName: types.NamespacedName{
+			req := reconcile.Request{
 				Name:      e.Object.GetName(),
-				Namespace: e.Object.GetNamespace(),
-			}}
+				Namespace: e.Object.GetNamespace()}
 
 			if shoot.Generation == shoot.Status.ObservedGeneration {
 				// spread shoot health checks across sync period to avoid checking on all Shoots roughly at the same
@@ -85,10 +83,9 @@ func (r *Reconciler) EventHandler() handler.EventHandler {
 			q.Add(req)
 		},
 		UpdateFunc: func(_ context.Context, e event.UpdateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{
+			q.Add(reconcile.Request{
 				Name:      e.ObjectNew.GetName(),
-				Namespace: e.ObjectNew.GetNamespace(),
-			}})
+				Namespace: e.ObjectNew.GetNamespace()})
 		},
 	}
 }

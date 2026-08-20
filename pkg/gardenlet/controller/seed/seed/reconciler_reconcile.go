@@ -116,7 +116,7 @@ func (r *Reconciler) runReconcileSeedFlow(
 	}
 
 	// label kube-system namespace
-	namespaceKubeSystem := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: metav1.NamespaceSystem}}
+	namespaceKubeSystem := &corev1.Namespace{Name: metav1.NamespaceSystem}
 	log.Info("Labeling namespace", "namespaceName", namespaceKubeSystem.Name)
 	patch := client.MergeFrom(namespaceKubeSystem.DeepCopy())
 	metav1.SetMetaDataLabel(&namespaceKubeSystem.ObjectMeta, "role", metav1.NamespaceSystem)
@@ -732,7 +732,7 @@ func renewGardenKubeconfig(ctx context.Context, seedClient client.Client, garden
 		)
 	}
 
-	kubeconfigSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenClientConnection.KubeconfigSecret.Name, Namespace: gardenClientConnection.KubeconfigSecret.Namespace}}
+	kubeconfigSecret := &corev1.Secret{Name: gardenClientConnection.KubeconfigSecret.Name, Namespace: gardenClientConnection.KubeconfigSecret.Namespace}
 	if err := seedClient.Get(ctx, client.ObjectKeyFromObject(kubeconfigSecret), kubeconfigSecret); err != nil {
 		return err
 	}

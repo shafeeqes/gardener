@@ -109,9 +109,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespaces")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "garden-",
-		},
+		GenerateName: "garden-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -119,9 +117,7 @@ var _ = BeforeSuite(func() {
 	testRunID = testNamespace.Name
 
 	istioSystemNamespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "istio-system",
-		},
+		Name: "istio-system",
 	}
 	Expect(testClient.Create(ctx, istioSystemNamespace)).To(Succeed())
 	log.Info("Created istio-system namespace for test")
@@ -159,7 +155,7 @@ var _ = BeforeSuite(func() {
 	)
 	Expect(err).NotTo(HaveOccurred())
 
-	gardenClientMap := fakeclientmap.NewClientMapBuilder().WithClientSetForKey(keys.ForGarden(&operatorv1alpha1.Garden{ObjectMeta: metav1.ObjectMeta{Name: gardenName}}), testClientSet).Build()
+	gardenClientMap := fakeclientmap.NewClientMapBuilder().WithClientSetForKey(keys.ForGarden(&operatorv1alpha1.Garden{Name: gardenName}), testClientSet).Build()
 
 	By("Register controller")
 	Expect((&care.Reconciler{

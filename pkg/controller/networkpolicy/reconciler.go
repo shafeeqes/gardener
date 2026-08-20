@@ -106,10 +106,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	for _, policyConfig := range r.networkPolicyConfigs() {
 		networkPolicy := &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      policyConfig.name,
-				Namespace: request.Name,
-			},
+			Name:      policyConfig.name,
+			Namespace: request.Name,
 		}
 		networkPolicyLogger := log.WithValues("networkPolicy", client.ObjectKeyFromObject(networkPolicy))
 

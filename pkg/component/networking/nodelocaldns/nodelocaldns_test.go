@@ -73,27 +73,25 @@ var _ = Describe("NodeLocalDNS", func() {
 		forceTcpToUpstreamDNS = "force_tcp"
 
 		scrapeConfig = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-node-local-dns",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-node-local-dns",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				Scheme:      new(monitoringv1.SchemeHTTPS),
 				TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-					Key:                  "token",
+					Name: "shoot-access-prometheus-shoot",
+					Key:  "token",
 				}},
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					APIServer:  new("https://kube-apiserver"),
 					Role:       "Pod",
 					Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				}},
@@ -148,27 +146,25 @@ var _ = Describe("NodeLocalDNS", func() {
 			},
 		}
 		scrapeConfigErrors = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-node-local-dns-errors",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-node-local-dns-errors",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				Scheme:      new(monitoringv1.SchemeHTTPS),
 				TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-					Key:                  "token",
+					Name: "shoot-access-prometheus-shoot",
+					Key:  "token",
 				}},
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					APIServer:  new("https://kube-apiserver"),
 					Role:       "Pod",
 					Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				}},
@@ -241,26 +237,18 @@ var _ = Describe("NodeLocalDNS", func() {
 		}
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 		shoot := &gardencorev1beta1.Shoot{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "core.gardener.cloud/v1beta1",
-				Kind:       "Shoot",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: "bar",
-			},
+			APIVersion: "core.gardener.cloud/v1beta1",
+			Kind:       "Shoot",
+			Name:       "foo",
+			Namespace:  "bar",
 			Spec: gardencorev1beta1.ShootSpec{
 				Provider: gardencorev1beta1.Provider{
 					Workers: []gardencorev1beta1.Worker{
@@ -272,9 +260,7 @@ var _ = Describe("NodeLocalDNS", func() {
 			},
 		}
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
+			Name: namespace,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot: runtime.RawExtension{
 					Object: shoot,
@@ -395,22 +381,18 @@ status:
 			hostPathFileOrCreate = corev1.HostPathFileOrCreate
 			daemonSetFor         = func() *appsv1.DaemonSet {
 				daemonSet := &appsv1.DaemonSet{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: appsv1.SchemeGroupVersion.String(),
-						Kind:       "DaemonSet",
+					APIVersion: appsv1.SchemeGroupVersion.String(),
+					Kind:       "DaemonSet",
+					Name:       "node-local-dns-worker-aaaa",
+					Namespace:  metav1.NamespaceSystem,
+					Annotations: map[string]string{
+						resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "node-local-dns-worker-aaaa",
-						Namespace: metav1.NamespaceSystem,
-						Annotations: map[string]string{
-							resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-						},
-						Labels: map[string]string{
-							labelKey:                                    labelValue,
-							v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleSystemComponent,
-							managedresources.LabelKeyOrigin:             managedresources.LabelValueGardener,
-							v1beta1constants.LabelNodeCriticalComponent: "true",
-						},
+					Labels: map[string]string{
+						labelKey:                                    labelValue,
+						v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleSystemComponent,
+						managedresources.LabelKeyOrigin:             managedresources.LabelValueGardener,
+						v1beta1constants.LabelNodeCriticalComponent: "true",
 					},
 					Spec: appsv1.DaemonSetSpec{
 						UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
@@ -511,12 +493,10 @@ status:
 											},
 										},
 										LivenessProbe: &corev1.Probe{
-											ProbeHandler: corev1.ProbeHandler{
-												HTTPGet: &corev1.HTTPGetAction{
-													Host: ipvsAddress,
-													Path: "/health",
-													Port: intstr.FromInt32(int32(livenessProbePort)),
-												},
+											HTTPGet: &corev1.HTTPGetAction{
+												Host: ipvsAddress,
+												Path: "/health",
+												Port: intstr.FromInt32(int32(livenessProbePort)),
 											},
 											InitialDelaySeconds: int32(60),
 											TimeoutSeconds:      int32(5),
@@ -546,50 +526,36 @@ status:
 								Volumes: []corev1.Volume{
 									{
 										Name: "xtables-lock",
-										VolumeSource: corev1.VolumeSource{
-											HostPath: &corev1.HostPathVolumeSource{
-												Path: "/run/xtables.lock",
-												Type: &hostPathFileOrCreate,
-											},
+										HostPath: &corev1.HostPathVolumeSource{
+											Path: "/run/xtables.lock",
+											Type: &hostPathFileOrCreate,
 										},
 									},
 									{
 										Name: "kube-dns-config",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "kube-dns",
-												},
-												Optional: new(true),
-											},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name:     "kube-dns",
+											Optional: new(true),
 										},
 									},
 									{
 										Name: "config-volume",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "node-local-dns-" + configMapHash,
-												},
-												Items: []corev1.KeyToPath{
-													{
-														Key:  "Corefile",
-														Path: "Corefile.base",
-													},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name: "node-local-dns-" + configMapHash,
+											Items: []corev1.KeyToPath{
+												{
+													Key:  "Corefile",
+													Path: "Corefile.base",
 												},
 											},
 										},
 									},
 									{
 										Name: "custom-config-volume",
-										VolumeSource: corev1.VolumeSource{
-											ConfigMap: &corev1.ConfigMapVolumeSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: coredns.CustomConfigMapName,
-												},
-												DefaultMode: new(int32(420)),
-												Optional:    new(true),
-											},
+										ConfigMap: &corev1.ConfigMapVolumeSource{
+											Name:        coredns.CustomConfigMapName,
+											DefaultMode: new(int32(420)),
+											Optional:    new(true),
 										},
 									},
 								},
@@ -634,10 +600,8 @@ status:
 					})
 
 					daemonSet.Spec.Template.Spec.Volumes = append(daemonSet.Spec.Template.Spec.Volumes, corev1.Volume{
-						Name: "generated-config",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
+						Name:     "generated-config",
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					})
 
 					daemonSet.Spec.Template.Spec.Containers[0].VolumeMounts = append(daemonSet.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -677,12 +641,10 @@ status: {}
 			Expect(component.Deploy(ctx)).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -1445,11 +1407,9 @@ import generated-config/custom-server-block.server
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1472,11 +1432,9 @@ import generated-config/custom-server-block.server
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

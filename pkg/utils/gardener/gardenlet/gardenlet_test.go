@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,9 +44,7 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return that seed is a garden cluster", func() {
 			garden := &operatorv1alpha1.Garden{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "garden",
-				},
+				Name: "garden",
 			}
 			Expect(fakeClient.Create(ctx, garden)).To(Succeed())
 
@@ -83,17 +80,17 @@ var _ = Describe("Gardenlet", func() {
 		})
 
 		It("should return that the seed is a self-hosted shoot", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "shoot"}}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Namespace{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "shoot"}})).To(Succeed())
 			Expect(ClusterIsSelfHostedShoot(ctx, fakeClient)).To(BeTrue())
 		})
 
 		It("should return that the seed is not a self-hosted shoot because kube-system namespace is not labeled correctly", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "kube-system"}}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Namespace{Name: "kube-system", Labels: map[string]string{"gardener.cloud/role": "kube-system"}})).To(Succeed())
 			Expect(ClusterIsSelfHostedShoot(ctx, fakeClient)).To(BeFalse())
 		})
 
 		It("should return that the seed is not a self-hosted shoot because kube-system namespace is not labeled at all", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system"}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Namespace{Name: "kube-system"})).To(Succeed())
 			Expect(ClusterIsSelfHostedShoot(ctx, fakeClient)).To(BeFalse())
 		})
 
@@ -198,10 +195,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should successfully extract shoot meta from bootstrap token", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot " + expectedShootNamespace + "/" + expectedShootName + " to Gardener via 'gardenadm connect'"),
 				},
@@ -223,10 +218,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return found=false when description does not start with required prefix", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Invalid prefix " + expectedShootNamespace + "/" + expectedShootName),
 				},
@@ -241,10 +234,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return an error when description has no shoot meta after prefix", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot "),
 				},
@@ -259,10 +250,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return an error when description has only whitespace after prefix", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot    "),
 				},
@@ -277,10 +266,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return an error when shoot meta format is invalid (no slash)", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot invalid-format-no-slash"),
 				},
@@ -295,10 +282,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return an error when shoot meta format has multiple slashes", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot namespace/shoot/extra"),
 				},
@@ -313,10 +298,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should extract shoot meta when namespace is empty", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot /my-shoot"),
 				},
@@ -332,10 +315,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should extract shoot meta when name is empty", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot my-namespace/"),
 				},
@@ -351,10 +332,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should handle description with additional text after shoot meta", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("Used for connecting the self-hosted Shoot " + expectedShootNamespace + "/" + expectedShootName + " additional text here"),
 				},
@@ -370,10 +349,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should return found=false when description key is missing", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"other-key": []byte("some-value"),
 				},
@@ -388,10 +365,8 @@ var _ = Describe("Gardenlet", func() {
 
 		It("should successfully extract shoot meta from a Gardenlet bootstrap token (deployer format)", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      bootstrapTokenSecretName,
-					Namespace: "kube-system",
-				},
+				Name:      bootstrapTokenSecretName,
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"description": []byte("A bootstrap token for the Gardenlet for seedmanagement.gardener.cloud/v1alpha1.Gardenlet resource " + expectedShootNamespace + "/self-hosted-shoot-" + expectedShootName + "."),
 				},

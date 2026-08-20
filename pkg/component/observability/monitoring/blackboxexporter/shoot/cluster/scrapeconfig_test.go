@@ -10,7 +10,6 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/observability/monitoring/blackboxexporter/shoot/cluster"
 )
@@ -22,11 +21,9 @@ var _ = Describe("ScrapeConfig", func() {
 		It("should compute the scrape configs", func() {
 			Expect(ScrapeConfig(namespace)).To(ContainElements(
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-blackbox-exporter-k8s-service-check",
-						Namespace: namespace,
-						Labels:    map[string]string{"prometheus": "shoot"},
-					},
+					Name:      "shoot-blackbox-exporter-k8s-service-check",
+					Namespace: namespace,
+					Labels:    map[string]string{"prometheus": "shoot"},
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels: new(false),
 						Scheme:      new(monitoringv1.SchemeHTTPS),
@@ -38,8 +35,8 @@ var _ = Describe("ScrapeConfig", func() {
 						// This is needed because we do not fetch the correct cluster CA bundle right now
 						TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-							Key:                  "token",
+							Name: "shoot-access-prometheus-shoot",
+							Key:  "token",
 						}},
 						KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 							Role:       "Service",
@@ -47,8 +44,8 @@ var _ = Describe("ScrapeConfig", func() {
 							APIServer:  new("https://kube-apiserver:443"),
 							TLSConfig:  &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-								Key:                  "token",
+								Name: "shoot-access-prometheus-shoot",
+								Key:  "token",
 							}},
 						}},
 						RelabelConfigs: []monitoringv1.RelabelConfig{

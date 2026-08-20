@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apimachineryversion "k8s.io/apimachinery/pkg/version"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -33,7 +32,7 @@ var _ = Describe("VerifyVersion", func() {
 
 	BeforeEach(func() {
 		log = logr.Discard()
-		garden = &operatorv1alpha1.Garden{ObjectMeta: metav1.ObjectMeta{GenerateName: "garden-"}}
+		garden = &operatorv1alpha1.Garden{GenerateName: "garden-"}
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.RuntimeScheme).WithStatusSubresource(garden).Build()
 	})
 

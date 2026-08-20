@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -64,9 +62,7 @@ var _ = Describe("Mapper", func() {
 				extensionName = "provider-local"
 
 				controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName + "-123",
-					},
+					Name: extensionName + "-123",
 					Spec: gardencorev1beta1.ControllerInstallationSpec{
 						RegistrationRef: corev1.ObjectReference{
 							Name: extensionName,
@@ -75,9 +71,7 @@ var _ = Describe("Mapper", func() {
 				}
 
 				extension = &operatorv1alpha1.Extension{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 				}
 
 				Expect(fakeClient.Create(ctx, extension)).To(Succeed())
@@ -85,7 +79,7 @@ var _ = Describe("Mapper", func() {
 
 			It("should return expected extension request", func() {
 				requests := mapperFunc(ctx, controllerInstallation)
-				Expect(requests).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: extensionName}}))
+				Expect(requests).To(ConsistOf(reconcile.Request{Name: extensionName}))
 			})
 
 			It("should not return any request if no related extension is found", func() {

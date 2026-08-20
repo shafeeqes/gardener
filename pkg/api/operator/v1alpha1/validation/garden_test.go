@@ -57,9 +57,7 @@ var _ = Describe("Validation Tests", func() {
 
 		BeforeEach(func() {
 			garden = &operatorv1alpha1.Garden{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "garden",
-				},
+				Name: "garden",
 				Spec: operatorv1alpha1.GardenSpec{
 					DNS: &operatorv1alpha1.DNSManagement{
 						Providers: []operatorv1alpha1.DNSProvider{
@@ -1717,9 +1715,7 @@ var _ = Describe("Validation Tests", func() {
 							})
 
 							garden.Spec.VirtualCluster.Gardener.APIServer = &operatorv1alpha1.GardenerAPIServerConfig{
-								KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-									FeatureGates: map[string]bool{"Foo": true},
-								},
+								FeatureGates: map[string]bool{"Foo": true},
 							}
 
 							Expect(ValidateGarden(garden, extensions)).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
@@ -2404,9 +2400,7 @@ var _ = Describe("Validation Tests", func() {
 					Context("Feature gates", func() {
 						It("should complain when non-existing feature gates were configured", func() {
 							garden.Spec.VirtualCluster.Gardener.ControllerManager = &operatorv1alpha1.GardenerControllerManagerConfig{
-								KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-									FeatureGates: map[string]bool{"Foo": true},
-								},
+								FeatureGates: map[string]bool{"Foo": true},
 							}
 
 							Expect(ValidateGarden(garden, extensions)).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
@@ -2422,9 +2416,7 @@ var _ = Describe("Validation Tests", func() {
 							})
 
 							garden.Spec.VirtualCluster.Gardener.ControllerManager = &operatorv1alpha1.GardenerControllerManagerConfig{
-								KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-									FeatureGates: map[string]bool{"Foo": true},
-								},
+								FeatureGates: map[string]bool{"Foo": true},
 							}
 
 							Expect(ValidateGarden(garden, extensions)).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
@@ -2454,9 +2446,7 @@ var _ = Describe("Validation Tests", func() {
 					Context("Feature gates", func() {
 						It("should complain when non-existing feature gates were configured", func() {
 							garden.Spec.VirtualCluster.Gardener.Scheduler = &operatorv1alpha1.GardenerSchedulerConfig{
-								KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-									FeatureGates: map[string]bool{"Foo": true},
-								},
+								FeatureGates: map[string]bool{"Foo": true},
 							}
 
 							Expect(ValidateGarden(garden, extensions)).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
@@ -2472,9 +2462,7 @@ var _ = Describe("Validation Tests", func() {
 							})
 
 							garden.Spec.VirtualCluster.Gardener.Scheduler = &operatorv1alpha1.GardenerSchedulerConfig{
-								KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-									FeatureGates: map[string]bool{"Foo": true},
-								},
+								FeatureGates: map[string]bool{"Foo": true},
 							}
 
 							Expect(ValidateGarden(garden, extensions)).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
@@ -2799,9 +2787,7 @@ var _ = Describe("Validation Tests", func() {
 
 		BeforeEach(func() {
 			oldGarden = &operatorv1alpha1.Garden{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "garden",
-				},
+				Name: "garden",
 				Spec: operatorv1alpha1.GardenSpec{
 					Extensions: []operatorv1alpha1.GardenExtension{{Type: "foo"}},
 					RuntimeCluster: operatorv1alpha1.RuntimeCluster{

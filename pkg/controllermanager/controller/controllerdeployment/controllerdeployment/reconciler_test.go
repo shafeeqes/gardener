@@ -9,8 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -41,15 +39,11 @@ var _ = Describe("Controller", func() {
 		reconciler = &Reconciler{Client: fakeClient}
 
 		controllerDeployment = &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: controllerDeploymentName,
-			},
+			Name: controllerDeploymentName,
 		}
 
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-controllerRegistration",
-			},
+			Name: "test-controllerRegistration",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 					DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -64,7 +58,7 @@ var _ = Describe("Controller", func() {
 	It("should return nil because object is not found", func() {
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(controllerDeployment), &gardencorev1.ControllerDeployment{})).To(BeNotFoundError())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerDeploymentName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerDeploymentName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -75,7 +69,7 @@ var _ = Describe("Controller", func() {
 		})
 
 		It("should ensure the finalizer", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerDeploymentName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerDeploymentName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(controllerDeployment), controllerDeployment)).To(Succeed())
@@ -97,7 +91,7 @@ var _ = Describe("Controller", func() {
 			controllerDeployment.Finalizers = []string{"test-finalizer"}
 			Expect(fakeClient.Patch(ctx, controllerDeployment, patch)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerDeploymentName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerDeploymentName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -108,13 +102,13 @@ var _ = Describe("Controller", func() {
 			Expect(fakeClient.Create(ctx, controllerRegistration)).To(Succeed())
 			Expect(fakeClient.Create(ctx, controllerRegistration2)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerDeploymentName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerDeploymentName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("cannot remove finalizer of ControllerDeployment %q because still found ControllerRegistrations: [%s %s]", controllerDeployment.Name, controllerRegistration.Name, controllerRegistration2.Name)))
 		})
 
 		It("should remove the finalizer because no ControllerRegistration is referencing the ControllerDeployment", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerDeploymentName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerDeploymentName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(controllerDeployment), controllerDeployment)).To(BeNotFoundError())

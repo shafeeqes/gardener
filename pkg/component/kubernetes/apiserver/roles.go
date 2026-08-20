@@ -9,7 +9,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/controllerutils"
@@ -19,28 +18,22 @@ const roleNameHAVPN = "kube-apiserver-vpn-client-init"
 
 func (k *kubeAPIServer) emptyServiceAccount() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      k.values.NamePrefix + v1beta1constants.DeploymentNameKubeAPIServer,
-			Namespace: k.namespace,
-		},
+		Name:      k.values.NamePrefix + v1beta1constants.DeploymentNameKubeAPIServer,
+		Namespace: k.namespace,
 	}
 }
 
 func (k *kubeAPIServer) emptyRoleHAVPN() *rbacv1.Role {
 	return &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      roleNameHAVPN,
-			Namespace: k.namespace,
-		},
+		Name:      roleNameHAVPN,
+		Namespace: k.namespace,
 	}
 }
 
 func (k *kubeAPIServer) emptyRoleBindingHAVPN() *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      roleNameHAVPN,
-			Namespace: k.namespace,
-		},
+		Name:      roleNameHAVPN,
+		Namespace: k.namespace,
 	}
 }
 

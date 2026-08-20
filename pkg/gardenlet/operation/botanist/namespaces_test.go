@@ -51,9 +51,7 @@ var _ = Describe("Namespaces", func() {
 		extensionType3          = "shoot-custom-service-3"
 		extensionType4          = "shoot-custom-service-4"
 		controllerRegistration1 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ctrlreg1",
-			},
+			Name: "ctrlreg1",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -65,9 +63,7 @@ var _ = Describe("Namespaces", func() {
 			},
 		}
 		controllerRegistration2 = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "ctrlreg2",
-			},
+			Name: "ctrlreg2",
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -94,9 +90,7 @@ var _ = Describe("Namespaces", func() {
 		}}
 
 		obj = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
+			Name: namespace,
 		}
 	})
 
@@ -312,9 +306,7 @@ var _ = Describe("Namespaces", func() {
 						"topology.foo.bar/zone":                  {"b", "a"},
 					} {
 						pv := &corev1.PersistentVolume{
-							ObjectMeta: metav1.ObjectMeta{
-								GenerateName: "pv-",
-							},
+							GenerateName: "pv-",
 							Spec: corev1.PersistentVolumeSpec{
 								NodeAffinity: &corev1.VolumeNodeAffinity{
 									Required: &corev1.NodeSelector{
@@ -341,10 +333,8 @@ var _ = Describe("Namespaces", func() {
 						Expect(seedClient.Create(ctx, pv)).To(Succeed())
 
 						pvc := &corev1.PersistentVolumeClaim{
-							ObjectMeta: metav1.ObjectMeta{
-								GenerateName: "pvc-",
-								Namespace:    metav1.NamespaceSystem,
-							},
+							GenerateName: "pvc-",
+							Namespace:    metav1.NamespaceSystem,
 							Spec: corev1.PersistentVolumeClaimSpec{
 								VolumeName: pv.Name,
 							},
@@ -388,11 +378,9 @@ var _ = Describe("Namespaces", func() {
 
 				It("should use zone information from namespace and find existing ones via persistent volumes", func() {
 					Expect(seedClient.Create(ctx, &corev1.Namespace{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: metav1.NamespaceSystem,
-							Annotations: map[string]string{
-								"high-availability-config.resources.gardener.cloud/zones": "a",
-							},
+						Name: metav1.NamespaceSystem,
+						Annotations: map[string]string{
+							"high-availability-config.resources.gardener.cloud/zones": "a",
 						},
 					})).To(Succeed())
 
@@ -433,12 +421,10 @@ var _ = Describe("Namespaces", func() {
 
 				It("should not amend zone information if failure tolerance is unchanged", func() {
 					Expect(seedClient.Create(ctx, &corev1.Namespace{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: metav1.NamespaceSystem,
-							Annotations: map[string]string{
-								"high-availability-config.resources.gardener.cloud/zones": "1,2,a,b",
-								"high-availability-config.resources.gardener.cloud/type":  "zone",
-							},
+						Name: metav1.NamespaceSystem,
+						Annotations: map[string]string{
+							"high-availability-config.resources.gardener.cloud/zones": "1,2,a,b",
+							"high-availability-config.resources.gardener.cloud/type":  "zone",
 						},
 					})).To(Succeed())
 
@@ -463,11 +449,9 @@ var _ = Describe("Namespaces", func() {
 			Context("when volume creation is in progress", func() {
 				BeforeEach(func() {
 					pvc := &corev1.PersistentVolumeClaim{
-						ObjectMeta: metav1.ObjectMeta{
-							GenerateName: "pvc-",
-							Namespace:    metav1.NamespaceSystem,
-						},
-						Spec: corev1.PersistentVolumeClaimSpec{},
+						GenerateName: "pvc-",
+						Namespace:    metav1.NamespaceSystem,
+						Spec:         corev1.PersistentVolumeClaimSpec{},
 					}
 					Expect(seedClient.Create(ctx, pvc)).To(Succeed())
 				})
@@ -601,21 +585,19 @@ var _ = Describe("Namespaces", func() {
 			botanist.Shoot.SetInfo(defaultShootInfo)
 
 			Expect(seedClient.Create(ctx, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: metav1.NamespaceSystem,
-					Annotations: map[string]string{
-						"shoot.gardener.cloud/uid": string(uid),
-					},
-					Labels: map[string]string{
-						"gardener.cloud/role":                         "shoot",
-						"seed.gardener.cloud/provider":                seedProviderType,
-						"shoot.gardener.cloud/provider":               shootProviderType,
-						"networking.shoot.gardener.cloud/provider":    networkingProviderType,
-						"backup.gardener.cloud/provider":              seedProviderType,
-						"extensions.gardener.cloud/" + extensionType1: "true",
-						"extensions.gardener.cloud/" + extensionType2: "true",
-						"extensions.gardener.cloud/" + extensionType3: "true",
-					},
+				Name: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					"shoot.gardener.cloud/uid": string(uid),
+				},
+				Labels: map[string]string{
+					"gardener.cloud/role":                         "shoot",
+					"seed.gardener.cloud/provider":                seedProviderType,
+					"shoot.gardener.cloud/provider":               shootProviderType,
+					"networking.shoot.gardener.cloud/provider":    networkingProviderType,
+					"backup.gardener.cloud/provider":              seedProviderType,
+					"extensions.gardener.cloud/" + extensionType1: "true",
+					"extensions.gardener.cloud/" + extensionType2: "true",
+					"extensions.gardener.cloud/" + extensionType3: "true",
 				},
 			})).To(Succeed())
 
@@ -632,11 +614,9 @@ var _ = Describe("Namespaces", func() {
 
 		It("should not overwrite other annotations or labels", func() {
 			Expect(seedClient.Create(ctx, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        metav1.NamespaceSystem,
-					Annotations: map[string]string{"foo": "bar"},
-					Labels:      map[string]string{"bar": "foo"},
-				},
+				Name:        metav1.NamespaceSystem,
+				Annotations: map[string]string{"foo": "bar"},
+				Labels:      map[string]string{"bar": "foo"},
 			})).To(Succeed())
 
 			Expect(botanist.SeedNamespaceObject).To(BeNil())
@@ -660,7 +640,7 @@ var _ = Describe("Namespaces", func() {
 
 			It("should union in existing PVC zones with the explicit zones", func() {
 				pv := &corev1.PersistentVolume{
-					ObjectMeta: metav1.ObjectMeta{Name: "pv"},
+					Name: "pv",
 					Spec: corev1.PersistentVolumeSpec{
 						NodeAffinity: &corev1.VolumeNodeAffinity{
 							Required: &corev1.NodeSelector{
@@ -678,8 +658,8 @@ var _ = Describe("Namespaces", func() {
 				Expect(seedClient.Create(ctx, pv)).To(Succeed())
 
 				pvc := &corev1.PersistentVolumeClaim{
-					ObjectMeta: metav1.ObjectMeta{Name: "pvc", Namespace: metav1.NamespaceSystem},
-					Spec:       corev1.PersistentVolumeClaimSpec{VolumeName: "pv"},
+					Name: "pvc", Namespace: metav1.NamespaceSystem,
+					Spec: corev1.PersistentVolumeClaimSpec{VolumeName: "pv"},
 				}
 				Expect(seedClient.Create(ctx, pvc)).To(Succeed())
 

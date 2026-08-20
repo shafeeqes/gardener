@@ -74,14 +74,12 @@ var _ = Describe("VpnSeedServer", func() {
 				nodes = nodeNetworks[0].String()
 			}
 			template := &corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:                                     v1beta1constants.GardenRoleControlPlane,
-						v1beta1constants.LabelApp:                                       "vpn-seed-server",
-						v1beta1constants.LabelNetworkPolicyToDNS:                        v1beta1constants.LabelNetworkPolicyAllowed,
-						v1beta1constants.LabelNetworkPolicyToPrivateNetworks:            v1beta1constants.LabelNetworkPolicyAllowed,
-						"networking.resources.gardener.cloud/to-kube-apiserver-tcp-443": "allowed",
-					},
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:                                     v1beta1constants.GardenRoleControlPlane,
+					v1beta1constants.LabelApp:                                       "vpn-seed-server",
+					v1beta1constants.LabelNetworkPolicyToDNS:                        v1beta1constants.LabelNetworkPolicyAllowed,
+					v1beta1constants.LabelNetworkPolicyToPrivateNetworks:            v1beta1constants.LabelNetworkPolicyAllowed,
+					"networking.resources.gardener.cloud/to-kube-apiserver-tcp-443": "allowed",
 				},
 				Spec: corev1.PodSpec{
 					AutomountServiceAccountToken: new(false),
@@ -130,24 +128,20 @@ var _ = Describe("VpnSeedServer", func() {
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									Exec: &corev1.ExecAction{
-										Command: []string{
-											"/bin/vpn-server",
-											"readiness",
-										},
+								Exec: &corev1.ExecAction{
+									Command: []string{
+										"/bin/vpn-server",
+										"readiness",
 									},
 								},
 								InitialDelaySeconds: 15,
 							},
 
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									Exec: &corev1.ExecAction{
-										Command: []string{
-											"/bin/vpn-server",
-											"liveness",
-										},
+								Exec: &corev1.ExecAction{
+									Command: []string{
+										"/bin/vpn-server",
+										"liveness",
 									},
 								},
 								InitialDelaySeconds: 5,
@@ -201,44 +195,36 @@ var _ = Describe("VpnSeedServer", func() {
 					Volumes: []corev1.Volume{
 						{
 							Name: "dev-net-tun",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/dev/net/tun",
-									Type: &hostPathCharDev,
-								},
+							HostPath: &corev1.HostPathVolumeSource{
+								Path: "/dev/net/tun",
+								Type: &hostPathCharDev,
 							},
 						},
 						{
 							Name: "certs",
-							VolumeSource: corev1.VolumeSource{
-								Projected: &corev1.ProjectedVolumeSource{
-									DefaultMode: new(int32(420)),
-									Sources: []corev1.VolumeProjection{
-										{
-											Secret: &corev1.SecretProjection{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "ca-vpn",
-												},
-												Items: []corev1.KeyToPath{{
-													Key:  "bundle.crt",
-													Path: "ca.crt",
-												}},
-											},
+							Projected: &corev1.ProjectedVolumeSource{
+								DefaultMode: new(int32(420)),
+								Sources: []corev1.VolumeProjection{
+									{
+										Secret: &corev1.SecretProjection{
+											Name: "ca-vpn",
+											Items: []corev1.KeyToPath{{
+												Key:  "bundle.crt",
+												Path: "ca.crt",
+											}},
 										},
-										{
-											Secret: &corev1.SecretProjection{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "vpn-seed-server",
+									},
+									{
+										Secret: &corev1.SecretProjection{
+											Name: "vpn-seed-server",
+											Items: []corev1.KeyToPath{
+												{
+													Key:  "tls.crt",
+													Path: "tls.crt",
 												},
-												Items: []corev1.KeyToPath{
-													{
-														Key:  "tls.crt",
-														Path: "tls.crt",
-													},
-													{
-														Key:  "tls.key",
-														Path: "tls.key",
-													},
+												{
+													Key:  "tls.key",
+													Path: "tls.key",
 												},
 											},
 										},
@@ -248,18 +234,14 @@ var _ = Describe("VpnSeedServer", func() {
 						},
 						{
 							Name: "tlsauth",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretNameTLSAuth,
-									DefaultMode: new(int32(0400)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretNameTLSAuth,
+								DefaultMode: new(int32(0400)),
 							},
 						},
 						{
-							Name: "openvpn-status",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
+							Name:     "openvpn-status",
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					},
 				},
@@ -325,17 +307,13 @@ var _ = Describe("VpnSeedServer", func() {
 						},
 					},
 					ReadinessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							TCPSocket: &corev1.TCPSocketAction{
-								Port: intstr.FromInt32(15000),
-							},
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.FromInt32(15000),
 						},
 					},
 					LivenessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							TCPSocket: &corev1.TCPSocketAction{
-								Port: intstr.FromInt32(15000),
-							},
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.FromInt32(15000),
 						},
 					},
 					Resources: corev1.ResourceRequirements{
@@ -350,12 +328,8 @@ var _ = Describe("VpnSeedServer", func() {
 				template.Spec.Containers = append(template.Spec.Containers, *envoy.GetEnvoyProxyContainer(apiServerProxyImage))
 				template.Spec.Volumes = append(template.Spec.Volumes, corev1.Volume{
 					Name: "envoy-config",
-					VolumeSource: corev1.VolumeSource{
-						ConfigMap: &corev1.ConfigMapVolumeSource{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: expectedConfigMap.Name,
-							},
-						},
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						Name: expectedConfigMap.Name,
 					},
 				})
 			}
@@ -367,16 +341,14 @@ var _ = Describe("VpnSeedServer", func() {
 			maxSurge := intstr.FromInt32(100)
 			maxUnavailable := intstr.FromInt32(0)
 			deploy := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-seed-server",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
-						v1beta1constants.LabelApp:   "vpn-seed-server",
-						"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-					},
-					ResourceVersion: "1",
+				Name:      "vpn-seed-server",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
+					v1beta1constants.LabelApp:   "vpn-seed-server",
+					"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 				},
+				ResourceVersion: "1",
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(values.Replicas),
 					RevisionHistoryLimit: new(int32(2)),
@@ -400,15 +372,13 @@ var _ = Describe("VpnSeedServer", func() {
 
 		statefulSet = func(nodeNetworks []net.IPNet) *appsv1.StatefulSet {
 			sts := &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-seed-server",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
-						v1beta1constants.LabelApp:   "vpn-seed-server",
-					},
-					ResourceVersion: "1",
+				Name:      "vpn-seed-server",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
+					v1beta1constants.LabelApp:   "vpn-seed-server",
 				},
+				ResourceVersion: "1",
 				Spec: appsv1.StatefulSetSpec{
 					PodManagementPolicy:  appsv1.ParallelPodManagement,
 					Replicas:             new(int32(3)),
@@ -429,7 +399,7 @@ var _ = Describe("VpnSeedServer", func() {
 
 		destinationRule = func() *istionetworkingv1beta1.DestinationRule {
 			return &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-server", Namespace: namespace, ResourceVersion: "1"},
+				Name: "vpn-seed-server", Namespace: namespace, ResourceVersion: "1",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					ExportTo: []string{istioNamespace},
 					Host:     fmt.Sprintf("%s.%s.svc.cluster.local", "vpn-seed-server", namespace),
@@ -473,14 +443,12 @@ var _ = Describe("VpnSeedServer", func() {
 
 		maxUnavailable              = intstr.FromInt32(1)
 		expectedPodDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpn-seed-server",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app": "vpn-seed-server",
-				},
-				ResourceVersion: "1",
+			Name:      "vpn-seed-server",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "vpn-seed-server",
 			},
+			ResourceVersion: "1",
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &maxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -493,17 +461,15 @@ var _ = Describe("VpnSeedServer", func() {
 		}
 
 		expectedService = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ServiceName,
-				Namespace: namespace,
-				Annotations: map[string]string{
-					"networking.istio.io/exportTo":                                              istioNamespace,
-					"networking.resources.gardener.cloud/namespace-selectors":                   `[{"matchLabels":{"gardener.cloud/role":"istio-ingress"}},{"matchExpressions":[{"key":"handler.exposureclass.gardener.cloud/name","operator":"Exists"}]}]`,
-					"networking.resources.gardener.cloud/pod-label-selector-namespace-alias":    "all-shoots",
-					"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":15000}]`,
-				},
-				ResourceVersion: "1",
+			Name:      ServiceName,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				"networking.istio.io/exportTo":                                              istioNamespace,
+				"networking.resources.gardener.cloud/namespace-selectors":                   `[{"matchLabels":{"gardener.cloud/role":"istio-ingress"}},{"matchExpressions":[{"key":"handler.exposureclass.gardener.cloud/name","operator":"Exists"}]}]`,
+				"networking.resources.gardener.cloud/pod-label-selector-namespace-alias":    "all-shoots",
+				"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":15000}]`,
 			},
+			ResourceVersion: "1",
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
 				Ports: []corev1.ServicePort{
@@ -600,12 +566,10 @@ var _ = Describe("VpnSeedServer", func() {
 			}
 
 			scrapeConfig := &monitoringv1alpha1.ScrapeConfig{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            "shoot-vpn-seed-server",
-					Namespace:       namespace,
-					Labels:          map[string]string{"prometheus": "shoot"},
-					ResourceVersion: "1",
-				},
+				Name:            "shoot-vpn-seed-server",
+				Namespace:       namespace,
+				Labels:          map[string]string{"prometheus": "shoot"},
+				ResourceVersion: "1",
 				Spec: monitoringv1alpha1.ScrapeConfigSpec{
 					KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 						Role:       "Service",
@@ -681,11 +645,9 @@ var _ = Describe("VpnSeedServer", func() {
 			})
 
 			return &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            "vpn-seed-server" + "-vpa",
-					Namespace:       namespace,
-					ResourceVersion: "1",
-				},
+				Name:            "vpn-seed-server" + "-vpa",
+				Namespace:       namespace,
+				ResourceVersion: "1",
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -728,7 +690,7 @@ var _ = Describe("VpnSeedServer", func() {
 		sm = fakesecretsmanager.New(c, namespace)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-vpn", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-vpn", Namespace: namespace})).To(Succeed())
 
 		vpnSeedServer = New(c, namespace, sm, istioNamespaceFunc, values)
 	})
@@ -970,10 +932,8 @@ var _ = Describe("VpnSeedServer", func() {
 			Expect(c.Create(ctx, vpa)).To(Succeed())
 
 			envoyFilter := &networkingv1alpha3.EnvoyFilter{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      namespace + "-vpn",
-					Namespace: istioNamespace,
-				},
+				Name:      namespace + "-vpn",
+				Namespace: istioNamespace,
 			}
 			Expect(c.Create(ctx, envoyFilter)).To(Succeed())
 		})
@@ -1029,11 +989,9 @@ func seedConfigMap(namespace string) *corev1.ConfigMap {
 	Expect(err).NotTo(HaveOccurred())
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "vpn-seed-server-envoy-config",
-			Namespace:       namespace,
-			ResourceVersion: "1",
-		},
+		Name:            "vpn-seed-server-envoy-config",
+		Namespace:       namespace,
+		ResourceVersion: "1",
 		Data: map[string]string{
 			"envoy.yaml": envoyConfig,
 		},

@@ -88,15 +88,13 @@ func (n *namespaces) computeResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		kubeSystemNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: metav1.NamespaceSystem,
-				Labels: map[string]string{
-					v1beta1constants.GardenerPurpose:                 metav1.NamespaceSystem,
-					resourcesv1alpha1.HighAvailabilityConfigConsider: "true",
-				},
-				Annotations: map[string]string{
-					resourcesv1alpha1.HighAvailabilityConfigZones: strings.Join(sets.List(zones), ","),
-				},
+			Name: metav1.NamespaceSystem,
+			Labels: map[string]string{
+				v1beta1constants.GardenerPurpose:                 metav1.NamespaceSystem,
+				resourcesv1alpha1.HighAvailabilityConfigConsider: "true",
+			},
+			Annotations: map[string]string{
+				resourcesv1alpha1.HighAvailabilityConfigZones: strings.Join(sets.List(zones), ","),
 			},
 		}
 	)

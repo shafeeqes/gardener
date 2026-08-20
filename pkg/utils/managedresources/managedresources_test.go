@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
@@ -97,10 +96,8 @@ var _ = Describe("managedresources", func() {
 
 		managedResource = func(keepObjects bool) *resourcesv1alpha1.ManagedResource {
 			return &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					KeepObjects: &keepObjects,
 				},
@@ -116,10 +113,9 @@ var _ = Describe("managedresources", func() {
 
 	BeforeEach(func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
-		mr = &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{
+		mr = &resourcesv1alpha1.ManagedResource{
 			Name:      name,
-			Namespace: namespace,
-		}}
+			Namespace: namespace}
 
 		fakeOps = &retryfake.Ops{MaxAttempts: 1}
 		resetVars = test.WithVars(
@@ -146,12 +142,10 @@ var _ = Describe("managedresources", func() {
 			actual := &resourcesv1alpha1.ManagedResource{}
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, actual)).To(Succeed())
 			Expect(actual).To(Equal(&resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					Labels:          map[string]string{"origin": origin},
-					ResourceVersion: "1",
-				},
+				Name:            name,
+				Namespace:       namespace,
+				Labels:          map[string]string{"origin": origin},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					KeepObjects:  new(keepObjects),
@@ -188,12 +182,10 @@ var _ = Describe("managedresources", func() {
 		It("should successfully create secret and managed resource", func() {
 			secretName, _ := NewSecret(fakeClient, namespace, name, data, true)
 			expectedMR := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            name,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs:   []corev1.LocalObjectReference{{Name: secretName}},
 					KeepObjects:  new(keepObjects),
@@ -207,21 +199,18 @@ var _ = Describe("managedresources", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 			Expect(mr).To(Equal(expectedMR))
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Name:      secretName,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secretName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-				},
-				Data:      data,
-				Immutable: new(true),
-				Type:      corev1.SecretTypeOpaque,
+				Name:            secretName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				Data:            data,
+				Immutable:       new(true),
+				Type:            corev1.SecretTypeOpaque,
 			}))
 		})
 
@@ -230,12 +219,10 @@ var _ = Describe("managedresources", func() {
 
 			secretName, _ := NewSecret(fakeClient, namespace, name, data, true)
 			expectedMR := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          utils.MergeStringMaps(map[string]string{"origin": "gardener"}, labels),
-				},
+				Name:            name,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          utils.MergeStringMaps(map[string]string{"origin": "gardener"}, labels),
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs:   []corev1.LocalObjectReference{{Name: secretName}},
 					KeepObjects:  new(keepObjects),
@@ -249,36 +236,31 @@ var _ = Describe("managedresources", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 			Expect(mr).To(Equal(expectedMR))
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Name:      secretName,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secretName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-				},
-				Data:      data,
-				Immutable: new(true),
-				Type:      corev1.SecretTypeOpaque,
+				Name:            secretName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				Data:            data,
+				Immutable:       new(true),
+				Type:            corev1.SecretTypeOpaque,
 			}))
 		})
 	})
 
 	Describe("#DeleteForShoot", func() {
 		It("should successfully delete all related resources", func() {
-			secret1 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "managedresource-" + name, Namespace: namespace}}
-			secret2 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "managedresource-" + name, Namespace: namespace}}
+			secret1 := &corev1.Secret{Name: "managedresource-" + name, Namespace: namespace}
+			secret2 := &corev1.Secret{Name: "managedresource-" + name, Namespace: namespace}
 			Expect(kubernetesutils.MakeUnique(secret2)).To(Succeed())
 
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					// Reference only the second secret
 					// The delete function should delete both secrets for backwards compatible reasons
@@ -307,12 +289,10 @@ var _ = Describe("managedresources", func() {
 		BeforeEach(func() {
 			secretName, _ = NewSecret(fakeClient, namespace, name, data, true)
 			expectedMR = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-				},
+				Name:            name,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs:  []corev1.LocalObjectReference{{Name: secretName}},
 					KeepObjects: new(keepObjects),
@@ -338,21 +318,18 @@ var _ = Describe("managedresources", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 			Expect(mr).To(Equal(expectedMR))
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Name:      secretName,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secretName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-				},
-				Data:      data,
-				Immutable: new(true),
-				Type:      corev1.SecretTypeOpaque,
+				Name:            secretName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				Data:            data,
+				Immutable:       new(true),
+				Type:            corev1.SecretTypeOpaque,
 			}))
 		})
 
@@ -371,21 +348,18 @@ var _ = Describe("managedresources", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 			Expect(mr).To(Equal(expectedMR))
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Name:      secretName,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secretName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-				},
-				Data:      data,
-				Immutable: new(true),
-				Type:      corev1.SecretTypeOpaque,
+				Name:            secretName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				Data:            data,
+				Immutable:       new(true),
+				Type:            corev1.SecretTypeOpaque,
 			}))
 		})
 
@@ -399,36 +373,31 @@ var _ = Describe("managedresources", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 			Expect(mr).To(Equal(expectedMR))
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Name:      secretName,
-				Namespace: namespace,
-			}}
+				Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secretName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-				},
-				Data:      data,
-				Immutable: new(true),
-				Type:      corev1.SecretTypeOpaque,
+				Name:            secretName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				Data:            data,
+				Immutable:       new(true),
+				Type:            corev1.SecretTypeOpaque,
 			}))
 		})
 	})
 
 	Describe("#DeleteForSeed", func() {
 		It("should successfully delete all related resources", func() {
-			secret1 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "managedresource-" + name, Namespace: namespace}}
-			secret2 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "managedresource-" + name, Namespace: namespace}}
+			secret1 := &corev1.Secret{Name: "managedresource-" + name, Namespace: namespace}
+			secret2 := &corev1.Secret{Name: "managedresource-" + name, Namespace: namespace}
 			Expect(kubernetesutils.MakeUnique(secret2)).To(Succeed())
 
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					// Reference only the second secret
 					// The delete function should delete both secrets for backwards compatible reasons
@@ -837,35 +806,23 @@ var _ = Describe("managedresources", func() {
 		It("should return all objects", func() {
 			expectedObjects := []client.Object{
 				&corev1.ConfigMap{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: corev1.SchemeGroupVersion.String(),
-						Kind:       "ConfigMap",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-					},
-					Data: map[string]string{"foo": "bar"},
+					APIVersion: corev1.SchemeGroupVersion.String(),
+					Kind:       "ConfigMap",
+					Name:       "foo",
+					Namespace:  "bar",
+					Data:       map[string]string{"foo": "bar"},
 				},
 				&corev1.Namespace{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: corev1.SchemeGroupVersion.String(),
-						Kind:       "Namespace",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "bar",
-						Labels: map[string]string{"foo": "bar"},
-					},
+					APIVersion: corev1.SchemeGroupVersion.String(),
+					Kind:       "Namespace",
+					Name:       "bar",
+					Labels:     map[string]string{"foo": "bar"},
 				},
 				&corev1.Secret{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: corev1.SchemeGroupVersion.String(),
-						Kind:       "Secret",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foobar",
-						Namespace: "bar",
-					},
+					APIVersion: corev1.SchemeGroupVersion.String(),
+					Kind:       "Secret",
+					Name:       "foobar",
+					Namespace:  "bar",
 				},
 			}
 
@@ -890,15 +847,11 @@ var _ = Describe("managedresources", func() {
 
 		It("should extract objects from a secret with uncompressed data", func() {
 			configMap := &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "ConfigMap",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-cm",
-					Namespace: "test-ns",
-				},
-				Data: map[string]string{"key": "value"},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "ConfigMap",
+				Name:       "test-cm",
+				Namespace:  "test-ns",
+				Data:       map[string]string{"key": "value"},
 			}
 
 			secret := &corev1.Secret{
@@ -921,25 +874,17 @@ data:
 
 		It("should extract multiple objects from a secret with YAML separator", func() {
 			configMap := &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "ConfigMap",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-cm",
-					Namespace: "test-ns",
-				},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "ConfigMap",
+				Name:       "test-cm",
+				Namespace:  "test-ns",
 			}
 
 			secret := &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-secret",
-					Namespace: "test-ns",
-				},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "Secret",
+				Name:       "test-secret",
+				Namespace:  "test-ns",
 			}
 
 			secretData := &corev1.Secret{
@@ -967,15 +912,11 @@ metadata:
 
 		It("should extract objects from a secret with brotli compressed data", func() {
 			configMap := &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "ConfigMap",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-cm",
-					Namespace: "test-ns",
-				},
-				Data: map[string]string{"key": "value"},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "ConfigMap",
+				Name:       "test-cm",
+				Namespace:  "test-ns",
+				Data:       map[string]string{"key": "value"},
 			}
 
 			rawData := []byte(`apiVersion: v1
@@ -1006,14 +947,10 @@ data:
 
 		It("should skip empty objects when trimmed", func() {
 			configMap := &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "ConfigMap",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-cm",
-					Namespace: "test-ns",
-				},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "ConfigMap",
+				Name:       "test-cm",
+				Namespace:  "test-ns",
 			}
 
 			secret := &corev1.Secret{

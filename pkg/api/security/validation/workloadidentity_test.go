@@ -28,11 +28,9 @@ var _ = Describe("WorkloadIdentity Validation Tests", func() {
 
 	BeforeEach(func() {
 		workloadIdentity = &security.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "identity",
-				Namespace: "garden",
-				UID:       "b0f6d68e-aae4-483e-aab1-eab98d9e608c",
-			},
+			Name:      "identity",
+			Namespace: "garden",
+			UID:       "b0f6d68e-aae4-483e-aab1-eab98d9e608c",
 			Spec: security.WorkloadIdentitySpec{
 				Audiences: []string{"gardener.cloud"},
 				TargetSystem: security.TargetSystem{

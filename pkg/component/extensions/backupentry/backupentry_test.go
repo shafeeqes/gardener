@@ -81,12 +81,10 @@ var _ = Describe("#BackupEntry", func() {
 		}
 
 		expected = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-					v1beta1constants.GardenerTimestamp: fakeClock.Now().UTC().Format(time.RFC3339Nano),
-				},
+			Name: name,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+				v1beta1constants.GardenerTimestamp: fakeClock.Now().UTC().Format(time.RFC3339Nano),
 			},
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{

@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/client/kubernetes/clientmap"
@@ -29,7 +28,7 @@ var _ = Describe("SelfHostedShootClientMap", func() {
 		ctx = context.Background()
 		clientSet = fake.NewClientSet()
 		cm = clientmap.NewSelfHostedShootClientMap(clientSet)
-		key = keys.ForShoot(&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "garden"}})
+		key = keys.ForShoot(&gardencorev1beta1.Shoot{Name: "shoot", Namespace: "garden"})
 	})
 
 	Describe("#GetClient", func() {

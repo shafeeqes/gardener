@@ -18,7 +18,7 @@ var _ = Describe("Util", func() {
 		var backupBucket *extensionsv1alpha1.BackupBucket
 
 		BeforeEach(func() {
-			backupBucket = &extensionsv1alpha1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			backupBucket = &extensionsv1alpha1.BackupBucket{Name: "foo"}
 		})
 
 		It("should return 'garden' namespace since annotation is not present", func() {

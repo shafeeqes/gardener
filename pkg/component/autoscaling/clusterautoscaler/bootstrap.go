@@ -10,7 +10,6 @@ import (
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/pkg/client/kubernetes"
@@ -41,9 +40,7 @@ func (b *bootstrapper) Deploy(ctx context.Context) error {
 		registry = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterRoleControlName,
-			},
+			Name: clusterRoleControlName,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{machinev1alpha1.GroupName},

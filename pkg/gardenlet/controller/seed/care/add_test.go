@@ -9,8 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -32,7 +30,7 @@ var _ = Describe("Add", func() {
 			SeedName: "seed",
 		}
 		seed = &gardencorev1beta1.Seed{}
-		managedResource = &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: "garden"}}
+		managedResource = &resourcesv1alpha1.ManagedResource{Namespace: "garden"}
 	})
 
 	Describe("#SeedPredicate", func() {
@@ -147,7 +145,7 @@ var _ = Describe("Add", func() {
 
 	Describe("#MapManagedResourceToSeed", func() {
 		It("should return a request with the seed name", func() {
-			Expect(reconciler.MapManagedResourceToSeed(context.TODO(), nil)).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: reconciler.SeedName}}))
+			Expect(reconciler.MapManagedResourceToSeed(context.TODO(), nil)).To(ConsistOf(reconcile.Request{Name: reconciler.SeedName}))
 		})
 	})
 })

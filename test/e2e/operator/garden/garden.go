@@ -184,10 +184,8 @@ func itShouldVerifyManagedResourcesAndAwaitHealthiness(s *GardenContext, namespa
 	managedResourceList := []resourcesv1alpha1.ManagedResource{}
 	for _, managedResource := range managedResourceNames {
 		managedResourceList = append(managedResourceList, resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResource,
-				Namespace: namespace,
-			},
+			Name:      managedResource,
+			Namespace: namespace,
 		})
 	}
 
@@ -298,9 +296,7 @@ func itShouldCleanupEtcdEncryptionConfig(s *GardenContext) {
 // ItShouldWaitForExtensionToReportDeletion waits for the specified extension to report DeleteSuccessful
 func ItShouldWaitForExtensionToReportDeletion(s *GardenContext, extensionName string) {
 	extension := &operatorv1alpha1.Extension{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: extensionName,
-		},
+		Name: extensionName,
 	}
 
 	It(fmt.Sprintf("Wait for extension %s to report deletion", extensionName), func(ctx SpecContext) {

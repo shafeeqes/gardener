@@ -74,8 +74,8 @@ func (b *Botanist) DeployNginxIngressAddon(ctx context.Context) error {
 		if err := kubernetesutils.DeleteObjects(
 			ctx,
 			b.ShootClientSet.Client(),
-			&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "ingress-controller-leader", Namespace: metav1.NamespaceSystem}},
-			&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "ingress-controller-leader-nginx", Namespace: metav1.NamespaceSystem}},
+			&corev1.ConfigMap{Name: "ingress-controller-leader", Namespace: metav1.NamespaceSystem},
+			&corev1.ConfigMap{Name: "ingress-controller-leader-nginx", Namespace: metav1.NamespaceSystem},
 		); err != nil {
 			return fmt.Errorf("failed deleting addons-nginx-ingress-controller resource lock configMaps: %w", err)
 		}

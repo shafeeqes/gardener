@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -43,12 +42,10 @@ var _ = Describe("SecretNameChange controller tests", func() {
 		Expect(testFS.WriteFile(nodeagenthelper.GetConfigFilePath(configDir), configRaw, 0600)).To(Succeed())
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID,
-				Labels: map[string]string{
-					testID: testRunID,
-					v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: initialSecret,
-				},
+			Name: testRunID,
+			Labels: map[string]string{
+				testID: testRunID,
+				v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: initialSecret,
 			},
 		}
 

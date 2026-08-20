@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -47,9 +46,7 @@ var _ = Describe("Project Activity", func() {
 		namespaceName = "namespace"
 
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: projectName,
-			},
+			Name: projectName,
 			Status: gardencorev1beta1.ProjectStatus{
 				LastActivityTimestamp: &metav1.Time{Time: time.Date(1, 1, 1, 1, 1, 1, 1, time.UTC)},
 			},
@@ -76,7 +73,7 @@ var _ = Describe("Project Activity", func() {
 
 		Context("#Reconcile", func() {
 			It("should update the lastActivityTimestamp to now", func() {
-				request = reconcile.Request{NamespacedName: types.NamespacedName{Name: project.Name}}
+				request = reconcile.Request{Name: project.Name}
 				_, err := reconciler.Reconcile(ctx, request)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -101,7 +98,7 @@ var _ = Describe("Project Activity", func() {
 					Clock:  fakeClock,
 				}
 
-				request = reconcile.Request{NamespacedName: types.NamespacedName{Name: project.Name, Namespace: namespaceName + "other"}}
+				request = reconcile.Request{Name: project.Name, Namespace: namespaceName + "other"}
 				_, err := reconciler.Reconcile(ctx, request)
 				Expect(err).To(MatchError(fakeErr))
 			})

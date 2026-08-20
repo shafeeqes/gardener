@@ -83,9 +83,7 @@ func New(
 		waitTimeout:         waitTimeout,
 
 		backupEntry: &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: values.Name,
-			},
+			Name: values.Name,
 		},
 	}
 }
@@ -114,11 +112,9 @@ func (b *backupEntry) deploy(ctx context.Context, operation string) (extensionsv
 		metav1.SetMetaDataAnnotation(&b.backupEntry.ObjectMeta, v1beta1constants.GardenerTimestamp, b.clock.Now().UTC().Format(time.RFC3339Nano))
 
 		b.backupEntry.Spec = extensionsv1alpha1.BackupEntrySpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           b.values.Type,
-				ProviderConfig: b.values.ProviderConfig,
-				Class:          b.values.Class,
-			},
+			Type:                       b.values.Type,
+			ProviderConfig:             b.values.ProviderConfig,
+			Class:                      b.values.Class,
 			Region:                     b.values.Region,
 			SecretRef:                  b.values.SecretRef,
 			BucketName:                 b.values.BucketName,

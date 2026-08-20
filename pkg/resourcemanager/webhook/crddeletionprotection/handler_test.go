@@ -51,8 +51,8 @@ var _ = Describe("handler", func() {
 		BeforeEach(func() {
 			log = logger.MustNewZapLogger(logger.DebugLevel, logger.FormatJSON, logzap.WriteTo(GinkgoWriter))
 
-			request = admission.Request{}
-			request.Operation = admissionv1.Delete
+			request = admission.Request{
+				Operation: admissionv1.Delete}
 
 			var err error
 			decoder = admission.NewDecoder(kubernetes.SeedScheme)

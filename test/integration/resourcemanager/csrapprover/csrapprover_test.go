@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/authentication/user"
 	certutil "k8s.io/client-go/util/cert"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,10 +59,8 @@ var _ = Describe("CertificateSigningRequest Approver Controller tests", func() {
 
 		csr = &certificatesv1.CertificateSigningRequest{
 			// Username, UID, Groups will be injected by API server.
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: certificatesv1.CertificateSigningRequestSpec{
 				Usages: []certificatesv1.KeyUsage{
 					certificatesv1.UsageDigitalSignature,
@@ -74,19 +71,15 @@ var _ = Describe("CertificateSigningRequest Approver Controller tests", func() {
 		}
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   nodeName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   nodeName,
+			Labels: map[string]string{testID: testRunID},
 		}
 
 		machine = &machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      machineName,
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID: testRunID,
-				},
+			Name:      machineName,
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID: testRunID,
 			},
 		}
 	})

@@ -97,19 +97,15 @@ var _ = Describe("#Network", func() {
 		}
 
 		empty = &extensionsv1alpha1.Network{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      networkName,
-				Namespace: networkNs,
-			},
+			Name:      networkName,
+			Namespace: networkNs,
 		}
 		expected = &extensionsv1alpha1.Network{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      networkName,
-				Namespace: networkNs,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-				},
+			Name:      networkName,
+			Namespace: networkNs,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+				v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
 			},
 			Spec: extensionsv1alpha1.NetworkSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -262,13 +258,11 @@ var _ = Describe("#Network", func() {
 			)()
 
 			expected := extensionsv1alpha1.Network{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      networkName,
-					Namespace: networkNs,
-					Annotations: map[string]string{
-						v1beta1constants.ConfirmationDeletion: "true",
-						v1beta1constants.GardenerTimestamp:    now.UTC().Format(time.RFC3339Nano),
-					},
+				Name:      networkName,
+				Namespace: networkNs,
+				Annotations: map[string]string{
+					v1beta1constants.ConfirmationDeletion: "true",
+					v1beta1constants.GardenerTimestamp:    now.UTC().Format(time.RFC3339Nano),
 				}}
 
 			fakeErr := fmt.Errorf("some random error")

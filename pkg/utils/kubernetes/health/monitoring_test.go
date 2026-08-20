@@ -18,7 +18,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -37,7 +36,7 @@ var _ = Describe("Monitoring", func() {
 			Status: monitoringv1.PrometheusStatus{Replicas: 1, AvailableReplicas: 1, Conditions: []monitoringv1.Condition{{Type: monitoringv1.Available, Status: monitoringv1.ConditionTrue}}},
 		}, BeNil()),
 		Entry("not observed at latest version", &monitoringv1.Prometheus{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 			Status:     monitoringv1.PrometheusStatus{Conditions: []monitoringv1.Condition{{Type: monitoringv1.Available, Status: monitoringv1.ConditionTrue}}},
 		}, MatchError(ContainSubstring("observed generation outdated (0/1)"))),
 		Entry("condition missing", &monitoringv1.Prometheus{}, MatchError(ContainSubstring(`condition "Available" is missing`))),
@@ -57,9 +56,7 @@ var _ = Describe("Monitoring", func() {
 
 		BeforeEach(func() {
 			prometheus = &monitoringv1.Prometheus{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 42,
-				},
+				Generation: 42,
 				Spec: monitoringv1.PrometheusSpec{
 					CommonPrometheusFields: monitoringv1.CommonPrometheusFields{Replicas: new(int32(3))},
 				},
@@ -115,7 +112,7 @@ var _ = Describe("Monitoring", func() {
 			Status: monitoringv1.AlertmanagerStatus{Replicas: 1, AvailableReplicas: 1, Conditions: []monitoringv1.Condition{{Type: monitoringv1.Available, Status: monitoringv1.ConditionTrue}}},
 		}, BeNil()),
 		Entry("not observed at latest version", &monitoringv1.Alertmanager{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 			Status:     monitoringv1.AlertmanagerStatus{Conditions: []monitoringv1.Condition{{Type: monitoringv1.Available, Status: monitoringv1.ConditionTrue}}},
 		}, MatchError(ContainSubstring("observed generation outdated (0/1)"))),
 		Entry("condition missing", &monitoringv1.Alertmanager{}, MatchError(ContainSubstring(`condition "Available" is missing`))),
@@ -135,9 +132,7 @@ var _ = Describe("Monitoring", func() {
 
 		BeforeEach(func() {
 			alertManager = &monitoringv1.Alertmanager{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 42,
-				},
+				Generation: 42,
 				Spec: monitoringv1.AlertmanagerSpec{
 					Replicas: new(int32(3)),
 				},

@@ -186,10 +186,8 @@ func (d *localDriver) applyPod(
 					},
 				},
 				ReadinessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						Exec: &corev1.ExecAction{
-							Command: []string{"sh", "-c", "/usr/bin/kubectl --kubeconfig /var/lib/kubelet/kubeconfig-real get no $NODE_NAME"},
-						},
+					Exec: &corev1.ExecAction{
+						Command: []string{"sh", "-c", "/usr/bin/kubectl --kubeconfig /var/lib/kubelet/kubeconfig-real get no $NODE_NAME"},
 					},
 				},
 				Ports: []corev1.ContainerPort{{
@@ -207,42 +205,32 @@ func (d *localDriver) applyPod(
 		Volumes: []corev1.Volume{
 			{
 				Name: "userdata",
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName:  userDataSecret.Name,
-						DefaultMode: new(int32(0o777)),
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName:  userDataSecret.Name,
+					DefaultMode: new(int32(0o777)),
 				},
 			},
 			{
-				Name: "containerd",
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
+				Name:     "containerd",
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
 			{
 				Name: "run",
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{
-						Medium: corev1.StorageMediumMemory,
-					},
+				EmptyDir: &corev1.EmptyDirVolumeSource{
+					Medium: corev1.StorageMediumMemory,
 				},
 			},
 			{
 				Name: "docker-socket",
-				VolumeSource: corev1.VolumeSource{
-					HostPath: &corev1.HostPathVolumeSource{
-						Path: "/var/run/docker.sock",
-						Type: new(corev1.HostPathSocket),
-					},
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: "/var/run/docker.sock",
+					Type: new(corev1.HostPathSocket),
 				},
 			},
 			{
 				Name: "modules",
-				VolumeSource: corev1.VolumeSource{
-					HostPath: &corev1.HostPathVolumeSource{
-						Path: "/lib/modules",
-					},
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: "/lib/modules",
 				},
 			},
 		},

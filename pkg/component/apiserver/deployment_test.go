@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	. "github.com/gardener/gardener/pkg/component/apiserver"
@@ -23,9 +22,9 @@ var _ = Describe("Deployment", func() {
 
 			var (
 				namePrefix       = "foo"
-				secretCAETCD     = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd"}}
-				secretETCDClient = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "etcd-client"}}
-				secretServer     = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "server"}}
+				secretCAETCD     = &corev1.Secret{Name: "ca-etcd"}
+				secretETCDClient = &corev1.Secret{Name: "etcd-client"}
+				secretServer     = &corev1.Secret{Name: "server"}
 				values           = Values{
 					FeatureGates: map[string]bool{"Foo": true, "Bar": false},
 					Requests: &gardencorev1beta1.APIServerRequests{
@@ -90,28 +89,22 @@ var _ = Describe("Deployment", func() {
 							Volumes: []corev1.Volume{
 								{
 									Name: "ca-etcd",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName: secretCAETCD.Name,
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: secretCAETCD.Name,
 									},
 								},
 								{
 									Name: "etcd-client",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  secretETCDClient.Name,
-											DefaultMode: new(int32(0640)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  secretETCDClient.Name,
+										DefaultMode: new(int32(0640)),
 									},
 								},
 								{
 									Name: "server",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  secretServer.Name,
-											DefaultMode: new(int32(0640)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  secretServer.Name,
+										DefaultMode: new(int32(0640)),
 									},
 								},
 							},

@@ -72,10 +72,8 @@ func New(
 		waitTimeout:  waitTimeout,
 
 		backupEntry: &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }

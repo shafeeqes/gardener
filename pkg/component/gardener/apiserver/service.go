@@ -40,11 +40,9 @@ func (g *gardenerAPIServer) serviceRuntime() *corev1.Service {
 
 func (g *gardenerAPIServer) service() *corev1.Service {
 	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    GetLabels(),
-		},
+		Name:      serviceName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    GetLabels(),
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: GetLabels(),

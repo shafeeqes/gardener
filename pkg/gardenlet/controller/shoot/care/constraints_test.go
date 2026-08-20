@@ -70,11 +70,9 @@ func (w *webhookTestCase) build() (
 	objSelector = w.objectSelector
 	timeoutSeconds = w.timeoutSeconds
 	rules = []admissionregistrationv1.RuleWithOperations{{
-		Rule: admissionregistrationv1.Rule{
-			APIGroups:   []string{w.gvr.Group},
-			Resources:   []string{w.gvr.Resource},
-			APIVersions: []string{w.gvr.Version},
-		},
+		APIGroups:   []string{w.gvr.Group},
+		Resources:   []string{w.gvr.Resource},
+		APIVersions: []string{w.gvr.Version},
 	}}
 
 	opType := admissionregistrationv1.OperationAll
@@ -474,15 +472,13 @@ var _ = Describe("Constraints", func() {
 
 			newCASecret = func(validUntilTime time.Time) *corev1.Secret {
 				return &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "some-secret-",
-						Namespace:    controlPlaneNamespace,
-						Labels: map[string]string{
-							"managed-by":       "secrets-manager",
-							"manager-identity": "gardenlet",
-							"persist":          "true",
-							"valid-until-time": strconv.FormatInt(validUntilTime.Unix(), 10),
-						},
+					GenerateName: "some-secret-",
+					Namespace:    controlPlaneNamespace,
+					Labels: map[string]string{
+						"managed-by":       "secrets-manager",
+						"manager-identity": "gardenlet",
+						"persist":          "true",
+						"valid-until-time": strconv.FormatInt(validUntilTime.Unix(), 10),
 					},
 					Data: map[string][]byte{"ca.crt": []byte(""), "ca.key": []byte("")},
 				}
@@ -552,9 +548,7 @@ var _ = Describe("Constraints", func() {
 
 			It("should keep the `CRDsWithProblematicConversionWebhooks` condition when it's false", func() {
 				crd1 := &apiextensionsv1.CustomResourceDefinition{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "sample1.example.com",
-					},
+					Name: "sample1.example.com",
 					Spec: apiextensionsv1.CustomResourceDefinitionSpec{
 						Conversion: &apiextensionsv1.CustomResourceConversion{
 							Strategy: "Webhook",
@@ -565,9 +559,7 @@ var _ = Describe("Constraints", func() {
 					},
 				}
 				crd2 := &apiextensionsv1.CustomResourceDefinition{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "sample2.example.com",
-					},
+					Name: "sample2.example.com",
 					Spec: apiextensionsv1.CustomResourceDefinitionSpec{
 						Conversion: &apiextensionsv1.CustomResourceConversion{
 							Strategy: "None",
@@ -705,9 +697,7 @@ var _ = Describe("Constraints", func() {
 			Context("#AutomaticCredentialsRotationPossible", func() {
 				BeforeEach(func() {
 					shoot = &gardencorev1beta1.Shoot{
-						ObjectMeta: metav1.ObjectMeta{
-							CreationTimestamp: metav1.NewTime(clock.Now().Add(-48 * time.Hour)),
-						},
+						CreationTimestamp: metav1.NewTime(clock.Now().Add(-48 * time.Hour)),
 						Spec: gardencorev1beta1.ShootSpec{
 							Maintenance: &gardencorev1beta1.Maintenance{
 								AutoRotation: &gardencorev1beta1.MaintenanceAutoRotation{
@@ -826,12 +816,10 @@ var _ = Describe("Constraints", func() {
 
 				It("should remove the constraint when a ManagedResource has ignore=false", func() {
 					mr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "foo",
-							Namespace: controlPlaneNamespace,
-							Annotations: map[string]string{
-								resourcesv1alpha1.Ignore: "false",
-							},
+						Name:      "foo",
+						Namespace: controlPlaneNamespace,
+						Annotations: map[string]string{
+							resourcesv1alpha1.Ignore: "false",
 						},
 					}
 					Expect(seedClient.Create(ctx, mr)).To(Succeed())
@@ -844,12 +832,10 @@ var _ = Describe("Constraints", func() {
 				It("should keep the constraint when ManagedResources are ignored during reconcile", func() {
 					for _, name := range []string{"foo", "bar", "baz"} {
 						mr := &resourcesv1alpha1.ManagedResource{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      name,
-								Namespace: controlPlaneNamespace,
-								Annotations: map[string]string{
-									resourcesv1alpha1.Ignore: "true",
-								},
+							Name:      name,
+							Namespace: controlPlaneNamespace,
+							Annotations: map[string]string{
+								resourcesv1alpha1.Ignore: "true",
 							},
 						}
 						Expect(seedClient.Create(ctx, mr)).To(Succeed())
@@ -901,12 +887,10 @@ var _ = Describe("Constraints", func() {
 
 					It("should preserve the constraint when ManagedResources are ignored", func() {
 						mr := &resourcesv1alpha1.ManagedResource{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "foo",
-								Namespace: controlPlaneNamespace,
-								Annotations: map[string]string{
-									resourcesv1alpha1.Ignore: "true",
-								},
+							Name:      "foo",
+							Namespace: controlPlaneNamespace,
+							Annotations: map[string]string{
+								resourcesv1alpha1.Ignore: "true",
 							},
 						}
 						Expect(seedClient.Create(ctx, mr)).To(Succeed())
@@ -950,8 +934,8 @@ var _ = Describe("Constraints", func() {
 
 					It("should remove the constraint when no MachineDeployments have preserved failed replicas", func() {
 						Expect(seedClient.Create(ctx, &machinev1alpha1.MachineDeployment{
-							ObjectMeta: metav1.ObjectMeta{Name: "deploy-1", Namespace: controlPlaneNamespace},
-							Status:     machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 0},
+							Name: "deploy-1", Namespace: controlPlaneNamespace,
+							Status: machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 0},
 						})).To(Succeed())
 
 						Expect(constraint.Check(ctx, constraints)).NotTo(ContainCondition(
@@ -961,12 +945,12 @@ var _ = Describe("Constraints", func() {
 
 					It("should keep the constraint when MachineDeployments have preserved failed replicas", func() {
 						Expect(seedClient.Create(ctx, &machinev1alpha1.MachineDeployment{
-							ObjectMeta: metav1.ObjectMeta{Name: "deploy-1", Namespace: controlPlaneNamespace},
-							Status:     machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 2},
+							Name: "deploy-1", Namespace: controlPlaneNamespace,
+							Status: machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 2},
 						})).To(Succeed())
 						Expect(seedClient.Create(ctx, &machinev1alpha1.MachineDeployment{
-							ObjectMeta: metav1.ObjectMeta{Name: "deploy-2", Namespace: controlPlaneNamespace},
-							Status:     machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 1},
+							Name: "deploy-2", Namespace: controlPlaneNamespace,
+							Status: machinev1alpha1.MachineDeploymentStatus{PreservedFailedReplicas: 1},
 						})).To(Succeed())
 
 						Expect(constraint.Check(ctx, constraints)).To(ContainCondition(

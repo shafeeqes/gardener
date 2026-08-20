@@ -18,7 +18,6 @@ import (
 	"go.uber.org/mock/gomock"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	vpaautoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	kubeletconfigv1beta1 "k8s.io/kubelet/config/v1beta1"
@@ -78,22 +77,16 @@ var _ = Describe("Mutator", func() {
 
 		cluster = &extensionscontroller.Cluster{
 			CloudProfile: &gardencorev1beta1.CloudProfile{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-					Kind:       "CloudProfile",
-				},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Kind:       "CloudProfile",
 			},
 			Seed: &gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-					Kind:       "Seed",
-				},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Kind:       "Seed",
 			},
 			Shoot: &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-					Kind:       "Shoot",
-				},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Kind:       "Shoot",
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						Version: kubernetesVersion,
@@ -142,22 +135,22 @@ var _ = Describe("Mutator", func() {
 		},
 			Entry(
 				"other services than kube-apiserver",
-				&corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: "test"}},
+				&corev1.Service{Name: "test"},
 				nil,
 			),
 			Entry(
 				"other deployments than kube-apiserver, kube-controller-manager, machine-controller-manager, and kube-scheduler",
-				&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "test"}},
+				&appsv1.Deployment{Name: "test"},
 				nil,
 			),
 			Entry(
 				"other VPAs than machine-controller-manager",
-				&vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "test"}},
+				&vpaautoscalingv1.VerticalPodAutoscaler{Name: "test"},
 				nil,
 			),
 			Entry(
 				"other etcds than etcd-main and etcd-events",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "test"}},
+				&druidcorev1alpha1.Etcd{Name: "test"},
 				nil,
 			),
 		)
@@ -171,21 +164,21 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureKubeAPIServerDeployment with a kube-apiserver deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver"}}
+					newObj = &appsv1.Deployment{Name: "kube-apiserver"}
 					ensurer.EXPECT().EnsureKubeAPIServerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureKubeAPIServerDeployment with a virtual-garden-kube-apiserver deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-kube-apiserver"}}
+					newObj = &appsv1.Deployment{Name: "virtual-garden-kube-apiserver"}
 					ensurer.EXPECT().EnsureKubeAPIServerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureKubeAPIServerDeployment with a kube-apiserver deployment and existing deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver"}}
+					newObj = &appsv1.Deployment{Name: "kube-apiserver"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureKubeAPIServerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -193,21 +186,21 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureKubeControllerManagerDeployment with a kube-controller-manager deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager"}}
+					newObj = &appsv1.Deployment{Name: "kube-controller-manager"}
 					ensurer.EXPECT().EnsureKubeControllerManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureKubeControllerManagerDeployment with a virtual-garden-kube-controller-manager deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-kube-controller-manager"}}
+					newObj = &appsv1.Deployment{Name: "virtual-garden-kube-controller-manager"}
 					ensurer.EXPECT().EnsureKubeControllerManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureKubeControllerManagerDeployment with a kube-controller-manager deployment and existing deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager"}}
+					newObj = &appsv1.Deployment{Name: "kube-controller-manager"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureKubeControllerManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -215,14 +208,14 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureKubeSchedulerDeployment with a kube-scheduler deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-scheduler"}}
+					newObj = &appsv1.Deployment{Name: "kube-scheduler"}
 					ensurer.EXPECT().EnsureKubeSchedulerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureKubeSchedulerDeployment with a kube-scheduler deployment and existing deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-scheduler"}}
+					newObj = &appsv1.Deployment{Name: "kube-scheduler"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureKubeSchedulerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -230,28 +223,28 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureClusterAutoscalerDeployment with a cluster-autoscaler deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler"}}
+					newObj = &appsv1.Deployment{Name: "cluster-autoscaler"}
 					ensurer.EXPECT().EnsureClusterAutoscalerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureMachineControllerManagerDeployment with a machine-controller-manager deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager"}}
+					newObj = &appsv1.Deployment{Name: "machine-controller-manager"}
 					ensurer.EXPECT().EnsureMachineControllerManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureMachineControllerManagerVPA with a machine-controller-manager VPA",
 				func() {
-					newObj = &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager-vpa"}}
+					newObj = &vpaautoscalingv1.VerticalPodAutoscaler{Name: "machine-controller-manager-vpa"}
 					ensurer.EXPECT().EnsureMachineControllerManagerVPA(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureClusterAutoscalerDeployment with a cluster-autoscaler deployment and existing deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler"}}
+					newObj = &appsv1.Deployment{Name: "cluster-autoscaler"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureClusterAutoscalerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -259,14 +252,14 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureVPNSeedServerDeployment with a vpn-seed-server deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-server"}}
+					newObj = &appsv1.Deployment{Name: "vpn-seed-server"}
 					ensurer.EXPECT().EnsureVPNSeedServerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureVPNSeedServerDeployment with a vpn-seed-server deployment and existing deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-server"}}
+					newObj = &appsv1.Deployment{Name: "vpn-seed-server"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureVPNSeedServerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -274,14 +267,14 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureVPNSeedServerStatefulSet with a vpn-seed-server statefulset",
 				func() {
-					newObj = &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-server"}}
+					newObj = &appsv1.StatefulSet{Name: "vpn-seed-server"}
 					ensurer.EXPECT().EnsureVPNSeedServerStatefulSet(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureVPNSeedServerStatefulSet with a vpn-seed-server statefulset and existing statefulset",
 				func() {
-					newObj = &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-server"}}
+					newObj = &appsv1.StatefulSet{Name: "vpn-seed-server"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureVPNSeedServerStatefulSet(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -289,21 +282,21 @@ var _ = Describe("Mutator", func() {
 			Entry(
 				"EnsureGardenerResourceManagerDeployment with a gardener-resource-manager deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager"}}
+					newObj = &appsv1.Deployment{Name: "gardener-resource-manager"}
 					ensurer.EXPECT().EnsureGardenerResourceManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureGardenerResourceManagerDeployment with a virtual-garden-gardener-resource-manager deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-gardener-resource-manager"}}
+					newObj = &appsv1.Deployment{Name: "virtual-garden-gardener-resource-manager"}
 					ensurer.EXPECT().EnsureGardenerResourceManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
 			),
 			Entry(
 				"EnsureGardenerResourceManagerDeployment with a gardener-resource-manager deployment and existing deployment",
 				func() {
-					newObj = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager"}}
+					newObj = &appsv1.Deployment{Name: "gardener-resource-manager"}
 					oldObj = newObj.DeepCopyObject().(client.Object)
 					ensurer.EXPECT().EnsureGardenerResourceManagerDeployment(context.Background(), gomock.Any(), newObj, oldObj).Return(nil)
 				},
@@ -326,33 +319,33 @@ var _ = Describe("Mutator", func() {
 		},
 			Entry(
 				"with a etcd-main",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-main", Namespace: namespace}},
+				&druidcorev1alpha1.Etcd{Name: "etcd-main", Namespace: namespace},
 				nil,
 			),
 			Entry(
 				"with a virtual-garden-etcd-main",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-etcd-main", Namespace: namespace}},
+				&druidcorev1alpha1.Etcd{Name: "virtual-garden-etcd-main", Namespace: namespace},
 				nil,
 			),
 			Entry(
 				"with a etcd-main and existing druid",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-main", Namespace: namespace}},
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-main", Namespace: namespace}},
+				&druidcorev1alpha1.Etcd{Name: "etcd-main", Namespace: namespace},
+				&druidcorev1alpha1.Etcd{Name: "etcd-main", Namespace: namespace},
 			),
 			Entry(
 				"with a etcd-events",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-events", Namespace: namespace}},
+				&druidcorev1alpha1.Etcd{Name: "etcd-events", Namespace: namespace},
 				nil,
 			),
 			Entry(
 				"with a virtual-garden-etcd-events",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-etcd-events", Namespace: namespace}},
+				&druidcorev1alpha1.Etcd{Name: "virtual-garden-etcd-events", Namespace: namespace},
 				nil,
 			),
 			Entry(
 				"with a etcd-events and existing druid",
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-events", Namespace: namespace}},
-				&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-events", Namespace: namespace}},
+				&druidcorev1alpha1.Etcd{Name: "etcd-events", Namespace: namespace},
+				&druidcorev1alpha1.Etcd{Name: "etcd-events", Namespace: namespace},
 			),
 		)
 
@@ -367,7 +360,7 @@ var _ = Describe("Mutator", func() {
 
 				BeforeEach(func() {
 					newOSC = &extensionsv1alpha1.OperatingSystemConfig{
-						ObjectMeta: metav1.ObjectMeta{Name: "test-provision", Namespace: "test"},
+						Name: "test-provision", Namespace: "test",
 						Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 							Purpose: "provision",
 						},
@@ -410,7 +403,7 @@ var _ = Describe("Mutator", func() {
 
 				BeforeEach(func() {
 					newOSC = &extensionsv1alpha1.OperatingSystemConfig{
-						ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+						Name: "test", Namespace: "test",
 						Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 							Purpose: "reconcile",
 							CRIConfig: &extensionsv1alpha1.CRIConfig{
@@ -651,9 +644,7 @@ func checkProvisionOperatingSystemConfig(osc *extensionsv1alpha1.OperatingSystem
 
 func clusterObject(cluster *extensionscontroller.Cluster) *extensionsv1alpha1.Cluster {
 	return &extensionsv1alpha1.Cluster{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
+		Name: namespace,
 		Spec: extensionsv1alpha1.ClusterSpec{
 			CloudProfile: runtime.RawExtension{
 				Raw: encode(cluster.CloudProfile),

@@ -8,7 +8,6 @@ import (
 	_ "embed"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -136,7 +135,7 @@ func CentralPrometheusRules(seedIsGarden bool) []*monitoringv1.PrometheusRule {
 		meteringStateful.DeepCopy(),
 		pvc.DeepCopy(),
 		{
-			ObjectMeta: metav1.ObjectMeta{Name: "seed"},
+			Name: "seed",
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name:  "seed.rules",

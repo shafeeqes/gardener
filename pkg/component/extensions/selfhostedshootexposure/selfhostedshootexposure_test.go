@@ -62,13 +62,11 @@ var _ = Describe("SelfHostedShootExposure", func() {
 		}
 
 		expected = &extensionsv1alpha1.SelfHostedShootExposure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-				},
+			Name:      name,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+				v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
 			},
 			Spec: extensionsv1alpha1.SelfHostedShootExposureSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{

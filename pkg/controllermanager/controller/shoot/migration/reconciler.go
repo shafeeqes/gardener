@@ -10,7 +10,6 @@ import (
 	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -53,12 +52,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, r.Client.Status().Patch(ctx, shoot, patch)
 	}
 
-	sourceSeed := &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: *shoot.Status.SeedName}}
+	sourceSeed := &gardencorev1beta1.Seed{Name: *shoot.Status.SeedName}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(sourceSeed), sourceSeed); err != nil {
 		return reconcile.Result{}, fmt.Errorf("failed reading source seed %s: %w", sourceSeed.Name, err)
 	}
 
-	destinationSeed := &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: *shoot.Spec.SeedName}}
+	destinationSeed := &gardencorev1beta1.Seed{Name: *shoot.Spec.SeedName}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(destinationSeed), destinationSeed); err != nil {
 		return reconcile.Result{}, fmt.Errorf("failed reading destination seed %s: %w", destinationSeed.Name, err)
 	}

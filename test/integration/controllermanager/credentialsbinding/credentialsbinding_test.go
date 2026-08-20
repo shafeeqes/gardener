@@ -30,19 +30,15 @@ var _ = Describe("CredentialsBinding controller test", func() {
 
 	BeforeEach(func() {
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
-				Namespace: testNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
+			Namespace: testNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 		}
 
 		quota = &gardencorev1beta1.Quota{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
-				Namespace: testNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
+			Namespace: testNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.QuotaSpec{
 				Scope: corev1.ObjectReference{
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
@@ -52,11 +48,9 @@ var _ = Describe("CredentialsBinding controller test", func() {
 		}
 
 		credentialsBinding = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
-				Namespace: testNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
+			Namespace: testNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 			Provider: securityv1alpha1.CredentialsBindingProvider{
 				Type: providerType,
 			},
@@ -73,10 +67,8 @@ var _ = Describe("CredentialsBinding controller test", func() {
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName:       new("test-cloudprofile"),
 				CredentialsBindingName: new(credentialsBinding.Name),

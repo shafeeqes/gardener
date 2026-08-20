@@ -6,7 +6,6 @@ package admissioncontroller
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -68,11 +67,9 @@ func (a *gardenerAdmissionController) admissionConfigConfigMap() (*corev1.Config
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      DeploymentName,
-			Namespace: a.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      DeploymentName,
+		Namespace: a.namespace,
+		Labels:    GetLabels(),
 		Data: map[string]string{
 			dataConfigKey: string(data),
 		},

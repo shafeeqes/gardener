@@ -60,12 +60,10 @@ func CreateNewServiceAccountSecrets(ctx context.Context, log logr.Logger, c clie
 			}
 
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        fmt.Sprintf("%s-token-%s", serviceAccount.Name, secretNameSuffix),
-					Namespace:   serviceAccount.Namespace,
-					Annotations: map[string]string{corev1.ServiceAccountNameKey: serviceAccount.Name},
-				},
-				Type: corev1.SecretTypeServiceAccountToken,
+				Name:        fmt.Sprintf("%s-token-%s", serviceAccount.Name, secretNameSuffix),
+				Namespace:   serviceAccount.Namespace,
+				Annotations: map[string]string{corev1.ServiceAccountNameKey: serviceAccount.Name},
+				Type:        corev1.SecretTypeServiceAccountToken,
 			}
 
 			// If the ServiceAccount already references the secret then we have already created it and added it to the
@@ -158,7 +156,7 @@ func DeleteOldServiceAccountSecrets(ctx context.Context, log logr.Logger, c clie
 					}
 					// We don't care about secrets in the list which do not exist actually - it is the responsibility of the user to clean this up.
 				} else if secretMeta.CreationTimestamp.UTC().Before(serviceAccountLastInitiationFinishedTime.UTC()) {
-					secretsToDelete = append(secretsToDelete, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretMeta.Name, Namespace: secretMeta.Namespace}})
+					secretsToDelete = append(secretsToDelete, &corev1.Secret{Name: secretMeta.Name, Namespace: secretMeta.Namespace})
 					continue
 				}
 

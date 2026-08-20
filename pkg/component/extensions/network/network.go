@@ -79,10 +79,8 @@ func New(
 		waitTimeout:         waitTimeout,
 
 		network: &extensionsv1alpha1.Network{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -186,13 +184,11 @@ func (n *network) deploy(ctx context.Context, operation string) (extensionsv1alp
 		metav1.SetMetaDataAnnotation(&n.network.ObjectMeta, v1beta1constants.GardenerTimestamp, TimeNow().UTC().Format(time.RFC3339Nano))
 
 		n.network.Spec = extensionsv1alpha1.NetworkSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           n.values.Type,
-				ProviderConfig: n.values.ProviderConfig,
-			},
-			IPFamilies:  n.values.IPFamilies,
-			PodCIDR:     getCIDRforSpec(n.values.IPFamilies, n.values.PodCIDRs),
-			ServiceCIDR: getCIDRforSpec(n.values.IPFamilies, n.values.ServiceCIDRs),
+			Type:           n.values.Type,
+			ProviderConfig: n.values.ProviderConfig,
+			IPFamilies:     n.values.IPFamilies,
+			PodCIDR:        getCIDRforSpec(n.values.IPFamilies, n.values.PodCIDRs),
+			ServiceCIDR:    getCIDRforSpec(n.values.IPFamilies, n.values.ServiceCIDRs),
 		}
 
 		return nil

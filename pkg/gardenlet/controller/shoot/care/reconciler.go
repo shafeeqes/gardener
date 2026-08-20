@@ -13,7 +13,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -99,9 +98,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 
 	// Only read Garden secrets once because we don't rely on up-to-date secrets for health checks.
 	if r.gardenSecrets == nil && !v1beta1helper.IsShootSelfHosted(shoot.Spec.Provider.Workers) {
-		seed := &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{
-			Name: r.SeedName,
-		}}
+		seed := &gardencorev1beta1.Seed{
+			Name: r.SeedName}
 
 		if err := r.GardenClient.Get(careCtx, client.ObjectKeyFromObject(seed), seed); err != nil {
 			return reconcile.Result{}, fmt.Errorf("error retrieving seed: %w", err)

@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -38,15 +37,15 @@ var _ = Describe("Add", func() {
 		})
 
 		It("should return true when expected object has renew annotation", func() {
-			test(&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace, Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": ""}}}, true)
+			test(&corev1.Secret{Name: name, Namespace: namespace, Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": ""}}, true)
 		})
 
 		It("should return false when expected object doesn't have renew annotation", func() {
-			test(&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace}}, false)
+			test(&corev1.Secret{Name: name, Namespace: namespace}, false)
 		})
 
 		It("should return false when unexpected object", func() {
-			test(&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name + "-foo", Namespace: namespace, Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": ""}}}, false)
+			test(&corev1.Secret{Name: name + "-foo", Namespace: namespace, Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": ""}}, false)
 		})
 	})
 })

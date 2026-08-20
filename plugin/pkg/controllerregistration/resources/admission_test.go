@@ -44,9 +44,7 @@ var _ = Describe("resources", func() {
 			admissionHandler.SetCoreClientSet(coreClient)
 
 			controllerRegistration = gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "dummy",
-				},
+				Name: "dummy",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -59,9 +57,7 @@ var _ = Describe("resources", func() {
 			}
 
 			coreControllerRegistration = core.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "dummy",
-				},
+				Name: "dummy",
 				Spec: core.ControllerRegistrationSpec{
 					Resources: []core.ControllerResource{
 						{

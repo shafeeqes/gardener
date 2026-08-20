@@ -9,7 +9,6 @@ import (
 	"slices"
 
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -73,15 +72,11 @@ func mergeExtensions(registrations []gardencorev1beta1.ControllerRegistration, e
 			}
 
 			typeToExtension[res.Type] = extension.Extension{
-				Extension: extensionsv1alpha1.Extension{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      res.Type,
-						Namespace: namespace,
-					},
-					Spec: extensionsv1alpha1.ExtensionSpec{
-						DefaultSpec: extensionsv1alpha1.DefaultSpec{
-							Type: res.Type,
-						},
+				Name:      res.Type,
+				Namespace: namespace,
+				Spec: extensionsv1alpha1.ExtensionSpec{
+					DefaultSpec: extensionsv1alpha1.DefaultSpec{
+						Type: res.Type,
 					},
 				},
 				Timeout:   timeout,

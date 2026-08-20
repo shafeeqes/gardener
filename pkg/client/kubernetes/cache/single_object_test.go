@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
@@ -51,10 +50,8 @@ var _ = Describe("SingleObject", func() {
 		})
 
 		obj = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: "bar",
-			},
+			Name:      "foo",
+			Namespace: "bar",
 		}
 		key = client.ObjectKeyFromObject(obj)
 

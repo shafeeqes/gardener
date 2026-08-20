@@ -16,7 +16,6 @@ import (
 	"github.com/andybalholm/brotli"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -244,9 +243,9 @@ func Delete(ctx context.Context, c client.Client, namespace string, name string,
 	// For more details, please see https://github.com/gardener/gardener/pull/8116
 	secretName := secretName(name, secretNameWithPrefix)
 
-	mr := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace}}
+	mr := &resourcesv1alpha1.ManagedResource{Name: name, Namespace: namespace}
 	mrKey := client.ObjectKeyFromObject(mr)
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace}}
+	secret := &corev1.Secret{Name: secretName, Namespace: namespace}
 
 	err := c.Get(ctx, mrKey, mr)
 	if err != nil && apierrors.IsNotFound(err) {
@@ -261,10 +260,9 @@ func Delete(ctx context.Context, c client.Client, namespace string, name string,
 
 	secretsToDelete := []*corev1.Secret{secret}
 	for _, secretRef := range mr.Spec.SecretRefs {
-		secretsToDelete = append(secretsToDelete, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+		secretsToDelete = append(secretsToDelete, &corev1.Secret{
 			Name:      secretRef.Name,
-			Namespace: namespace,
-		}})
+			Namespace: namespace})
 	}
 
 	// Delete the secrets first so we do not lose reference to them
@@ -309,10 +307,8 @@ func WaitUntilHealthyAndNotProgressing(ctx context.Context, reader client.Reader
 
 func waitUntilHealthy(ctx context.Context, reader client.Reader, namespace, name string, andNotProgressing bool) error {
 	obj := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 	}
 
 	return retry.Until(ctx, IntervalWait, func(ctx context.Context) (done bool, err error) {
@@ -361,10 +357,8 @@ func WaitUntilListDeleted(ctx context.Context, client client.Client, mrList *res
 // WaitUntilDeleted waits until the given managed resource is deleted.
 func WaitUntilDeleted(ctx context.Context, client client.Client, namespace, name string) error {
 	mr := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 	}
 	if err := kubernetesutils.WaitUntilResourceDeleted(ctx, client, mr, IntervalWait); err != nil {
 		resourcesAppliedCondition := v1beta1helper.GetCondition(mr.Status.Conditions, resourcesv1alpha1.ResourcesApplied)
@@ -381,10 +375,8 @@ func WaitUntilDeleted(ctx context.Context, client client.Client, namespace, name
 // SetKeepObjects updates the keepObjects field of the managed resource with the given name in the given namespace.
 func SetKeepObjects(ctx context.Context, c client.Writer, namespace, name string, keepObjects bool) error {
 	resource := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 	}
 
 	patch := client.MergeFrom(resource.DeepCopy())

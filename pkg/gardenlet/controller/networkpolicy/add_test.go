@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -30,14 +29,10 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			p = ClusterPredicate()
 			shoot = &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "garden-bar",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       "foo",
+				Namespace:  "garden-bar",
 				Spec: gardencorev1beta1.ShootSpec{
 					Provider: gardencorev1beta1.Provider{
 						Workers: []gardencorev1beta1.Worker{},
@@ -45,9 +40,7 @@ var _ = Describe("Add", func() {
 				},
 			}
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
-				},
+				Name: "test",
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Raw: encode(shoot),

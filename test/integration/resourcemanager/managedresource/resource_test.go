@@ -59,30 +59,22 @@ var _ = Describe("ManagedResource controller tests", func() {
 		objectKey = client.ObjectKey{Namespace: testNamespace.Name, Name: resourceName}
 
 		configMap = &corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: corev1.SchemeGroupVersion.String(),
-				Kind:       "ConfigMap",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-			},
-			Data: map[string]string{"abc": "xyz"},
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "ConfigMap",
+			Name:       resourceName,
+			Namespace:  testNamespace.Name,
+			Data:       map[string]string{"abc": "xyz"},
 		}
 
 		secretForManagedResource = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-			},
-			Data: secretDataForObject(configMap, dataKey),
+			Name:      resourceName,
+			Namespace: testNamespace.Name,
+			Data:      secretDataForObject(configMap, dataKey),
 		}
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-			},
+			Name:      resourceName,
+			Namespace: testNamespace.Name,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class:      new(filter.ResourceClass()),
 				SecretRefs: []corev1.LocalObjectReference{{Name: secretForManagedResource.Name}},
@@ -123,10 +115,8 @@ var _ = Describe("ManagedResource controller tests", func() {
 		Describe("successful creation", func() {
 			test := func() {
 				secret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: testNamespace.Name,
-					},
+					Name:      resourceName,
+					Namespace: testNamespace.Name,
 				}
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 
@@ -201,14 +191,10 @@ var _ = Describe("ManagedResource controller tests", func() {
 
 		BeforeEach(func() {
 			newResource = &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName + "-new",
-					Namespace: testNamespace.Name,
-				},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "Secret",
+				Name:       resourceName + "-new",
+				Namespace:  testNamespace.Name,
 				Data: map[string][]byte{
 					"entry":  []byte("value"),
 					"entry2": []byte("value2"),
@@ -249,14 +235,10 @@ var _ = Describe("ManagedResource controller tests", func() {
 
 			It("should correctly set the condition ResourceApplied to Progressing", func() {
 				newConfigMap := &corev1.ConfigMap{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: corev1.SchemeGroupVersion.String(),
-						Kind:       "ConfigMap",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName + "-new",
-						Namespace: testNamespace.Name,
-					},
+					APIVersion: corev1.SchemeGroupVersion.String(),
+					Kind:       "ConfigMap",
+					Name:       resourceName + "-new",
+					Namespace:  testNamespace.Name,
 				}
 
 				patch := client.MergeFrom(secretForManagedResource.DeepCopy())
@@ -352,11 +334,9 @@ var _ = Describe("ManagedResource controller tests", func() {
 				Expect(checksumBefore).NotTo(BeNil())
 
 				newSecretForManagedResource := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName + "-new-resource",
-						Namespace: testNamespace.Name,
-					},
-					Data: secretDataForObject(newResource, dataKey),
+					Name:      resourceName + "-new-resource",
+					Namespace: testNamespace.Name,
+					Data:      secretDataForObject(newResource, dataKey),
 				}
 
 				Expect(testClient.Create(ctx, newSecretForManagedResource)).To(Succeed())
@@ -652,14 +632,10 @@ var _ = Describe("ManagedResource controller tests", func() {
 				secretForManagedResource.Data = secretDataForObject(configMap, dataKey)
 
 				node = &corev1.Node{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: corev1.SchemeGroupVersion.String(),
-						Kind:       "Node",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "node",
-						Labels: map[string]string{references.LabelKeyGarbageCollectable: references.LabelValueGarbageCollectable},
-					},
+					APIVersion: corev1.SchemeGroupVersion.String(),
+					Kind:       "Node",
+					Name:       "node",
+					Labels:     map[string]string{references.LabelKeyGarbageCollectable: references.LabelValueGarbageCollectable},
 				}
 				secretForManagedResource.Data["node.yaml"] = jsonDataForObject(node)
 			})
@@ -785,9 +761,7 @@ var _ = Describe("ManagedResource controller tests", func() {
 
 			BeforeEach(func() {
 				defaultPodTemplateSpec = &corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{"foo": "bar"},
-					},
+					Labels: map[string]string{"foo": "bar"},
 					Spec: corev1.PodSpec{
 						Containers: []corev1.Container{
 							{
@@ -799,14 +773,10 @@ var _ = Describe("ManagedResource controller tests", func() {
 				}
 
 				deployment = &appsv1.Deployment{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: appsv1.SchemeGroupVersion.String(),
-						Kind:       "Deployment",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: testNamespace.Name,
-					},
+					APIVersion: appsv1.SchemeGroupVersion.String(),
+					Kind:       "Deployment",
+					Name:       resourceName,
+					Namespace:  testNamespace.Name,
 					Spec: appsv1.DeploymentSpec{
 						Selector: &metav1.LabelSelector{
 							MatchLabels: map[string]string{"foo": "bar"},
@@ -905,9 +875,7 @@ var _ = Describe("ManagedResource controller tests", func() {
 
 			BeforeEach(func() {
 				defaultPodTemplateSpec = &corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{"foo": "bar"},
-					},
+					Labels: map[string]string{"foo": "bar"},
 					Spec: corev1.PodSpec{
 						Containers: []corev1.Container{
 							{
@@ -929,14 +897,10 @@ var _ = Describe("ManagedResource controller tests", func() {
 				}
 
 				deployment = &appsv1.Deployment{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: appsv1.SchemeGroupVersion.String(),
-						Kind:       "Deployment",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: testNamespace.Name,
-					},
+					APIVersion: appsv1.SchemeGroupVersion.String(),
+					Kind:       "Deployment",
+					Name:       resourceName,
+					Namespace:  testNamespace.Name,
 					Spec: appsv1.DeploymentSpec{
 						Selector: &metav1.LabelSelector{
 							MatchLabels: map[string]string{"foo": "bar"},
@@ -1093,11 +1057,9 @@ var _ = Describe("ManagedResource controller tests", func() {
 		BeforeEach(func() {
 			configMap.Immutable = new(true)
 			secretForManagedResource = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-				},
-				Data: secretDataForObject(configMap, dataKey),
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Data:      secretDataForObject(configMap, dataKey),
 			}
 		})
 

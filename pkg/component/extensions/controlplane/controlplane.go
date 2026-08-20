@@ -78,10 +78,8 @@ func New(
 		waitTimeout:         waitTimeout,
 
 		controlPlane: &extensionsv1alpha1.ControlPlane{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -115,11 +113,9 @@ func (c *controlPlane) deploy(ctx context.Context, operation string) (extensions
 		metav1.SetMetaDataAnnotation(&c.controlPlane.ObjectMeta, v1beta1constants.GardenerTimestamp, TimeNow().UTC().Format(time.RFC3339Nano))
 
 		c.controlPlane.Spec = extensionsv1alpha1.ControlPlaneSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           c.values.Type,
-				ProviderConfig: providerConfig,
-			},
-			Region: c.values.Region,
+			Type:           c.values.Type,
+			ProviderConfig: providerConfig,
+			Region:         c.values.Region,
 			SecretRef: corev1.SecretReference{
 				Name:      v1beta1constants.SecretNameCloudProvider,
 				Namespace: c.controlPlane.Namespace,

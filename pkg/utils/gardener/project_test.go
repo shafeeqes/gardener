@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -44,9 +43,7 @@ var _ = Describe("Project", func() {
 			Build()
 
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: projectName,
-			},
+			Name: projectName,
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: &namespaceName,
 			},
@@ -104,9 +101,7 @@ var _ = Describe("Project", func() {
 
 		It("should return the namespace but no project because labels missing", func() {
 			namespace := &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: namespaceName,
-				},
+				Name: namespaceName,
 			}
 			Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
 
@@ -118,10 +113,8 @@ var _ = Describe("Project", func() {
 
 		It("should return an error because getting the project failed", func() {
 			namespace := &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   namespaceName,
-					Labels: map[string]string{"project.gardener.cloud/name": projectName},
-				},
+				Name:   namespaceName,
+				Labels: map[string]string{"project.gardener.cloud/name": projectName},
 			}
 			Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
 
@@ -146,10 +139,8 @@ var _ = Describe("Project", func() {
 
 		It("should return both namespace and project", func() {
 			namespace := &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   namespaceName,
-					Labels: map[string]string{"project.gardener.cloud/name": projectName},
-				},
+				Name:   namespaceName,
+				Labels: map[string]string{"project.gardener.cloud/name": projectName},
 			}
 			Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
 			Expect(fakeClient.Create(ctx, project)).To(Succeed())

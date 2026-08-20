@@ -60,10 +60,8 @@ var _ = Describe("Shoot Care Control", func() {
 		seedName = "seed"
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			Name:      shootName,
+			Namespace: shootNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName: new(seedName),
 				Provider: gardencorev1beta1.Provider{
@@ -99,15 +97,13 @@ var _ = Describe("Shoot Care Control", func() {
 			careSyncPeriod = 1 * time.Minute
 
 			gardenSecrets = []corev1.Secret{{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "internal-domain-secret",
-					Namespace:   gardenerutils.ComputeGardenNamespace(seedName),
-					Annotations: map[string]string{gardenerutils.DNSProvider: "fooDNS", gardenerutils.DNSDomain: "foo.bar"},
-					Labels:      map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
-				},
+				Name:        "internal-domain-secret",
+				Namespace:   gardenerutils.ComputeGardenNamespace(seedName),
+				Annotations: map[string]string{gardenerutils.DNSProvider: "fooDNS", gardenerutils.DNSDomain: "foo.bar"},
+				Labels:      map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
 			}}
 
-			req = reconcile.Request{NamespacedName: client.ObjectKey{Namespace: shootNamespace, Name: shootName}}
+			req = reconcile.Request{Namespace: shootNamespace, Name: shootName}
 
 			gardenletConf = gardenletconfigv1alpha1.GardenletConfiguration{
 				Controllers: &gardenletconfigv1alpha1.GardenletControllerConfiguration{
@@ -118,9 +114,7 @@ var _ = Describe("Shoot Care Control", func() {
 			}
 
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seedName,
-				},
+				Name: seedName,
 			}
 		})
 

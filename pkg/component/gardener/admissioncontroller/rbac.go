@@ -25,10 +25,8 @@ const (
 
 func (a *gardenerAdmissionController) clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{gardencorev1beta1.GroupName},
@@ -95,10 +93,8 @@ func (a *gardenerAdmissionController) clusterRole() *rbacv1.ClusterRole {
 
 func (a *gardenerAdmissionController) clusterRoleBinding(serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleBindingName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleBindingName,
+		Labels: GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",

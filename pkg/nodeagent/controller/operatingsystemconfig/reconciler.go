@@ -399,7 +399,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 func (r *Reconciler) getNode(ctx context.Context) (*corev1.Node, bool, error) {
 	if r.NodeName != "" {
-		node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: r.NodeName}}
+		node := &corev1.Node{Name: r.NodeName}
 		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(node), node); err != nil {
 			return nil, false, fmt.Errorf("unable to fetch node %q: %w", r.NodeName, err)
 		}
@@ -489,7 +489,7 @@ func (r *Reconciler) getFileContentData(ctx context.Context, file extensionsv1al
 		// invisible to the cached client.
 		// Since we plan to use files with secretRef only for the control plane worker pool of self-hosted shoots, the
 		// network I/O impact should be negligible.
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: file.Content.SecretRef.Name, Namespace: metav1.NamespaceSystem}}
+		secret := &corev1.Secret{Name: file.Content.SecretRef.Name, Namespace: metav1.NamespaceSystem}
 		if err := r.APIReader.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 			return nil, false, fmt.Errorf("unable to read referenced secret %q: %w", file.Content.SecretRef.Name, err)
 		}
@@ -926,7 +926,7 @@ func (r *Reconciler) completeKubeletInPlaceUpdate(ctx context.Context, log logr.
 }
 
 func (r *Reconciler) triggerTokenResync(log logr.Logger, secretName string) {
-	r.Channel <- event.TypedGenericEvent[*corev1.Secret]{Object: &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: metav1.NamespaceSystem}}}
+	r.Channel <- event.TypedGenericEvent[*corev1.Secret]{Object: &corev1.Secret{Name: secretName, Namespace: metav1.NamespaceSystem}}
 	log.Info("Triggered an event for the token controller", "secret", secretName)
 }
 

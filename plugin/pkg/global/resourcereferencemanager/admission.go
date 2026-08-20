@@ -1390,14 +1390,12 @@ func (r *ReferenceManager) sanityCheckProviderInternalSecret(ctx context.Context
 
 	for _, providerType := range providerTypes {
 		dummyInternalSecret := &gardencorev1beta1.InternalSecret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: name,
-				Namespace:    namespace,
-				Annotations:  internalSecret.Annotations,
-				Labels:       utils.MergeStringMaps(internalSecret.Labels, map[string]string{v1beta1constants.LabelShootProviderPrefix + providerType: "true"}),
-			},
-			Type: internalSecret.Type,
-			Data: internalSecret.Data,
+			GenerateName: name,
+			Namespace:    namespace,
+			Annotations:  internalSecret.Annotations,
+			Labels:       utils.MergeStringMaps(internalSecret.Labels, map[string]string{v1beta1constants.LabelShootProviderPrefix + providerType: "true"}),
+			Type:         internalSecret.Type,
+			Data:         internalSecret.Data,
 		}
 
 		if _, err := r.gardenCoreClient.CoreV1beta1().InternalSecrets(dummyInternalSecret.Namespace).Create(ctx, dummyInternalSecret, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}}); err != nil {
@@ -1531,14 +1529,12 @@ func (r *ReferenceManager) sanityCheckProviderSecret(ctx context.Context, namesp
 
 	for _, providerType := range providerTypes {
 		dummySecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: name,
-				Namespace:    namespace,
-				Annotations:  secret.Annotations,
-				Labels:       utils.MergeStringMaps(secret.Labels, map[string]string{v1beta1constants.LabelShootProviderPrefix + providerType: "true"}),
-			},
-			Type: secret.Type,
-			Data: secret.Data,
+			GenerateName: name,
+			Namespace:    namespace,
+			Annotations:  secret.Annotations,
+			Labels:       utils.MergeStringMaps(secret.Labels, map[string]string{v1beta1constants.LabelShootProviderPrefix + providerType: "true"}),
+			Type:         secret.Type,
+			Data:         secret.Data,
 		}
 
 		if _, err := r.kubeClient.CoreV1().Secrets(dummySecret.Namespace).Create(ctx, dummySecret, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}}); err != nil {

@@ -16,10 +16,8 @@ import (
 
 func (g *gardenerAPIServer) apiService(secretCAGardener *corev1.Secret, group, version string) *apiregistrationv1.APIService {
 	return &apiregistrationv1.APIService{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   fmt.Sprintf("%s.%s", version, group),
-			Labels: GetLabels(),
-		},
+		Name:   fmt.Sprintf("%s.%s", version, group),
+		Labels: GetLabels(),
 		Spec: apiregistrationv1.APIServiceSpec{
 			CABundle: secretCAGardener.Data[secrets.DataKeyCertificateBundle],
 			Service: &apiregistrationv1.ServiceReference{

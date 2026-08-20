@@ -64,10 +64,8 @@ var _ = Describe("ControlPlane", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(scheme).Build()
 
 		empty = &extensionsv1alpha1.ControlPlane{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 		cp = empty.DeepCopy()
 		cp.SetAnnotations(map[string]string{
@@ -76,11 +74,9 @@ var _ = Describe("ControlPlane", func() {
 		})
 
 		cpSpec = extensionsv1alpha1.ControlPlaneSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           extensionType,
-				ProviderConfig: providerConfig,
-			},
-			Region: region,
+			Type:           extensionType,
+			ProviderConfig: providerConfig,
+			Region:         region,
 			SecretRef: corev1.SecretReference{
 				Name:      "cloudprovider",
 				Namespace: namespace,
@@ -110,16 +106,14 @@ var _ = Describe("ControlPlane", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(obj).To(DeepEqual(&extensionsv1alpha1.ControlPlane{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": now.UTC().Format(time.RFC3339Nano),
-					},
-					ResourceVersion: "1",
+				Name:      name,
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": now.UTC().Format(time.RFC3339Nano),
 				},
-				Spec: cpSpec,
+				ResourceVersion: "1",
+				Spec:            cpSpec,
 			}))
 		})
 	})

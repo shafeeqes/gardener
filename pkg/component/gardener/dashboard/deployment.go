@@ -74,13 +74,11 @@ func (g *gardenerDashboard) deployment(
 	error,
 ) {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: g.namespace,
-			Labels: utils.MergeStringMaps(GetLabels(), map[string]string{
-				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
-			}),
-		},
+		Name:      deploymentName,
+		Namespace: g.namespace,
+		Labels: utils.MergeStringMaps(GetLabels(), map[string]string{
+			resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
+		}),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -165,10 +163,8 @@ func (g *gardenerDashboard) deployment(
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									TCPSocket: &corev1.TCPSocketAction{
-										Port: intstr.FromString(portNameServer),
-									},
+								TCPSocket: &corev1.TCPSocketAction{
+									Port: intstr.FromString(portNameServer),
 								},
 								InitialDelaySeconds: 15,
 								TimeoutSeconds:      5,
@@ -177,12 +173,10 @@ func (g *gardenerDashboard) deployment(
 								PeriodSeconds:       20,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromString(portNameServer),
-										Scheme: corev1.URISchemeHTTPS,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   intstr.FromString(portNameServer),
+									Scheme: corev1.URISchemeHTTPS,
 								},
 								InitialDelaySeconds: 5,
 								TimeoutSeconds:      5,
@@ -219,48 +213,40 @@ func (g *gardenerDashboard) deployment(
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeNameSession,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretNameSession,
-									DefaultMode: new(int32(0640)),
-									Items: []corev1.KeyToPath{{
-										Key:  secretsutils.DataKeyPassword,
-										Path: dataKeySessionSecret,
-									}},
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretNameSession,
+								DefaultMode: new(int32(0640)),
+								Items: []corev1.KeyToPath{{
+									Key:  secretsutils.DataKeyPassword,
+									Path: dataKeySessionSecret,
+								}},
 							},
 						},
 						{
 							Name: volumeNameConfig,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
-									Items: []corev1.KeyToPath{{
-										Key:  dataKeyConfig,
-										Path: dataKeyConfig,
-									}},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: configMapName,
+								Items: []corev1.KeyToPath{{
+									Key:  dataKeyConfig,
+									Path: dataKeyConfig,
+								}},
 							},
 						},
 						{
 							Name: volumeNameLoginConfig,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
-									Items: []corev1.KeyToPath{{
-										Key:  dataKeyLoginConfig,
-										Path: dataKeyLoginConfig,
-									}},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: configMapName,
+								Items: []corev1.KeyToPath{{
+									Key:  dataKeyLoginConfig,
+									Path: dataKeyLoginConfig,
+								}},
 							},
 						},
 						{
 							Name: volumeNameTLS,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretNameServerCert,
-									DefaultMode: new(int32(0640)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretNameServerCert,
+								DefaultMode: new(int32(0640)),
 							},
 						},
 					},
@@ -272,15 +258,13 @@ func (g *gardenerDashboard) deployment(
 	if secretSessionPrevious != nil {
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameSessionPrevious,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  secretSessionPrevious.Name,
-					DefaultMode: new(int32(0640)),
-					Items: []corev1.KeyToPath{{
-						Key:  secretsutils.DataKeyPassword,
-						Path: dataKeySessionSecretPrevious,
-					}},
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  secretSessionPrevious.Name,
+				DefaultMode: new(int32(0640)),
+				Items: []corev1.KeyToPath{{
+					Key:  secretsutils.DataKeyPassword,
+					Path: dataKeySessionSecretPrevious,
+				}},
 			},
 		})
 		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -293,11 +277,9 @@ func (g *gardenerDashboard) deployment(
 	if g.values.OIDC != nil {
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameOIDC,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  g.values.OIDC.SecretRef.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  g.values.OIDC.SecretRef.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		})
 		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -309,11 +291,9 @@ func (g *gardenerDashboard) deployment(
 	if g.values.GitHub != nil {
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameGithub,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  g.values.GitHub.SecretRef.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  g.values.GitHub.SecretRef.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		})
 		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -330,8 +310,8 @@ func (g *gardenerDashboard) deployment(
 		metav1.SetMetaDataAnnotation(&deployment.Spec.Template.ObjectMeta, "checksum-configmap-"+configMapAssets.Name, utils.ComputeSecretChecksum(configMapAssets.BinaryData))
 
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
-			Name:         volumeNameConfigAssets,
-			VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: configMapAssets.Name}}},
+			Name:      volumeNameConfigAssets,
+			ConfigMap: &corev1.ConfigMapVolumeSource{Name: configMapAssets.Name},
 		})
 		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
 			Name:      volumeNameConfigAssets,

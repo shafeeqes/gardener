@@ -144,11 +144,9 @@ func (k *kubeScheduler) Deploy(ctx context.Context) error {
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "kube-scheduler-config",
-			Namespace: k.namespace,
-		},
-		Data: map[string]string{dataKeyComponentConfig: componentConfigYAML},
+		Name:      "kube-scheduler-config",
+		Namespace: k.namespace,
+		Data:      map[string]string{dataKeyComponentConfig: componentConfigYAML},
 	}
 	utilruntime.Must(kubernetesutils.MakeUnique(configMap))
 
@@ -206,14 +204,12 @@ func (k *kubeScheduler) Deploy(ctx context.Context) error {
 		deployment.Spec.RevisionHistoryLimit = new(int32(1))
 		deployment.Spec.Selector = &metav1.LabelSelector{MatchLabels: getLabels()}
 		deployment.Spec.Template = corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleControlPlane,
-					v1beta1constants.LabelPodMaintenanceRestart: "true",
-					v1beta1constants.LabelNetworkPolicyToDNS:    v1beta1constants.LabelNetworkPolicyAllowed,
-					gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
-				}),
-			},
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleControlPlane,
+				v1beta1constants.LabelPodMaintenanceRestart: "true",
+				v1beta1constants.LabelNetworkPolicyToDNS:    v1beta1constants.LabelNetworkPolicyAllowed,
+				gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
+			}),
 			Spec: corev1.PodSpec{
 				AutomountServiceAccountToken: new(false),
 				SecurityContext: &corev1.PodSecurityContext{
@@ -231,12 +227,10 @@ func (k *kubeScheduler) Deploy(ctx context.Context) error {
 						ImagePullPolicy: corev1.PullIfNotPresent,
 						Command:         command,
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/healthz",
-									Scheme: probeURIScheme,
-									Port:   intstr.FromInt32(port),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/healthz",
+								Scheme: probeURIScheme,
+								Port:   intstr.FromInt32(port),
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    2,
@@ -280,20 +274,16 @@ func (k *kubeScheduler) Deploy(ctx context.Context) error {
 				Volumes: []corev1.Volume{
 					{
 						Name: volumeNameClientCA,
-						VolumeSource: corev1.VolumeSource{
-							Projected: &corev1.ProjectedVolumeSource{
-								DefaultMode: new(int32(420)),
-								Sources: []corev1.VolumeProjection{
-									{
-										Secret: &corev1.SecretProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: clientCASecret.Name,
-											},
-											Items: []corev1.KeyToPath{{
-												Key:  secrets.DataKeyCertificateBundle,
-												Path: fileNameClientCA,
-											}},
-										},
+						Projected: &corev1.ProjectedVolumeSource{
+							DefaultMode: new(int32(420)),
+							Sources: []corev1.VolumeProjection{
+								{
+									Secret: &corev1.SecretProjection{
+										Name: clientCASecret.Name,
+										Items: []corev1.KeyToPath{{
+											Key:  secrets.DataKeyCertificateBundle,
+											Path: fileNameClientCA,
+										}},
 									},
 								},
 							},
@@ -301,21 +291,15 @@ func (k *kubeScheduler) Deploy(ctx context.Context) error {
 					},
 					{
 						Name: volumeNameServer,
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName:  serverSecret.Name,
-								DefaultMode: new(int32(0640)),
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName:  serverSecret.Name,
+							DefaultMode: new(int32(0640)),
 						},
 					},
 					{
 						Name: volumeNameConfig,
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: configMap.Name,
-								},
-							},
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							Name: configMap.Name,
 						},
 					},
 				},
@@ -448,19 +432,13 @@ func (k *kubeScheduler) Deploy(ctx context.Context) error {
 		serviceMonitor.Spec = monitoringv1.ServiceMonitorSpec{
 			Selector: metav1.LabelSelector{MatchLabels: getLabels()},
 			Endpoints: []monitoringv1.Endpoint{{
-				Port:   portNameMetrics,
-				Scheme: new(monitoringv1.SchemeHTTPS),
-				HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-					HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-						TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-						HTTPConfigWithoutTLS: monitoringv1.HTTPConfigWithoutTLS{
-							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: shoot.AccessSecretName},
-								Key:                  resourcesv1alpha1.DataKeyToken,
-							}},
-						},
-					},
-				},
+				Port:      portNameMetrics,
+				Scheme:    new(monitoringv1.SchemeHTTPS),
+				TLSConfig: &monitoringv1.TLSConfig{InsecureSkipVerify: new(true)},
+				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
+					Name: shoot.AccessSecretName,
+					Key:  resourcesv1alpha1.DataKeyToken,
+				}},
 				RelabelConfigs: []monitoringv1.RelabelConfig{{
 					Action: "labelmap",
 					Regex:  `__meta_kubernetes_service_label_(.+)`,
@@ -496,15 +474,15 @@ func (k *kubeScheduler) Wait(_ context.Context) error        { return nil }
 func (k *kubeScheduler) WaitCleanup(_ context.Context) error { return nil }
 
 func (k *kubeScheduler) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "kube-scheduler-vpa", Namespace: k.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: "kube-scheduler-vpa", Namespace: k.namespace}
 }
 
 func (k *kubeScheduler) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeScheduler, Namespace: k.namespace}}
+	return &policyv1.PodDisruptionBudget{Name: v1beta1constants.DeploymentNameKubeScheduler, Namespace: k.namespace}
 }
 
 func (k *kubeScheduler) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: k.namespace}}
+	return &corev1.Service{Name: serviceName, Namespace: k.namespace}
 }
 
 func (k *kubeScheduler) emptyPrometheusRule() *monitoringv1.PrometheusRule {
@@ -516,7 +494,7 @@ func (k *kubeScheduler) emptyServiceMonitor() *monitoringv1.ServiceMonitor {
 }
 
 func (k *kubeScheduler) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeScheduler, Namespace: k.namespace}}
+	return &appsv1.Deployment{Name: v1beta1constants.DeploymentNameKubeScheduler, Namespace: k.namespace}
 }
 
 func (k *kubeScheduler) newShootAccessSecret() *gardenerutils.AccessSecret {
@@ -528,9 +506,7 @@ func (k *kubeScheduler) reconcileShootResources(ctx context.Context, serviceAcco
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		clusterRoleBinding1 = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:kube-scheduler",
-			},
+			Name: "gardener.cloud:target:kube-scheduler",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -543,9 +519,7 @@ func (k *kubeScheduler) reconcileShootResources(ctx context.Context, serviceAcco
 			}},
 		}
 		clusterRoleBinding2 = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:kube-scheduler-volume",
-			},
+			Name: "gardener.cloud:target:kube-scheduler-volume",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",

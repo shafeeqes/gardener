@@ -14,7 +14,6 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	kubernetesclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -92,10 +91,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: testID + "-",
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: testID + "-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -108,10 +105,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create RBAC for bootstrap tokens")
 	clusterRole := &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:system:seed-bootstrapper-test-" + testRunID,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   "gardener.cloud:system:seed-bootstrapper-test-" + testRunID,
+		Labels: map[string]string{testID: testRunID},
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"certificates.k8s.io"},
@@ -128,10 +123,8 @@ var _ = BeforeSuite(func() {
 	Expect(testClient.Create(ctx, clusterRole)).To(Succeed())
 
 	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:system:seed-bootstrapper-test-" + testRunID,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   "gardener.cloud:system:seed-bootstrapper-test-" + testRunID,
+		Labels: map[string]string{testID: testRunID},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",

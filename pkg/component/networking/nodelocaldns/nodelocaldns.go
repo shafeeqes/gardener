@@ -413,10 +413,8 @@ func (n *nodeLocalDNS) getAddress(useIPv6Brackets bool) string {
 // createCleanupConfigMap creates a ConfigMap containing the cleanup shell script for node-local-dns cleanup DaemonSet.
 func createCleanupConfigMap(ctx context.Context, shootClient client.Client) error {
 	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cleanupConfigMapName,
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      cleanupConfigMapName,
+		Namespace: metav1.NamespaceSystem,
 	}
 
 	_, err := controllerutils.GetAndCreateOrMergePatch(ctx, shootClient, cm, func() error {
@@ -431,10 +429,8 @@ func createCleanupConfigMap(ctx context.Context, shootClient client.Client) erro
 
 func createCleanupDaemonSet(ctx context.Context, shootClient client.Client, alpineImage string) error {
 	cleanupDaemonSet := &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      labelValueAndCleanupName,
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      labelValueAndCleanupName,
+		Namespace: metav1.NamespaceSystem,
 	}
 	_, err := controllerutil.CreateOrUpdate(ctx, shootClient, cleanupDaemonSet, func() error {
 		metav1.SetMetaDataLabel(&cleanupDaemonSet.ObjectMeta, v1beta1constants.LabelApp, labelValueAndCleanupName)
@@ -494,12 +490,10 @@ func createCleanupDaemonSet(ctx context.Context, shootClient client.Client, alpi
 								PeriodSeconds:       2,
 								SuccessThreshold:    1,
 								FailureThreshold:    3,
-								ProbeHandler: corev1.ProbeHandler{
-									Exec: &corev1.ExecAction{
-										Command: []string{
-											"cat",
-											"/tmp/healthy",
-										},
+								Exec: &corev1.ExecAction{
+									Command: []string{
+										"cat",
+										"/tmp/healthy",
 									},
 								},
 							},
@@ -514,22 +508,16 @@ func createCleanupDaemonSet(ctx context.Context, shootClient client.Client, alpi
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeMountNameCleanUp,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: cleanupConfigMapName,
-									},
-									DefaultMode: new(int32(0775)),
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name:        cleanupConfigMapName,
+								DefaultMode: new(int32(0775)),
 							},
 						},
 						{
 							Name: volumeMountNameXtablesLock,
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: volumeMountPathXtablesLock,
-									Type: new(corev1.HostPathFileOrCreate),
-								},
+							HostPath: &corev1.HostPathVolumeSource{
+								Path: volumeMountPathXtablesLock,
+								Type: new(corev1.HostPathFileOrCreate),
 							},
 						},
 					},
@@ -610,10 +598,8 @@ func waitForDaemonSetCompletion(ctx context.Context, shootClient client.Client, 
 // deleteCleanupScriptConfigMap deletes the ConfigMap containing the cleanup script.
 func deleteCleanupScriptConfigMap(ctx context.Context, shootClient client.Client) error {
 	cleanupScriptCM := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cleanupConfigMapName,
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      cleanupConfigMapName,
+		Namespace: metav1.NamespaceSystem,
 	}
 	if err := shootClient.Delete(ctx, cleanupScriptCM); client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("failed to delete cleanup script ConfigMap: %w", err)
@@ -654,10 +640,8 @@ func RunCleanup(ctx context.Context, shootClient client.Client, alpineImage stri
 
 	logger.Info("Cleanup DaemonSet for node-local-dns completed")
 	cleanupDaemonSet := &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      labelValueAndCleanupName,
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      labelValueAndCleanupName,
+		Namespace: metav1.NamespaceSystem,
 	}
 	if err := shootClient.Delete(ctx, cleanupDaemonSet); client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("failed to delete cleanup DaemonSet %s: %w", labelValueAndCleanupName, err)

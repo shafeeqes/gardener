@@ -15,10 +15,8 @@ const (
 
 func (g *gardenerAPIServer) clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		Rules: []rbacv1.PolicyRule{{
 			APIGroups: []string{"*"},
 			Resources: []string{"*"},
@@ -29,10 +27,8 @@ func (g *gardenerAPIServer) clusterRole() *rbacv1.ClusterRole {
 
 func (g *gardenerAPIServer) clusterRoleBinding(serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -48,10 +44,8 @@ func (g *gardenerAPIServer) clusterRoleBinding(serviceAccountName string) *rbacv
 
 func (g *gardenerAPIServer) clusterRoleBindingAuthDelegation(serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:apiserver:auth-delegator",
-			Labels: GetLabels(),
-		},
+		Name:   "gardener.cloud:apiserver:auth-delegator",
+		Labels: GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -67,11 +61,9 @@ func (g *gardenerAPIServer) clusterRoleBindingAuthDelegation(serviceAccountName 
 
 func (g *gardenerAPIServer) roleBindingAuthReader(serviceAccountName string) *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardener.cloud:apiserver:auth-reader",
-			Namespace: metav1.NamespaceSystem,
-			Labels:    GetLabels(),
-		},
+		Name:      "gardener.cloud:apiserver:auth-reader",
+		Namespace: metav1.NamespaceSystem,
+		Labels:    GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "Role",

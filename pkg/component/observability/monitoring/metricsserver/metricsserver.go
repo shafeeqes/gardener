@@ -114,12 +114,10 @@ func (m *metricsServer) WaitCleanup(_ context.Context) error { return nil }
 
 func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secret) (map[string][]byte, error) {
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "metrics-server",
-			Namespace: metav1.NamespaceSystem,
-		},
-		Type: corev1.SecretTypeTLS,
-		Data: serverSecret.Data,
+		Name:      "metrics-server",
+		Namespace: metav1.NamespaceSystem,
+		Type:      corev1.SecretTypeTLS,
+		Data:      serverSecret.Data,
 	}
 	utilruntime.Must(kubernetesutils.MakeUnique(secret))
 
@@ -127,17 +125,13 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceAccountName,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:                         serviceAccountName,
+			Namespace:                    metav1.NamespaceSystem,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:metrics-server",
-			},
+			Name: "system:metrics-server",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -148,11 +142,9 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:metrics-server",
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: "system:metrics-server",
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -167,11 +159,9 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		}
 
 		clusterRoleBindingAuthDelegator = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "metrics-server:system:auth-delegator",
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: "metrics-server:system:auth-delegator",
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -186,12 +176,10 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "metrics-server-auth-reader",
-				Namespace: metav1.NamespaceSystem,
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name:      "metrics-server-auth-reader",
+			Namespace: metav1.NamespaceSystem,
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -206,11 +194,9 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    map[string]string{"kubernetes.io/name": serviceName},
-			},
+			Name:      serviceName,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    map[string]string{"kubernetes.io/name": serviceName},
 			Spec: corev1.ServiceSpec{
 				Selector: getLabels(),
 				Ports: []corev1.ServicePort{
@@ -224,9 +210,7 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		}
 
 		apiService = &apiregistrationv1.APIService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "v1beta1.metrics.k8s.io",
-			},
+			Name: "v1beta1.metrics.k8s.io",
 			Spec: apiregistrationv1.APIServiceSpec{
 				Service: &apiregistrationv1.ServiceReference{
 					Name:      service.Name,
@@ -242,15 +226,13 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 
 		maxUnavailable = intstr.FromInt32(0)
 		deployment     = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      deploymentName,
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					managedresources.LabelKeyOrigin:              managedresources.LabelValueGardener,
-					v1beta1constants.GardenRole:                  v1beta1constants.GardenRoleSystemComponent,
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
-				}),
-			},
+			Name:      deploymentName,
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				managedresources.LabelKeyOrigin:              managedresources.LabelValueGardener,
+				v1beta1constants.GardenRole:                  v1beta1constants.GardenRoleSystemComponent,
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
+			}),
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(1)),
 				RevisionHistoryLimit: new(int32(2)),
@@ -304,24 +286,20 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 								fmt.Sprintf("--tls-private-key-file=%s/%s", volumeMountPathServer, secrets.DataKeyPrivateKey),
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromInt32(containerPort),
-										Scheme: corev1.URISchemeHTTPS,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/readyz",
+									Port:   intstr.FromInt32(containerPort),
+									Scheme: corev1.URISchemeHTTPS,
 								},
 								InitialDelaySeconds: 5,
 								PeriodSeconds:       10,
 								FailureThreshold:    1,
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/livez",
-										Port:   intstr.FromInt32(containerPort),
-										Scheme: corev1.URISchemeHTTPS,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/livez",
+									Port:   intstr.FromInt32(containerPort),
+									Scheme: corev1.URISchemeHTTPS,
 								},
 								InitialDelaySeconds: 30,
 								PeriodSeconds:       30,
@@ -346,10 +324,8 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 						}},
 						Volumes: []corev1.Volume{{
 							Name: volumeMountNameServer,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: secret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: secret.Name,
 							},
 						}},
 					},
@@ -358,11 +334,9 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		}
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "metrics-server",
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getLabels(),
-			},
+			Name:      "metrics-server",
+			Namespace: metav1.NamespaceSystem,
+			Labels:    getLabels(),
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable:             new(intstr.FromInt32(1)),
 				Selector:                   deployment.Spec.Selector,
@@ -389,10 +363,8 @@ func (m *metricsServer) computeResourcesData(serverSecret, caSecret *corev1.Secr
 		vpaUpdateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		controlledValues := vpaautoscalingv1.ContainerControlledValuesRequestsOnly
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "metrics-server",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "metrics-server",
+			Namespace: metav1.NamespaceSystem,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),

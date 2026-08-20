@@ -96,7 +96,7 @@ var _ = Describe("WaiterTest", func() {
 				},
 			}).Build()
 
-			Expect(seedClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager", Namespace: namespace}})).To(Succeed())
+			Expect(seedClient.Create(ctx, &appsv1.Deployment{Name: "kube-controller-manager", Namespace: namespace})).To(Succeed())
 
 			fakeSeedInterface = fakekubernetes.NewClientSetBuilder().WithAPIReader(seedClient).WithClient(seedClient).Build()
 			kubeControllerManager = New(testLogger, fakeSeedInterface, namespace, nil, values)
@@ -107,7 +107,7 @@ var _ = Describe("WaiterTest", func() {
 
 		It("should fail if no kube controller manager pod can be found", func() {
 			// Create the deployment so Get succeeds
-			Expect(seedClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager", Namespace: namespace}})).To(Succeed())
+			Expect(seedClient.Create(ctx, &appsv1.Deployment{Name: "kube-controller-manager", Namespace: namespace})).To(Succeed())
 			// No pods created - List returns empty list
 
 			Expect(kubeControllerManager.WaitForControllerToBeActive(ctx)).To(MatchError(Equal("retry failed with max attempts reached, last error: controller kube-controller-manager is not active")))
@@ -115,19 +115,17 @@ var _ = Describe("WaiterTest", func() {
 
 		It("should fail if one of the existing kube controller manager pods has a deletion timestamp", func() {
 			// Create the deployment
-			Expect(seedClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager", Namespace: namespace}})).To(Succeed())
+			Expect(seedClient.Create(ctx, &appsv1.Deployment{Name: "kube-controller-manager", Namespace: namespace})).To(Succeed())
 
 			// Create pods with matching labels
-			Expect(seedClient.Create(ctx, &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			Expect(seedClient.Create(ctx, &corev1.Pod{
 				Name: "pod1", Namespace: namespace,
-				Labels: map[string]string{"app": "kubernetes", "role": "controller-manager"},
-			}})).To(Succeed())
+				Labels: map[string]string{"app": "kubernetes", "role": "controller-manager"}})).To(Succeed())
 			// For the pod with deletion timestamp, we need a finalizer to prevent immediate deletion
-			pod2 := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			pod2 := &corev1.Pod{
 				Name: "pod2", Namespace: namespace,
 				Labels:     map[string]string{"app": "kubernetes", "role": "controller-manager"},
-				Finalizers: []string{"test-finalizer"},
-			}}
+				Finalizers: []string{"test-finalizer"}}
 			Expect(seedClient.Create(ctx, pod2)).To(Succeed())
 			// Now delete pod2 to set DeletionTimestamp
 			Expect(seedClient.Delete(ctx, pod2)).To(Succeed())
@@ -137,21 +135,18 @@ var _ = Describe("WaiterTest", func() {
 
 		It("should fail if the existing kube controller manager fails to acquire leader election", func() {
 			// Create the deployment
-			Expect(seedClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager", Namespace: namespace}})).To(Succeed())
+			Expect(seedClient.Create(ctx, &appsv1.Deployment{Name: "kube-controller-manager", Namespace: namespace})).To(Succeed())
 
 			// Create a matching pod
-			Expect(seedClient.Create(ctx, &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			Expect(seedClient.Create(ctx, &corev1.Pod{
 				Name: "pod1", Namespace: namespace,
-				Labels: map[string]string{"app": "kubernetes", "role": "controller-manager"},
-			}})).To(Succeed())
+				Labels: map[string]string{"app": "kubernetes", "role": "controller-manager"}})).To(Succeed())
 
 			// Create a lease with old renew time in the shoot client
 			renewTime := metav1.NewMicroTime(time.Now().UTC().Add(-10 * time.Second))
 			Expect(shootClient.Create(ctx, &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-controller-manager",
-					Namespace: metav1.NamespaceSystem,
-				},
+				Name:      "kube-controller-manager",
+				Namespace: metav1.NamespaceSystem,
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime: &renewTime,
 				},
@@ -162,21 +157,18 @@ var _ = Describe("WaiterTest", func() {
 
 		It("should succeed", func() {
 			// Create the deployment
-			Expect(seedClient.Create(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-controller-manager", Namespace: namespace}})).To(Succeed())
+			Expect(seedClient.Create(ctx, &appsv1.Deployment{Name: "kube-controller-manager", Namespace: namespace})).To(Succeed())
 
 			// Create a matching pod
-			Expect(seedClient.Create(ctx, &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			Expect(seedClient.Create(ctx, &corev1.Pod{
 				Name: "pod1", Namespace: namespace,
-				Labels: map[string]string{"app": "kubernetes", "role": "controller-manager"},
-			}})).To(Succeed())
+				Labels: map[string]string{"app": "kubernetes", "role": "controller-manager"}})).To(Succeed())
 
 			// Create a lease with recent renew time in the shoot client
 			renewTime := metav1.NewMicroTime(time.Now().UTC())
 			Expect(shootClient.Create(ctx, &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-controller-manager",
-					Namespace: metav1.NamespaceSystem,
-				},
+				Name:      "kube-controller-manager",
+				Namespace: metav1.NamespaceSystem,
 				Spec: coordinationv1.LeaseSpec{
 					RenewTime: &renewTime,
 				},
@@ -197,10 +189,8 @@ var _ = Describe("WaiterTest", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 			fakeKubernetesInterface = fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).Build()
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-core-kube-controller-manager",
-					Namespace: namespace,
-				},
+				Name:      "shoot-core-kube-controller-manager",
+				Namespace: namespace,
 			}
 
 			kubeControllerManager = New(testLogger, fakeKubernetesInterface, namespace, nil, Values{})

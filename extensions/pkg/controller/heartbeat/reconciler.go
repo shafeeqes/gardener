@@ -44,10 +44,8 @@ func (r *reconciler) Reconcile(ctx context.Context, _ reconcile.Request) (reconc
 	log := logf.FromContext(ctx)
 
 	lease := &coordinationv1.Lease{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      extensions.HeartBeatResourceName,
-			Namespace: r.namespace,
-		},
+		Name:      extensions.HeartBeatResourceName,
+		Namespace: r.namespace,
 	}
 
 	op, err := controllerutils.CreateOrGetAndMergePatch(ctx, r.client, lease, func() error {

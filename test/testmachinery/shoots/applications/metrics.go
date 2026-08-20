@@ -27,7 +27,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metricsv1beta1 "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -99,7 +98,7 @@ var _ = ginkgo.Describe("Shoot application metrics testing", func() {
 		)
 	}, metricsTestTimeout, framework.WithCAfterTest(func(ctx context.Context) {
 		ginkgo.By("Cleanup metrics test deployment")
-		err := f.ShootClient.Client().Delete(ctx, &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: f.Namespace}})
+		err := f.ShootClient.Client().Delete(ctx, &appsv1.Deployment{Name: name, Namespace: f.Namespace})
 		framework.ExpectNoError(client.IgnoreNotFound(err))
 	}, cleanupTimeout))
 

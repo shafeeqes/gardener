@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -94,10 +93,8 @@ var _ = Describe("Plutono", func() {
 		})
 
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: projectNamespace,
-			},
+			Name:      shootName,
+			Namespace: projectNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				Purpose: &shootPurposeEvaluation,
 			},

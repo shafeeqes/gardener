@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock/testing"
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
@@ -41,10 +40,8 @@ var _ = Describe("DualStackMigration", func() {
 
 		// Initialize the shoot with proper IP families for dual-stack tests
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-shoot",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-shoot",
+			Namespace: "test-namespace",
 			Spec: gardencorev1beta1.ShootSpec{
 				Networking: &gardencorev1beta1.Networking{
 					IPFamilies: []gardencorev1beta1.IPFamily{
@@ -65,11 +62,9 @@ var _ = Describe("DualStackMigration", func() {
 			}
 
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "test-shoot",
-					Namespace:   "test-namespace",
-					Annotations: map[string]string{},
-				},
+				Name:        "test-shoot",
+				Namespace:   "test-namespace",
+				Annotations: map[string]string{},
 				Spec: gardencorev1beta1.ShootSpec{
 					Networking: &gardencorev1beta1.Networking{
 						IPFamilies: []gardencorev1beta1.IPFamily{

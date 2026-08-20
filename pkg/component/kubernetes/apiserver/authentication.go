@@ -11,7 +11,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/apis/apiserver"
@@ -41,10 +40,8 @@ func (k *kubeAPIServer) reconcileConfigMapAuthenticationConfig(ctx context.Conte
 	authenticationConfig := ptr.Deref(k.values.AuthenticationConfiguration, "")
 
 	authenticationConfigurationV1Beta1 := &apiserverv1beta1.AuthenticationConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
-			Kind:       "AuthenticationConfiguration",
-		},
+		APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
+		Kind:       "AuthenticationConfiguration",
 	}
 
 	if len(authenticationConfig) > 0 {
@@ -78,10 +75,8 @@ func (k *kubeAPIServer) handleAuthenticationSettings(deployment *appsv1.Deployme
 
 	if config, ok := configMapAuthenticationConfig.Data[DataKeyConfigMapAuthenticationConfig]; ok {
 		authenticationConfiguration := &apiserverv1beta1.AuthenticationConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
-				Kind:       "AuthenticationConfiguration",
-			},
+			APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
+			Kind:       "AuthenticationConfiguration",
 		}
 
 		if err := runtime.DecodeInto(ConfigCodec, []byte(config), authenticationConfiguration); err != nil {
@@ -106,12 +101,8 @@ func (k *kubeAPIServer) handleAuthenticationSettings(deployment *appsv1.Deployme
 	})
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name: volumeNameStructuredAuthenticationConfig,
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: configMapAuthenticationConfig.Name,
-				},
-			},
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			Name: configMapAuthenticationConfig.Name,
 		},
 	})
 

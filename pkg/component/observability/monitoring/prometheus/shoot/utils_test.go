@@ -44,16 +44,16 @@ var _ = Describe("Utils", func() {
 					Scheme:      new(monitoringv1.SchemeHTTPS),
 					TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 						APIServer:  new("https://kube-apiserver"),
 						Role:       "Pod",
 						Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-							Key:                  "token",
+							Name: "shoot-access-prometheus-shoot",
+							Key:  "token",
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 					}},
@@ -129,16 +129,16 @@ var _ = Describe("Utils", func() {
 					Scheme:      new(monitoringv1.SchemeHTTPS),
 					TLSConfig:   &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 						APIServer:  new("https://kube-apiserver"),
 						Role:       "Endpoints",
 						Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-							Key:                  "token",
+							Name: "shoot-access-prometheus-shoot",
+							Key:  "token",
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 					}},

@@ -92,7 +92,7 @@ type SelfHostedShootInfo struct {
 // secret. The returned bool indicates whether the secret contains shoot metadata (i.e., it is a self-hosted shoot
 // bootstrap token). If false, the token is likely for a ManagedSeed rather than a self-hosted shoot.
 func ShootMetaFromBootstrapToken(ctx context.Context, reader client.Reader, bootstrapTokenSecretName string) (types.NamespacedName, bool, error) {
-	bootstrapTokenSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: bootstrapTokenSecretName, Namespace: metav1.NamespaceSystem}}
+	bootstrapTokenSecret := &corev1.Secret{Name: bootstrapTokenSecretName, Namespace: metav1.NamespaceSystem}
 	if err := reader.Get(ctx, client.ObjectKeyFromObject(bootstrapTokenSecret), bootstrapTokenSecret); err != nil {
 		return types.NamespacedName{}, false, fmt.Errorf("failed to read bootstrap token secret %s: %w", client.ObjectKeyFromObject(bootstrapTokenSecret), err)
 	}

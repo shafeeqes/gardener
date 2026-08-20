@@ -12,7 +12,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -59,7 +58,7 @@ volumes:
 		return nil
 	}
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: pod.Namespace, Name: resourcemanagerconfigv1alpha1.IstioInternalLoadBalancingConfigMapName}}
+	configMap := &corev1.ConfigMap{Namespace: pod.Namespace, Name: resourcemanagerconfigv1alpha1.IstioInternalLoadBalancingConfigMapName}
 	if err := h.TargetClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); apierrors.IsNotFound(err) {
 		return nil
 	} else if err != nil {
@@ -73,7 +72,7 @@ volumes:
 	hosts := strings.Split(configMap.Data[resourcemanagerconfigv1alpha1.HostsConfigMapKey], ",")
 	istioNamespace := configMap.Data[resourcemanagerconfigv1alpha1.IstioNamespaceConfigMapKey]
 
-	istioService := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Namespace: istioNamespace, Name: v1beta1constants.InternalSNIIngressServiceName}}
+	istioService := &corev1.Service{Namespace: istioNamespace, Name: v1beta1constants.InternalSNIIngressServiceName}
 	if err := h.TargetClient.Get(ctx, client.ObjectKeyFromObject(istioService), istioService); err != nil {
 		return fmt.Errorf("failed to get internal istio-ingressgateway service %q: %w", client.ObjectKeyFromObject(istioService), err)
 	}

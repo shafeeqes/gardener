@@ -7,7 +7,6 @@ package prometheus
 import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
 	kubernetesutils "github.com/gardener/gardener/pkg/utils/kubernetes"
@@ -58,18 +57,16 @@ func (p *prometheus) cortexContainer() corev1.Container {
 
 func (p *prometheus) cortexVolume(configMapName string) corev1.Volume {
 	return corev1.Volume{
-		Name:         volumeNameCortexConfig,
-		VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: configMapName}}},
+		Name:      volumeNameCortexConfig,
+		ConfigMap: &corev1.ConfigMapVolumeSource{Name: configMapName},
 	}
 }
 
 func (p *prometheus) cortexConfigMap() *corev1.ConfigMap {
 	obj := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.name() + "-" + cortexConfigNameInfix,
-			Namespace: p.namespace,
-			Labels:    p.getLabels(),
-		},
+		Name:      p.name() + "-" + cortexConfigNameInfix,
+		Namespace: p.namespace,
+		Labels:    p.getLabels(),
 		Data: map[string]string{
 			dataKeyCortexConfig: `target: ` + cortexTarget + `
 auth_enabled: false

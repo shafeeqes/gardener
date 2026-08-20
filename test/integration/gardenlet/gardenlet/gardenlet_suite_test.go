@@ -112,9 +112,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create seed")
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "seed-",
-		},
+		GenerateName: "seed-",
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",
@@ -163,14 +161,14 @@ var _ = BeforeSuite(func() {
 	})
 
 	By("Create garden namespaces for test")
-	gardenNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "garden"}}
+	gardenNamespace := &corev1.Namespace{Name: "garden"}
 	Expect(testClient.Create(ctx, gardenNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", gardenNamespace.Name)
 	DeferCleanup(func() {
 		By("Delete garden namespace")
 		Expect(testClient.Delete(ctx, gardenNamespace)).To(Or(Succeed(), BeNotFoundError()))
 	})
-	gardenNamespaceSeed = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{GenerateName: "garden-"}}
+	gardenNamespaceSeed = &corev1.Namespace{GenerateName: "garden-"}
 	Expect(testClient.Create(ctx, gardenNamespaceSeed)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", gardenNamespaceSeed.Name)
 	DeferCleanup(func() {
@@ -221,11 +219,7 @@ var _ = BeforeSuite(func() {
 			},
 		},
 		SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-			SeedTemplate: gardencorev1beta1.SeedTemplate{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seed.Name,
-				},
-			},
+			Name: seed.Name,
 		},
 	}
 

@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	clientcmdv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -111,7 +110,7 @@ func (v *GardenletKubeconfigRotationVerifier) After(parentCtx context.Context, e
 	}).WithPolling(5 * time.Second).Should(Succeed())
 
 	By("Verify that gardenlet's deployment is updated and healthy after kubeconfig secret was renewed")
-	gardenletDeployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: gardenletDeploymentName, Namespace: gardenletDeploymentNamespace}}
+	gardenletDeployment := &appsv1.Deployment{Name: gardenletDeploymentName, Namespace: gardenletDeploymentNamespace}
 	isUpdated := health.IsDeploymentUpdated(v.SeedReader, gardenletDeployment)
 	CEventually(ctx, func(g Gomega) {
 		updated, err := isUpdated(ctx)

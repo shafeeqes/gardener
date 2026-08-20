@@ -48,21 +48,21 @@ var _ = Describe("ManagedResources", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 		botanist = &Botanist{Operation: &operation.Operation{}}
 		k8sSeedClient := fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).Build()
-		namespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "test"}}
+		namespace = &corev1.Namespace{Name: "test"}
 		botanist.SeedClientSet = k8sSeedClient
 		botanist.Shoot = &shootpkg.Shoot{
 			ControlPlaneNamespace: namespace.Name,
 		}
 		seedManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: "seed", Namespace: namespace.Name},
-			Spec:       resourcesv1alpha1.ManagedResourceSpec{Class: new("seed")},
+			Name: "seed", Namespace: namespace.Name,
+			Spec: resourcesv1alpha1.ManagedResourceSpec{Class: new("seed")},
 		}
 		shootManagedResourceZeroClass = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: "shoot-zero-class", Namespace: namespace.Name},
-			Spec:       resourcesv1alpha1.ManagedResourceSpec{Class: new("")},
+			Name: "shoot-zero-class", Namespace: namespace.Name,
+			Spec: resourcesv1alpha1.ManagedResourceSpec{Class: new("")},
 		}
 		shootManagedResourceNoClass = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{Name: "shoot-no-class", Namespace: namespace.Name},
+			Name: "shoot-no-class", Namespace: namespace.Name,
 		}
 	})
 

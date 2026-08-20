@@ -29,10 +29,8 @@ var _ = Describe("SelfHostedShootExposure controller tests", func() {
 	// controlPlaneNode returns a healthy control-plane Node with the given addresses.
 	controlPlaneNode := func(name string, addresses ...corev1.NodeAddress) *corev1.Node {
 		return &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: map[string]string{"node-role.kubernetes.io/control-plane": "", testID: testRunID},
-			},
+			Name:   name,
+			Labels: map[string]string{"node-role.kubernetes.io/control-plane": "", testID: testRunID},
 			Status: corev1.NodeStatus{
 				Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}},
 				Addresses:  addresses,
@@ -42,11 +40,9 @@ var _ = Describe("SelfHostedShootExposure controller tests", func() {
 
 	BeforeEach(func() {
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: v1beta1constants.GardenNamespace,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      shootName,
+			Namespace: v1beta1constants.GardenNamespace,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName: new("cloudprofile1"),
 				Region:           "europe-central-1",
@@ -75,11 +71,9 @@ var _ = Describe("SelfHostedShootExposure controller tests", func() {
 
 		// The external DNSRecord already exists (created during bootstrapping); the controller only keeps it in sync.
 		dnsRecord = &extensionsv1alpha1.DNSRecord{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      dnsRecordName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      dnsRecordName,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{Type: exposureType},
 				SecretRef:   corev1.SecretReference{Name: "dnsrecord-secret", Namespace: metav1.NamespaceSystem},
@@ -215,11 +209,9 @@ var _ = Describe("SelfHostedShootExposure controller tests", func() {
 // cleanup, since the controller is expected to delete it) and returns it.
 func createExposure() *extensionsv1alpha1.SelfHostedShootExposure {
 	exposure := &extensionsv1alpha1.SelfHostedShootExposure{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shootName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    map[string]string{testID: testRunID},
-		},
+		Name:      shootName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    map[string]string{testID: testRunID},
 		Spec: extensionsv1alpha1.SelfHostedShootExposureSpec{
 			DefaultSpec: extensionsv1alpha1.DefaultSpec{Type: "local"},
 			Port:        443,
@@ -254,7 +246,7 @@ func stampExposureIngress(exposure *extensionsv1alpha1.SelfHostedShootExposure, 
 // referencing the test shoot, and registers cleanup.
 func createControllerRegistrationAndInstallation(continuousEndpointUpdate *bool) {
 	registration := &gardencorev1beta1.ControllerRegistration{
-		ObjectMeta: metav1.ObjectMeta{Name: "provider-local-" + testRunID, Labels: map[string]string{testID: testRunID}},
+		Name: "provider-local-" + testRunID, Labels: map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.ControllerRegistrationSpec{
 			Resources: []gardencorev1beta1.ControllerResource{{
 				Kind:                     extensionsv1alpha1.SelfHostedShootExposureResource,
@@ -269,7 +261,7 @@ func createControllerRegistrationAndInstallation(continuousEndpointUpdate *bool)
 	})
 
 	installation := &gardencorev1beta1.ControllerInstallation{
-		ObjectMeta: metav1.ObjectMeta{Name: "provider-local-" + testRunID, Labels: map[string]string{testID: testRunID}},
+		Name: "provider-local-" + testRunID, Labels: map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.ControllerInstallationSpec{
 			RegistrationRef: corev1.ObjectReference{Name: registration.Name},
 			SeedRef:         &corev1.ObjectReference{Name: "seed"},

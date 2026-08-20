@@ -15,7 +15,6 @@ import (
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/testing"
@@ -184,10 +183,8 @@ var _ = Describe("migration", func() {
 
 		BeforeEach(func() {
 			botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "bar",
-					Namespace: "foo",
-				},
+				Name:      "bar",
+				Namespace: "foo",
 				Status: gardencorev1beta1.ShootStatus{
 					LastOperation: &gardencorev1beta1.LastOperation{
 						Type: gardencorev1beta1.LastOperationTypeRestore,
@@ -196,11 +193,9 @@ var _ = Describe("migration", func() {
 			})
 			botanist.Seed = &seed.Seed{}
 			botanist.Seed.SetInfo(&gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "seed",
-					Namespace: "garden",
-					UID:       "new-seed",
-				},
+				Name:      "seed",
+				Namespace: "garden",
+				UID:       "new-seed",
 				Spec: gardencorev1beta1.SeedSpec{
 					Backup: &gardencorev1beta1.Backup{
 						Provider: "gcp",
@@ -350,13 +345,13 @@ var _ = Describe("migration", func() {
 	Describe("#ShallowDeleteMachineResources", func() {
 		It("should delete most of the resources and remove MCM finalizers", func() {
 			var (
-				machine             = &machinev1alpha1.Machine{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}}
-				machineSet          = &machinev1alpha1.MachineSet{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}}
-				machineDeployment   = &machinev1alpha1.MachineDeployment{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}}
-				machineClass        = &machinev1alpha1.MachineClass{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}}
-				machineClassSecret  = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}, Labels: map[string]string{"gardener.cloud/purpose": "machineclass"}}}
-				cloudProviderSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller", "do-not-remove-me"}, Labels: map[string]string{"gardener.cloud/purpose": "cloudprovider"}}}
-				unrelatedSecret     = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: shootNamespace}}
+				machine             = &machinev1alpha1.Machine{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}
+				machineSet          = &machinev1alpha1.MachineSet{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}
+				machineDeployment   = &machinev1alpha1.MachineDeployment{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}
+				machineClass        = &machinev1alpha1.MachineClass{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}}
+				machineClassSecret  = &corev1.Secret{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller"}, Labels: map[string]string{"gardener.cloud/purpose": "machineclass"}}
+				cloudProviderSecret = &corev1.Secret{GenerateName: "obj-", Namespace: shootNamespace, Finalizers: []string{"machine.sapcloud.io/machine-controller-manager", "machine.sapcloud.io/machine-controller", "do-not-remove-me"}, Labels: map[string]string{"gardener.cloud/purpose": "cloudprovider"}}
+				unrelatedSecret     = &corev1.Secret{GenerateName: "obj-", Namespace: shootNamespace}
 			)
 
 			Expect(fakeClient.Create(ctx, machine)).To(Succeed())

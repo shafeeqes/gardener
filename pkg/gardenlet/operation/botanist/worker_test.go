@@ -63,7 +63,7 @@ var _ = Describe("Worker", func() {
 		sm = fakesecretsmanager.New(c, namespace)
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ssh-keypair", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ssh-keypair", Namespace: namespace})).To(Succeed())
 
 		worker = mockworker.NewMockInterface(ctrl)
 		operatingSystemConfig = mockoperatingsystemconfig.NewMockInterface(ctrl)
@@ -167,19 +167,15 @@ var _ = Describe("Worker", func() {
 				pool1 = "pool1"
 				pool2 = "pool2"
 				node1 = corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "node1",
-						Labels: map[string]string{"worker.gardener.cloud/pool": pool1},
-					},
+					Name:   "node1",
+					Labels: map[string]string{"worker.gardener.cloud/pool": pool1},
 				}
 				node2 = corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "node2",
-						Labels: map[string]string{"worker.gardener.cloud/pool": pool2},
-					},
+					Name:   "node2",
+					Labels: map[string]string{"worker.gardener.cloud/pool": pool2},
 				}
 				node3 = corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{Name: "node3"},
+					Name: "node3",
 				}
 			)
 
@@ -223,43 +219,35 @@ var _ = Describe("Worker", func() {
 				checksum2 = "bar"
 
 				secret1 = corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "secret1",
-						Namespace: metav1.NamespaceSystem,
-						Labels: map[string]string{
-							"worker.gardener.cloud/pool": pool1,
-							"gardener.cloud/role":        "operating-system-config",
-						},
-						Annotations: map[string]string{"checksum/data-script": checksum1},
+					Name:      "secret1",
+					Namespace: metav1.NamespaceSystem,
+					Labels: map[string]string{
+						"worker.gardener.cloud/pool": pool1,
+						"gardener.cloud/role":        "operating-system-config",
 					},
+					Annotations: map[string]string{"checksum/data-script": checksum1},
 				}
 				secret2 = corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "secret2",
-						Namespace: metav1.NamespaceSystem,
-						Labels: map[string]string{
-							"worker.gardener.cloud/pool": pool2,
-							"gardener.cloud/role":        "operating-system-config",
-						},
-						Annotations: map[string]string{"checksum/data-script": checksum2},
+					Name:      "secret2",
+					Namespace: metav1.NamespaceSystem,
+					Labels: map[string]string{
+						"worker.gardener.cloud/pool": pool2,
+						"gardener.cloud/role":        "operating-system-config",
 					},
+					Annotations: map[string]string{"checksum/data-script": checksum2},
 				}
 				secret3WithoutWorkerPoolLabel = corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        "secret3",
-						Namespace:   metav1.NamespaceSystem,
-						Labels:      map[string]string{"gardener.cloud/role": "operating-system-config"},
-						Annotations: map[string]string{"checksum/data-script": "baz"},
-					},
+					Name:        "secret3",
+					Namespace:   metav1.NamespaceSystem,
+					Labels:      map[string]string{"gardener.cloud/role": "operating-system-config"},
+					Annotations: map[string]string{"checksum/data-script": "baz"},
 				}
 				secret4WithoutAnnotations = corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "secret4",
-						Namespace: metav1.NamespaceSystem,
-						Labels: map[string]string{
-							"worker.gardener/cloud": pool2,
-							"gardener.cloud/role":   "operating-system-config",
-						},
+					Name:      "secret4",
+					Namespace: metav1.NamespaceSystem,
+					Labels: map[string]string{
+						"worker.gardener/cloud": pool2,
+						"gardener.cloud/role":   "operating-system-config",
 					},
 				}
 			)
@@ -308,12 +296,11 @@ var _ = Describe("Worker", func() {
 		),
 		Entry("checksum annotation missing",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
-			map[string][]corev1.Node{"pool1": {{ObjectMeta: metav1.ObjectMeta{
+			map[string][]corev1.Node{"pool1": {{
 				Labels: map[string]string{
 					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
 					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-				},
-			}}}},
+				}}}},
 			map[string]metav1.ObjectMeta{"pool1": {
 				Name:        "gardener-node-agent--c63c0",
 				Annotations: map[string]string{"checksum/data-script": "foo"},
@@ -322,13 +309,12 @@ var _ = Describe("Worker", func() {
 		),
 		Entry("checksum annotation outdated",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
-			map[string][]corev1.Node{"pool1": {{ObjectMeta: metav1.ObjectMeta{
+			map[string][]corev1.Node{"pool1": {{
 				Annotations: map[string]string{"checksum/cloud-config-data": "outdated"},
 				Labels: map[string]string{
 					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
 					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-				},
-			}}}},
+				}}}},
 			map[string]metav1.ObjectMeta{"pool1": {
 				Name:        "gardener-node-agent--c63c0",
 				Annotations: map[string]string{"checksum/data-script": "foo"},
@@ -338,12 +324,10 @@ var _ = Describe("Worker", func() {
 		Entry("skip node marked by MCM for termination",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
 			map[string][]corev1.Node{"pool1": {{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{"checksum/cloud-config-data": "outdated"},
-					Labels: map[string]string{
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
+				Annotations: map[string]string{"checksum/cloud-config-data": "outdated"},
+				Labels: map[string]string{
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
 				},
 				Spec: corev1.NodeSpec{Taints: []corev1.Taint{{Key: "deployment.machine.sapcloud.io/prefer-no-schedule", Effect: corev1.TaintEffectPreferNoSchedule}}},
 			}}},
@@ -355,13 +339,12 @@ var _ = Describe("Worker", func() {
 		),
 		Entry("skip node whose OSC key does not match secret OSC key",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
-			map[string][]corev1.Node{"pool1": {{ObjectMeta: metav1.ObjectMeta{
+			map[string][]corev1.Node{"pool1": {{
 				Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
 				Labels: map[string]string{
 					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
 					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-				},
-			}}}},
+				}}}},
 			map[string]metav1.ObjectMeta{"pool1": {
 				Name:        "gardener-node-agent--c63c1",
 				Annotations: map[string]string{"checksum/data-script": "foo"},
@@ -371,14 +354,12 @@ var _ = Describe("Worker", func() {
 		Entry("skip node that is preserved and not ready (Ready=False)",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
 			map[string][]corev1.Node{"pool1": {{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
-					},
-					Labels: map[string]string{
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
+				Annotations: map[string]string{
+					nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
+				},
+				Labels: map[string]string{
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
 				},
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{
@@ -396,14 +377,12 @@ var _ = Describe("Worker", func() {
 		Entry("skip node that is preserved and not ready (Ready=Unknown)",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
 			map[string][]corev1.Node{"pool1": {{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
-					},
-					Labels: map[string]string{
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
+				Annotations: map[string]string{
+					nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
+				},
+				Labels: map[string]string{
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
 				},
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{
@@ -421,14 +400,12 @@ var _ = Describe("Worker", func() {
 		Entry("do not skip node that is preserved but ready (Ready=True)",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
 			map[string][]corev1.Node{"pool1": {{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
-					},
-					Labels: map[string]string{
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
+				Annotations: map[string]string{
+					nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
+				},
+				Labels: map[string]string{
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
 				},
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{
@@ -446,14 +423,12 @@ var _ = Describe("Worker", func() {
 		Entry("do not skip node that is not preserved but not ready",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
 			map[string][]corev1.Node{"pool1": {{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
-					},
-					Labels: map[string]string{
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
+				Annotations: map[string]string{
+					nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
+				},
+				Labels: map[string]string{
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
 				},
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{
@@ -470,14 +445,12 @@ var _ = Describe("Worker", func() {
 		Entry("do not skip node that has Preserved=False and is not ready",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}},
 			map[string][]corev1.Node{"pool1": {{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
-					},
-					Labels: map[string]string{
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
+				Annotations: map[string]string{
+					nodeagentconfigv1alpha1.AnnotationKeyChecksumAppliedOperatingSystemConfig: "outdated",
+				},
+				Labels: map[string]string{
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
 				},
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{
@@ -496,20 +469,18 @@ var _ = Describe("Worker", func() {
 		Entry("everything up-to-date",
 			[]gardencorev1beta1.Worker{{Name: "pool1"}, {Name: "pool2"}},
 			map[string][]corev1.Node{
-				"pool1": {{ObjectMeta: metav1.ObjectMeta{
+				"pool1": {{
 					Annotations: map[string]string{"checksum/cloud-config-data": "uptodate1"},
 					Labels: map[string]string{
 						"worker.gardener.cloud/kubernetes-version":              "1.26.0",
 						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--c63c0",
-					},
-				}}},
-				"pool2": {{ObjectMeta: metav1.ObjectMeta{
+					}}},
+				"pool2": {{
 					Annotations: map[string]string{"checksum/cloud-config-data": "uptodate2"},
 					Labels: map[string]string{
 						"worker.gardener.cloud/kubernetes-version":              "1.25.0",
 						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent--5dcdf",
-					},
-				}}},
+					}}},
 			},
 			map[string]metav1.ObjectMeta{
 				"pool1": {
@@ -560,11 +531,9 @@ var _ = Describe("Worker", func() {
 
 			// Create ManagedResource with Generation != ObservedGeneration (not populated yet)
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       "shoot-gardener-node-agent",
-					Namespace:  controlPlaneNamespace,
-					Generation: 2,
-				},
+				Name:       "shoot-gardener-node-agent",
+				Namespace:  controlPlaneNamespace,
+				Generation: 2,
 			}
 			Expect(seedFakeClient.Create(ctx, mr)).To(Succeed())
 
@@ -589,11 +558,9 @@ var _ = Describe("Worker", func() {
 
 			// Create ManagedResource with matching Generation/ObservedGeneration and healthy conditions
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       "shoot-gardener-node-agent",
-					Namespace:  controlPlaneNamespace,
-					Generation: 1,
-				},
+				Name:       "shoot-gardener-node-agent",
+				Namespace:  controlPlaneNamespace,
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -612,25 +579,21 @@ var _ = Describe("Worker", func() {
 
 			// Create a node with outdated checksum in the shoot client
 			Expect(shootFakeClient.Create(ctx, &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "node1",
-					Labels: map[string]string{
-						"worker.gardener.cloud/pool":                            "pool1",
-						"worker.gardener.cloud/kubernetes-version":              "1.24.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent-pool1-c63c0",
-					},
-					Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
+				Name: "node1",
+				Labels: map[string]string{
+					"worker.gardener.cloud/pool":                            "pool1",
+					"worker.gardener.cloud/kubernetes-version":              "1.24.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent-pool1-c63c0",
 				},
+				Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
 			})).To(Succeed())
 
 			// Create OSC secret with different checksum
 			Expect(shootFakeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "gardener-node-agent-pool1-c63c0",
-					Namespace:   metav1.NamespaceSystem,
-					Labels:      map[string]string{"worker.gardener.cloud/pool": "pool1", "gardener.cloud/role": "operating-system-config"},
-					Annotations: map[string]string{"checksum/data-script": "bar"},
-				},
+				Name:        "gardener-node-agent-pool1-c63c0",
+				Namespace:   metav1.NamespaceSystem,
+				Labels:      map[string]string{"worker.gardener.cloud/pool": "pool1", "gardener.cloud/role": "operating-system-config"},
+				Annotations: map[string]string{"checksum/data-script": "bar"},
 			})).To(Succeed())
 
 			Expect(botanist.WaitUntilOperatingSystemConfigUpdatedForAllWorkerPools(ctx, false)).To(MatchError(ContainSubstring("is outdated")))
@@ -654,11 +617,9 @@ var _ = Describe("Worker", func() {
 
 			// Create ManagedResource with matching Generation/ObservedGeneration and healthy conditions
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       "shoot-gardener-node-agent",
-					Namespace:  controlPlaneNamespace,
-					Generation: 1,
-				},
+				Name:       "shoot-gardener-node-agent",
+				Namespace:  controlPlaneNamespace,
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -677,25 +638,21 @@ var _ = Describe("Worker", func() {
 
 			// Create node with matching checksum in shoot client
 			Expect(shootFakeClient.Create(ctx, &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "node1",
-					Labels: map[string]string{
-						"worker.gardener.cloud/pool":                            "pool1",
-						"worker.gardener.cloud/kubernetes-version":              "1.26.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent-pool1-5dcdf",
-					},
-					Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
+				Name: "node1",
+				Labels: map[string]string{
+					"worker.gardener.cloud/pool":                            "pool1",
+					"worker.gardener.cloud/kubernetes-version":              "1.26.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent-pool1-5dcdf",
 				},
+				Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
 			})).To(Succeed())
 
 			// Create OSC secret with matching checksum
 			Expect(shootFakeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "gardener-node-agent-pool1-5dcdf",
-					Namespace:   metav1.NamespaceSystem,
-					Labels:      map[string]string{"worker.gardener.cloud/pool": "pool1", "gardener.cloud/role": "operating-system-config"},
-					Annotations: map[string]string{"checksum/data-script": "foo"},
-				},
+				Name:        "gardener-node-agent-pool1-5dcdf",
+				Namespace:   metav1.NamespaceSystem,
+				Labels:      map[string]string{"worker.gardener.cloud/pool": "pool1", "gardener.cloud/role": "operating-system-config"},
+				Annotations: map[string]string{"checksum/data-script": "foo"},
 			})).To(Succeed())
 
 			Expect(botanist.WaitUntilOperatingSystemConfigUpdatedForAllWorkerPools(ctx, false)).To(Succeed())
@@ -737,11 +694,9 @@ var _ = Describe("Worker", func() {
 			botanist.SeedClientSet = seedInterface
 
 			Expect(seedFakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       "shoot-gardener-node-agent",
-					Namespace:  controlPlaneNamespace,
-					Generation: 1,
-				},
+				Name:       "shoot-gardener-node-agent",
+				Namespace:  controlPlaneNamespace,
+				Generation: 1,
 				Status: resourcesv1alpha1.ManagedResourceStatus{
 					ObservedGeneration: 1,
 					Conditions: []gardencorev1beta1.Condition{
@@ -758,24 +713,20 @@ var _ = Describe("Worker", func() {
 			})).To(Succeed())
 
 			Expect(shootFakeClient.Create(ctx, &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "node1",
-					Labels: map[string]string{
-						"worker.gardener.cloud/pool":                            "pool1",
-						"worker.gardener.cloud/kubernetes-version":              "1.26.0",
-						"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent-pool1-5dcdf",
-					},
-					Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
+				Name: "node1",
+				Labels: map[string]string{
+					"worker.gardener.cloud/pool":                            "pool1",
+					"worker.gardener.cloud/kubernetes-version":              "1.26.0",
+					"worker.gardener.cloud/gardener-node-agent-secret-name": "gardener-node-agent-pool1-5dcdf",
 				},
+				Annotations: map[string]string{"checksum/cloud-config-data": "foo"},
 			})).To(Succeed())
 
 			Expect(shootFakeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "gardener-node-agent-pool1-5dcdf",
-					Namespace:   metav1.NamespaceSystem,
-					Labels:      map[string]string{"worker.gardener.cloud/pool": "pool1", "gardener.cloud/role": "operating-system-config"},
-					Annotations: map[string]string{"checksum/data-script": "foo"},
-				},
+				Name:        "gardener-node-agent-pool1-5dcdf",
+				Namespace:   metav1.NamespaceSystem,
+				Labels:      map[string]string{"worker.gardener.cloud/pool": "pool1", "gardener.cloud/role": "operating-system-config"},
+				Annotations: map[string]string{"checksum/data-script": "foo"},
 			})).To(Succeed())
 
 			Expect(botanist.WaitUntilOperatingSystemConfigUpdatedForAllWorkerPools(ctx, true)).To(Succeed())

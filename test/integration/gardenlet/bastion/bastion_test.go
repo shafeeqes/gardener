@@ -50,12 +50,10 @@ var _ = Describe("Bastion controller tests", func() {
 
 			patch = client.MergeFrom(extensionBastion.DeepCopy())
 			extensionBastion.Status = extensionsv1alpha1.BastionStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					ObservedGeneration: extensionBastion.Generation,
-					LastOperation: &gardencorev1beta1.LastOperation{
-						LastUpdateTime: metav1.NewTime(fakeClock.Now()),
-						State:          gardencorev1beta1.LastOperationStateSucceeded,
-					},
+				ObservedGeneration: extensionBastion.Generation,
+				LastOperation: &gardencorev1beta1.LastOperation{
+					LastUpdateTime: metav1.NewTime(fakeClock.Now()),
+					State:          gardencorev1beta1.LastOperationStateSucceeded,
 				},
 				Ingress: &corev1.LoadBalancerIngress{},
 			}
@@ -69,10 +67,8 @@ var _ = Describe("Bastion controller tests", func() {
 		providerType := "foo-provider"
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "seed-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "seed-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -114,11 +110,9 @@ var _ = Describe("Bastion controller tests", func() {
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "shoot-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "shoot-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("my-provider-account"),
 				CloudProfileName:  new("test-cloudprofile"),
@@ -150,11 +144,9 @@ var _ = Describe("Bastion controller tests", func() {
 		}
 
 		operationsBastion = &operationsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "bastion-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "bastion-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: operationsv1alpha1.BastionSpec{
 				ProviderType: &providerType,
 				SSHPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDcSZKq0lM9w+ElLp9I9jFvqEFbOV1+iOBX7WEe66GvPLOWl9ul03ecjhOf06+FhPsWFac1yaxo2xj+SJ+FVZ3DdSn4fjTpS9NGyQVPInSZveetRw0TV0rbYCFBTJuVqUFu6yPEgdcWq8dlUjLqnRNwlelHRcJeBfACBZDLNSxjj0oUz7ANRNCEne1ecySwuJUAz3IlNLPXFexRT0alV7Nl9hmJke3dD73nbeGbQtwvtu8GNFEoO4Eu3xOCKsLw6ILLo4FBiFcYQOZqvYZgCb4ncKM52bnABagG54upgBMZBRzOJvWp0ol+jK3Em7Vb6ufDTTVNiQY78U6BAlNZ8Xg+LUVeyk1C6vWjzAQf02eRvMdfnRCFvmwUpzbHWaVMsQm8gf3AgnTUuDR0ev1nQH/5892wZA86uLYW/wLiiSbvQsqtY1jSn9BAGFGdhXgWLAkGsd/E1vOT+vDcor6/6KjHBm0rG697A3TDBRkbXQ/1oFxcM9m17RteCaXuTiAYWMqGKDoJvTMDc4L+Uvy544pEfbOH39zfkIYE76WLAFPFsUWX6lXFjQrX3O7vEV73bCHoJnwzaNd03PSdJOw+LCzrTmxVezwli3F9wUDiBRB0HkQxIXQmncc1HSecCKALkogIK+1e1OumoWh6gPdkF4PlTMUxRitrwPWSaiUIlPfCpQ== you@example.com",
@@ -198,9 +190,7 @@ var _ = Describe("Bastion controller tests", func() {
 
 		By("Create seed namespace for test")
 		seedNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: technicalID,
-			},
+			Name: technicalID,
 		}
 
 		Expect(testClient.Create(ctx, seedNamespace)).To(Succeed())
@@ -213,20 +203,14 @@ var _ = Describe("Bastion controller tests", func() {
 
 		By("Create Cluster extension resource")
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: technicalID,
-			},
+			Name: technicalID,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot: runtime.RawExtension{
 					Object: &gardencorev1beta1.Shoot{
-						TypeMeta: metav1.TypeMeta{
-							APIVersion: "core.gardener.cloud/v1beta1",
-							Kind:       "Shoot",
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      shoot.Name,
-							Namespace: shoot.Namespace,
-						},
+						APIVersion: "core.gardener.cloud/v1beta1",
+						Kind:       "Shoot",
+						Name:       shoot.Name,
+						Namespace:  shoot.Namespace,
 					},
 				},
 				Seed: &runtime.RawExtension{
@@ -258,10 +242,8 @@ var _ = Describe("Bastion controller tests", func() {
 		log.Info("Created Bastion for test", "bastion", client.ObjectKeyFromObject(operationsBastion))
 
 		extensionBastion = &extensionsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      operationsBastion.Name,
-				Namespace: seedNamespace.Name,
-			},
+			Name:      operationsBastion.Name,
+			Namespace: seedNamespace.Name,
 		}
 
 		DeferCleanup(func() {

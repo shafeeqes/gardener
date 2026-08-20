@@ -256,10 +256,8 @@ var _ = Describe("Worker", func() {
 		}
 
 		empty = &extensionsv1alpha1.Worker{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 		w = empty.DeepCopy()
 		w.SetAnnotations(map[string]string{
@@ -268,9 +266,7 @@ var _ = Describe("Worker", func() {
 		})
 
 		wSpec = extensionsv1alpha1.WorkerSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type: extensionType,
-			},
+			Type:   extensionType,
 			Region: region,
 			SecretRef: corev1.SecretReference{
 				Name:      "cloudprovider",
@@ -379,16 +375,14 @@ var _ = Describe("Worker", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(obj).To(DeepEqual(&extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
-					},
-					ResourceVersion: "1",
+				Name:      name,
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
 				},
-				Spec: wSpec,
+				ResourceVersion: "1",
+				Spec:            wSpec,
 			}))
 		})
 
@@ -422,16 +416,14 @@ var _ = Describe("Worker", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(obj).To(DeepEqual(&extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
-					},
-					ResourceVersion: "2",
+				Name:      name,
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
 				},
-				Spec: *expectedWorkerSpec,
+				ResourceVersion: "2",
+				Spec:            *expectedWorkerSpec,
 			}))
 		})
 
@@ -464,16 +456,14 @@ var _ = Describe("Worker", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj)).To(Succeed())
 
 			Expect(obj).To(DeepEqual(&extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
-					},
-					ResourceVersion: "2",
+				Name:      name,
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
 				},
-				Spec: *expectedWorkerSpec,
+				ResourceVersion: "2",
+				Spec:            *expectedWorkerSpec,
 			}))
 		})
 
@@ -520,16 +510,14 @@ var _ = Describe("Worker", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj)).To(Succeed())
 
 			Expect(obj).To(DeepEqual(&extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
-					},
-					ResourceVersion: "2",
+				Name:      name,
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
 				},
-				Spec: *expectedWorkerSpec,
+				ResourceVersion: "2",
+				Spec:            *expectedWorkerSpec,
 			}))
 		})
 
@@ -567,16 +555,14 @@ var _ = Describe("Worker", func() {
 			obj := &extensionsv1alpha1.Worker{}
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj)).To(Succeed())
 			Expect(obj).To(DeepEqual(&extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
-					},
-					ResourceVersion: "1",
+				Name:      name,
+				Namespace: namespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": fakeClock.Now().UTC().Format(time.RFC3339Nano),
 				},
-				Spec: *expectedWorkerSpec,
+				ResourceVersion: "1",
+				Spec:            *expectedWorkerSpec,
 			}))
 		})
 	})
@@ -659,16 +645,12 @@ var _ = Describe("Worker", func() {
 					namespace + "-worker-z0": {
 						Replicas: 1,
 						MachineSets: []machinev1alpha1.MachineSet{{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      namespace + "-worker-z0-abcde",
-								Namespace: namespace,
-							},
+							Name:      namespace + "-worker-z0-abcde",
+							Namespace: namespace,
 						}},
 						Machines: []machinev1alpha1.Machine{{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      namespace + "-worker-z0-abcde-xyz",
-								Namespace: namespace,
-							},
+							Name:      namespace + "-worker-z0-abcde-xyz",
+							Namespace: namespace,
 						}},
 					},
 				},

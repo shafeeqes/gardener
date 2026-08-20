@@ -63,29 +63,25 @@ var _ = Describe("Manager", func() {
 
 		It("should create a new instance w/ overwritten last rotation initiation times", func() {
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"name":                          "secret1",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-					},
+				Name:      "secret1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"name":                          "secret1",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
 
 			existingSecret2 := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret2",
-					Namespace: namespace2,
-					Labels: map[string]string{
-						"name":                          "secret2",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-					},
+				Name:      "secret2",
+				Namespace: namespace2,
+				Labels: map[string]string{
+					"name":                          "secret2",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret2)).To(Succeed())
@@ -102,15 +98,13 @@ var _ = Describe("Manager", func() {
 
 		It("should create a new instance w/ both existing and provided last rotation initiation times", func() {
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"name":                          "secret1",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-					},
+				Name:      "secret1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"name":                          "secret1",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
@@ -129,17 +123,15 @@ var _ = Describe("Manager", func() {
 			fakeClock = testclock.NewFakeClock(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"name":                          "secret1",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-						"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
-						"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(time.Hour).Unix(), 10),
-					},
+				Name:      "secret1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"name":                          "secret1",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
+					"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
+					"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(time.Hour).Unix(), 10),
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
@@ -155,17 +147,15 @@ var _ = Describe("Manager", func() {
 			fakeClock = testclock.NewFakeClock(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"name":                          "secret1",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-						"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
-						"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(24*time.Hour).Unix(), 10),
-					},
+				Name:      "secret1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"name":                          "secret1",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
+					"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
+					"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(24*time.Hour).Unix(), 10),
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
@@ -181,17 +171,15 @@ var _ = Describe("Manager", func() {
 			fakeClock = testclock.NewFakeClock(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"name":                          "secret1",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-						"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
-						"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(15*365*24*time.Hour).Unix(), 10),
-					},
+				Name:      "secret1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"name":                          "secret1",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
+					"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
+					"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(15*365*24*time.Hour).Unix(), 10),
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
@@ -207,17 +195,15 @@ var _ = Describe("Manager", func() {
 			fakeClock = testclock.NewFakeClock(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret1",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"name":                          "secret1",
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              identity,
-						"last-rotation-initiation-time": "-100",
-						"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
-						"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(time.Hour).Unix(), 10),
-					},
+				Name:      "secret1",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"name":                          "secret1",
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              identity,
+					"last-rotation-initiation-time": "-100",
+					"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
+					"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(time.Hour).Unix(), 10),
 				},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
@@ -232,42 +218,36 @@ var _ = Describe("Manager", func() {
 		It("should only consider the last rotation initiation time for the newest secret", func() {
 			secrets := []*corev1.Secret{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:              "secret1-1",
-						Namespace:         namespace,
-						CreationTimestamp: metav1.Time{Time: time.Date(2000, 1, 3, 1, 1, 1, 1, time.UTC)},
-						Labels: map[string]string{
-							"name":                          "secret1",
-							"managed-by":                    "secrets-manager",
-							"manager-identity":              identity,
-							"last-rotation-initiation-time": "24",
-						},
+					Name:              "secret1-1",
+					Namespace:         namespace,
+					CreationTimestamp: metav1.Time{Time: time.Date(2000, 1, 3, 1, 1, 1, 1, time.UTC)},
+					Labels: map[string]string{
+						"name":                          "secret1",
+						"managed-by":                    "secrets-manager",
+						"manager-identity":              identity,
+						"last-rotation-initiation-time": "24",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:              "secret1-2",
-						Namespace:         namespace,
-						CreationTimestamp: metav1.Time{Time: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)},
-						Labels: map[string]string{
-							"name":                          "secret1",
-							"managed-by":                    "secrets-manager",
-							"manager-identity":              identity,
-							"last-rotation-initiation-time": "12",
-						},
+					Name:              "secret1-2",
+					Namespace:         namespace,
+					CreationTimestamp: metav1.Time{Time: time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC)},
+					Labels: map[string]string{
+						"name":                          "secret1",
+						"managed-by":                    "secrets-manager",
+						"manager-identity":              identity,
+						"last-rotation-initiation-time": "12",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:              "secret1-3",
-						Namespace:         namespace,
-						CreationTimestamp: metav1.Time{Time: time.Date(2000, 1, 2, 1, 1, 1, 1, time.UTC)},
-						Labels: map[string]string{
-							"name":                          "secret1",
-							"managed-by":                    "secrets-manager",
-							"manager-identity":              identity,
-							"last-rotation-initiation-time": "16",
-						},
+					Name:              "secret1-3",
+					Namespace:         namespace,
+					CreationTimestamp: metav1.Time{Time: time.Date(2000, 1, 2, 1, 1, 1, 1, time.UTC)},
+					Labels: map[string]string{
+						"name":                          "secret1",
+						"managed-by":                    "secrets-manager",
+						"manager-identity":              identity,
+						"last-rotation-initiation-time": "16",
 					},
 				},
 			}
@@ -290,17 +270,15 @@ var _ = Describe("Manager", func() {
 				fakeClock = testclock.NewFakeClock(time.Date(2000, 1, 1, 1, 1, 1, 1, time.UTC))
 
 				existingSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "secret1",
-						Namespace: namespace,
-						Labels: map[string]string{
-							"name":                          "secret1",
-							"managed-by":                    "secrets-manager",
-							"manager-identity":              identity,
-							"last-rotation-initiation-time": "-100",
-							"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
-							"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(24*time.Hour).Unix(), 10),
-						},
+					Name:      "secret1",
+					Namespace: namespace,
+					Labels: map[string]string{
+						"name":                          "secret1",
+						"managed-by":                    "secrets-manager",
+						"manager-identity":              identity,
+						"last-rotation-initiation-time": "-100",
+						"issued-at-time":                strconv.FormatInt(fakeClock.Now().Add(-24*time.Hour).Unix(), 10),
+						"valid-until-time":              strconv.FormatInt(fakeClock.Now().Add(24*time.Hour).Unix(), 10),
 					},
 					Data: map[string][]byte{
 						"ca.crt": []byte("foo"),

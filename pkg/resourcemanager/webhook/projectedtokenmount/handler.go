@@ -109,37 +109,33 @@ func tokenExpirationSeconds(annotations map[string]string, defaultExpirationSeco
 func getVolume(expirationSeconds int64) corev1.Volume {
 	return corev1.Volume{
 		Name: volumeName(),
-		VolumeSource: corev1.VolumeSource{
-			Projected: &corev1.ProjectedVolumeSource{
-				DefaultMode: new(int32(420)),
-				Sources: []corev1.VolumeProjection{
-					{
-						ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
-							ExpirationSeconds: &expirationSeconds,
-							Path:              "token",
-						},
+		Projected: &corev1.ProjectedVolumeSource{
+			DefaultMode: new(int32(420)),
+			Sources: []corev1.VolumeProjection{
+				{
+					ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+						ExpirationSeconds: &expirationSeconds,
+						Path:              "token",
 					},
-					{
-						ConfigMap: &corev1.ConfigMapProjection{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "kube-root-ca.crt",
+				},
+				{
+					ConfigMap: &corev1.ConfigMapProjection{
+						Name: "kube-root-ca.crt",
+						Items: []corev1.KeyToPath{{
+							Key:  "ca.crt",
+							Path: "ca.crt",
+						}},
+					},
+				},
+				{
+					DownwardAPI: &corev1.DownwardAPIProjection{
+						Items: []corev1.DownwardAPIVolumeFile{{
+							FieldRef: &corev1.ObjectFieldSelector{
+								APIVersion: "v1",
+								FieldPath:  "metadata.namespace",
 							},
-							Items: []corev1.KeyToPath{{
-								Key:  "ca.crt",
-								Path: "ca.crt",
-							}},
-						},
-					},
-					{
-						DownwardAPI: &corev1.DownwardAPIProjection{
-							Items: []corev1.DownwardAPIVolumeFile{{
-								FieldRef: &corev1.ObjectFieldSelector{
-									APIVersion: "v1",
-									FieldPath:  "metadata.namespace",
-								},
-								Path: "namespace",
-							}},
-						},
+							Path: "namespace",
+						}},
 					},
 				},
 			},

@@ -36,12 +36,10 @@ var _ = Describe("Seed Reference controller tests", func() {
 		allReferencedObjects = []client.Object{secret1, configMap1, workloadIdentity1}
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Labels: map[string]string{
-					testID:                               testRunID,
-					"provider.extensions.gardener.cloud": "local",
-				},
+			GenerateName: "test-",
+			Labels: map[string]string{
+				testID:                               testRunID,
+				"provider.extensions.gardener.cloud": "local",
 			},
 			Spec: gardencorev1beta1.SeedSpec{
 				DNS: gardencorev1beta1.SeedDNS{

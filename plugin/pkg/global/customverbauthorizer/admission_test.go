@@ -62,9 +62,7 @@ var _ = Describe("customverbauthorizer", func() {
 
 			BeforeEach(func() {
 				project = &core.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "dummy",
-					},
+					Name: "dummy",
 				}
 
 				authorizeAttributes = authorizer.AttributesRecord{
@@ -177,34 +175,26 @@ var _ = Describe("customverbauthorizer", func() {
 							Subject: owner,
 						},
 						{
-							Subject: rbacv1.Subject{
-								APIGroup: rbacv1.GroupName,
-								Kind:     rbacv1.UserKind,
-								Name:     "foo",
-							},
+							APIGroup: rbacv1.GroupName,
+							Kind:     rbacv1.UserKind,
+							Name:     "foo",
 						},
 						{
-							Subject: rbacv1.Subject{
-								APIGroup: rbacv1.GroupName,
-								Kind:     rbacv1.GroupKind,
-								Name:     "bar",
-							},
+							APIGroup: rbacv1.GroupName,
+							Kind:     rbacv1.GroupKind,
+							Name:     "bar",
 						},
 					}
 					projectMembersWithoutHumans = []core.ProjectMember{
 						{
-							Subject: rbacv1.Subject{
-								APIGroup: "",
-								Kind:     rbacv1.ServiceAccountKind,
-								Name:     "foo",
-							},
+							APIGroup: "",
+							Kind:     rbacv1.ServiceAccountKind,
+							Name:     "foo",
 						},
 						{
-							Subject: rbacv1.Subject{
-								APIGroup: rbacv1.GroupName,
-								Kind:     rbacv1.UserKind,
-								Name:     servieaccount.ServiceAccountUsernamePrefix + "foo:bar",
-							},
+							APIGroup: rbacv1.GroupName,
+							Kind:     rbacv1.UserKind,
+							Name:     servieaccount.ServiceAccountUsernamePrefix + "foo:bar",
 						},
 					}
 					project.Spec.Owner = &owner
@@ -323,7 +313,7 @@ var _ = Describe("customverbauthorizer", func() {
 
 						It("should forbid creating a project with group members if creator!=owner", func() {
 							project.Spec.Owner = &owner
-							project.Spec.Members = []core.ProjectMember{{Subject: rbacv1.Subject{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"}}}
+							project.Spec.Members = []core.ProjectMember{{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"}}
 							attrs = admission.NewAttributesRecord(project, nil, core.Kind("Project").WithVersion("version"), "", project.Name, core.Resource("projects").WithVersion("version"), "", admission.Create, &metav1.CreateOptions{}, false, userInfo)
 							Expect(admissionHandler.Validate(ctx, attrs, nil)).NotTo(Succeed())
 						})
@@ -332,7 +322,7 @@ var _ = Describe("customverbauthorizer", func() {
 							project.Spec.Owner = &owner
 							project.Spec.Members = []core.ProjectMember{
 								{Subject: owner},
-								{Subject: rbacv1.Subject{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"}},
+								{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"},
 							}
 							attrs = admission.NewAttributesRecord(project, nil, core.Kind("Project").WithVersion("version"), "", project.Name, core.Resource("projects").WithVersion("version"), "", admission.Create, &metav1.CreateOptions{}, false, userInfo)
 							Expect(admissionHandler.Validate(ctx, attrs, nil)).NotTo(Succeed())
@@ -384,7 +374,7 @@ var _ = Describe("customverbauthorizer", func() {
 							project.Spec.Owner = &owner
 							project.Spec.Members = projectMembersWithoutHumans
 							oldProject := project.DeepCopy()
-							project.Spec.Members = append(projectMembersWithoutHumans, core.ProjectMember{Subject: rbacv1.Subject{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"}})
+							project.Spec.Members = append(projectMembersWithoutHumans, core.ProjectMember{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"})
 
 							attrs = admission.NewAttributesRecord(project, oldProject, core.Kind("Project").WithVersion("version"), "", project.Name, core.Resource("projects").WithVersion("version"), "", admission.Update, &metav1.UpdateOptions{}, false, userInfo)
 							Expect(admissionHandler.Validate(ctx, attrs, nil)).NotTo(Succeed())
@@ -392,7 +382,7 @@ var _ = Describe("customverbauthorizer", func() {
 
 						It("should forbid to remove groups (user!=owner)", func() {
 							project.Spec.Owner = &owner
-							project.Spec.Members = []core.ProjectMember{{Subject: rbacv1.Subject{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"}}}
+							project.Spec.Members = []core.ProjectMember{{APIGroup: rbacv1.GroupName, Kind: rbacv1.GroupKind, Name: "baz"}}
 							oldProject := project.DeepCopy()
 							project.Spec.Members = []core.ProjectMember{}
 
@@ -404,12 +394,10 @@ var _ = Describe("customverbauthorizer", func() {
 							project.Spec.Owner = &owner
 							project.Spec.Members = []core.ProjectMember{
 								{
-									Subject: rbacv1.Subject{
-										APIGroup: rbacv1.GroupName,
-										Kind:     rbacv1.UserKind,
-										Name:     "test-user",
-									},
-									Roles: []string{"viewer"},
+									APIGroup: rbacv1.GroupName,
+									Kind:     rbacv1.UserKind,
+									Name:     "test-user",
+									Roles:    []string{"viewer"},
 								},
 							}
 							oldProject := project.DeepCopy()
@@ -498,17 +486,13 @@ var _ = Describe("customverbauthorizer", func() {
 
 			BeforeEach(func() {
 				parentCloudProfile = &v1beta1.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "parent-cloud-profile",
-					},
+					Name: "parent-cloud-profile",
 				}
 				Expect(coreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Add(parentCloudProfile)).To(Succeed())
 
 				namespacedCloudProfile = &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "dummy",
-						Namespace: "dummy-namespace",
-					},
+					Name:      "dummy",
+					Namespace: "dummy-namespace",
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{
 							Name: parentCloudProfile.Name,
@@ -641,7 +625,7 @@ var _ = Describe("customverbauthorizer", func() {
 					It("should allow creating a NamespacedCloudProfile with machineImages section", func() {
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})},
 							}},
 						}
 
@@ -652,13 +636,13 @@ var _ = Describe("customverbauthorizer", func() {
 					It("should allow updating a NamespacedCloudProfile's machineImages section", func() {
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})},
 							}},
 						}
 						oldNamespacedCloudProfile := namespacedCloudProfile.DeepCopy()
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(48 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(48 * time.Hour)})},
 							}},
 						}
 
@@ -669,7 +653,7 @@ var _ = Describe("customverbauthorizer", func() {
 					It("should allow removing a NamespacedCloudProfile's machineImages section", func() {
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})},
 							}},
 						}
 						oldNamespacedCloudProfile := namespacedCloudProfile.DeepCopy()
@@ -688,7 +672,7 @@ var _ = Describe("customverbauthorizer", func() {
 					It("should forbid creating a NamespacedCloudProfile with machineImages section", func() {
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})},
 							}},
 						}
 
@@ -699,13 +683,13 @@ var _ = Describe("customverbauthorizer", func() {
 					It("should forbid updating a NamespacedCloudProfile's machineImages section", func() {
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})},
 							}},
 						}
 						oldNamespacedCloudProfile := namespacedCloudProfile.DeepCopy()
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(48 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(48 * time.Hour)})},
 							}},
 						}
 
@@ -716,7 +700,7 @@ var _ = Describe("customverbauthorizer", func() {
 					It("should forbid removing a NamespacedCloudProfile's machineImages section", func() {
 						namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 							{Name: "dummy-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})}},
+								{Version: "1.0.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(24 * time.Hour)})},
 							}},
 						}
 						oldNamespacedCloudProfile := namespacedCloudProfile.DeepCopy()
@@ -797,10 +781,8 @@ var _ = Describe("customverbauthorizer", func() {
 
 			BeforeEach(func() {
 				shoot = &core.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "dummy",
-						Namespace: "dummy-namespace",
-					},
+					Name:      "dummy",
+					Namespace: "dummy-namespace",
 				}
 
 				authorizeAttributes = authorizer.AttributesRecord{

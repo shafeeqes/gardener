@@ -9,7 +9,6 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -43,9 +42,7 @@ func SecretToBackupEntryMapper(reader client.Reader, predicates []predicate.Pred
 			}
 
 			requests = append(requests, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name: backupEntry.Name,
-				},
+				Name: backupEntry.Name,
 			})
 		}
 
@@ -84,9 +81,7 @@ func NamespaceToBackupEntryMapper(reader client.Reader, predicates []predicate.P
 			}
 
 			requests = append(requests, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name: backupEntry.Name,
-				},
+				Name: backupEntry.Name,
 			})
 		}
 		return requests

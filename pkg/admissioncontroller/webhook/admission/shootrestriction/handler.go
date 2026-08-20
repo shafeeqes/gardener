@@ -234,7 +234,7 @@ func (h *Handler) admitManagedSeed(ctx context.Context, gardenletShootInfo types
 		return admission.Errored(http.StatusBadRequest, fmt.Errorf("unexpected operation: %q", request.Operation))
 	}
 
-	managedSeed := &seedmanagementv1alpha1.ManagedSeed{ObjectMeta: metav1.ObjectMeta{Name: request.Name, Namespace: request.Namespace}}
+	managedSeed := &seedmanagementv1alpha1.ManagedSeed{Name: request.Name, Namespace: request.Namespace}
 	if err := h.Client.Get(ctx, client.ObjectKeyFromObject(managedSeed), managedSeed); err != nil {
 		if apierrors.IsNotFound(err) {
 			return admission.Errored(http.StatusForbidden, err)
@@ -282,7 +282,7 @@ func (h *Handler) admitSecret(ctx context.Context, gardenletShootInfo types.Name
 		kind, namespace, name := gardenletbootstraputil.MetadataFromDescription(string(secret.Data[bootstraptokenapi.BootstrapTokenDescriptionKey]))
 		switch kind {
 		case gardenletbootstraputil.KindManagedSeed:
-			managedSeed := &seedmanagementv1alpha1.ManagedSeed{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace}}
+			managedSeed := &seedmanagementv1alpha1.ManagedSeed{Name: name, Namespace: namespace}
 			if err := h.Client.Get(ctx, client.ObjectKeyFromObject(managedSeed), managedSeed); err != nil {
 				if apierrors.IsNotFound(err) {
 					return admission.Errored(http.StatusForbidden, err)

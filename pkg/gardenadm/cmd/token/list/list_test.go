@@ -92,9 +92,9 @@ bootstrap-token-token2\s+token2\s+token2secret5678\s+token2.token2secret5678\s+1
 
 			It("should fail because it cannot parse the expiration time", func() {
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-987654", Namespace: "kube-system"},
-					Type:       corev1.SecretTypeBootstrapToken,
-					Data:       map[string][]byte{"expiration": []byte("cannot-parse")},
+					Name: "bootstrap-token-987654", Namespace: "kube-system",
+					Type: corev1.SecretTypeBootstrapToken,
+					Data: map[string][]byte{"expiration": []byte("cannot-parse")},
 				})).To(Succeed())
 
 				Expect(command.RunE(command, nil)).To(MatchError(ContainSubstring("failed parsing the expiration time")))

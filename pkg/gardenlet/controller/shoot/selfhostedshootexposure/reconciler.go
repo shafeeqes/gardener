@@ -129,10 +129,8 @@ func (r *Reconciler) updateExternalDNSRecordFromNodes(ctx context.Context, log l
 // getExposure returns the shoot's SelfHostedShootExposure, or nil if it does not exist.
 func (r *Reconciler) getExposure(ctx context.Context, shoot *gardencorev1beta1.Shoot) (*extensionsv1alpha1.SelfHostedShootExposure, error) {
 	exposure := &extensionsv1alpha1.SelfHostedShootExposure{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shoot.Name,
-			Namespace: v1beta1helper.ControlPlaneNamespaceForShoot(shoot),
-		},
+		Name:      shoot.Name,
+		Namespace: v1beta1helper.ControlPlaneNamespaceForShoot(shoot),
 	}
 	if err := r.ShootClient.Get(ctx, client.ObjectKeyFromObject(exposure), exposure); err != nil {
 		if apierrors.IsNotFound(err) {

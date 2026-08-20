@@ -14,7 +14,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -85,9 +84,9 @@ func NewCertificateManager(
 		gardenClientConnection: config.GardenClientConnection,
 		newTargetedObject: func() client.Object {
 			if selfHostedShootInfo != nil {
-				return &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Namespace: selfHostedShootInfo.Meta.Namespace, Name: selfHostedShootInfo.Meta.Name}}
+				return &gardencorev1beta1.Shoot{Namespace: selfHostedShootInfo.Meta.Namespace, Name: selfHostedShootInfo.Meta.Name}
 			}
-			return &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: gardenletbootstraputil.GetSeedName(config.SeedConfig)}}
+			return &gardencorev1beta1.Seed{Name: gardenletbootstraputil.GetSeedName(config.SeedConfig)}
 		},
 	}, nil
 }

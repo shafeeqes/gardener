@@ -12,7 +12,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +51,7 @@ var _ = Describe("handler", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = admission.NewContextWithRequest(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Name: resourceName}})
+		ctx = admission.NewContextWithRequest(ctx, admission.Request{Name: resourceName})
 		log = logger.MustNewZapLogger(logger.DebugLevel, logger.FormatJSON, logzap.WriteTo(GinkgoWriter))
 
 		fakeClient = fakeclient.NewClientBuilder().
@@ -68,16 +67,14 @@ var _ = Describe("handler", func() {
 		handler = &Handler{Logger: log, APIReader: fakeClient, Scheme: kubernetes.GardenScheme}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: gardenNamespaceName,
-				Annotations: map[string]string{
-					"dns.gardener.cloud/provider": "foo",
-					"dns.gardener.cloud/domain":   "bar",
-				},
-				Labels: map[string]string{
-					"gardener.cloud/role": "internal-domain",
-				},
+			Name:      resourceName,
+			Namespace: gardenNamespaceName,
+			Annotations: map[string]string{
+				"dns.gardener.cloud/provider": "foo",
+				"dns.gardener.cloud/domain":   "bar",
+			},
+			Labels: map[string]string{
+				"gardener.cloud/role": "internal-domain",
 			},
 		}
 
@@ -129,11 +126,9 @@ var _ = Describe("handler", func() {
 
 		It("should fail because another internal domain secret exists in the garden namespace", func() {
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "other-internal-domain-secret",
-					Namespace: gardenNamespaceName,
-					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
-				},
+				Name:      "other-internal-domain-secret",
+				Namespace: gardenNamespaceName,
+				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
 
@@ -144,11 +139,9 @@ var _ = Describe("handler", func() {
 
 		It("should fail because another internal domain secret exists in the same seed namespace", func() {
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "other-internal-domain-secret",
-					Namespace: seedNamespace,
-					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
-				},
+				Name:      "other-internal-domain-secret",
+				Namespace: seedNamespace,
+				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
 
@@ -206,11 +199,9 @@ var _ = Describe("handler", func() {
 
 			It("should fail because another internal domain secret exists in the garden namespace", func() {
 				existingSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "other-internal-domain-secret",
-						Namespace: gardenNamespaceName,
-						Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
-					},
+					Name:      "other-internal-domain-secret",
+					Namespace: gardenNamespaceName,
+					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleInternalDomain},
 				}
 				Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
 
@@ -264,7 +255,7 @@ var _ = Describe("handler", func() {
 
 		It("should forbid because the global domain is changed but shoots exist", func() {
 			existingShoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: "garden-foo"},
+				Name: "shoot1", Namespace: "garden-foo",
 			}
 			Expect(fakeClient.Create(ctx, existingShoot)).To(Succeed())
 
@@ -277,7 +268,7 @@ var _ = Describe("handler", func() {
 
 		It("should forbid because the domain in seed namespace is changed but shoots using the seed exist", func() {
 			existingShoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: "garden-foo"},
+				Name: "shoot1", Namespace: "garden-foo",
 				Spec: gardencorev1beta1.ShootSpec{
 					SeedName: &seedName,
 				},
@@ -335,7 +326,7 @@ var _ = Describe("handler", func() {
 
 		It("should fail because at least one shoot exists", func() {
 			existingShoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: "garden-foo"},
+				Name: "shoot1", Namespace: "garden-foo",
 			}
 			Expect(fakeClient.Create(ctx, existingShoot)).To(Succeed())
 
@@ -346,7 +337,7 @@ var _ = Describe("handler", func() {
 
 		It("should fail because at least one shoot on the seed exists", func() {
 			existingShoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: "garden-foo"},
+				Name: "shoot1", Namespace: "garden-foo",
 				Spec: gardencorev1beta1.ShootSpec{
 					SeedName: &seedName,
 				},

@@ -24,9 +24,7 @@ var _ = Describe("Garden", func() {
 
 	BeforeEach(func() {
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden",
-			},
+			Name: "garden",
 		}
 	})
 

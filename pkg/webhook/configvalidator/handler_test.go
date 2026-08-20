@@ -53,20 +53,14 @@ var _ = Describe("Handler", func() {
 		decoder = admission.NewDecoder(scheme)
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "config-name",
-				Namespace: "shoot-namespace",
-			},
+			Name:      "config-name",
+			Namespace: "shoot-namespace",
 		}
 		shoot = &gardencorev1beta1.Shoot{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				Kind:       "Shoot",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-name",
-				Namespace: configMap.Namespace,
-			},
+			APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+			Kind:       "Shoot",
+			Name:       "shoot-name",
+			Namespace:  configMap.Namespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				Kubernetes: gardencorev1beta1.Kubernetes{
 					Version: "1.35.0",
@@ -74,13 +68,9 @@ var _ = Describe("Handler", func() {
 			},
 		}
 		garden = &operatorv1alpha1.Garden{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: operatorv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "Garden",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden-name",
-			},
+			APIVersion: operatorv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "Garden",
+			Name:       "garden-name",
 			Spec: operatorv1alpha1.GardenSpec{
 				VirtualCluster: operatorv1alpha1.VirtualCluster{
 					Kubernetes: operatorv1alpha1.Kubernetes{
@@ -532,11 +522,9 @@ var _ = Describe("Handler", func() {
 		It("should validate multiple ConfigMaps when both gardener and kube-apiserver audit policies are configured", func() {
 			// Create second ConfigMap for kube-apiserver
 			kubeAPIServerConfigMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-apiserver-audit-policy",
-					Namespace: configMap.Namespace,
-				},
-				Data: map[string]string{"config.yaml": "kube-apiserver-config"},
+				Name:      "kube-apiserver-audit-policy",
+				Namespace: configMap.Namespace,
+				Data:      map[string]string{"config.yaml": "kube-apiserver-config"},
 			}
 			Expect(fakeClient.Create(ctx, kubeAPIServerConfigMap)).To(Succeed())
 

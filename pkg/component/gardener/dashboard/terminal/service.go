@@ -7,7 +7,6 @@ package terminal
 import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
@@ -16,11 +15,9 @@ import (
 
 func (t *terminal) service() *corev1.Service {
 	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: t.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      name,
+		Namespace: t.namespace,
+		Labels:    getLabels(),
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: getLabels(),

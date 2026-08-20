@@ -155,7 +155,7 @@ func (r *Reconciler) reconcile(ctx context.Context, log logr.Logger, mr *resourc
 	conditionResourcesApplied := v1beta1helper.GetOrInitConditionWithClock(r.Clock, mr.Status.Conditions, resourcesv1alpha1.ResourcesApplied)
 
 	for _, ref := range mr.Spec.SecretRefs {
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: ref.Name, Namespace: mr.Namespace}}
+		secret := &corev1.Secret{Name: ref.Name, Namespace: mr.Namespace}
 		if err := r.SourceClient.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 			conditionResourcesApplied = v1beta1helper.UpdatedConditionWithClock(r.Clock, conditionResourcesApplied, gardencorev1beta1.ConditionFalse, "CannotReadSecret", err.Error())
 			if err := updateConditions(ctx, r.SourceClient, mr, conditionResourcesApplied); err != nil {
@@ -244,12 +244,10 @@ func (r *Reconciler) reconcile(ctx context.Context, log logr.Logger, mr *resourc
 						forceOverwriteAnnotations: forceOverwriteAnnotations,
 					}
 					objectReference = resourcesv1alpha1.ObjectReference{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: newObj.obj.GetAPIVersion(),
-							Kind:       newObj.obj.GetKind(),
-							Name:       newObj.obj.GetName(),
-							Namespace:  newObj.obj.GetNamespace(),
-						},
+						APIVersion:  newObj.obj.GetAPIVersion(),
+						Kind:        newObj.obj.GetKind(),
+						Name:        newObj.obj.GetName(),
+						Namespace:   newObj.obj.GetNamespace(),
 						Labels:      mergeMaps(newObj.obj.GetLabels(), mr.Spec.InjectLabels),
 						Annotations: newObj.obj.GetAnnotations(),
 					}

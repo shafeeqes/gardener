@@ -10,7 +10,6 @@ import (
 	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -63,10 +62,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	)
 
 	managedResource := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ManagedResourceNameForControllerInstallation(controllerInstallation),
-			Namespace: r.ManagedResourceNamespace,
-		},
+		Name:      gardenerutils.ManagedResourceNameForControllerInstallation(controllerInstallation),
+		Namespace: r.ManagedResourceNamespace,
 	}
 
 	if err := r.SeedClient.Get(seedCtx, client.ObjectKeyFromObject(managedResource), managedResource); err != nil {

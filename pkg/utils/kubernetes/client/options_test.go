@@ -83,10 +83,10 @@ var _ = Describe("Options", func() {
 
 			ignore := IgnoreUnknownNamespaces(namespaces, kubernetes.ShootScheme)
 
-			Expect(ignore(logr.Discard(), &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "test1"}})).To(BeFalse())
-			Expect(ignore(logr.Discard(), &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "test2"}})).To(BeFalse())
-			Expect(ignore(logr.Discard(), &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: ""}})).To(BeFalse())
-			Expect(ignore(logr.Discard(), &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "test3"}})).To(BeTrue())
+			Expect(ignore(logr.Discard(), &corev1.ConfigMap{Namespace: "test1"})).To(BeFalse())
+			Expect(ignore(logr.Discard(), &corev1.ConfigMap{Namespace: "test2"})).To(BeFalse())
+			Expect(ignore(logr.Discard(), &corev1.ConfigMap{Namespace: ""})).To(BeFalse())
+			Expect(ignore(logr.Discard(), &corev1.ConfigMap{Namespace: "test3"})).To(BeTrue())
 		})
 	})
 
@@ -96,19 +96,13 @@ var _ = Describe("Options", func() {
 			ignore := IgnoreObjectsCreatedAfter(clock.Now(), kubernetesscheme.Scheme)
 
 			createdBefore := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					CreationTimestamp: metav1.Time{Time: clock.Now().Add(-time.Second)},
-				},
+				CreationTimestamp: metav1.Time{Time: clock.Now().Add(-time.Second)},
 			}
 			createdAt := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					CreationTimestamp: metav1.Time{Time: clock.Now()},
-				},
+				CreationTimestamp: metav1.Time{Time: clock.Now()},
 			}
 			createdAfter := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					CreationTimestamp: metav1.Time{Time: clock.Now().Add(+time.Second)},
-				},
+				CreationTimestamp: metav1.Time{Time: clock.Now().Add(+time.Second)},
 			}
 
 			Expect(ignore(logr.Discard(), createdBefore)).To(BeFalse())

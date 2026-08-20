@@ -24,9 +24,7 @@ var _ = Describe("#ValidateControllerDeployment", func() {
 
 	BeforeEach(func() {
 		controllerDeployment = &ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "deployment-abc",
-			},
+			Name: "deployment-abc",
 			Helm: &HelmControllerDeployment{
 				RawChart: []byte("foo"),
 			},

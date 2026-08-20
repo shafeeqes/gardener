@@ -74,11 +74,9 @@ var _ = Describe("#TokenRequest", func() {
 		BeforeEach(func() {
 			r = TokenRequestREST{}
 			workloadIdentity = &securityapi.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      workloadName,
-					Namespace: workloadNamespace,
-					UID:       types.UID(workloadUID),
-				},
+				Name:      workloadName,
+				Namespace: workloadNamespace,
+				UID:       types.UID(workloadUID),
 				Spec: securityapi.WorkloadIdentitySpec{
 					Audiences: []string{aud},
 				},
@@ -241,29 +239,29 @@ var _ = Describe("#TokenRequest", func() {
 
 		BeforeEach(func() {
 			shoot = &gardencorev1beta1.Shoot{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Shoot"},
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespaceName, Name: shootName, UID: shootUID},
-				Status:     gardencorev1beta1.ShootStatus{TechnicalID: shootTechnicalID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Shoot",
+				Namespace: namespaceName, Name: shootName, UID: shootUID,
+				Status: gardencorev1beta1.ShootStatus{TechnicalID: shootTechnicalID},
 			}
 			seed = &gardencorev1beta1.Seed{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Seed"},
-				ObjectMeta: metav1.ObjectMeta{Name: seedName, UID: seedUID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Seed",
+				Name: seedName, UID: seedUID,
 			}
 			project = &gardencorev1beta1.Project{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Project"},
-				ObjectMeta: metav1.ObjectMeta{Name: projectName, UID: projectUID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Project",
+				Name: projectName, UID: projectUID,
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: new(namespaceName),
 				},
 			}
 			backupBucket = &gardencorev1beta1.BackupBucket{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "BackupBucket"},
-				ObjectMeta: metav1.ObjectMeta{Name: backupBucketName, UID: backupBucketUID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "BackupBucket",
+				Name: backupBucketName, UID: backupBucketUID,
 			}
 			backupEntry = &gardencorev1beta1.BackupEntry{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "BackupEntry"},
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespaceName, Name: backupEntryName, UID: backupEntryUID},
-				Spec:       gardencorev1beta1.BackupEntrySpec{BucketName: backupBucketName},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "BackupEntry",
+				Namespace: namespaceName, Name: backupEntryName, UID: backupEntryUID,
+				Spec: gardencorev1beta1.BackupEntrySpec{BucketName: backupBucketName},
 			}
 			informerFactory := gardencoreinformers.NewSharedInformerFactory(nil, 0)
 
@@ -804,11 +802,9 @@ var _ = Describe("#TokenRequest", func() {
 			maxDuration = int64(time.Hour.Seconds() * 48)
 
 			workloadIdentity = &securityapi.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      workloadName,
-					Namespace: workloadNamespace,
-					UID:       types.UID(workloadUID),
-				},
+				Name:      workloadName,
+				Namespace: workloadNamespace,
+				UID:       types.UID(workloadUID),
 				Spec: securityapi.WorkloadIdentitySpec{
 					Audiences: []string{aud},
 				},
@@ -817,16 +813,16 @@ var _ = Describe("#TokenRequest", func() {
 				},
 			}
 			shoot = &gardencorev1beta1.Shoot{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Shoot"},
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespaceName, Name: shootName, UID: shootUID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Shoot",
+				Namespace: namespaceName, Name: shootName, UID: shootUID,
 			}
 			seed = &gardencorev1beta1.Seed{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Seed"},
-				ObjectMeta: metav1.ObjectMeta{Name: seedName, UID: seedUID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Seed",
+				Name: seedName, UID: seedUID,
 			}
 			project = &gardencorev1beta1.Project{
-				TypeMeta:   metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Project"},
-				ObjectMeta: metav1.ObjectMeta{Name: projectName, UID: projectUID},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Project",
+				Name: projectName, UID: projectUID,
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: new(namespaceName),
 				},

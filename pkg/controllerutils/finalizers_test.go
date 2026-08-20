@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
@@ -39,7 +38,7 @@ var _ = Describe("Finalizers", func() {
 		scheme = runtime.NewScheme()
 		Expect(kubernetesscheme.AddToScheme(scheme)).To(Succeed())
 
-		obj = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "some-ns", Name: "some-name"}}
+		obj = &corev1.ConfigMap{Namespace: "some-ns", Name: "some-name"}
 		obj.SetResourceVersion(resourceVersion)
 	})
 

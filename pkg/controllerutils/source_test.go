@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -41,7 +40,7 @@ var _ = Describe("Source", func() {
 
 	Describe("#EnqueueAnonymously", func() {
 		var (
-			obj = &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "known"}}
+			obj = &corev1.Node{Name: "known"}
 		)
 
 		assert := func() {

@@ -458,10 +458,8 @@ func (o *operatingSystemConfig) forEachWorkerPoolAndPurpose(fn func(*extensionsv
 			osc, ok := o.oscs[oscName]
 			if !ok {
 				osc = &extensionsv1alpha1.OperatingSystemConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      oscName,
-						Namespace: o.values.Namespace,
-					},
+					Name:      oscName,
+					Namespace: o.values.Namespace,
 				}
 				// store object for later usage (we want to pass a filled object to WaitUntil*)
 				o.oscs[oscName] = osc

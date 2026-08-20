@@ -92,7 +92,7 @@ var _ = Describe("Etcd", func() {
 					FeatureGates: map[string]bool{"UpgradeEtcdVersion": true},
 				},
 			}
-			botanist.Seed.SetInfo(&gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "test-seed"}})
+			botanist.Seed.SetInfo(&gardencorev1beta1.Seed{Name: "test-seed"})
 			botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
@@ -355,10 +355,8 @@ var _ = Describe("Etcd", func() {
 				backupProvider = "prov"
 				bucketName     = "container"
 				backupSecret   = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "etcd-backup",
-						Namespace: namespace,
-					},
+					Name:      "etcd-backup",
+					Namespace: namespace,
 					Data: map[string][]byte{
 						"bucketName": []byte(bucketName),
 					},

@@ -170,7 +170,7 @@ func run(ctx context.Context, opts *Options) error {
 				Fn: func(ctx context.Context) error {
 					timeoutCtx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 					defer cancel()
-					return retry.Until(timeoutCtx, 2*time.Second, health.IsDeploymentUpdated(b.SeedClientSet.Client(), &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameGardenlet, Namespace: b.Shoot.ControlPlaneNamespace}}))
+					return retry.Until(timeoutCtx, 2*time.Second, health.IsDeploymentUpdated(b.SeedClientSet.Client(), &appsv1.Deployment{Name: v1beta1constants.DeploymentNameGardenlet, Namespace: b.Shoot.ControlPlaneNamespace}))
 				},
 				Dependencies: flow.NewTaskIDs(deployGardenlet),
 			})

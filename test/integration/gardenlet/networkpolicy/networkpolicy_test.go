@@ -39,63 +39,49 @@ var _ = Describe("NetworkPolicy controller tests", func() {
 
 	BeforeEach(func() {
 		istioSystemNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "istio-system-",
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioSystem,
-				},
+			GenerateName: "istio-system-",
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioSystem,
 			},
 		}
 		istioIngressNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "istio-ingress-",
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
-				},
+			GenerateName: "istio-ingress-",
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress,
 			},
 		}
 		istioExposureClassNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "istio-ingress-handler-",
-				Labels: map[string]string{
-					testID: testRunID,
-					v1beta1constants.LabelExposureClassHandlerName: "",
-				},
+			GenerateName: "istio-ingress-handler-",
+			Labels: map[string]string{
+				testID: testRunID,
+				v1beta1constants.LabelExposureClassHandlerName: "",
 			},
 		}
 		shootNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "shoot--",
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot,
-					testID:                      testRunID,
-				},
+			GenerateName: "shoot--",
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot,
+				testID:                      testRunID,
 			},
 		}
 		extensionNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "extension-",
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleExtension,
-					testID:                      testRunID,
-				},
+			GenerateName: "extension-",
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleExtension,
+				testID:                      testRunID,
 			},
 		}
 		fooNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "foo--",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "foo--",
+			Labels:       map[string]string{testID: testRunID},
 		}
 		customNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "custom--",
-				Labels: map[string]string{
-					testID:   testRunID,
-					"custom": "namespace",
-				},
+			GenerateName: "custom--",
+			Labels: map[string]string{
+				testID:   testRunID,
+				"custom": "namespace",
 			},
 		}
 		cluster = &extensionsv1alpha1.Cluster{
@@ -305,10 +291,8 @@ var _ = Describe("NetworkPolicy controller tests", func() {
 		Context("deletion", func() {
 			It("should delete the network policy in foo namespace", func() {
 				networkPolicy := &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: fooNamespace.Name,
-						Name:      attrs.networkPolicyName,
-					},
+					Namespace: fooNamespace.Name,
+					Name:      attrs.networkPolicyName,
 				}
 
 				By("Create network policy")
@@ -350,7 +334,7 @@ var _ = Describe("NetworkPolicy controller tests", func() {
 		var expectedNetworkPolicySpec networkingv1.NetworkPolicySpec
 
 		JustBeforeEach(func() {
-			kubernetesEndpoint := &corev1.Endpoints{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "kubernetes"}}
+			kubernetesEndpoint := &corev1.Endpoints{Namespace: "default", Name: "kubernetes"}
 			Expect(testClient.Get(ctx, client.ObjectKeyFromObject(kubernetesEndpoint), kubernetesEndpoint)).To(Succeed())
 
 			egressRules, err := networkpolicyhelper.GetEgressRules(kubernetesEndpoint.Subsets...)
@@ -596,11 +580,9 @@ var _ = Describe("NetworkPolicy controller tests", func() {
 
 		BeforeEach(func() {
 			garden = &operatorv1alpha1.Garden{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "garden-",
-					Labels: map[string]string{
-						testID: testRunID,
-					},
+				GenerateName: "garden-",
+				Labels: map[string]string{
+					testID: testRunID,
 				},
 				Spec: operatorv1alpha1.GardenSpec{
 					RuntimeCluster: operatorv1alpha1.RuntimeCluster{

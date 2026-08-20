@@ -15,7 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -103,7 +102,7 @@ func (r *Reconciler) MapToMatchingClusterRoles(log logr.Logger) handler.MapFunc 
 			}
 
 			if labelSelector.Matches(labels.Set(serviceAccount.GetLabels())) {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: clusterRole.Name}})
+				requests = append(requests, reconcile.Request{Name: clusterRole.Name})
 			}
 		}
 

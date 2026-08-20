@@ -13,7 +13,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -115,7 +114,7 @@ var _ = Describe("Add", func() {
 						deploy := obj.(*appsv1.Deployment)
 						deploy.Generation++
 
-						pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{GenerateName: "pod-", Labels: map[string]string{"foo": "bar"}}}
+						pod := &corev1.Pod{GenerateName: "pod-", Labels: map[string]string{"foo": "bar"}}
 						Expect(fakeClient.Create(ctx, pod)).To(Succeed())
 						DeferCleanup(func() {
 							Expect(fakeClient.Delete(ctx, pod)).To(Succeed())
@@ -204,9 +203,9 @@ var _ = Describe("Add", func() {
 		)
 
 		BeforeEach(func() {
-			pod = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: "namespace"}}
-			replicaSet = &appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{Name: "replicaset", Namespace: pod.Namespace}}
-			deployment = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "deployment", Namespace: pod.Namespace}}
+			pod = &corev1.Pod{Namespace: "namespace"}
+			replicaSet = &appsv1.ReplicaSet{Name: "replicaset", Namespace: pod.Namespace}
+			deployment = &appsv1.Deployment{Name: "deployment", Namespace: pod.Namespace}
 		})
 
 		It("should return nil because owning Deployment was not found", func() {
@@ -229,7 +228,7 @@ var _ = Describe("Add", func() {
 			deployment.Annotations = map[string]string{"resources.gardener.cloud/origin": "foo:bar/baz"}
 			Expect(fakeClient.Create(ctx, deployment)).To(Succeed())
 
-			Expect(reconciler.MapPodToDeploymentToOriginManagedResource(log, "foo")(ctx, pod)).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: "baz", Namespace: "bar"}}))
+			Expect(reconciler.MapPodToDeploymentToOriginManagedResource(log, "foo")(ctx, pod)).To(ConsistOf(reconcile.Request{Name: "baz", Namespace: "bar"}))
 		})
 	})
 })

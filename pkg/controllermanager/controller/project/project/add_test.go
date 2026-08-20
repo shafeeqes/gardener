@@ -13,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -41,9 +40,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			p = reconciler.RoleBindingPredicate()
 			roleBinding = &rbacv1.RoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					ResourceVersion: "1",
-				},
+				ResourceVersion: "1",
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: rbacv1.GroupName,
 					Kind:     "ClusterRole",
@@ -139,20 +136,14 @@ var _ = Describe("Add", func() {
 
 			BeforeEach(func() {
 				shoot = &metav1.PartialObjectMetadata{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-						Kind:       "Shoot",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-shoot",
-						Namespace: namespace,
-					},
+					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+					Kind:       "Shoot",
+					Name:       "test-shoot",
+					Namespace:  namespace,
 				}
 				existingShoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "existing-shoot",
-						Namespace: namespace,
-					},
+					Name:      "existing-shoot",
+					Namespace: namespace,
 				}
 			})
 
@@ -174,32 +165,24 @@ var _ = Describe("Add", func() {
 
 			BeforeEach(func() {
 				shoot = &metav1.PartialObjectMetadata{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-						Kind:       "Shoot",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-shoot",
-						Namespace: namespace,
-					},
+					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+					Kind:       "Shoot",
+					Name:       "test-shoot",
+					Namespace:  namespace,
 				}
 
 				project = &gardencorev1beta1.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       projectName,
-						Finalizers: []string{"gardener"},
-					},
+					Name:       projectName,
+					Finalizers: []string{"gardener"},
 					Spec: gardencorev1beta1.ProjectSpec{
 						Namespace: &namespace,
 					},
 				}
 
 				projectNamespace = &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: namespace,
-						Labels: map[string]string{
-							"project.gardener.cloud/name": projectName,
-						},
+					Name: namespace,
+					Labels: map[string]string{
+						"project.gardener.cloud/name": projectName,
 					},
 				}
 
@@ -211,7 +194,7 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Delete(ctx, project)).To(Succeed())
 
 				Expect(reconciler.MapShootToProjectInDeletion(log)(ctx, shoot)).To(Equal([]reconcile.Request{
-					{NamespacedName: types.NamespacedName{Name: projectName}},
+					{Name: projectName},
 				}))
 			})
 

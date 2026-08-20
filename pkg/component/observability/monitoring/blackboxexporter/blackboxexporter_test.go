@@ -13,7 +13,6 @@ import (
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	blackboxexporterconfig "github.com/prometheus/blackbox_exporter/config"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -87,29 +86,21 @@ var _ = Describe("BlackboxExporter", func() {
 		deployer = New(c, fakeSecretsManager, namespace, values)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		monitoringManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName + "-monitoring-resources",
-				Namespace: namespace,
-			},
+			Name:      managedResourceName + "-monitoring-resources",
+			Namespace: namespace,
 		}
 		monitoringManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + monitoringManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + monitoringManagedResource.Name,
+			Namespace: namespace,
 		}
 
 		serviceAccountYAML = `apiVersion: v1
@@ -355,12 +346,10 @@ status: {}
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels:          map[string]string{"origin": "gardener"},
-					},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels:          map[string]string{"origin": "gardener"},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -417,16 +406,12 @@ status: {}
 
 				BeforeEach(func() {
 					values.ScrapeConfigs = []*monitoringv1alpha1.ScrapeConfig{{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "foo",
-							Namespace: namespace,
-						},
+						Name:      "foo",
+						Namespace: namespace,
 					}}
 					values.PrometheusRules = []*monitoringv1.PrometheusRule{{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "bar",
-							Namespace: namespace,
-						},
+						Name:      "bar",
+						Namespace: namespace,
 					}}
 
 					scrapeConfigYAML = `apiVersion: monitoring.coreos.com/v1alpha1
@@ -449,14 +434,12 @@ spec: {}
 				JustBeforeEach(func() {
 					Expect(c.Get(ctx, client.ObjectKeyFromObject(monitoringManagedResource), monitoringManagedResource)).To(Succeed())
 					expectedMr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            monitoringManagedResource.Name,
-							Namespace:       monitoringManagedResource.Namespace,
-							ResourceVersion: "1",
-							Labels: map[string]string{
-								"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-								"gardener.cloud/role":                "seed-system-component",
-							},
+						Name:            monitoringManagedResource.Name,
+						Namespace:       monitoringManagedResource.Namespace,
+						ResourceVersion: "1",
+						Labels: map[string]string{
+							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
+							"gardener.cloud/role":                "seed-system-component",
 						},
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							Class: new("seed"),
@@ -519,7 +502,7 @@ spec: {}
 			resourcesNamespace = namespace
 
 			By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 		})
 
 		Describe("#Deploy", func() {
@@ -530,14 +513,12 @@ spec: {}
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-							"gardener.cloud/role":                "seed-system-component",
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
+						"gardener.cloud/role":                "seed-system-component",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
@@ -597,7 +578,7 @@ spec: {}
 					values.IsGardenCluster = true
 
 					By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-					Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-gardener", Namespace: namespace}})).To(Succeed())
+					Expect(c.Create(ctx, &corev1.Secret{Name: "ca-gardener", Namespace: namespace})).To(Succeed())
 				})
 
 				It("should successfully deploy all resources", func() {
@@ -642,11 +623,9 @@ spec: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -669,11 +648,9 @@ spec: {}
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

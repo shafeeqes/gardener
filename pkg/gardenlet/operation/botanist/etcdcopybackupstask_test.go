@@ -63,9 +63,7 @@ var _ = Describe("EtcdCopyBackupsTask", func() {
 			BackupEntryName:       backupEntryName,
 		}
 		botanist.Seed.SetInfo(&gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: seedName,
-			},
+			Name: seedName,
 			Spec: gardencorev1beta1.SeedSpec{
 				Backup: &gardencorev1beta1.Backup{
 					Provider: "gcp",
@@ -73,10 +71,8 @@ var _ = Describe("EtcdCopyBackupsTask", func() {
 			},
 		})
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: projectName,
-			},
+			Name:      shootName,
+			Namespace: projectName,
 		})
 	})
 
@@ -130,21 +126,15 @@ var _ = Describe("EtcdCopyBackupsTask", func() {
 			}
 
 			etcdBackupSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-backup",
-					Namespace: namespace,
-				},
+				Name:      "etcd-backup",
+				Namespace: namespace,
 			}
 			sourceEtcdBackupSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "source-etcd-backup",
-					Namespace: namespace,
-				},
+				Name:      "source-etcd-backup",
+				Namespace: namespace,
 			}
 			sourceBackupEntry = &extensionsv1alpha1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "source-" + backupEntryName,
-				},
+				Name: "source-" + backupEntryName,
 				Spec: extensionsv1alpha1.BackupEntrySpec{
 					DefaultSpec: extensionsv1alpha1.DefaultSpec{
 						Type: "aws",

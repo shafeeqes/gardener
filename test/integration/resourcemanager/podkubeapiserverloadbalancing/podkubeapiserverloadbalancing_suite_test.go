@@ -83,10 +83,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			Name: testID,
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		Name: testID,
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -142,13 +140,9 @@ var _ = BeforeSuite(func() {
 func getMutatingWebhookConfigurations(testID string) []*admissionregistrationv1.MutatingWebhookConfiguration {
 	webhookConfig := []*admissionregistrationv1.MutatingWebhookConfiguration{
 		{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
-				Kind:       "MutatingWebhookConfiguration",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener-resource-manager-" + testID,
-			},
+			APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
+			Kind:       "MutatingWebhookConfiguration",
+			Name:       "gardener-resource-manager-" + testID,
 			Webhooks: []admissionregistrationv1.MutatingWebhook{
 				resourcemanager.NewPodKubeAPIServerLoadBalancingMutatingWebhook(
 					&metav1.LabelSelector{MatchLabels: map[string]string{corev1.LabelMetadataName: testID}}, nil, "", nil, func(_ *corev1.Secret, path string) admissionregistrationv1.WebhookClientConfig {

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,14 +43,14 @@ var _ = Describe("Cleanup", func() {
 
 	secretList := func(identity, namespace string) []*corev1.Secret {
 		secrets := []*corev1.Secret{
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret1", Labels: map[string]string{"name": "first"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret2", Labels: map[string]string{"name": "first"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret3", Labels: map[string]string{"name": "first-bundle", "bundle-for": "first"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret4", Labels: map[string]string{"name": "second"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret5", Labels: map[string]string{"name": "third"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret6", Labels: map[string]string{"name": "third"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret7", Labels: map[string]string{"name": "fourth"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "secret8", Labels: map[string]string{"name": "fifth"}}},
+			{Name: "secret1", Labels: map[string]string{"name": "first"}},
+			{Name: "secret2", Labels: map[string]string{"name": "first"}},
+			{Name: "secret3", Labels: map[string]string{"name": "first-bundle", "bundle-for": "first"}},
+			{Name: "secret4", Labels: map[string]string{"name": "second"}},
+			{Name: "secret5", Labels: map[string]string{"name": "third"}},
+			{Name: "secret6", Labels: map[string]string{"name": "third"}},
+			{Name: "secret7", Labels: map[string]string{"name": "fourth"}},
+			{Name: "secret8", Labels: map[string]string{"name": "fifth"}},
 		}
 
 		for i := range secrets {

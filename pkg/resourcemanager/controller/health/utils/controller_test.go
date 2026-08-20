@@ -13,7 +13,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	logzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -186,7 +185,7 @@ var _ = Describe("HealthStatusChanged", func() {
 		It("should return a request because the origin matches the cluster id", func() {
 			obj.Annotations = map[string]string{"resources.gardener.cloud/origin": "foo:bar/baz"}
 
-			Expect(MapToOriginManagedResource(log, "foo")(ctx, obj)).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: "baz", Namespace: "bar"}}))
+			Expect(MapToOriginManagedResource(log, "foo")(ctx, obj)).To(ConsistOf(reconcile.Request{Name: "baz", Namespace: "bar"}))
 		})
 	})
 })

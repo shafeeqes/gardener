@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -32,10 +31,8 @@ var _ = Describe("DeletionConfirmation", func() {
 
 		It("should prevent the deletion due annotation value != true", func() {
 			obj := &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						v1beta1constants.ConfirmationDeletion: "false",
-					},
+				Annotations: map[string]string{
+					v1beta1constants.ConfirmationDeletion: "false",
 				},
 			}
 
@@ -44,10 +41,8 @@ var _ = Describe("DeletionConfirmation", func() {
 
 		It("should allow the deletion due annotation value == true", func() {
 			obj := &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						v1beta1constants.ConfirmationDeletion: "true",
-					},
+				Annotations: map[string]string{
+					v1beta1constants.ConfirmationDeletion: "true",
 				},
 			}
 
@@ -66,7 +61,7 @@ var _ = Describe("DeletionConfirmation", func() {
 
 		BeforeEach(func() {
 			ctx = context.Background()
-			obj = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			obj = &corev1.Namespace{Name: "foo"}
 			c = fake.NewClientBuilder().WithObjects(obj).Build()
 			now = time.Now().UTC()
 			fakeClock = testclock.NewFakeClock(now)

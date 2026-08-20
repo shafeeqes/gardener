@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -34,15 +33,13 @@ func (b *GardenadmBotanist) MigrateSecrets(ctx context.Context, fakeClient, real
 	for _, secret := range secretList.Items {
 		taskFns = append(taskFns, func(ctx context.Context) error {
 			return client.IgnoreAlreadyExists(realClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        secret.Name,
-					Namespace:   secret.Namespace,
-					Labels:      secret.Labels,
-					Annotations: secret.Annotations,
-				},
-				Type:      secret.Type,
-				Immutable: secret.Immutable,
-				Data:      secret.Data,
+				Name:        secret.Name,
+				Namespace:   secret.Namespace,
+				Labels:      secret.Labels,
+				Annotations: secret.Annotations,
+				Type:        secret.Type,
+				Immutable:   secret.Immutable,
+				Data:        secret.Data,
 			}))
 		})
 	}
@@ -82,10 +79,8 @@ func (b *GardenadmBotanist) PersistBootstrapSecrets(ctx context.Context, configD
 
 	shoot := b.Shoot.GetInfo()
 	shootState := &gardencorev1beta1.ShootState{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shoot.Name,
-			Namespace: shoot.Namespace,
-		},
+		Name:      shoot.Name,
+		Namespace: shoot.Namespace,
 		Spec: gardencorev1beta1.ShootStateSpec{
 			Gardener: gardenerData,
 		},

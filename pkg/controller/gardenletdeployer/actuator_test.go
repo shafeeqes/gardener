@@ -19,7 +19,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
-	"k8s.io/component-base/config/v1alpha1"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -125,10 +124,8 @@ var _ = Describe("Interface", func() {
 		ctx = context.TODO()
 
 		managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Shoot: &seedmanagementv1alpha1.Shoot{
 					Name: name,
@@ -137,13 +134,11 @@ var _ = Describe("Interface", func() {
 		}
 
 		seedTemplate = &gardencorev1beta1.SeedTemplate{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-				},
-				Annotations: map[string]string{
-					"bar": "baz",
-				},
+			Labels: map[string]string{
+				"foo": "bar",
+			},
+			Annotations: map[string]string{
+				"bar": "baz",
 			},
 			Spec: gardencorev1beta1.SeedSpec{
 				Backup: &gardencorev1beta1.Backup{
@@ -172,10 +167,8 @@ var _ = Describe("Interface", func() {
 			},
 			Config: runtime.RawExtension{
 				Object: &gardenletconfigv1alpha1.GardenletConfiguration{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-						Kind:       "GardenletConfiguration",
-					},
+					APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+					Kind:       "GardenletConfiguration",
 					SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
 						SeedTemplate: *seedTemplate,
 					},
@@ -186,17 +179,13 @@ var _ = Describe("Interface", func() {
 		}
 
 		gardenNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: v1beta1constants.GardenNamespace,
-			},
+			Name: v1beta1constants.GardenNamespace,
 		}
 		backupSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      backupSecretName,
-				Namespace: namespace,
-				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(managedSeed, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeed")),
-				},
+			Name:      backupSecretName,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(managedSeed, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeed")),
 			},
 			Data: map[string][]byte{
 				"backupKey": []byte("backupValue"),
@@ -204,23 +193,19 @@ var _ = Describe("Interface", func() {
 			Type: corev1.SecretTypeOpaque,
 		}
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-				Labels: utils.MergeStringMaps(seedTemplate.Labels, map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed,
-				}),
-				Annotations: seedTemplate.Annotations,
-				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(managedSeed, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeed")),
-				},
+			Name: name,
+			Labels: utils.MergeStringMaps(seedTemplate.Labels, map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed,
+			}),
+			Annotations: seedTemplate.Annotations,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(managedSeed, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeed")),
 			},
 			Spec: seedTemplate.Spec,
 		}
 		gardenletDeployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.DeploymentNameGardenlet,
-				Namespace: v1beta1constants.GardenNamespace,
-			},
+			Name:      v1beta1constants.DeploymentNameGardenlet,
+			Namespace: v1beta1constants.GardenNamespace,
 		}
 	})
 
@@ -257,9 +242,7 @@ var _ = Describe("Interface", func() {
 
 			mergedGardenletConfig = managedSeed.Spec.Gardenlet.Config.Object.(*gardenletconfigv1alpha1.GardenletConfiguration).DeepCopy()
 			mergedGardenletConfig.GardenClientConnection = &gardenletconfigv1alpha1.GardenClientConnection{
-				ClientConnectionConfiguration: v1alpha1.ClientConnectionConfiguration{
-					Kubeconfig: "kubeconfig",
-				},
+				Kubeconfig: "kubeconfig",
 			}
 
 			vh.EXPECT().MergeGardenletDeployment(managedSeed.Spec.Gardenlet.Deployment).Return(mergedDeployment, nil)
@@ -308,12 +291,10 @@ var _ = Describe("Interface", func() {
 
 					if !selfHostedShoot {
 						Expect(gc.SeedConfig.SeedTemplate).To(Equal(gardencorev1beta1.SeedTemplate{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:        name,
-								Labels:      seedTemplate.Labels,
-								Annotations: seedTemplate.Annotations,
-							},
-							Spec: seedTemplate.Spec,
+							Name:        name,
+							Labels:      seedTemplate.Labels,
+							Annotations: seedTemplate.Annotations,
+							Spec:        seedTemplate.Spec,
 						}))
 					}
 
@@ -371,10 +352,8 @@ var _ = Describe("Interface", func() {
 				}
 				managedSeed.Spec.Gardenlet.Config = runtime.RawExtension{
 					Object: &gardenletconfigv1alpha1.GardenletConfiguration{
-						TypeMeta: metav1.TypeMeta{
-							APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-							Kind:       "GardenletConfiguration",
-						},
+						APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+						Kind:       "GardenletConfiguration",
 						SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
 							SeedTemplate: *seedTemplate,
 						},
@@ -465,10 +444,9 @@ var _ = Describe("Interface", func() {
 
 				Expect(gardenClient.Create(ctx, seed.DeepCopy())).To(Succeed())
 				Expect(gardenClient.Create(ctx, backupSecret.DeepCopy())).To(Succeed())
-				Expect(shootClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				Expect(shootClient.Create(ctx, &corev1.Secret{
 					Name:      "gardenlet-kubeconfig",
-					Namespace: v1beta1constants.GardenNamespace,
-				}})).To(Succeed())
+					Namespace: v1beta1constants.GardenNamespace})).To(Succeed())
 
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Ensuring gardenlet namespace in target cluster")
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Reconciling seed secrets")
@@ -503,10 +481,9 @@ var _ = Describe("Interface", func() {
 				Expect(gardenClient.Create(ctx, seed.DeepCopy())).To(Succeed())
 				Expect(gardenClient.Create(ctx, backupSecret.DeepCopy())).To(Succeed())
 				Expect(gardenClient.Create(ctx, managedSeed.DeepCopy())).To(Succeed())
-				Expect(shootClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				Expect(shootClient.Create(ctx, &corev1.Secret{
 					Name:      "gardenlet-kubeconfig",
-					Namespace: v1beta1constants.GardenNamespace,
-				}})).To(Succeed())
+					Namespace: v1beta1constants.GardenNamespace})).To(Succeed())
 
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Renewing gardenlet kubeconfig secret due to operation annotation")
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Ensuring gardenlet namespace in target cluster")
@@ -605,7 +582,7 @@ var _ = Describe("Interface", func() {
 				managedSeed.Spec.Gardenlet = gardenlet
 
 				Expect(shootClient.Create(ctx, &operatorv1alpha1.Garden{
-					ObjectMeta: metav1.ObjectMeta{Name: "garden"},
+					Name: "garden",
 				})).To(Succeed())
 			})
 
@@ -663,10 +640,9 @@ var _ = Describe("Interface", func() {
 
 				Expect(gardenClient.Create(ctx, seed.DeepCopy())).To(Succeed())
 				Expect(gardenClient.Create(ctx, backupSecret.DeepCopy())).To(Succeed())
-				Expect(shootClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				Expect(shootClient.Create(ctx, &corev1.Secret{
 					Name:      "gardenlet-kubeconfig",
-					Namespace: v1beta1constants.GardenNamespace,
-				}})).To(Succeed())
+					Namespace: v1beta1constants.GardenNamespace})).To(Succeed())
 
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Ensuring gardenlet namespace in target cluster")
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Reconciling seed secrets")
@@ -701,10 +677,9 @@ var _ = Describe("Interface", func() {
 				Expect(gardenClient.Create(ctx, seed.DeepCopy())).To(Succeed())
 				Expect(gardenClient.Create(ctx, backupSecret.DeepCopy())).To(Succeed())
 				Expect(gardenClient.Create(ctx, managedSeed.DeepCopy())).To(Succeed())
-				Expect(shootClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				Expect(shootClient.Create(ctx, &corev1.Secret{
 					Name:      "gardenlet-kubeconfig",
-					Namespace: v1beta1constants.GardenNamespace,
-				}})).To(Succeed())
+					Namespace: v1beta1constants.GardenNamespace})).To(Succeed())
 
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Renewing gardenlet kubeconfig secret due to operation annotation")
 				recorder.EXPECT().Eventf(managedSeed, nil, corev1.EventTypeNormal, gardencorev1beta1.EventReconciling, gardencorev1beta1.EventActionReconcile, "Ensuring gardenlet namespace in target cluster")
@@ -764,19 +739,15 @@ var _ = Describe("Interface", func() {
 
 			It("should return error when existing gardenlet uses different seed name", func() {
 				Expect(shootClient.Create(ctx, &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardenlet",
-						Namespace: v1beta1constants.GardenNamespace,
-					},
+					Name:      "gardenlet",
+					Namespace: v1beta1constants.GardenNamespace,
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Volumes: []corev1.Volume{{
 									Name: "gardenlet-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{Name: "gardenlet-config-12345"},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: "gardenlet-config-12345",
 									},
 								}},
 							},
@@ -785,10 +756,8 @@ var _ = Describe("Interface", func() {
 				})).To(Succeed())
 
 				Expect(shootClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardenlet-config-12345",
-						Namespace: v1beta1constants.GardenNamespace,
-					},
+					Name:      "gardenlet-config-12345",
+					Namespace: v1beta1constants.GardenNamespace,
 					Data: map[string]string{
 						"config.yaml": fmt.Sprintf(`apiVersion: gardenlet.config.gardener.cloud/v1alpha1
 kind: GardenletConfiguration
@@ -881,10 +850,8 @@ seedConfig:
 				}
 				managedSeed.Spec.Gardenlet.Config = runtime.RawExtension{
 					Object: &gardenletconfigv1alpha1.GardenletConfiguration{
-						TypeMeta: metav1.TypeMeta{
-							APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-							Kind:       "GardenletConfiguration",
-						},
+						APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+						Kind:       "GardenletConfiguration",
 						SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
 							SeedTemplate: *seedTemplate,
 						},

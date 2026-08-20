@@ -16,7 +16,7 @@ import (
 func CentralServiceMonitors() []*monitoringv1.ServiceMonitor {
 	return []*monitoringv1.ServiceMonitor{
 		{
-			ObjectMeta: metav1.ObjectMeta{Name: "alertmanager-garden"},
+			Name: "alertmanager-garden",
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: alertmanager.GetLabels("garden")},
 				Endpoints: []monitoringv1.Endpoint{{

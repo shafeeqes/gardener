@@ -102,10 +102,8 @@ var _ = Describe("Shoot Hibernation", func() {
 				ctx = context.TODO()
 
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bar",
-						Namespace: "garden-foo",
-					},
+					Name:      "bar",
+					Namespace: "garden-foo",
 					Spec: gardencorev1beta1.ShootSpec{
 						Hibernation: &gardencorev1beta1.Hibernation{},
 					},

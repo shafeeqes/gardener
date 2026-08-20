@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -100,9 +99,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "garden-",
-		},
+		GenerateName: "garden-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -116,9 +113,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create seed Namespace")
 	seedNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: gardenerutils.ComputeGardenNamespace(seedName),
-		},
+		Name: gardenerutils.ComputeGardenNamespace(seedName),
 	}
 	Expect(testClient.Create(ctx, seedNamespace)).To(Succeed())
 	log.Info("Created Namespace for seed", "namespaceName", seedNamespace.Name)

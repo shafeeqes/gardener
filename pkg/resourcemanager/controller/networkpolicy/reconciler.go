@@ -503,10 +503,8 @@ func (r *Reconciler) portsExposedByVirtualServiceResources(ctx context.Context, 
 			}
 
 			gateways = append(gateways, &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      gatewayName,
-					Namespace: namespace,
-				},
+				Name:      gatewayName,
+				Namespace: namespace,
 			})
 		}
 

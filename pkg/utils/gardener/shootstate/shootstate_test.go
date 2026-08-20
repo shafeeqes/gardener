@@ -54,16 +54,12 @@ var _ = Describe("ShootState", func() {
 		fakeClock = testclock.NewFakeClock(time.Now())
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-shoot",
-				Namespace: "garden-my-project",
-			},
+			Name:      "my-shoot",
+			Namespace: "garden-my-project",
 		}
 		shootState = &gardencorev1beta1.ShootState{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-shoot",
-				Namespace: "garden-my-project",
-			},
+			Name:      "my-shoot",
+			Namespace: "garden-my-project",
 		}
 	})
 
@@ -112,7 +108,7 @@ var _ = Describe("ShootState", func() {
 				createExtensionObject(ctx, fakeSeedClient, "controlplane", controlPlaneNamespace, &extensionsv1alpha1.ControlPlane{Spec: extensionsv1alpha1.ControlPlaneSpec{}}, &runtime.RawExtension{Raw: []byte(`{"name":"controlplane"}`)})
 				createExtensionObject(ctx, fakeSeedClient, "dnsrecord", controlPlaneNamespace, &extensionsv1alpha1.DNSRecord{}, &runtime.RawExtension{Raw: []byte(`{"name":"dnsrecord"}`)})
 				createExtensionObject(ctx, fakeSeedClient, "extension", controlPlaneNamespace, &extensionsv1alpha1.Extension{}, &runtime.RawExtension{Raw: []byte(`{"name":"extension"}`)}, gardencorev1beta1.NamedResourceReference{Name: "resource-ref1", ResourceRef: autoscalingv1.CrossVersionObjectReference{Kind: "ConfigMap", APIVersion: "v1", Name: "extension-configmap"}})
-				Expect(fakeSeedClient.Create(ctx, &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "extension-configmap", Namespace: controlPlaneNamespace}, Data: map[string]string{"some-data": "for-extension"}})).To(Succeed())
+				Expect(fakeSeedClient.Create(ctx, &corev1.ConfigMap{Name: "extension-configmap", Namespace: controlPlaneNamespace, Data: map[string]string{"some-data": "for-extension"}})).To(Succeed())
 				createExtensionObject(ctx, fakeSeedClient, "infrastructure", controlPlaneNamespace, &extensionsv1alpha1.Infrastructure{}, &runtime.RawExtension{Raw: []byte(`{"name":"infrastructure"}`)})
 				createExtensionObject(ctx, fakeSeedClient, "network", controlPlaneNamespace, &extensionsv1alpha1.Network{}, &runtime.RawExtension{Raw: []byte(`{"name":"network"}`)})
 				createExtensionObject(ctx, fakeSeedClient, "osc", controlPlaneNamespace, &extensionsv1alpha1.OperatingSystemConfig{}, &runtime.RawExtension{Raw: []byte(`{"name":"osc"}`)})
@@ -224,12 +220,10 @@ var _ = Describe("ShootState", func() {
 						},
 					},
 					Resources: []gardencorev1beta1.ResourceData{{
-						CrossVersionObjectReference: autoscalingv1.CrossVersionObjectReference{
-							APIVersion: "v1",
-							Kind:       "ConfigMap",
-							Name:       "extension-configmap",
-						},
-						Data: runtime.RawExtension{Raw: []byte(`{"apiVersion":"v1","data":{"some-data":"for-extension"},"kind":"ConfigMap","metadata":{"name":"extension-configmap","namespace":"shoot--my-project--my-shoot"}}`)},
+						APIVersion: "v1",
+						Kind:       "ConfigMap",
+						Name:       "extension-configmap",
+						Data:       runtime.RawExtension{Raw: []byte(`{"apiVersion":"v1","data":{"some-data":"for-extension"},"kind":"ConfigMap","metadata":{"name":"extension-configmap","namespace":"shoot--my-project--my-shoot"}}`)},
 					}},
 				}
 			})
@@ -294,13 +288,11 @@ var _ = Describe("ShootState", func() {
 
 func newSecret(name, namespace string, withPersistLabel bool, withManagedByLabel bool, opts ...func(*corev1.Secret)) *corev1.Secret {
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    map[string]string{},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{name: []byte("some-data")},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    map[string]string{},
+		Type:      corev1.SecretTypeOpaque,
+		Data:      map[string][]byte{name: []byte("some-data")},
 	}
 
 	if withManagedByLabel {
@@ -344,21 +336,17 @@ func createMachineObjects(
 	namespace string,
 ) func(ctx context.Context) {
 	machineDeployment1 := &machinev1alpha1.MachineDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "deploy1",
-			Namespace: namespace,
-		},
-		Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
+		Name:      "deploy1",
+		Namespace: namespace,
+		Spec:      machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
 	}
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineDeployment1)).To(Succeed())
 
 	machineSet1 := &machinev1alpha1.MachineSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "deploy1-set1",
-			Namespace:       namespace,
-			OwnerReferences: []metav1.OwnerReference{{Kind: "MachineDeployment", Name: machineDeployment1.Name}},
-			Annotations:     map[string]string{"some": "annotation"},
-		},
+		Name:            "deploy1-set1",
+		Namespace:       namespace,
+		OwnerReferences: []metav1.OwnerReference{{Kind: "MachineDeployment", Name: machineDeployment1.Name}},
+		Annotations:     map[string]string{"some": "annotation"},
 		Status: machinev1alpha1.MachineSetStatus{
 			Replicas:      1234,
 			ReadyReplicas: 5678,
@@ -367,12 +355,10 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineSet1)).To(Succeed())
 
 	machineSet2 := &machinev1alpha1.MachineSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        "deploy1-set2",
-			Namespace:   namespace,
-			Labels:      map[string]string{"name": machineDeployment1.Name},
-			Annotations: map[string]string{"some": "annotation"},
-		},
+		Name:        "deploy1-set2",
+		Namespace:   namespace,
+		Labels:      map[string]string{"name": machineDeployment1.Name},
+		Annotations: map[string]string{"some": "annotation"},
 		Status: machinev1alpha1.MachineSetStatus{
 			Replicas:      1234,
 			ReadyReplicas: 5678,
@@ -381,13 +367,11 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineSet2)).To(Succeed())
 
 	machine1 := &machinev1alpha1.Machine{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "deploy1-set1-machine1",
-			Namespace:       namespace,
-			OwnerReferences: []metav1.OwnerReference{{Kind: "MachineSet", Name: machineSet1.Name}},
-			Labels:          map[string]string{"node": "nodename"},
-			Annotations:     map[string]string{"some": "annotation"},
-		},
+		Name:            "deploy1-set1-machine1",
+		Namespace:       namespace,
+		OwnerReferences: []metav1.OwnerReference{{Kind: "MachineSet", Name: machineSet1.Name}},
+		Labels:          map[string]string{"node": "nodename"},
+		Annotations:     map[string]string{"some": "annotation"},
 		Status: machinev1alpha1.MachineStatus{
 			CurrentStatus: machinev1alpha1.CurrentStatus{TimeoutActive: true},
 		},
@@ -395,13 +379,11 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machine1)).To(Succeed())
 
 	machine2 := &machinev1alpha1.Machine{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        "deploy1-set2-machine2",
-			Namespace:   namespace,
-			Labels:      map[string]string{"name": machineDeployment1.Name},
-			Annotations: map[string]string{"some": "annotation"},
-		},
-		Spec: machinev1alpha1.MachineSpec{ProviderID: "provider-id"},
+		Name:        "deploy1-set2-machine2",
+		Namespace:   namespace,
+		Labels:      map[string]string{"name": machineDeployment1.Name},
+		Annotations: map[string]string{"some": "annotation"},
+		Spec:        machinev1alpha1.MachineSpec{ProviderID: "provider-id"},
 		Status: machinev1alpha1.MachineStatus{
 			CurrentStatus: machinev1alpha1.CurrentStatus{TimeoutActive: true},
 		},
@@ -409,30 +391,24 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machine2)).To(Succeed())
 
 	machine3 := &machinev1alpha1.Machine{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "deploy1-set2-machine3",
-			Namespace:       namespace,
-			OwnerReferences: []metav1.OwnerReference{{Kind: "MachineSet", Name: machineSet2.Name}},
-		},
+		Name:            "deploy1-set2-machine3",
+		Namespace:       namespace,
+		OwnerReferences: []metav1.OwnerReference{{Kind: "MachineSet", Name: machineSet2.Name}},
 	}
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machine3)).To(Succeed())
 
 	machineDeployment2 := &machinev1alpha1.MachineDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "deploy2",
-			Namespace: namespace,
-		},
-		Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
+		Name:      "deploy2",
+		Namespace: namespace,
+		Spec:      machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
 	}
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineDeployment2)).To(Succeed())
 
 	machineSet3 := &machinev1alpha1.MachineSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "deploy2-set3",
-			Namespace:       namespace,
-			OwnerReferences: []metav1.OwnerReference{{Kind: "MachineDeployment", Name: machineDeployment2.Name}},
-			Annotations:     map[string]string{"some": "annotation"},
-		},
+		Name:            "deploy2-set3",
+		Namespace:       namespace,
+		OwnerReferences: []metav1.OwnerReference{{Kind: "MachineDeployment", Name: machineDeployment2.Name}},
+		Annotations:     map[string]string{"some": "annotation"},
 		Status: machinev1alpha1.MachineSetStatus{
 			Replicas:      1234,
 			ReadyReplicas: 5678,
@@ -441,12 +417,10 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineSet3)).To(Succeed())
 
 	machineSet4 := &machinev1alpha1.MachineSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        "deploy2-set4",
-			Namespace:   namespace,
-			Labels:      map[string]string{"name": machineDeployment2.Name},
-			Annotations: map[string]string{"some": "annotation"},
-		},
+		Name:        "deploy2-set4",
+		Namespace:   namespace,
+		Labels:      map[string]string{"name": machineDeployment2.Name},
+		Annotations: map[string]string{"some": "annotation"},
 		Status: machinev1alpha1.MachineSetStatus{
 			Replicas:      1234,
 			ReadyReplicas: 5678,
@@ -455,13 +429,11 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineSet4)).To(Succeed())
 
 	machine4 := &machinev1alpha1.Machine{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "deploy2-set3-machine4",
-			Namespace:       namespace,
-			OwnerReferences: []metav1.OwnerReference{{Kind: "MachineSet", Name: machineSet3.Name}},
-			Labels:          map[string]string{"node": "nodename"},
-			Annotations:     map[string]string{"some": "annotation"},
-		},
+		Name:            "deploy2-set3-machine4",
+		Namespace:       namespace,
+		OwnerReferences: []metav1.OwnerReference{{Kind: "MachineSet", Name: machineSet3.Name}},
+		Labels:          map[string]string{"node": "nodename"},
+		Annotations:     map[string]string{"some": "annotation"},
 		Status: machinev1alpha1.MachineStatus{
 			CurrentStatus: machinev1alpha1.CurrentStatus{TimeoutActive: true},
 		},
@@ -469,13 +441,11 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machine4)).To(Succeed())
 
 	machine5 := &machinev1alpha1.Machine{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        "deploy2-set4-machine5",
-			Namespace:   namespace,
-			Labels:      map[string]string{"name": machineDeployment2.Name},
-			Annotations: map[string]string{"some": "annotation"},
-		},
-		Spec: machinev1alpha1.MachineSpec{ProviderID: "provider-id"},
+		Name:        "deploy2-set4-machine5",
+		Namespace:   namespace,
+		Labels:      map[string]string{"name": machineDeployment2.Name},
+		Annotations: map[string]string{"some": "annotation"},
+		Spec:        machinev1alpha1.MachineSpec{ProviderID: "provider-id"},
 		Status: machinev1alpha1.MachineStatus{
 			CurrentStatus: machinev1alpha1.CurrentStatus{TimeoutActive: true},
 		},
@@ -483,11 +453,9 @@ func createMachineObjects(
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machine5)).To(Succeed())
 
 	machineDeployment3 := &machinev1alpha1.MachineDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "deploy3",
-			Namespace: namespace,
-		},
-		Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
+		Name:      "deploy3",
+		Namespace: namespace,
+		Spec:      machinev1alpha1.MachineDeploymentSpec{Replicas: 3},
 	}
 	ExpectWithOffset(1, fakeSeedClient.Create(ctx, machineDeployment3)).To(Succeed())
 

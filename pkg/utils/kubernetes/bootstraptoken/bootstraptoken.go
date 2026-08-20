@@ -43,10 +43,8 @@ var (
 // ComputeBootstrapTokenWithSecret computes and creates a new bootstrap token with a specified token secret, and returns it.
 func ComputeBootstrapTokenWithSecret(ctx context.Context, c client.Client, tokenID, tokenSecret, description string, validity time.Duration) (secret *corev1.Secret, err error) {
 	secret = &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      bootstraptokenutil.BootstrapTokenSecretName(tokenID),
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      bootstraptokenutil.BootstrapTokenSecretName(tokenID),
+		Namespace: metav1.NamespaceSystem,
 	}
 
 	if err = c.Get(ctx, client.ObjectKeyFromObject(secret), secret); client.IgnoreNotFound(err) != nil {

@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -64,16 +63,14 @@ var _ = Describe("Seed Tests", Label("Seed", "default"), func() {
 			seedNamespace = gardenerutils.ComputeGardenNamespace(s.Seed.Name)
 			gardenAccessName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 			accessSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      gardenAccessName,
-					Namespace: v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						resourcesv1alpha1.ResourceManagerPurpose: resourcesv1alpha1.LabelPurposeTokenRequest,
-						resourcesv1alpha1.ResourceManagerClass:   resourcesv1alpha1.ResourceManagerClassGarden,
-					},
-					Annotations: map[string]string{
-						resourcesv1alpha1.ServiceAccountName: gardenAccessName,
-					},
+				Name:      gardenAccessName,
+				Namespace: v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					resourcesv1alpha1.ResourceManagerPurpose: resourcesv1alpha1.LabelPurposeTokenRequest,
+					resourcesv1alpha1.ResourceManagerClass:   resourcesv1alpha1.ResourceManagerClassGarden,
+				},
+				Annotations: map[string]string{
+					resourcesv1alpha1.ServiceAccountName: gardenAccessName,
 				},
 			}
 		})
@@ -89,10 +86,8 @@ var _ = Describe("Seed Tests", Label("Seed", "default"), func() {
 
 		It("Should create RBAC role for service account", func(ctx SpecContext) {
 			role := &rbacv1.Role{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      gardenAccessName,
-					Namespace: seedNamespace,
-				},
+				Name:      gardenAccessName,
+				Namespace: seedNamespace,
 				Rules: []rbacv1.PolicyRule{{
 					APIGroups:     []string{""},
 					Resources:     []string{"serviceaccounts"},
@@ -111,10 +106,8 @@ var _ = Describe("Seed Tests", Label("Seed", "default"), func() {
 
 		It("Should create RoleBinding for service account", func(ctx SpecContext) {
 			roleBinding := &rbacv1.RoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      gardenAccessName,
-					Namespace: seedNamespace,
-				},
+				Name:      gardenAccessName,
+				Namespace: seedNamespace,
 				Subjects: []rbacv1.Subject{{
 					Kind: rbacv1.ServiceAccountKind,
 					Name: gardenAccessName,

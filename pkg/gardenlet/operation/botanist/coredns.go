@@ -128,7 +128,7 @@ func (b *Botanist) getCoreDNSRestartedAtAnnotations(ctx context.Context) (map[st
 		return map[string]string{key: NowFunc().UTC().Format(time.RFC3339)}, nil
 	}
 
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: coredns.DeploymentName, Namespace: metav1.NamespaceSystem}}
+	deployment := &appsv1.Deployment{Name: coredns.DeploymentName, Namespace: metav1.NamespaceSystem}
 	if err := b.ShootClientSet.Client().Get(ctx, client.ObjectKeyFromObject(deployment), deployment); client.IgnoreNotFound(err) != nil {
 		return nil, err
 	}

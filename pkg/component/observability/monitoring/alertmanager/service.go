@@ -19,11 +19,9 @@ import (
 
 func (a *alertManager) service() *corev1.Service {
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.name(),
-			Namespace: a.namespace,
-			Labels:    a.getLabels(),
-		},
+		Name:      a.name(),
+		Namespace: a.namespace,
+		Labels:    a.getLabels(),
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: a.getLabels(),

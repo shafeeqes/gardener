@@ -10,7 +10,6 @@ import (
 	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/utils/istio"
 )
@@ -24,7 +23,7 @@ var _ = Describe("Protocol", func() {
 
 		BeforeEach(func() {
 			destinationRule = &istionetworkingv1beta1.DestinationRule{
-				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "ns"},
+				Name: "test", Namespace: "ns",
 				Spec: istioapinetworkingv1beta1.DestinationRule{
 					Host: "svc.ns.svc.cluster.local",
 				},

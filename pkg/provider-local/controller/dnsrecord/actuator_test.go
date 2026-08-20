@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
@@ -48,9 +47,7 @@ var _ = Describe("Actuator", func() {
 		}
 
 		dnsRecord = &extensionsv1alpha1.DNSRecord{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "foo",
-			},
+			Namespace: "foo",
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				Name:       "api.something.local.gardener.cloud",
 				RecordType: extensionsv1alpha1.DNSRecordTypeA,
@@ -267,5 +264,5 @@ func (m *fakeDNSClient) Exchange(msg *dns.Msg, _ string) (*dns.Msg, time.Duratio
 }
 
 func successResponse() *dns.Msg {
-	return &dns.Msg{MsgHdr: dns.MsgHdr{Rcode: dns.RcodeSuccess}}
+	return &dns.Msg{Rcode: dns.RcodeSuccess}
 }

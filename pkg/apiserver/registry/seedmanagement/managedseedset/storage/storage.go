@@ -209,13 +209,11 @@ func scaleFromManagedSeedSet(mss *seedmanagement.ManagedSeedSet) (*autoscalingv1
 		return nil, err
 	}
 	return &autoscalingv1.Scale{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:              mss.Name,
-			Namespace:         mss.Namespace,
-			UID:               mss.UID,
-			ResourceVersion:   mss.ResourceVersion,
-			CreationTimestamp: mss.CreationTimestamp,
-		},
+		Name:              mss.Name,
+		Namespace:         mss.Namespace,
+		UID:               mss.UID,
+		ResourceVersion:   mss.ResourceVersion,
+		CreationTimestamp: mss.CreationTimestamp,
 		Spec: autoscalingv1.ScaleSpec{
 			Replicas: ptr.Deref(mss.Spec.Replicas, 0),
 		},

@@ -57,9 +57,7 @@ var _ = Describe("Certificates", func() {
 		}
 
 		approvedCSR = certificatesv1.CertificateSigningRequest{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "approved-csr",
-			},
+			Name: "approved-csr",
 			Status: certificatesv1.CertificateSigningRequestStatus{
 				Conditions: []certificatesv1.CertificateSigningRequestCondition{
 					{
@@ -71,9 +69,7 @@ var _ = Describe("Certificates", func() {
 		}
 
 		deniedCSR = certificatesv1.CertificateSigningRequest{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "denied-csr",
-			},
+			Name: "denied-csr",
 			Status: certificatesv1.CertificateSigningRequestStatus{
 				Conditions: []certificatesv1.CertificateSigningRequestCondition{
 					{
@@ -84,9 +80,7 @@ var _ = Describe("Certificates", func() {
 		}
 
 		failedCSR = certificatesv1.CertificateSigningRequest{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "failed-csr",
-			},
+			Name: "failed-csr",
 			Status: certificatesv1.CertificateSigningRequestStatus{
 				Conditions: []certificatesv1.CertificateSigningRequestCondition{
 					{
@@ -146,18 +140,15 @@ var _ = Describe("Certificates", func() {
 			mockGardenInterface.EXPECT().Kubernetes().Return(kubeClient)
 
 			// mock gardenClient.RESTConfig()
-			certClientConfig := &rest.Config{Host: "testhost", TLSClientConfig: rest.TLSClientConfig{
+			certClientConfig := &rest.Config{Host: "testhost",
 				Insecure: false,
-				CAFile:   "filepath",
-			}}
+				CAFile:   "filepath"}
 			mockGardenInterface.EXPECT().RESTConfig().Return(certClientConfig)
 
 			// Create the kubeconfig secret in the fake client (empty, will be patched)
 			Expect(fakeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      gardenClientConnection.KubeconfigSecret.Name,
-					Namespace: gardenClientConnection.KubeconfigSecret.Namespace,
-				},
+				Name:      gardenClientConnection.KubeconfigSecret.Name,
+				Namespace: gardenClientConnection.KubeconfigSecret.Namespace,
 			})).To(Succeed())
 
 			err := rotateCertificate(ctx, log, mockGardenInterface, fakeClient, gardenClientConnection, &certificateSubject, []string{}, []net.IP{})
@@ -275,10 +266,8 @@ users:
 			It("should return an error - secret does not contain a kubeconfig", func() {
 				// Create existing secret with missing garden kubeconfig
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      gardenClientConnection.KubeconfigSecret.Name,
-						Namespace: gardenClientConnection.KubeconfigSecret.Namespace,
-					},
+					Name:      gardenClientConnection.KubeconfigSecret.Name,
+					Namespace: gardenClientConnection.KubeconfigSecret.Namespace,
 				})).To(Succeed())
 
 				_, _, err := readCertificateFromKubeconfigSecret(ctx, log, fakeClient, gardenClientConnection)
@@ -301,11 +290,9 @@ users:
 
 				It("should not return an error", func() {
 					Expect(fakeClient.Create(ctx, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      gardenClientConnection.KubeconfigSecret.Name,
-							Namespace: gardenClientConnection.KubeconfigSecret.Namespace,
-						},
-						Data: map[string][]byte{kubernetes.KubeConfig: []byte(testKubeconfig)},
+						Name:      gardenClientConnection.KubeconfigSecret.Name,
+						Namespace: gardenClientConnection.KubeconfigSecret.Namespace,
+						Data:      map[string][]byte{kubernetes.KubeConfig: []byte(testKubeconfig)},
 					})).To(Succeed())
 
 					subject, dnsSANs, ipSANs, _, err := waitForCertificateRotation(ctx, log, fakeClient, gardenClientConnection, time.Now)
@@ -356,12 +343,10 @@ users:
 				testKubeconfig = fmt.Sprintf(baseKubeconfig, utils.EncodeBase64(cert.CertificatePEM), utils.EncodeBase64(cert.PrivateKeyPEM))
 
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        gardenClientConnection.KubeconfigSecret.Name,
-						Namespace:   gardenClientConnection.KubeconfigSecret.Namespace,
-						Annotations: map[string]string{"gardener.cloud/operation": "renew"},
-					},
-					Data: map[string][]byte{kubernetes.KubeConfig: []byte(testKubeconfig)},
+					Name:        gardenClientConnection.KubeconfigSecret.Name,
+					Namespace:   gardenClientConnection.KubeconfigSecret.Namespace,
+					Annotations: map[string]string{"gardener.cloud/operation": "renew"},
+					Data:        map[string][]byte{kubernetes.KubeConfig: []byte(testKubeconfig)},
 				})).To(Succeed())
 
 				subject, dnsSANs, ipSANs, _, err := waitForCertificateRotation(ctx, log, fakeClient, gardenClientConnection, time.Now)

@@ -32,25 +32,19 @@ var _ = Describe("Actuator", func() {
 
 		BeforeEach(func() {
 			expected = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machineclass-secret1",
-					Namespace: ns,
-					Labels:    map[string]string{"gardener.cloud/purpose": "machineclass"},
-				},
+				Name:      "machineclass-secret1",
+				Namespace: ns,
+				Labels:    map[string]string{"gardener.cloud/purpose": "machineclass"},
 			}
 			all = []runtime.Object{
 				&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "machineclass-secret3",
-						Namespace: "other-ns",
-						Labels:    map[string]string{"gardener.cloud/purpose": "machineclass"},
-					},
+					Name:      "machineclass-secret3",
+					Namespace: "other-ns",
+					Labels:    map[string]string{"gardener.cloud/purpose": "machineclass"},
 				},
 				&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "machineclass-secret4",
-						Namespace: ns,
-					},
+					Name:      "machineclass-secret4",
+					Namespace: ns,
 				},
 				expected,
 			}
@@ -71,9 +65,7 @@ var _ = Describe("Actuator", func() {
 			mdWithoutState            = worker.MachineDeployment{ClassName: "gcp", Name: "md-without-state"}
 			mdWithStateAndMachineSets = worker.MachineDeployment{ClassName: "gcp", Name: "md-with-state-machinesets", State: &shootstate.MachineDeploymentState{Replicas: 1, MachineSets: []machinev1alpha1.MachineSet{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "machineSet",
-					},
+					Name: "machineSet",
 				},
 			}}}
 			mdWithEmptyState = worker.MachineDeployment{ClassName: "gcp", Name: "md-with-state", State: &shootstate.MachineDeploymentState{Replicas: 1, MachineSets: []machinev1alpha1.MachineSet{}}}
@@ -127,26 +119,20 @@ var _ = Describe("Actuator", func() {
 			}
 
 			machineDeployment = machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       machineDeploymentName,
-					Finalizers: []string{"machine.sapcloud.io/machine-controller-manager"},
-				},
-				Spec: machineDeploymentSpec,
+				Name:       machineDeploymentName,
+				Finalizers: []string{"machine.sapcloud.io/machine-controller-manager"},
+				Spec:       machineDeploymentSpec,
 			}
 
 			machineDeploymentTooYoung = machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              machineDeploymentName,
-					Finalizers:        []string{"machine.sapcloud.io/machine-controller-manager"},
-					CreationTimestamp: metav1.Now(),
-				},
-				Spec: machineDeploymentSpec,
+				Name:              machineDeploymentName,
+				Finalizers:        []string{"machine.sapcloud.io/machine-controller-manager"},
+				CreationTimestamp: metav1.Now(),
+				Spec:              machineDeploymentSpec,
 			}
 
 			machineDeploymentNoFinalizer = machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "other",
-				},
+				Name: "other",
 				Spec: machineDeploymentSpec,
 			}
 			machineDeployments = []machinev1alpha1.MachineDeployment{
@@ -164,18 +150,14 @@ var _ = Describe("Actuator", func() {
 			}
 
 			matchingMachineSet = machinev1alpha1.MachineSet{
-				ObjectMeta: metav1.ObjectMeta{
-					OwnerReferences: machineDeploymentOwnerReference,
-					Name:            "matching-machine-set",
-				},
-				Spec: machineSetSpec,
+				OwnerReferences: machineDeploymentOwnerReference,
+				Name:            "matching-machine-set",
+				Spec:            machineSetSpec,
 			}
 
 			machineSetOtherMachineClass = machinev1alpha1.MachineSet{
-				ObjectMeta: metav1.ObjectMeta{
-					OwnerReferences: machineDeploymentOwnerReference,
-					Name:            "machine-set-old",
-				},
+				OwnerReferences: machineDeploymentOwnerReference,
+				Name:            "machine-set-old",
 				Spec: machinev1alpha1.MachineSetSpec{
 					Template: machinev1alpha1.MachineTemplateSpec{
 						Spec: machinev1alpha1.MachineSpec{
@@ -188,10 +170,8 @@ var _ = Describe("Actuator", func() {
 			}
 
 			machineSetOtherOwner = machinev1alpha1.MachineSet{
-				ObjectMeta: metav1.ObjectMeta{
-					OwnerReferences: []metav1.OwnerReference{{Name: "machine-deployment-2"}},
-					Name:            "other-machine-set",
-				},
+				OwnerReferences: []metav1.OwnerReference{{Name: "machine-deployment-2"}},
+				Name:            "other-machine-set",
 			}
 		)
 

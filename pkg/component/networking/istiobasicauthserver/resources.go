@@ -30,12 +30,10 @@ import (
 
 func (i *istioBasicAuthServer) getService(isShootNamespace bool) *corev1.Service {
 	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      i.getPrefix() + svcName,
-			Namespace: i.namespace,
-			Annotations: map[string]string{
-				istioapiannotation.NetworkingExportTo.Name: i.values.IstioIngressGatewayNamespace,
-			},
+		Name:      i.getPrefix() + svcName,
+		Namespace: i.namespace,
+		Annotations: map[string]string{
+			istioapiannotation.NetworkingExportTo.Name: i.values.IstioIngressGatewayNamespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: i.getLabels(),
@@ -66,11 +64,9 @@ func (i *istioBasicAuthServer) getService(isShootNamespace bool) *corev1.Service
 
 func (i *istioBasicAuthServer) getDeployment(volumes []corev1.Volume, volumeMounts []corev1.VolumeMount) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      i.getPrefix() + v1beta1constants.DeploymentNameIstioBasicAuthServer,
-			Namespace: i.namespace,
-			Labels:    i.getLabels(),
-		},
+		Name:      i.getPrefix() + v1beta1constants.DeploymentNameIstioBasicAuthServer,
+		Namespace: i.namespace,
+		Labels:    i.getLabels(),
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: i.getLabels(),
@@ -95,10 +91,8 @@ func (i *istioBasicAuthServer) getDeployment(volumes []corev1.Volume, volumeMoun
 								"--grpc-reflection",
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									TCPSocket: &corev1.TCPSocketAction{
-										Port: intstr.FromInt32(Port),
-									},
+								TCPSocket: &corev1.TCPSocketAction{
+									Port: intstr.FromInt32(Port),
 								},
 								SuccessThreshold: 1,
 								FailureThreshold: 2,
@@ -106,10 +100,8 @@ func (i *istioBasicAuthServer) getDeployment(volumes []corev1.Volume, volumeMoun
 								TimeoutSeconds:   5,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									TCPSocket: &corev1.TCPSocketAction{
-										Port: intstr.FromInt32(Port),
-									},
+								TCPSocket: &corev1.TCPSocketAction{
+									Port: intstr.FromInt32(Port),
 								},
 								SuccessThreshold: 1,
 								FailureThreshold: 2,
@@ -158,11 +150,9 @@ func (i *istioBasicAuthServer) getEnvoyFilter(
 	ownerReference *metav1.OwnerReference,
 ) *istionetworkingv1alpha3.EnvoyFilter {
 	return &istionetworkingv1alpha3.EnvoyFilter{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            fmt.Sprintf("%s-%s%s", i.namespace, i.getPrefix(), name),
-			Namespace:       i.values.IstioIngressGatewayNamespace,
-			OwnerReferences: []metav1.OwnerReference{*ownerReference},
-		},
+		Name:            fmt.Sprintf("%s-%s%s", i.namespace, i.getPrefix(), name),
+		Namespace:       i.values.IstioIngressGatewayNamespace,
+		OwnerReferences: []metav1.OwnerReference{*ownerReference},
 		Spec: istioapinetworkingv1alpha3.EnvoyFilter{
 			ConfigPatches: configPatches,
 		},
@@ -170,7 +160,7 @@ func (i *istioBasicAuthServer) getEnvoyFilter(
 }
 
 func (i *istioBasicAuthServer) getDestinationRule(destinationHost string, secretName string) (*istionetworkingv1beta1.DestinationRule, error) {
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: i.getPrefix() + v1beta1constants.DeploymentNameIstioBasicAuthServer, Namespace: i.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: i.getPrefix() + v1beta1constants.DeploymentNameIstioBasicAuthServer, Namespace: i.namespace}
 	if err := istio.DestinationRuleWithTLSTermination(
 		destinationRule,
 		i.getLabels(),
@@ -190,12 +180,10 @@ func (i *istioBasicAuthServer) getDestinationRule(destinationHost string, secret
 func (i *istioBasicAuthServer) getTLSSecret(caSecret *corev1.Secret, secretName string, ownerReference *metav1.OwnerReference) *corev1.Secret {
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            secretName,
-			Namespace:       i.values.IstioIngressGatewayNamespace,
-			Labels:          i.getLabels(),
-			OwnerReferences: []metav1.OwnerReference{*ownerReference},
-		},
+		Name:            secretName,
+		Namespace:       i.values.IstioIngressGatewayNamespace,
+		Labels:          i.getLabels(),
+		OwnerReferences: []metav1.OwnerReference{*ownerReference},
 		Data: map[string][]byte{
 			"cacert": caSecret.Data[secretsutils.DataKeyCertificateBundle],
 		},
@@ -204,11 +192,9 @@ func (i *istioBasicAuthServer) getTLSSecret(caSecret *corev1.Secret, secretName 
 
 func (i *istioBasicAuthServer) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      i.getPrefix() + name,
-			Namespace: i.namespace,
-			Labels:    i.getLabels(),
-		},
+		Name:      i.getPrefix() + name,
+		Namespace: i.namespace,
+		Labels:    i.getLabels(),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				APIVersion: appsv1.SchemeGroupVersion.String(),

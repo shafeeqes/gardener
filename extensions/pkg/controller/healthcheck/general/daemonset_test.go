@@ -272,11 +272,9 @@ var _ = Describe("DaemonSet", func() {
 
 func newHealthyDaemonSet() *appsv1.DaemonSet {
 	return &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:       "test-daemonset",
-			Namespace:  "test-namespace",
-			Generation: 1,
-		},
+		Name:       "test-daemonset",
+		Namespace:  "test-namespace",
+		Generation: 1,
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},
 		},

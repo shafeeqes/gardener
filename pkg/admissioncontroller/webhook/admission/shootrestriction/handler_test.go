@@ -55,11 +55,9 @@ var _ = Describe("handler", func() {
 		extensionUser           authenticationv1.UserInfo
 
 		responseAllowed = admission.Response{
-			AdmissionResponse: admissionv1.AdmissionResponse{
-				Allowed: true,
-				Result: &metav1.Status{
-					Code: int32(http.StatusOK),
-				},
+			Allowed: true,
+			Result: &metav1.Status{
+				Code: int32(http.StatusOK),
 			},
 		}
 	)
@@ -104,12 +102,10 @@ var _ = Describe("handler", func() {
 				request.UserInfo = gardenletUser
 
 				Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: false,
-						Result: &metav1.Status{
-							Code:    int32(http.StatusBadRequest),
-							Message: `unexpected resource: ""`,
-						},
+					Allowed: false,
+					Result: &metav1.Status{
+						Code:    int32(http.StatusBadRequest),
+						Message: `unexpected resource: ""`,
 					},
 				}))
 			})
@@ -119,12 +115,10 @@ var _ = Describe("handler", func() {
 				request.Resource = metav1.GroupVersionResource{}
 
 				Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: false,
-						Result: &metav1.Status{
-							Code:    int32(http.StatusBadRequest),
-							Message: `unexpected resource: ""`,
-						},
+					Allowed: false,
+					Result: &metav1.Status{
+						Code:    int32(http.StatusBadRequest),
+						Message: `unexpected resource: ""`,
 					},
 				}))
 			})
@@ -147,12 +141,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -170,45 +162,37 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
 
 					It("should deny the request because BackupBucket has no ShootRef", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupBucket{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupBucket",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name"},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupBucket",
+							Name:       "some-name",
 						})
 						Expect(err).NotTo(HaveOccurred())
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should deny the request because BackupBucket does not reference the Shoot", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupBucket{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupBucket",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name"},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupBucket",
+							Name:       "some-name",
 							Spec: gardencorev1beta1.BackupBucketSpec{
 								ShootRef: &corev1.ObjectReference{Name: "other-shoot", Namespace: shootNamespace},
 							},
@@ -217,23 +201,19 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should allow the request because BackupBucket references the Shoot", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupBucket{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupBucket",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name"},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupBucket",
+							Name:       "some-name",
 							Spec: gardencorev1beta1.BackupBucketSpec{
 								ShootRef: &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace},
 							},
@@ -262,12 +242,10 @@ var _ = Describe("handler", func() {
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -285,45 +263,37 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
 
 					It("should deny the request because BackupEntry has no ShootRef", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupEntry",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name", Namespace: shootNamespace},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupEntry",
+							Name:       "some-name", Namespace: shootNamespace,
 						})
 						Expect(err).NotTo(HaveOccurred())
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should deny the request because BackupEntry does not reference the Shoot", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupEntry",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name", Namespace: shootNamespace},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupEntry",
+							Name:       "some-name", Namespace: shootNamespace,
 							Spec: gardencorev1beta1.BackupEntrySpec{
 								ShootRef: &corev1.ObjectReference{Name: "other-shoot", Namespace: shootNamespace},
 							},
@@ -332,23 +302,19 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should deny the request because the referenced BackupBucket was not found", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupEntry",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name", Namespace: shootNamespace},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupEntry",
+							Name:       "some-name", Namespace: shootNamespace,
 							Spec: gardencorev1beta1.BackupEntrySpec{
 								BucketName: "missing-bucket",
 								ShootRef:   &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace},
@@ -358,28 +324,24 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: `backupbuckets.core.gardener.cloud "missing-bucket" not found`,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: `backupbuckets.core.gardener.cloud "missing-bucket" not found`,
 							},
 						}))
 					})
 
 					It("should deny the request because the referenced BackupBucket has no ShootRef", func() {
 						backupBucket := &gardencorev1beta1.BackupBucket{
-							ObjectMeta: metav1.ObjectMeta{Name: "the-bucket"},
+							Name: "the-bucket",
 						}
 						Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupEntry",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name", Namespace: shootNamespace},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupEntry",
+							Name:       "some-name", Namespace: shootNamespace,
 							Spec: gardencorev1beta1.BackupEntrySpec{
 								BucketName: "the-bucket",
 								ShootRef:   &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace},
@@ -389,19 +351,17 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should deny the request because the referenced BackupBucket does not reference the Shoot", func() {
 						backupBucket := &gardencorev1beta1.BackupBucket{
-							ObjectMeta: metav1.ObjectMeta{Name: "the-bucket"},
+							Name: "the-bucket",
 							Spec: gardencorev1beta1.BackupBucketSpec{
 								ShootRef: &corev1.ObjectReference{Name: "other-shoot", Namespace: shootNamespace},
 							},
@@ -409,11 +369,9 @@ var _ = Describe("handler", func() {
 						Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupEntry",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name", Namespace: shootNamespace},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupEntry",
+							Name:       "some-name", Namespace: shootNamespace,
 							Spec: gardencorev1beta1.BackupEntrySpec{
 								BucketName: "the-bucket",
 								ShootRef:   &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace},
@@ -423,19 +381,17 @@ var _ = Describe("handler", func() {
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should allow the request because both BackupEntry and referenced BackupBucket reference the Shoot", func() {
 						backupBucket := &gardencorev1beta1.BackupBucket{
-							ObjectMeta: metav1.ObjectMeta{Name: "the-bucket"},
+							Name: "the-bucket",
 							Spec: gardencorev1beta1.BackupBucketSpec{
 								ShootRef: &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace},
 							},
@@ -443,11 +399,9 @@ var _ = Describe("handler", func() {
 						Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.BackupEntry{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "BackupEntry",
-							},
-							ObjectMeta: metav1.ObjectMeta{Name: "some-name", Namespace: shootNamespace},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "BackupEntry",
+							Name:       "some-name", Namespace: shootNamespace,
 							Spec: gardencorev1beta1.BackupEntrySpec{
 								BucketName: "the-bucket",
 								ShootRef:   &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace},
@@ -500,12 +454,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -523,22 +475,18 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
 
 					It("should forbid the request because the CSR is not a valid shoot-related CSR", func() {
 						objData, err := runtime.Encode(encoder, &certificatesv1.CertificateSigningRequest{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: certificatesv1.SchemeGroupVersion.String(),
-								Kind:       "CertificateSigningRequest",
-							},
+							APIVersion: certificatesv1.SchemeGroupVersion.String(),
+							Kind:       "CertificateSigningRequest",
 							Spec: certificatesv1.CertificateSigningRequestSpec{
 								Request: rawCSR,
 							},
@@ -547,22 +495,18 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "can only create CSRs for shoot clusters: key usages are not set to [key encipherment digital signature client auth]",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "can only create CSRs for shoot clusters: key usages are not set to [key encipherment digital signature client auth]",
 							},
 						}))
 					})
 
 					It("should forbid the request because the shoot info of the csr does not match", func() {
 						objData, err := runtime.Encode(encoder, &certificatesv1.CertificateSigningRequest{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: certificatesv1.SchemeGroupVersion.String(),
-								Kind:       "CertificateSigningRequest",
-							},
+							APIVersion: certificatesv1.SchemeGroupVersion.String(),
+							Kind:       "CertificateSigningRequest",
 							Spec: certificatesv1.CertificateSigningRequestSpec{
 								Request: rawCSR,
 								Usages: []certificatesv1.KeyUsage{
@@ -581,22 +525,18 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						}
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "object does not belong to shoot foo/bar",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "object does not belong to shoot foo/bar",
 							},
 						}))
 					})
 
 					It("should allow the request because shoot info matches", func() {
 						objData, err := runtime.Encode(encoder, &certificatesv1.CertificateSigningRequest{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: certificatesv1.SchemeGroupVersion.String(),
-								Kind:       "CertificateSigningRequest",
-							},
+							APIVersion: certificatesv1.SchemeGroupVersion.String(),
+							Kind:       "CertificateSigningRequest",
 							Spec: certificatesv1.CertificateSigningRequestSpec{
 								Request: rawCSR,
 								Usages: []certificatesv1.KeyUsage{
@@ -629,12 +569,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -653,12 +591,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "foo"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -667,12 +603,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "other-shoot.ca-cluster"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -710,12 +644,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -733,24 +665,20 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "foo"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: `the resource for self-hosted shoots must be prefixed with "self-hosted-shoot-"`,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: `the resource for self-hosted shoots must be prefixed with "self-hosted-shoot-"`,
 							},
 						}))
 					})
 
 					It("should return an error because the requestor is not responsible for the resource", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "object does not belong to shoot " + shootNamespace + "/" + shootName,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "object does not belong to shoot " + shootNamespace + "/" + shootName,
 							},
 						}))
 					})
@@ -779,12 +707,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -803,12 +729,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "foo"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -817,12 +741,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "other-shoot.ca-client"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -852,12 +774,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -873,19 +793,17 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 					It("should return an error because the ManagedSeed was not found", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("managedseeds.seedmanagement.gardener.cloud %q not found", "foo"),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("managedseeds.seedmanagement.gardener.cloud %q not found", "foo"),
 							},
 						}))
 					})
 
 					It("should forbid because the ManagedSeed does not belong to gardenlet's shoot", func() {
 						managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-							ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: shootNamespace},
+							Name: "foo", Namespace: shootNamespace,
 							Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 								Shoot: &seedmanagementv1alpha1.Shoot{Name: "other-shoot"},
 							},
@@ -893,19 +811,17 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should allow because the ManagedSeed belongs to gardenlet's shoot", func() {
 						managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-							ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: shootNamespace},
+							Name: "foo", Namespace: shootNamespace,
 							Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 								Shoot: &seedmanagementv1alpha1.Shoot{Name: shootName},
 							},
@@ -937,12 +853,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -960,24 +874,20 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "foo"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: `the resource for self-hosted shoots must be prefixed with "self-hosted-shoot-"`,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: `the resource for self-hosted shoots must be prefixed with "self-hosted-shoot-"`,
 							},
 						}))
 					})
 
 					It("should return an error because the requestor is not responsible for the resource", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "object does not belong to shoot " + shootNamespace + "/" + shootName,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "object does not belong to shoot " + shootNamespace + "/" + shootName,
 							},
 						}))
 					})
@@ -1006,12 +916,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Namespace = "other-namespace"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("extension client can only create leases in the namespace for shoot \"%s/%s\"", extensionShootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("extension client can only create leases in the namespace for shoot \"%s/%s\"", extensionShootNamespace, shootName),
 							},
 						}))
 					})
@@ -1020,12 +928,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Name = "other-shoot--provider-aws-leader-election"
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("extension client can only create leases with the shoot name %q as prefix", shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("extension client can only create leases with the shoot name %q as prefix", shootName),
 							},
 						}))
 					})
@@ -1052,12 +958,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1080,12 +984,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							request.Name = "other-shoot.ca-cluster"
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 								},
 							}))
 						})
@@ -1111,44 +1013,40 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 						It("should return an error because the related BackupBucket was not found", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("backupbuckets.core.gardener.cloud %q not found", name),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("backupbuckets.core.gardener.cloud %q not found", name),
 								},
 							}))
 						})
 
 						It("should forbid because the related Shoot does not belong to gardenlet's shoot", func() {
 							backupBucket := &gardencorev1beta1.BackupBucket{
-								ObjectMeta: metav1.ObjectMeta{Name: name},
-								Spec:       gardencorev1beta1.BackupBucketSpec{ShootRef: &corev1.ObjectReference{Name: "other-shoot", Namespace: "other-namespace"}},
+								Name: name,
+								Spec: gardencorev1beta1.BackupBucketSpec{ShootRef: &corev1.ObjectReference{Name: "other-shoot", Namespace: "other-namespace"}},
 							}
 							Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 								},
 							}))
 						})
 
 						It("should allow because the related BackupBucket does belong to gardenlet's seed", func() {
 							backupBucket := &gardencorev1beta1.BackupBucket{
-								ObjectMeta: metav1.ObjectMeta{Name: name},
-								Spec:       gardencorev1beta1.BackupBucketSpec{ShootRef: &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace}},
+								Name: name,
+								Spec: gardencorev1beta1.BackupBucketSpec{ShootRef: &corev1.ObjectReference{Name: shootName, Namespace: shootNamespace}},
 							}
 							Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
 							shoot := &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: shootNamespace},
-								Status:     gardencorev1beta1.ShootStatus{UID: types.UID(name)},
+								Name: shootName, Namespace: shootNamespace,
+								Status: gardencorev1beta1.ShootStatus{UID: types.UID(name)},
 							}
 							Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
@@ -1164,7 +1062,7 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 						It("should allow because the ManagedSeed belongs to gardenlet's shoot", func() {
 							managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-								ObjectMeta: metav1.ObjectMeta{Name: "my-managed-seed", Namespace: shootNamespace},
+								Name: "my-managed-seed", Namespace: shootNamespace,
 								Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 									Shoot: &seedmanagementv1alpha1.Shoot{Name: shootName},
 								},
@@ -1172,8 +1070,8 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 							secret := &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-abcdef", Namespace: metav1.NamespaceSystem},
-								Type:       corev1.SecretTypeBootstrapToken,
+								Name: "bootstrap-token-abcdef", Namespace: metav1.NamespaceSystem,
+								Type: corev1.SecretTypeBootstrapToken,
 								Data: map[string][]byte{
 									"description": []byte("A bootstrap token for the Gardenlet for seedmanagement.gardener.cloud/v1alpha1.ManagedSeed resource " + shootNamespace + "/my-managed-seed."),
 								},
@@ -1187,7 +1085,7 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 						It("should forbid because the ManagedSeed does not belong to gardenlet's shoot", func() {
 							managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-								ObjectMeta: metav1.ObjectMeta{Name: "my-managed-seed", Namespace: "other-namespace"},
+								Name: "my-managed-seed", Namespace: "other-namespace",
 								Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 									Shoot: &seedmanagementv1alpha1.Shoot{Name: "other-shoot"},
 								},
@@ -1195,8 +1093,8 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							Expect(fakeClient.Create(ctx, managedSeed)).To(Succeed())
 
 							secret := &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-abcdef", Namespace: metav1.NamespaceSystem},
-								Type:       corev1.SecretTypeBootstrapToken,
+								Name: "bootstrap-token-abcdef", Namespace: metav1.NamespaceSystem,
+								Type: corev1.SecretTypeBootstrapToken,
 								Data: map[string][]byte{
 									"description": []byte("A bootstrap token for the Gardenlet for seedmanagement.gardener.cloud/v1alpha1.ManagedSeed resource other-namespace/my-managed-seed."),
 								},
@@ -1206,12 +1104,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 								},
 							}))
 						})
@@ -1225,8 +1121,8 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 						It("should allow because the Gardenlet belongs to gardenlet's shoot", func() {
 							secret := &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-abcdef", Namespace: metav1.NamespaceSystem},
-								Type:       corev1.SecretTypeBootstrapToken,
+								Name: "bootstrap-token-abcdef", Namespace: metav1.NamespaceSystem,
+								Type: corev1.SecretTypeBootstrapToken,
 								Data: map[string][]byte{
 									"description": []byte("A bootstrap token for the Gardenlet for seedmanagement.gardener.cloud/v1alpha1.Gardenlet resource " + shootNamespace + "/self-hosted-shoot-" + shootName + "."),
 								},
@@ -1240,8 +1136,8 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 						It("should forbid because the Gardenlet does not belong to gardenlet's shoot", func() {
 							secret := &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-abcdef", Namespace: "other-namespace"},
-								Type:       corev1.SecretTypeBootstrapToken,
+								Name: "bootstrap-token-abcdef", Namespace: "other-namespace",
+								Type: corev1.SecretTypeBootstrapToken,
 								Data: map[string][]byte{
 									"description": []byte("A bootstrap token for the Gardenlet for seedmanagement.gardener.cloud/v1alpha1.Gardenlet resource other-namespace/self-hosted-shoot-other-shoot."),
 								},
@@ -1251,12 +1147,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							request.Object.Raw = objData
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 								},
 							}))
 						})
@@ -1280,12 +1174,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1308,12 +1200,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							request.Name = "not-prefixed-sa"
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 								},
 							}))
 						})
@@ -1322,12 +1212,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 							request.Namespace = "other-namespace"
 
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 								},
 							}))
 						})
@@ -1340,12 +1228,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 						It("should forbid service account creation", func() {
 							Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-								AdmissionResponse: admissionv1.AdmissionResponse{
-									Allowed: false,
-									Result: &metav1.Status{
-										Code:    int32(http.StatusForbidden),
-										Message: "extension client may not create ServiceAccounts",
-									},
+								Allowed: false,
+								Result: &metav1.Status{
+									Code:    int32(http.StatusForbidden),
+									Message: "extension client may not create ServiceAccounts",
 								},
 							}))
 						})
@@ -1373,12 +1259,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1394,12 +1278,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 					It("should return an error because the requestor is not responsible for the resource", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: "object does not belong to shoot " + shootNamespace + "/" + shootName,
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: "object does not belong to shoot " + shootNamespace + "/" + shootName,
 							},
 						}))
 					})
@@ -1438,12 +1320,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1459,12 +1339,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 					It("should deny the request because object namespace does not match shoot namespaces", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -1500,12 +1378,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1521,12 +1397,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 					It("should deny the request because object namespace does not match shoot namespaces", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -1561,12 +1435,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1584,22 +1456,18 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
 
 					It("should deny the request because project namespace does not match shoot namespaces", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.Project{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "Project",
-							},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "Project",
 							Spec: gardencorev1beta1.ProjectSpec{
 								Namespace: new("other-namespace"),
 							},
@@ -1608,22 +1476,18 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should allow the request because project namespace matches shoot namespaces", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.Project{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "Project",
-							},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "Project",
 							Spec: gardencorev1beta1.ProjectSpec{
 								Namespace: &shootNamespace,
 							},
@@ -1659,12 +1523,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1680,12 +1542,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 
 					It("should deny the request because object namespace does not match shoot namespaces", func() {
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
@@ -1720,12 +1580,10 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Operation = operation
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: fmt.Sprintf("unexpected operation: %q", operation),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: fmt.Sprintf("unexpected operation: %q", operation),
 							},
 						}))
 					},
@@ -1743,51 +1601,39 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 						request.Object.Raw = []byte(`{]`)
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusBadRequest),
-									Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusBadRequest),
+								Message: "couldn't get version/kind; json parse error: invalid character ']' looking for beginning of object key string",
 							},
 						}))
 					})
 
 					It("should deny the request because shoot does not match shoot info", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.Shoot{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "Shoot",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "other-namespace",
-								Name:      "other-name",
-							},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "Shoot",
+							Namespace:  "other-namespace",
+							Name:       "other-name",
 						})
 						Expect(err).NotTo(HaveOccurred())
 						request.Object.Raw = objData
 
 						Expect(handler.Handle(ctx, request)).To(Equal(admission.Response{
-							AdmissionResponse: admissionv1.AdmissionResponse{
-								Allowed: false,
-								Result: &metav1.Status{
-									Code:    int32(http.StatusForbidden),
-									Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
-								},
+							Allowed: false,
+							Result: &metav1.Status{
+								Code:    int32(http.StatusForbidden),
+								Message: fmt.Sprintf("object does not belong to shoot %s/%s", shootNamespace, shootName),
 							},
 						}))
 					})
 
 					It("should allow the request because shoot namespace matches shoot namespaces", func() {
 						objData, err := runtime.Encode(encoder, &gardencorev1beta1.Shoot{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-								Kind:       "Shoot",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: shootNamespace,
-								Name:      shootName,
-							},
+							APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+							Kind:       "Shoot",
+							Namespace:  shootNamespace,
+							Name:       shootName,
 						})
 						Expect(err).NotTo(HaveOccurred())
 						request.Object.Raw = objData

@@ -79,7 +79,7 @@ func (t *ShootMigrationTest) initializeShootMigrationTest(ctx context.Context) e
 }
 
 func (t *ShootMigrationTest) initShootAndClient(ctx context.Context) (err error) {
-	shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: t.Config.ShootName, Namespace: t.Config.ShootNamespace}}
+	shoot := &gardencorev1beta1.Shoot{Name: t.Config.ShootName, Namespace: t.Config.ShootNamespace}
 	if err = t.GardenerFramework.GetShoot(ctx, shoot); err != nil {
 		return err
 	}
@@ -349,15 +349,11 @@ func constructTestSecretAndServiceAccount() (*corev1.Secret, *corev1.ServiceAcco
 		serviceAccountNamespace = metav1.NamespaceDefault
 	)
 	testSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-		},
+		Name:      secretName,
+		Namespace: secretNamespace,
 	}
 	testServiceAccount := &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceAccountName,
-			Namespace: serviceAccountNamespace,
-		}}
+		Name:      serviceAccountName,
+		Namespace: serviceAccountNamespace}
 	return testSecret, testServiceAccount
 }

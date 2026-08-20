@@ -7,7 +7,6 @@ package admission
 import (
 	"net/http"
 
-	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -17,11 +16,9 @@ import (
 // `.status.message` field.
 func Allowed(msg string) admission.Response {
 	resp := admission.Response{
-		AdmissionResponse: admissionv1.AdmissionResponse{
-			Allowed: true,
-			Result: &metav1.Status{
-				Code: int32(http.StatusOK),
-			},
+		Allowed: true,
+		Result: &metav1.Status{
+			Code: int32(http.StatusOK),
 		},
 	}
 	if len(msg) > 0 {

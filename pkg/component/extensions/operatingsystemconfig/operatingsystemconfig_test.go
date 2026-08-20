@@ -236,17 +236,15 @@ var _ = Describe("OperatingSystemConfig", func() {
 				name := key + "-init"
 
 				oscInit := &extensionsv1alpha1.OperatingSystemConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-						Annotations: map[string]string{
-							v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-							v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-						},
-						Labels: map[string]string{
-							"worker.gardener.cloud/pool":                                         worker.Name,
-							"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-						},
+					Name:      name,
+					Namespace: namespace,
+					Annotations: map[string]string{
+						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+					},
+					Labels: map[string]string{
+						"worker.gardener.cloud/pool":                                         worker.Name,
+						"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 					},
 					Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 						DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -274,17 +272,15 @@ var _ = Describe("OperatingSystemConfig", func() {
 				name = key + "-original"
 
 				oscOriginal := &extensionsv1alpha1.OperatingSystemConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-						Annotations: map[string]string{
-							v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-							v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-						},
-						Labels: map[string]string{
-							"worker.gardener.cloud/pool":                                         worker.Name,
-							"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-						},
+					Name:      name,
+					Namespace: namespace,
+					Annotations: map[string]string{
+						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+					},
+					Labels: map[string]string{
+						"worker.gardener.cloud/pool":                                         worker.Name,
+						"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 					},
 					Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 						DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -358,8 +354,8 @@ var _ = Describe("OperatingSystemConfig", func() {
 			sm = fakesecretsmanager.New(fakeClient, namespace)
 
 			By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-kubelet", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-kubelet", Namespace: namespace})).To(Succeed())
 
 			workers = []gardencorev1beta1.Worker{
 				{
@@ -438,32 +434,26 @@ var _ = Describe("OperatingSystemConfig", func() {
 			}
 
 			values = &Values{
-				Namespace:         namespace,
-				Workers:           workers,
-				KubernetesVersion: kubernetesVersion,
-				InitValues: InitValues{
-					APIServerURL: apiServerURL,
-				},
-				OriginalValues: OriginalValues{
-					CABundle:                                caBundle,
-					ClusterDNSAddresses:                     clusterDNSAddresses,
-					ClusterDomain:                           clusterDomain,
-					Images:                                  images,
-					KubeletConfig:                           kubeletConfig,
-					MachineTypes:                            machineTypes,
-					SSHPublicKeys:                           sshPublicKeys,
-					ValitailEnabled:                         valitailEnabled,
-					OpenTelemetryCollectorLogShipperEnabled: openTelemetryCollectorLogShipperEnabled,
-				},
+				Namespace:                               namespace,
+				Workers:                                 workers,
+				KubernetesVersion:                       kubernetesVersion,
+				APIServerURL:                            apiServerURL,
+				CABundle:                                caBundle,
+				ClusterDNSAddresses:                     clusterDNSAddresses,
+				ClusterDomain:                           clusterDomain,
+				Images:                                  images,
+				KubeletConfig:                           kubeletConfig,
+				MachineTypes:                            machineTypes,
+				SSHPublicKeys:                           sshPublicKeys,
+				ValitailEnabled:                         valitailEnabled,
+				OpenTelemetryCollectorLogShipperEnabled: openTelemetryCollectorLogShipperEnabled,
 			}
 
 			poolHashesSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "worker-pools-operatingsystemconfig-hashes",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"persist": "true",
-					},
+				Name:      "worker-pools-operatingsystemconfig-hashes",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"persist": "true",
 				},
 				Type: corev1.SecretTypeOpaque,
 				Data: map[string][]byte{
@@ -531,23 +521,19 @@ var _ = Describe("OperatingSystemConfig", func() {
 			Context("In-place update", func() {
 				BeforeEach(func() {
 					values = &Values{
-						Namespace:         namespace,
-						Workers:           inPlaceUpdateWorkers,
-						KubernetesVersion: kubernetesVersion,
-						InitValues: InitValues{
-							APIServerURL: apiServerURL,
-						},
-						OriginalValues: OriginalValues{
-							CABundle:                                caBundle,
-							ClusterDNSAddresses:                     clusterDNSAddresses,
-							ClusterDomain:                           clusterDomain,
-							Images:                                  images,
-							KubeletConfig:                           kubeletConfig,
-							MachineTypes:                            machineTypes,
-							SSHPublicKeys:                           sshPublicKeys,
-							ValitailEnabled:                         valitailEnabled,
-							OpenTelemetryCollectorLogShipperEnabled: openTelemetryCollectorLogShipperEnabled,
-						},
+						Namespace:                               namespace,
+						Workers:                                 inPlaceUpdateWorkers,
+						KubernetesVersion:                       kubernetesVersion,
+						APIServerURL:                            apiServerURL,
+						CABundle:                                caBundle,
+						ClusterDNSAddresses:                     clusterDNSAddresses,
+						ClusterDomain:                           clusterDomain,
+						Images:                                  images,
+						KubeletConfig:                           kubeletConfig,
+						MachineTypes:                            machineTypes,
+						SSHPublicKeys:                           sshPublicKeys,
+						ValitailEnabled:                         valitailEnabled,
+						OpenTelemetryCollectorLogShipperEnabled: openTelemetryCollectorLogShipperEnabled,
 						CredentialsRotationStatus: &gardencorev1beta1.ShootCredentialsRotation{
 							CertificateAuthorities: &gardencorev1beta1.CARotation{
 								LastInitiationTime: globalLastInitiationTime,
@@ -849,10 +835,8 @@ var _ = Describe("OperatingSystemConfig", func() {
 
 					// create cloud-config secret
 					ccSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "cc-" + expected[i].Name,
-							Namespace: expected[i].Name,
-						},
+						Name:      "cc-" + expected[i].Name,
+						Namespace: expected[i].Name,
 						Data: map[string][]byte{
 							"cloud_config": []byte("foobar-" + expected[i].Name),
 						},
@@ -900,10 +884,8 @@ var _ = Describe("OperatingSystemConfig", func() {
 
 					// create cloud-config secret
 					ccSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "cc-" + expected[i].Name,
-							Namespace: expected[i].Name,
-						},
+						Name:      "cc-" + expected[i].Name,
+						Namespace: expected[i].Name,
 						Data: map[string][]byte{
 							"cloud_config": []byte("foobar-" + expected[i].Name),
 						},
@@ -985,10 +967,8 @@ var _ = Describe("OperatingSystemConfig", func() {
 
 					// create cloud-config secret
 					ccSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "cc-" + expected[i].Name,
-							Namespace: expected[i].Name,
-						},
+						Name:      "cc-" + expected[i].Name,
+						Namespace: expected[i].Name,
 						Data: map[string][]byte{
 							"cloud_config": []byte("foobar-" + expected[i].Name),
 						},
@@ -1042,13 +1022,11 @@ var _ = Describe("OperatingSystemConfig", func() {
 				)()
 
 				expectedOSC := extensionsv1alpha1.OperatingSystemConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "osc1",
-						Namespace: namespace,
-						Annotations: map[string]string{
-							v1beta1constants.ConfirmationDeletion: "true",
-							v1beta1constants.GardenerTimestamp:    now.UTC().Format(time.RFC3339Nano),
-						},
+					Name:      "osc1",
+					Namespace: namespace,
+					Annotations: map[string]string{
+						v1beta1constants.ConfirmationDeletion: "true",
+						v1beta1constants.GardenerTimestamp:    now.UTC().Format(time.RFC3339Nano),
 					},
 				}
 
@@ -1235,9 +1213,7 @@ var _ = Describe("OperatingSystemConfig", func() {
 						LastInitiationTime: &lastSAKeyRotationInitiation,
 					},
 				},
-				OriginalValues: OriginalValues{
-					NodeLocalDNSEnabled: false,
-				},
+				NodeLocalDNSEnabled: false,
 			}
 			kubeletConfig = &gardencorev1beta1.KubeletConfig{
 				KubeReserved: &gardencorev1beta1.KubeletConfigReserved{

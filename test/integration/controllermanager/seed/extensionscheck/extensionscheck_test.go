@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -29,10 +28,8 @@ var _ = Describe("Seed ExtensionsCheck controller tests", func() {
 
 		By("Create Seed")
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -93,10 +90,8 @@ var _ = Describe("Seed ExtensionsCheck controller tests", func() {
 		}).Should(Succeed())
 
 		ci1 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "foo-1-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "foo-1-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				SeedRef: &corev1.ObjectReference{
 					Name: seed.Name,

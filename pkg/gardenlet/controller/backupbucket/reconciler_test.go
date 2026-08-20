@@ -13,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,19 +57,15 @@ var _ = Describe("Controller", func() {
 
 	BeforeEach(func() {
 		gardenSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-secret",
-				Namespace: gardenNamespaceName,
-			},
+			Name:      "test-secret",
+			Namespace: gardenNamespaceName,
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
 		}
 		workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-workload-identity",
-				Namespace: gardenNamespaceName,
-			},
+			Name:      "test-workload-identity",
+			Namespace: gardenNamespaceName,
 			Spec: securityv1alpha1.WorkloadIdentitySpec{
 				Audiences: []string{"test"},
 				TargetSystem: securityv1alpha1.TargetSystem{
@@ -79,10 +74,8 @@ var _ = Describe("Controller", func() {
 			},
 		}
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       "foo",
-				Generation: 1,
-			},
+			Name:       "foo",
+			Generation: 1,
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				Provider: gardencorev1beta1.BackupBucketProvider{
 					Type:   "provider-type",
@@ -128,16 +121,12 @@ var _ = Describe("Controller", func() {
 
 		now = fakeClock.Now().UTC()
 		extensionSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      generateBackupBucketSecretName(backupBucket.Name),
-				Namespace: gardenNamespaceName,
-			},
+			Name:      generateBackupBucketSecretName(backupBucket.Name),
+			Namespace: gardenNamespaceName,
 		}
 
 		extensionBackupBucket = &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupBucket.Name,
-			},
+			Name: backupBucket.Name,
 			Spec: extensionsv1alpha1.BackupBucketSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           backupBucket.Spec.Provider.Type,
@@ -160,10 +149,8 @@ var _ = Describe("Controller", func() {
 		}
 
 		request = reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Name:      backupBucket.Name,
-				Namespace: backupBucket.Namespace,
-			},
+			Name:      backupBucket.Name,
+			Namespace: backupBucket.Namespace,
 		}
 	})
 
@@ -176,7 +163,7 @@ var _ = Describe("Controller", func() {
 				Name:       "non-existing",
 			}
 			Expect(gardenClient.Create(ctx, backupBucket)).To(Succeed())
-			gardenSecret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}}
+			gardenSecret := corev1.Secret{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}
 			Expect(gardenClient.Get(ctx, client.ObjectKeyFromObject(&gardenSecret), &gardenSecret)).To(BeNotFoundError())
 
 			result, err := reconciler.Reconcile(ctx, request)
@@ -193,7 +180,7 @@ var _ = Describe("Controller", func() {
 				Name:       "backup-cm",
 			}
 			Expect(gardenClient.Create(ctx, backupBucket)).To(Succeed())
-			gardenConfigMap := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}}
+			gardenConfigMap := corev1.ConfigMap{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}
 			Expect(gardenClient.Create(ctx, &gardenConfigMap)).To(Succeed())
 
 			result, err := reconciler.Reconcile(ctx, request)
@@ -230,11 +217,9 @@ var _ = Describe("Controller", func() {
 
 			Expect(seedClient.Get(ctx, client.ObjectKeyFromObject(extensionBackupBucket), extensionBackupBucket)).To(Succeed())
 			Expect(extensionBackupBucket.Spec).To(Equal(extensionsv1alpha1.BackupBucketSpec{
-				DefaultSpec: extensionsv1alpha1.DefaultSpec{
-					Type:           backupBucket.Spec.Provider.Type,
-					ProviderConfig: backupBucket.Spec.ProviderConfig,
-				},
-				Region: backupBucket.Spec.Provider.Region,
+				Type:           backupBucket.Spec.Provider.Type,
+				ProviderConfig: backupBucket.Spec.ProviderConfig,
+				Region:         backupBucket.Spec.Provider.Region,
 				SecretRef: corev1.SecretReference{
 					Name:      extensionSecret.Name,
 					Namespace: extensionSecret.Namespace,
@@ -380,11 +365,9 @@ var _ = Describe("Controller", func() {
 
 			Expect(seedClient.Get(ctx, client.ObjectKeyFromObject(extensionBackupBucket), extensionBackupBucket)).To(Succeed())
 			Expect(extensionBackupBucket.Spec).To(Equal(extensionsv1alpha1.BackupBucketSpec{
-				DefaultSpec: extensionsv1alpha1.DefaultSpec{
-					Type:           backupBucket.Spec.Provider.Type,
-					ProviderConfig: backupBucket.Spec.ProviderConfig,
-				},
-				Region: backupBucket.Spec.Provider.Region,
+				Type:           backupBucket.Spec.Provider.Type,
+				ProviderConfig: backupBucket.Spec.ProviderConfig,
+				Region:         backupBucket.Spec.Provider.Region,
 				SecretRef: corev1.SecretReference{
 					Name:      extensionSecret.Name,
 					Namespace: extensionSecret.Namespace,

@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -63,13 +62,13 @@ var _ = Describe("Mutator", func() {
 		})
 
 		It("Should ignore secrets other than cloudprovider", func() {
-			newSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "test"}}
+			newSecret = &corev1.Secret{Name: "test"}
 			err := mutator.Mutate(context.TODO(), newSecret, old)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("Should mutate cloudprovider secret", func() {
-			newSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.SecretNameCloudProvider}}
+			newSecret = &corev1.Secret{Name: v1beta1constants.SecretNameCloudProvider}
 
 			ensurer.EXPECT().EnsureCloudProviderSecret(context.TODO(), gomock.Any(), newSecret, old)
 			err := mutator.Mutate(context.TODO(), newSecret, old)

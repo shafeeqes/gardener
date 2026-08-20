@@ -28,12 +28,10 @@ const (
 
 func newDefaultLivenessProbe() *corev1.Probe {
 	return &corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/health-check",
-				Port:   intstr.FromString(metricsPortName),
-				Scheme: corev1.URISchemeHTTP,
-			},
+		HTTPGet: &corev1.HTTPGetAction{
+			Path:   "/health-check",
+			Port:   intstr.FromString(metricsPortName),
+			Scheme: corev1.URISchemeHTTP,
 		},
 		// Typically, the short-term impact of losing VPA is low
 		// So, we can afford relaxed liveness timing and avoid unnecessary restarts aggravating high load situations
@@ -216,22 +214,18 @@ func (v *vpa) reconcileGeneralMutatingWebhookConfiguration(mutatingWebhookConfig
 		TimeoutSeconds:          new(int32(10)),
 		Rules: []admissionregistrationv1.RuleWithOperations{
 			{
-				Rule: admissionregistrationv1.Rule{
-					APIGroups:   []string{""},
-					APIVersions: []string{"v1"},
-					Resources:   []string{"pods"},
-					Scope:       &scope,
-				},
-				Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+				APIGroups:   []string{""},
+				APIVersions: []string{"v1"},
+				Resources:   []string{"pods"},
+				Scope:       &scope,
+				Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 			},
 			{
-				Rule: admissionregistrationv1.Rule{
-					APIGroups:   []string{"autoscaling.k8s.io"},
-					APIVersions: []string{"*"},
-					Resources:   []string{"verticalpodautoscalers"},
-					Scope:       &scope,
-				},
-				Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+				APIGroups:   []string{"autoscaling.k8s.io"},
+				APIVersions: []string{"*"},
+				Resources:   []string{"verticalpodautoscalers"},
+				Scope:       &scope,
+				Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 			},
 		},
 	}}

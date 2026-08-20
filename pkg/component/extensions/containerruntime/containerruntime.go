@@ -258,10 +258,8 @@ func (c *containerRuntime) forEachContainerRuntime(fn func(ctx context.Context, 
 
 func (c *containerRuntime) emptyContainerRuntimeExtension(name string) *extensionsv1alpha1.ContainerRuntime {
 	return &extensionsv1alpha1.ContainerRuntime{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: c.values.Namespace,
-		},
+		Name:      name,
+		Namespace: c.values.Namespace,
 	}
 }
 

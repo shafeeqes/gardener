@@ -81,10 +81,8 @@ func New(
 		SSHDial:             sshutils.Dial,
 
 		bastion: &extensionsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -106,9 +104,7 @@ func (b *Bastion) Deploy(ctx context.Context) error {
 		metav1.SetMetaDataAnnotation(&b.bastion.ObjectMeta, v1beta1constants.GardenerTimestamp, b.Clock.Now().UTC().Format(time.RFC3339Nano))
 
 		b.bastion.Spec = extensionsv1alpha1.BastionSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type: b.Values.Provider,
-			},
+			Type:     b.Values.Provider,
 			UserData: userDataForBastion(b.sshKeypairSecret.Data[secretsutils.DataKeySSHAuthorizedKeys]),
 			Ingress:  b.ingressPolicies(),
 		}

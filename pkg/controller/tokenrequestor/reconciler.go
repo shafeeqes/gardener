@@ -293,10 +293,8 @@ func (r *Reconciler) getServiceAccountFromAnnotations(annotations map[string]str
 	}
 
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      annotations[resourcesv1alpha1.ServiceAccountName],
-			Namespace: namespace,
-		},
+		Name:      annotations[resourcesv1alpha1.ServiceAccountName],
+		Namespace: namespace,
 	}
 }
 
@@ -329,10 +327,8 @@ func getTargetSecretFromAnnotations(annotations map[string]string) *corev1.Secre
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 	}
 }
 

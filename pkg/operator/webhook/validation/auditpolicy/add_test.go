@@ -139,13 +139,9 @@ rules:
 		request = admission.Request{}
 
 		garden = &operatorv1alpha1.Garden{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: operatorv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "Garden",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: gardenName,
-			},
+			APIVersion: operatorv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "Garden",
+			Name:       gardenName,
 			Spec: operatorv1alpha1.GardenSpec{
 				VirtualCluster: operatorv1alpha1.VirtualCluster{
 					Gardener: operatorv1alpha1.Gardener{
@@ -178,14 +174,10 @@ rules:
 		}
 
 		cm = &corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      cmName,
-				Namespace: gardenNs,
-			},
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+			Name:       cmName,
+			Namespace:  gardenNs,
 			Data: map[string]string{
 				"policy": validAuditPolicy,
 			},
@@ -271,8 +263,8 @@ rules:
 			It("references a valid auditPolicy for Gardener APIServer (CREATE)", func() {
 				garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, true, statusCodeAllowed, "all referenced configMaps are valid", "")
 			})
@@ -280,16 +272,16 @@ rules:
 			It("references a valid auditPolicy for KubeAPIServer (CREATE)", func() {
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, true, statusCodeAllowed, "all referenced configMaps are valid", "")
 			})
 
 			It("references a valid auditPolicy for both Gardener APIServer and KubeAPIServer (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, true, statusCodeAllowed, "all referenced configMaps are valid", "")
 			})
@@ -302,8 +294,8 @@ rules:
 
 			It("auditPolicy name was added for Gardener APIServer (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				apiServerConfig := garden.Spec.VirtualCluster.Gardener.APIServer.DeepCopy()
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
@@ -315,8 +307,8 @@ rules:
 
 			It("auditPolicy name was added for KubeAPIServer (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				kubeAPIServerConfig := garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer.DeepCopy()
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
@@ -329,8 +321,8 @@ rules:
 			It("referenced auditPolicy name was changed for Gardener APIServer (UPDATE)", func() {
 				garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmNameOther, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmNameOther, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				newGarden := garden.DeepCopy()
 				newGarden.Spec.VirtualCluster.Gardener.APIServer.AuditConfig.AuditPolicy.ConfigMapRef.Name = cmNameOther
@@ -340,8 +332,8 @@ rules:
 			It("referenced auditPolicy name was changed for KubeAPIServer (UPDATE)", func() {
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmNameOther, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmNameOther, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				newGarden := garden.DeepCopy()
 				newGarden.Spec.VirtualCluster.Kubernetes.KubeAPIServer.AuditConfig.AuditPolicy.ConfigMapRef.Name = cmNameOther
@@ -408,8 +400,8 @@ rules:
 			It("references configmap without a policy key for Gardener APIServer", func() {
 				garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       nil,
+					Name: cmName, Namespace: gardenNs,
+					Data: nil,
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "error getting ConfigMap garden/fake-cm-name: missing audit policy key in policy ConfigMap data", "")
 			})
@@ -417,8 +409,8 @@ rules:
 			It("references configmap without a policy key for KubeAPIServer", func() {
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       nil,
+					Name: cmName, Namespace: gardenNs,
+					Data: nil,
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "error getting ConfigMap garden/fake-cm-name: missing audit policy key in policy ConfigMap data", "")
 			})
@@ -426,8 +418,8 @@ rules:
 			It("references audit policy which breaks validation rules for Gardener APIServer", func() {
 				garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": invalidAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": invalidAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "Unsupported value: \"FakeLevel\"", "")
 			})
@@ -435,8 +427,8 @@ rules:
 			It("references audit policy which breaks validation rules for KubeAPIServer", func() {
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": invalidAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": invalidAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "Unsupported value: \"FakeLevel\"", "")
 			})
@@ -444,8 +436,8 @@ rules:
 			It("references audit policy with invalid structure for Gardener APIServer", func() {
 				garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": missingKeyAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": missingKeyAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "did not find expected key", "")
 			})
@@ -453,8 +445,8 @@ rules:
 			It("references audit policy with invalid structure for KubeAPIServer", func() {
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": missingKeyAuditPolicy},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": missingKeyAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "did not find expected key", "")
 			})
@@ -462,8 +454,8 @@ rules:
 			It("references a deprecated auditPolicy/v1alpha1 for Gardener APIServer", func() {
 				garden.Spec.VirtualCluster.Kubernetes.KubeAPIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicyV1alpha1},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicyV1alpha1},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "no kind \"Policy\" is registered for version \"audit.k8s.io/v1alpha1\"", "")
 			})
@@ -471,8 +463,8 @@ rules:
 			It("references a deprecated auditPolicy/v1alpha1 for KubeAPIServer", func() {
 				garden.Spec.VirtualCluster.Gardener.APIServer = nil
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: gardenNs},
-					Data:       map[string]string{"policy": validAuditPolicyV1alpha1},
+					Name: cmName, Namespace: gardenNs,
+					Data: map[string]string{"policy": validAuditPolicyV1alpha1},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, garden, false, statusCodeInvalid, "no kind \"Policy\" is registered for version \"audit.k8s.io/v1alpha1\"", "")
 			})

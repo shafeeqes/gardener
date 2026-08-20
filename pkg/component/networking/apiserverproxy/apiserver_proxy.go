@@ -219,12 +219,10 @@ func (a *apiserverProxy) computeResourcesData() (map[string][]byte, error) {
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Labels:    getDefaultLabels(),
-			Namespace: metav1.NamespaceSystem,
-		},
-		Data: map[string]string{dataKeyConfig: envoyYAML.String()},
+		Name:      configMapName,
+		Labels:    getDefaultLabels(),
+		Namespace: metav1.NamespaceSystem,
+		Data:      map[string]string{dataKeyConfig: envoyYAML.String()},
 	}
 	utilruntime.Must(kubernetesutils.MakeUnique(configMap))
 
@@ -232,19 +230,15 @@ func (a *apiserverProxy) computeResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getDefaultLabels(),
-			},
+			Name:                         name,
+			Namespace:                    metav1.NamespaceSystem,
+			Labels:                       getDefaultLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getDefaultLabels(),
-			},
+			Name:      name,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    getDefaultLabels(),
 			Spec: corev1.ServiceSpec{
 				Type:      corev1.ServiceTypeClusterIP,
 				ClusterIP: "None",
@@ -260,16 +254,14 @@ func (a *apiserverProxy) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		daemonSet = &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: metav1.NamespaceSystem,
-				Labels: utils.MergeStringMaps(
-					getDefaultLabels(),
-					map[string]string{
-						v1beta1constants.LabelNodeCriticalComponent: "true",
-					},
-				),
-			},
+			Name:      name,
+			Namespace: metav1.NamespaceSystem,
+			Labels: utils.MergeStringMaps(
+				getDefaultLabels(),
+				map[string]string{
+					v1beta1constants.LabelNodeCriticalComponent: "true",
+				},
+			),
 			Spec: appsv1.DaemonSetSpec{
 				UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
 					Type: appsv1.RollingUpdateDaemonSetStrategyType,
@@ -382,11 +374,9 @@ func (a *apiserverProxy) computeResourcesData() (map[string][]byte, error) {
 									RunAsUser: new(int64(0)),
 								},
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/ready",
-											Port: intstr.FromInt32(adminPort),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/ready",
+										Port: intstr.FromInt32(adminPort),
 									},
 									InitialDelaySeconds: 1,
 									PeriodSeconds:       2,
@@ -394,11 +384,9 @@ func (a *apiserverProxy) computeResourcesData() (map[string][]byte, error) {
 									TimeoutSeconds:      1,
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/ready",
-											Port: intstr.FromInt32(adminPort),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/ready",
+										Port: intstr.FromInt32(adminPort),
 									},
 									InitialDelaySeconds: 1,
 									PeriodSeconds:       10,
@@ -428,19 +416,13 @@ func (a *apiserverProxy) computeResourcesData() (map[string][]byte, error) {
 						Volumes: []corev1.Volume{
 							{
 								Name: volumeNameConfig,
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMap.Name,
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: configMap.Name,
 								},
 							},
 							{
-								Name: volumeNameAdminUDS,
-								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{},
-								},
+								Name:     volumeNameAdminUDS,
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
 						},
 					},

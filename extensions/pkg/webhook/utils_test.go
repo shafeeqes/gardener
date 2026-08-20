@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpaautoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 
 	"github.com/gardener/gardener/extensions/pkg/webhook"
@@ -181,26 +180,20 @@ var _ = Describe("Utils", func() {
 			BeforeEach(func() {
 				volumes = []corev1.Volume{
 					{
-						Name: "volume1",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{Medium: ""},
-						},
+						Name:     "volume1",
+						EmptyDir: &corev1.EmptyDirVolumeSource{Medium: ""},
 					},
 					{
-						Name: "volume2",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
+						Name:     "volume2",
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 				}
 			})
 
 			It("should add a new Volume if not present", func() {
 				newVolume := corev1.Volume{
-					Name: "volume3",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
+					Name:     "volume3",
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
 				}
 				result := webhook.EnsureVolumeWithName(volumes, newVolume)
 				Expect(result).To(Equal(append(volumes, newVolume)))
@@ -208,24 +201,18 @@ var _ = Describe("Utils", func() {
 
 			It("should replace the existing Volume if it's not identical", func() {
 				existingVolume := corev1.Volume{
-					Name: "volume1",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{Medium: "Memory"},
-					},
+					Name:     "volume1",
+					EmptyDir: &corev1.EmptyDirVolumeSource{Medium: "Memory"},
 				}
 				result := webhook.EnsureVolumeWithName(volumes, existingVolume)
 				Expect(result).To(Equal([]corev1.Volume{
 					{
-						Name: "volume1",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{Medium: "Memory"},
-						},
+						Name:     "volume1",
+						EmptyDir: &corev1.EmptyDirVolumeSource{Medium: "Memory"},
 					},
 					{
-						Name: "volume2",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
+						Name:     "volume2",
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 				}))
 			})
@@ -349,9 +336,7 @@ var _ = Describe("Utils", func() {
 			BeforeEach(func() {
 				pvcs = []corev1.PersistentVolumeClaim{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc1",
-						},
+						Name: "pvc1",
 						Spec: corev1.PersistentVolumeClaimSpec{
 							Resources: corev1.VolumeResourceRequirements{
 								Requests: map[corev1.ResourceName]resource.Quantity{
@@ -361,9 +346,7 @@ var _ = Describe("Utils", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc2",
-						},
+						Name: "pvc2",
 						Spec: corev1.PersistentVolumeClaimSpec{
 							Resources: corev1.VolumeResourceRequirements{
 								Requests: map[corev1.ResourceName]resource.Quantity{
@@ -377,9 +360,7 @@ var _ = Describe("Utils", func() {
 
 			It("should add a new PersistentVolumeClaim if not present", func() {
 				newPVC := corev1.PersistentVolumeClaim{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pvc3",
-					},
+					Name: "pvc3",
 					Spec: corev1.PersistentVolumeClaimSpec{
 						Resources: corev1.VolumeResourceRequirements{
 							Requests: map[corev1.ResourceName]resource.Quantity{
@@ -394,9 +375,7 @@ var _ = Describe("Utils", func() {
 
 			It("should replace the existing PersistentVolumeClaim if it's not identical", func() {
 				existingPVC := corev1.PersistentVolumeClaim{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pvc1",
-					},
+					Name: "pvc1",
 					Spec: corev1.PersistentVolumeClaimSpec{
 						Resources: corev1.VolumeResourceRequirements{
 							Requests: map[corev1.ResourceName]resource.Quantity{
@@ -408,9 +387,7 @@ var _ = Describe("Utils", func() {
 				result := webhook.EnsurePVCWithName(pvcs, existingPVC)
 				Expect(result).To(Equal([]corev1.PersistentVolumeClaim{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc1",
-						},
+						Name: "pvc1",
 						Spec: corev1.PersistentVolumeClaimSpec{
 							Resources: corev1.VolumeResourceRequirements{
 								Requests: map[corev1.ResourceName]resource.Quantity{
@@ -420,9 +397,7 @@ var _ = Describe("Utils", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc2",
-						},
+						Name: "pvc2",
 						Spec: corev1.PersistentVolumeClaimSpec{
 							Resources: corev1.VolumeResourceRequirements{
 								Requests: map[corev1.ResourceName]resource.Quantity{
@@ -734,22 +709,16 @@ var _ = Describe("Utils", func() {
 			BeforeEach(func() {
 				volumes = []corev1.Volume{
 					{
-						Name: "volume1",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
+						Name:     "volume1",
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 					{
-						Name: "volume2",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
+						Name:     "volume2",
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 					{
-						Name: "volume1",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
+						Name:     "volume1",
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 				}
 			})
@@ -757,10 +726,8 @@ var _ = Describe("Utils", func() {
 			It("should delete all volumes with a given name", func() {
 				result := webhook.EnsureNoVolumeWithName(volumes, "volume1")
 				Expect(result).To(Equal([]corev1.Volume{{
-					Name: "volume2",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
+					Name:     "volume2",
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
 				}}))
 			})
 		})
@@ -788,26 +755,20 @@ var _ = Describe("Utils", func() {
 			BeforeEach(func() {
 				pvcs = []corev1.PersistentVolumeClaim{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc1",
-						},
+						Name: "pvc1",
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc2",
-						},
+						Name: "pvc2",
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "pvc1",
-						},
+						Name: "pvc1",
 					},
 				}
 			})
 
 			It("should delete all Persistent Volume Claims with a given name", func() {
 				result := webhook.EnsureNoPVCWithName(pvcs, "pvc1")
-				Expect(result).To(Equal([]corev1.PersistentVolumeClaim{{ObjectMeta: metav1.ObjectMeta{Name: "pvc2"}}}))
+				Expect(result).To(Equal([]corev1.PersistentVolumeClaim{{Name: "pvc2"}}))
 			})
 		})
 	})

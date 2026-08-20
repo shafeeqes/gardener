@@ -177,10 +177,8 @@ var _ = Describe("CoreDNS", func() {
 
 			shootClient := botanist.ShootClientSet.Client()
 			Expect(shootClient.Create(ctx, &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "coredns",
-					Namespace: "kube-system",
-				},
+				Name:      "coredns",
+				Namespace: "kube-system",
 				Spec: appsv1.DeploymentSpec{
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{

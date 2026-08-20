@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	. "github.com/gardener/gardener/pkg/api/seedmanagement/v1alpha1/helper"
@@ -30,11 +29,9 @@ var _ = Describe("Helper", func() {
 				},
 			}
 			config = &gardenletconfigv1alpha1.GardenletConfiguration{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-					Kind:       "GardenletConfiguration",
-				},
-				LogLevel: "1234",
+				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "GardenletConfiguration",
+				LogLevel:   "1234",
 			}
 		)
 
@@ -83,10 +80,8 @@ var _ = Describe("Helper", func() {
 				seedTemplate, gardenletConfig, err := ExtractSeedTemplateAndGardenletConfig(managedSeed.Name, &managedSeed.Spec.Gardenlet.Config)
 				Expect(seedTemplate).To(BeNil())
 				Expect(gardenletConfig).To(Equal(&gardenletconfigv1alpha1.GardenletConfiguration{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-						Kind:       "GardenletConfiguration",
-					},
+					APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+					Kind:       "GardenletConfiguration",
 				}))
 				Expect(err).NotTo(HaveOccurred())
 			})

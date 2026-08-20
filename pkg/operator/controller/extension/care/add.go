@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -93,7 +92,7 @@ func (r *Reconciler) MapManagedResourceToExtension(_ context.Context, obj client
 	}
 
 	if extensionName, ok := operator.ExtensionForManagedResourceName(managedResource.Name); ok {
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: extensionName}}}
+		return []reconcile.Request{{Name: extensionName}}
 	}
 
 	return nil

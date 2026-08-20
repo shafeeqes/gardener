@@ -80,9 +80,7 @@ var _ = Describe("validator", func() {
 			}
 			validMachineImageVersions = []gardencorev1beta1.MachineImageVersion{
 				{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-						Version: "0.0.1",
-					},
+					Version: "0.0.1",
 					CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 						{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 						{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -110,17 +108,13 @@ var _ = Describe("validator", func() {
 			seedNodesCIDR    = "10.240.0.0/16"
 
 			projectBase = gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: projectName,
-				},
+				Name: projectName,
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: &namespaceName,
 				},
 			}
 			cloudProfileBase = gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "profile",
-				},
+				Name: "profile",
 				Spec: gardencorev1beta1.CloudProfileSpec{
 					MachineCapabilities: capabilityDefinitions,
 					Type:                "unknown",
@@ -210,10 +204,8 @@ var _ = Describe("validator", func() {
 				},
 			}
 			namespacedCloudProfileBase = gardencorev1beta1.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      profileName,
-					Namespace: namespaceName,
-				},
+				Name:      profileName,
+				Namespace: namespaceName,
 				Spec: gardencorev1beta1.NamespacedCloudProfileSpec{Parent: gardencorev1beta1.CloudProfileReference{
 					Kind: "CloudProfile",
 					Name: cloudProfileBase.Name,
@@ -223,9 +215,7 @@ var _ = Describe("validator", func() {
 				},
 			}
 			seedBase = gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seedName,
-				},
+				Name: seedName,
 				Spec: gardencorev1beta1.SeedSpec{
 					Backup: &gardencorev1beta1.Backup{},
 					Networks: gardencorev1beta1.SeedNetworks{
@@ -237,28 +227,22 @@ var _ = Describe("validator", func() {
 				},
 			}
 			secretBindingBase = gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-secret",
-					Namespace: namespaceName,
-				},
+				Name:      "my-secret",
+				Namespace: namespaceName,
 				Provider: &gardencorev1beta1.SecretBindingProvider{
 					Type: "unknown",
 				},
 			}
 			credentialsBindingBase = securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-secret",
-					Namespace: namespaceName,
-				},
+				Name:      "my-secret",
+				Namespace: namespaceName,
 				Provider: securityv1alpha1.CredentialsBindingProvider{
 					Type: "unknown",
 				},
 			}
 			shootBase = core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot",
-					Namespace: namespaceName,
-				},
+				Name:      "shoot",
+				Namespace: namespaceName,
 				Spec: core.ShootSpec{
 					CloudProfileName:       new("profile"),
 					Region:                 "europe",
@@ -322,10 +306,8 @@ var _ = Describe("validator", func() {
 			}
 
 			secret = corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-1",
-					Namespace: namespaceName,
-				},
+				Name:      "secret-1",
+				Namespace: namespaceName,
 			}
 		)
 
@@ -672,10 +654,8 @@ var _ = Describe("validator", func() {
 			It("should allow setting the seedSelector on create", func() {
 				shoot.Spec.SeedName = nil
 				shoot.Spec.SeedSelector = &core.SeedSelector{
-					LabelSelector: metav1.LabelSelector{
-						MatchLabels: map[string]string{
-							"provider": "local",
-						},
+					MatchLabels: map[string]string{
+						"provider": "local",
 					},
 					ProviderTypes: []string{"local"},
 				}
@@ -690,10 +670,8 @@ var _ = Describe("validator", func() {
 				shoot.Spec.SeedName = nil
 				oldShoot := shoot.DeepCopy()
 				shoot.Spec.SeedSelector = &core.SeedSelector{
-					LabelSelector: metav1.LabelSelector{
-						MatchLabels: map[string]string{
-							"provider": "local",
-						},
+					MatchLabels: map[string]string{
+						"provider": "local",
 					},
 				}
 
@@ -706,13 +684,11 @@ var _ = Describe("validator", func() {
 			It("should allow changing a matching seedSelector on update when seed is assigned", func() {
 				oldShoot := shoot.DeepCopy()
 				shoot.Spec.SeedSelector = &core.SeedSelector{
-					LabelSelector: metav1.LabelSelector{
-						MatchLabels: map[string]string{
-							"provider": "local",
-						},
-						MatchExpressions: []metav1.LabelSelectorRequirement{
-							{Key: "purpose", Operator: metav1.LabelSelectorOpIn, Values: []string{"test"}},
-						},
+					MatchLabels: map[string]string{
+						"provider": "local",
+					},
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						{Key: "purpose", Operator: metav1.LabelSelectorOpIn, Values: []string{"test"}},
 					},
 				}
 
@@ -725,13 +701,11 @@ var _ = Describe("validator", func() {
 			It("should deny changing a seedSelector on update when the assigned seed does not match the new selector", func() {
 				oldShoot := shoot.DeepCopy()
 				shoot.Spec.SeedSelector = &core.SeedSelector{
-					LabelSelector: metav1.LabelSelector{
-						MatchLabels: map[string]string{
-							"provider": "local",
-						},
-						MatchExpressions: []metav1.LabelSelectorRequirement{
-							{Key: "purpose", Operator: metav1.LabelSelectorOpIn, Values: []string{"production"}},
-						},
+					MatchLabels: map[string]string{
+						"provider": "local",
+					},
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						{Key: "purpose", Operator: metav1.LabelSelectorOpIn, Values: []string{"production"}},
 					},
 				}
 
@@ -1098,7 +1072,7 @@ var _ = Describe("validator", func() {
 						{
 							Name: "gardenlinux",
 							Versions: []gardencorev1beta1.MachineImageVersion{
-								{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1592.1.0-dev"}},
+								{Version: "1592.1.0-dev"},
 							},
 						},
 					}
@@ -1560,7 +1534,7 @@ var _ = Describe("validator", func() {
 
 			It("should reject creation because shoot access restrictions are not supported in this region", func() {
 				shoot.Spec.SeedName = nil
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				attrs := admission.NewAttributesRecord(&shoot, nil, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Create, &metav1.UpdateOptions{}, false, userInfo)
 				err := admissionHandler.Validate(ctx, attrs, nil)
@@ -1573,7 +1547,7 @@ var _ = Describe("validator", func() {
 				cloudProfile.Spec.Regions[0].AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Update(&cloudProfile)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				attrs := admission.NewAttributesRecord(&shoot, nil, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Create, &metav1.UpdateOptions{}, false, userInfo)
 				err := admissionHandler.Validate(ctx, attrs, nil)
@@ -1589,7 +1563,7 @@ var _ = Describe("validator", func() {
 				seed.Spec.AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Update(&seed)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				attrs := admission.NewAttributesRecord(&shoot, nil, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Create, &metav1.UpdateOptions{}, false, userInfo)
 				err := admissionHandler.Validate(ctx, attrs, nil)
@@ -1598,7 +1572,7 @@ var _ = Describe("validator", func() {
 			})
 
 			It("should reject update because shoot access restrictions are not supported in this region", func() {
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				attrs := admission.NewAttributesRecord(&shoot, oldShoot, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Update, &metav1.UpdateOptions{}, false, nil)
 				err := admissionHandler.Validate(ctx, attrs, nil)
@@ -1611,7 +1585,7 @@ var _ = Describe("validator", func() {
 				cloudProfile.Spec.Regions[0].AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Update(&cloudProfile)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				attrs := admission.NewAttributesRecord(&shoot, oldShoot, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Update, &metav1.UpdateOptions{}, false, nil)
 				err := admissionHandler.Validate(ctx, attrs, nil)
@@ -1627,7 +1601,7 @@ var _ = Describe("validator", func() {
 				seed.Spec.AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Update(&seed)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				attrs := admission.NewAttributesRecord(&shoot, oldShoot, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Update, &metav1.UpdateOptions{}, false, nil)
 				err := admissionHandler.Validate(ctx, attrs, nil)
@@ -1647,7 +1621,7 @@ var _ = Describe("validator", func() {
 				newSeed.Spec.AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "bar"}}
 				Expect(coreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Add(newSeed)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 				oldShoot.Spec.AccessRestrictions = shoot.Spec.AccessRestrictions
 				shoot.Spec.SeedName = &newSeedName
 
@@ -1662,7 +1636,7 @@ var _ = Describe("validator", func() {
 				cloudProfile.Spec.Regions[0].AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Update(&cloudProfile)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Add(&shoot)).To(Succeed())
 
 				shoot.Spec.AccessRestrictions = nil
@@ -1675,7 +1649,7 @@ var _ = Describe("validator", func() {
 				seed.Spec.AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Update(&seed)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				oldShoot = shoot.DeepCopy()
 				attrs := admission.NewAttributesRecord(&shoot, oldShoot, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Delete, &metav1.UpdateOptions{}, false, nil)
@@ -1686,7 +1660,7 @@ var _ = Describe("validator", func() {
 				cloudProfile.Spec.Regions[0].AccessRestrictions = []gardencorev1beta1.AccessRestriction{{Name: "foo"}}
 				Expect(coreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Update(&cloudProfile)).To(Succeed())
 
-				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}}
+				shoot.Spec.AccessRestrictions = []core.AccessRestrictionWithOptions{{Name: "foo"}}
 
 				oldShoot = shoot.DeepCopy()
 				attrs := admission.NewAttributesRecord(&shoot, oldShoot, core.Kind("Shoot").WithVersion("version"), shoot.Namespace, shoot.Name, core.Resource("shoots").WithVersion("version"), "", admission.Delete, &metav1.UpdateOptions{}, false, nil)
@@ -1920,10 +1894,8 @@ var _ = Describe("validator", func() {
 			Context("cloud profile's seed selector", func() {
 				It("should reject shoot creation on seed when the cloud profile's seed selector is invalid", func() {
 					cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-						LabelSelector: metav1.LabelSelector{
-							MatchExpressions: []metav1.LabelSelectorRequirement{
-								{Key: "domain", Operator: "invalid-operator", Values: []string{"foo"}},
-							},
+						MatchExpressions: []metav1.LabelSelectorRequirement{
+							{Key: "domain", Operator: "invalid-operator", Values: []string{"foo"}},
 						},
 					}
 
@@ -1942,9 +1914,7 @@ var _ = Describe("validator", func() {
 
 				It("should allow shoot creation on seed that matches the cloud profile's seed selector", func() {
 					cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-						LabelSelector: metav1.LabelSelector{
-							MatchLabels: map[string]string{"domain": "foo"},
-						},
+						MatchLabels: map[string]string{"domain": "foo"},
 					}
 					seed.Labels = map[string]string{"domain": "foo"}
 
@@ -1962,9 +1932,7 @@ var _ = Describe("validator", func() {
 
 				It("should reject shoot creation on seed that does not match the cloud profile's seed selector", func() {
 					cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-						LabelSelector: metav1.LabelSelector{
-							MatchLabels: map[string]string{"domain": "foo"},
-						},
+						MatchLabels: map[string]string{"domain": "foo"},
 					}
 					seed.Labels = nil
 
@@ -2024,9 +1992,7 @@ var _ = Describe("validator", func() {
 
 				It("should allow updating the seedName to seed that matches the cloud profile's seed selector (w/ shoots/binding subresource)", func() {
 					cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-						LabelSelector: metav1.LabelSelector{
-							MatchLabels: map[string]string{"domain": "foo"},
-						},
+						MatchLabels: map[string]string{"domain": "foo"},
 					}
 					seed.Labels = map[string]string{"domain": "foo"}
 
@@ -2044,9 +2010,7 @@ var _ = Describe("validator", func() {
 
 				It("should reject updating the seedName to seed that does not match the cloud profile's seed selector (w/ shoots/binding subresource)", func() {
 					cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-						LabelSelector: metav1.LabelSelector{
-							MatchLabels: map[string]string{"domain": "foo"},
-						},
+						MatchLabels: map[string]string{"domain": "foo"},
 					}
 					seed.Labels = nil
 
@@ -2065,9 +2029,7 @@ var _ = Describe("validator", func() {
 
 				It("should allow updating the seedName to seed that matches one of the provider types in the cloud profile's seed selector (w/ shoots/binding subresource)", func() {
 					cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-						LabelSelector: metav1.LabelSelector{
-							MatchLabels: map[string]string{"domain": "foo"},
-						},
+						MatchLabels: map[string]string{"domain": "foo"},
 					}
 					seed.Labels = map[string]string{"domain": "foo"}
 
@@ -3318,19 +3280,15 @@ var _ = Describe("validator", func() {
 						Name: validMachineImageName,
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        previewVersion,
-									Classification: &classificationPreview,
-								},
+								Version:        previewVersion,
+								Classification: &classificationPreview,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: latestNonExpiredVersion,
-								},
+								Version: latestNonExpiredVersion,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{
 										Capabilities: gardencorev1beta1.Capabilities{
@@ -3347,38 +3305,30 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: latestNonExpiredVersionThatSupportsCapabilities,
-								},
+								Version: latestNonExpiredVersionThatSupportsCapabilities,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: nonExpiredVersion,
-								},
+								Version: nonExpiredVersion,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        expiringVersion,
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        expiringVersion,
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        expiredVersion,
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-								},
+								Version:        expiredVersion,
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3390,19 +3340,15 @@ var _ = Describe("validator", func() {
 						Name: imageName2,
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        previewVersion,
-									Classification: &classificationPreview,
-								},
+								Version:        previewVersion,
+								Classification: &classificationPreview,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: latestNonExpiredVersion,
-								},
+								Version: latestNonExpiredVersion,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{
 										Capabilities: gardencorev1beta1.Capabilities{
@@ -3419,38 +3365,30 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: latestNonExpiredVersionThatSupportsCapabilities,
-								},
+								Version: latestNonExpiredVersionThatSupportsCapabilities,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: nonExpiredVersion,
-								},
+								Version: nonExpiredVersion,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        expiringVersion,
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        expiringVersion,
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        expiredVersion,
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-								},
+								Version:        expiredVersion,
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3466,43 +3404,31 @@ var _ = Describe("validator", func() {
 							Name: validMachineImageName,
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        previewVersion,
-										Classification: &classificationPreview,
-									},
+									Version:        previewVersion,
+									Classification: &classificationPreview,
+									Architectures:  []string{"amd64", "arm64"},
+								},
+								{
+									Version:       latestNonExpiredVersion,
 									Architectures: []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersion,
-									},
+									Version:       nonExpiredVersion,
 									Architectures: []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: nonExpiredVersion,
-									},
+									Version:       latestNonExpiredVersionThatSupportsCapabilities,
 									Architectures: []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersionThatSupportsCapabilities,
-									},
-									Architectures: []string{"amd64", "arm64"},
+									Version:        expiringVersion,
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        expiringVersion,
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64", "arm64"},
-								},
-								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        expiredVersion,
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
-									Architectures: []string{"amd64", "arm64"},
+									Version:        expiredVersion,
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+									Architectures:  []string{"amd64", "arm64"},
 								},
 							},
 						},
@@ -3510,43 +3436,31 @@ var _ = Describe("validator", func() {
 							Name: imageName2,
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        previewVersion,
-										Classification: &classificationPreview,
-									},
+									Version:        previewVersion,
+									Classification: &classificationPreview,
+									Architectures:  []string{"amd64", "arm64"},
+								},
+								{
+									Version:       latestNonExpiredVersion,
 									Architectures: []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersion,
-									},
+									Version:       nonExpiredVersion,
 									Architectures: []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: nonExpiredVersion,
-									},
+									Version:       latestNonExpiredVersionThatSupportsCapabilities,
 									Architectures: []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersionThatSupportsCapabilities,
-									},
-									Architectures: []string{"amd64", "arm64"},
+									Version:        expiringVersion,
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64", "arm64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        expiringVersion,
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64", "arm64"},
-								},
-								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        expiredVersion,
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
-									Architectures: []string{"amd64", "arm64"},
+									Version:        expiredVersion,
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+									Architectures:  []string{"amd64", "arm64"},
 								},
 							},
 						},
@@ -3607,16 +3521,12 @@ var _ = Describe("validator", func() {
 							Name: validMachineImageName,
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: nonExpiredVersion,
-									},
+									Version: nonExpiredVersion,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 									}},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersionThatSupportsCapabilities,
-									},
+									Version: latestNonExpiredVersionThatSupportsCapabilities,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3630,15 +3540,11 @@ var _ = Describe("validator", func() {
 								Name: validMachineImageName,
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: nonExpiredVersion,
-										},
+										Version:       nonExpiredVersion,
 										Architectures: []string{"arm64"},
 									},
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: latestNonExpiredVersionThatSupportsCapabilities,
-										},
+										Version:       latestNonExpiredVersionThatSupportsCapabilities,
 										Architectures: []string{"amd64", "arm64"},
 									},
 								},
@@ -3665,17 +3571,13 @@ var _ = Describe("validator", func() {
 							Name: validMachineImageName,
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        expiredVersion,
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
+									Version:        expiredVersion,
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 									}},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersionThatSupportsCapabilities,
-									},
+									Version: latestNonExpiredVersionThatSupportsCapabilities,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3689,16 +3591,12 @@ var _ = Describe("validator", func() {
 								Name: validMachineImageName,
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version:        expiredVersion,
-											ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-										},
-										Architectures: []string{"arm64"},
+										Version:        expiredVersion,
+										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+										Architectures:  []string{"arm64"},
 									},
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: latestNonExpiredVersionThatSupportsCapabilities,
-										},
+										Version:       latestNonExpiredVersionThatSupportsCapabilities,
 										Architectures: []string{"amd64", "arm64"},
 									},
 								},
@@ -3725,9 +3623,7 @@ var _ = Describe("validator", func() {
 							Name: validMachineImageName,
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersion,
-									},
+									Version: latestNonExpiredVersion,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3737,9 +3633,7 @@ var _ = Describe("validator", func() {
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: nonExpiredVersion,
-									},
+									Version: nonExpiredVersion,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3749,9 +3643,7 @@ var _ = Describe("validator", func() {
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersionThatSupportsCapabilities,
-									},
+									Version: latestNonExpiredVersionThatSupportsCapabilities,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3767,27 +3659,21 @@ var _ = Describe("validator", func() {
 								Name: validMachineImageName,
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: latestNonExpiredVersion,
-										},
+										Version:       latestNonExpiredVersion,
 										Architectures: []string{"amd64", "arm64"},
 										InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 											Supported: false,
 										},
 									},
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: nonExpiredVersion,
-										},
+										Version:       nonExpiredVersion,
 										Architectures: []string{"amd64", "arm64"},
 										InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 											Supported: true,
 										},
 									},
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: latestNonExpiredVersionThatSupportsCapabilities,
-										},
+										Version:       latestNonExpiredVersionThatSupportsCapabilities,
 										Architectures: []string{"amd64", "arm64"},
 									},
 								},
@@ -3814,18 +3700,14 @@ var _ = Describe("validator", func() {
 							Name: validMachineImageName,
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        expiredVersion,
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
+									Version:        expiredVersion,
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: nonExpiredVersion,
-									},
+									Version: nonExpiredVersion,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3835,9 +3717,7 @@ var _ = Describe("validator", func() {
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: latestNonExpiredVersionThatSupportsCapabilities,
-									},
+									Version: latestNonExpiredVersionThatSupportsCapabilities,
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -3856,25 +3736,19 @@ var _ = Describe("validator", func() {
 								Name: validMachineImageName,
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version:        expiredVersion,
-											ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-										},
-										Architectures: []string{"arm64"},
+										Version:        expiredVersion,
+										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+										Architectures:  []string{"arm64"},
 									},
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: nonExpiredVersion,
-										},
+										Version:       nonExpiredVersion,
 										Architectures: []string{"amd64", "arm64"},
 										InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 											Supported: true,
 										},
 									},
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: latestNonExpiredVersionThatSupportsCapabilities,
-										},
+										Version:       latestNonExpiredVersionThatSupportsCapabilities,
 										Architectures: []string{"amd64", "arm64"},
 										InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 											Supported: true,
@@ -3899,9 +3773,7 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:                  "1.2.3",
 									KubeletVersionConstraint: new("< 1.26"),
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
@@ -3915,9 +3787,7 @@ var _ = Describe("validator", func() {
 								Name: "constraint-image-name",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: "1.2.3",
-										},
+										Version:                  "1.2.3",
 										KubeletVersionConstraint: new("< 1.26"),
 										Architectures:            []string{"amd64"},
 									},
@@ -3954,9 +3824,7 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:                  "1.2.3",
 									KubeletVersionConstraint: new(">= 1.26"),
 									CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 										{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
@@ -3972,9 +3840,7 @@ var _ = Describe("validator", func() {
 								Name: "constraint-image-name",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: "1.2.3",
-										},
+										Version:                  "1.2.3",
 										KubeletVersionConstraint: new(">= 1.26"),
 										Architectures:            []string{"amd64"},
 									},
@@ -4058,9 +3924,7 @@ var _ = Describe("validator", func() {
 							Name: "cr-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version: "1.2.3",
 									CRI: []gardencorev1beta1.CRI{
 										{
 											Name: gardencorev1beta1.CRINameContainerD,
@@ -4112,9 +3976,7 @@ var _ = Describe("validator", func() {
 							Name: "cr-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version: "1.2.3",
 									CRI: []gardencorev1beta1.CRI{
 										{
 											Name: gardencorev1beta1.CRINameContainerD,
@@ -4168,9 +4030,7 @@ var _ = Describe("validator", func() {
 							Name: "cr-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version: "1.2.3",
 									CRI: []gardencorev1beta1.CRI{
 										{
 											Name: gardencorev1beta1.CRINameContainerD,
@@ -4215,9 +4075,7 @@ var _ = Describe("validator", func() {
 							Name: "cr-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version: "1.2.3",
 									CRI: []gardencorev1beta1.CRI{
 										{
 											Name: gardencorev1beta1.CRINameContainerD,
@@ -4252,9 +4110,7 @@ var _ = Describe("validator", func() {
 							Name: "cr-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version: "1.2.3",
 									CRI: []gardencorev1beta1.CRI{
 										{
 											Name: gardencorev1beta1.CRINameContainerD,
@@ -4263,9 +4119,7 @@ var _ = Describe("validator", func() {
 									Architectures: []string{"amd64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "2.3.4",
-									},
+									Version:       "2.3.4",
 									Architectures: []string{"amd64"},
 								},
 							},
@@ -4295,9 +4149,7 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:                  "1.2.3",
 									KubeletVersionConstraint: new("< 1.26"),
 									Architectures:            []string{"amd64"},
 								},
@@ -4335,9 +4187,7 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:                  "1.2.3",
 									KubeletVersionConstraint: new(">= 1.26"),
 									Architectures:            []string{"amd64"},
 								},
@@ -4377,11 +4227,9 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.4",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.4",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+									Architectures:  []string{"amd64"},
 								},
 							},
 						},
@@ -4431,17 +4279,13 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.4",
-									},
+									Version:       "1.2.4",
 									Architectures: []string{"amd64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.3",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.3",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+									Architectures:  []string{"amd64"},
 								},
 							},
 						},
@@ -4489,16 +4333,12 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.4",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.4",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * -1000)},
+									Architectures:  []string{"amd64"},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:       "1.2.3",
 									Architectures: []string{"amd64"},
 								},
 							},
@@ -4545,10 +4385,8 @@ var _ = Describe("validator", func() {
 						Name: "constraint-image-name",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "1.2.5",
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        "1.2.5",
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4557,10 +4395,8 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "1.2.4",
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        "1.2.4",
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4570,9 +4406,7 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "1.2.3",
-								},
+								Version: "1.2.3",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4587,30 +4421,24 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.5",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.5",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported: false,
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.4",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.4",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported:           true,
 										MinVersionForUpdate: new("1.2.3"),
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:       "1.2.3",
 									Architectures: []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported: true,
@@ -4665,10 +4493,8 @@ var _ = Describe("validator", func() {
 						Name: "constraint-image-name",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "1.2.5",
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        "1.2.5",
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4678,10 +4504,8 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "1.2.4",
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        "1.2.4",
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4691,9 +4515,7 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "1.2.3",
-								},
+								Version: "1.2.3",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4711,31 +4533,25 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.5",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.5",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported:           true,
 										MinVersionForUpdate: new("1.2.4"),
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.4",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.4",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported:           true,
 										MinVersionForUpdate: new("1.2.2"),
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:       "1.2.3",
 									Architectures: []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported:           true,
@@ -4791,10 +4607,8 @@ var _ = Describe("validator", func() {
 						Name: "constraint-image-name",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "1.2.4",
-									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-								},
+								Version:        "1.2.4",
+								ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4804,9 +4618,7 @@ var _ = Describe("validator", func() {
 								},
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "1.2.3",
-								},
+								Version: "1.2.3",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureAMD64}}},
 								},
@@ -4823,20 +4635,16 @@ var _ = Describe("validator", func() {
 							Name: "constraint-image-name",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version:        "1.2.4",
-										ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
-									},
-									Architectures: []string{"amd64"},
+									Version:        "1.2.4",
+									ExpirationDate: &metav1.Time{Time: metav1.Now().Add(time.Second * 1000)},
+									Architectures:  []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported:           true,
 										MinVersionForUpdate: new("1.2.3"),
 									},
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.2.3",
-									},
+									Version:       "1.2.3",
 									Architectures: []string{"amd64"},
 									InPlaceUpdates: &gardencorev1beta1.InPlaceUpdates{
 										Supported:           true,
@@ -4934,9 +4742,7 @@ var _ = Describe("validator", func() {
 						Name: validMachineImageName,
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: nonExpiredVersion,
-								},
+								Version: nonExpiredVersion,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									// Not supported version flavor 1
 									{Capabilities: gardencorev1beta1.Capabilities{
@@ -4984,9 +4790,7 @@ var _ = Describe("validator", func() {
 						Name: validMachineImageName,
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: nonExpiredVersion,
-								},
+								Version: nonExpiredVersion,
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{
 										"architecture":   []string{v1beta1constants.ArchitectureAMD64},
@@ -6233,12 +6037,10 @@ var _ = Describe("validator", func() {
 
 			BeforeEach(func() {
 				issuerSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "sa-issuer",
-						Namespace: "garden",
-						Labels: map[string]string{
-							"gardener.cloud/role": "shoot-service-account-issuer",
-						},
+					Name:      "sa-issuer",
+					Namespace: "garden",
+					Labels: map[string]string{
+						"gardener.cloud/role": "shoot-service-account-issuer",
 					},
 					Data: map[string][]byte{
 						"hostname": []byte("foo.bar"),
@@ -6508,15 +6310,13 @@ var _ = Describe("validator", func() {
 				destSeed.Status.Gardener = &gardencorev1beta1.Gardener{Version: "v1.100.0"}
 
 				regionConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "scheduler-region-config",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels: map[string]string{
-							v1beta1constants.SchedulingPurpose: v1beta1constants.SchedulingPurposeRegionConfig,
-						},
-						Annotations: map[string]string{
-							v1beta1constants.AnnotationSchedulingCloudProfiles: "profile",
-						},
+					Name:      "scheduler-region-config",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels: map[string]string{
+						v1beta1constants.SchedulingPurpose: v1beta1constants.SchedulingPurposeRegionConfig,
+					},
+					Annotations: map[string]string{
+						v1beta1constants.AnnotationSchedulingCloudProfiles: "profile",
 					},
 					Data: map[string]string{"eu-west-1": "eu-central-1: 50\nus-east-1: 999\n"},
 				}

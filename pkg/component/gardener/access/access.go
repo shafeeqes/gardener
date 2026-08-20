@@ -109,7 +109,7 @@ func (g *gardener) Deploy(ctx context.Context) error {
 
 func (g *gardener) Destroy(ctx context.Context) error {
 	for _, v := range []string{v1beta1constants.SecretNameGardener, v1beta1constants.SecretNameGardenerInternal} {
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: v, Namespace: g.namespace}}
+		secret := &corev1.Secret{Name: v, Namespace: g.namespace}
 		if err := g.client.Delete(ctx, secret); client.IgnoreNotFound(err) != nil {
 			return fmt.Errorf("failed deleting secret %s: %w", client.ObjectKeyFromObject(secret), err)
 		}
@@ -140,9 +140,7 @@ func (g *gardener) computeResourcesData(serviceAccountNames ...string) (map[stri
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		gardenerSystemClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:gardener",
-			},
+			Name: "gardener.cloud:system:gardener",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -172,11 +170,9 @@ func (g *gardener) computeResourcesData(serviceAccountNames ...string) (map[stri
 func adminClusterRoleBindings() []client.Object {
 	return []client.Object{
 		&rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: v1beta1constants.ShootSystemAdminsGroupName,
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: v1beta1constants.ShootSystemAdminsGroupName,
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -190,11 +186,9 @@ func adminClusterRoleBindings() []client.Object {
 			}},
 		},
 		&rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: v1beta1constants.ShootProjectAdminsGroupName,
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: v1beta1constants.ShootProjectAdminsGroupName,
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -214,11 +208,9 @@ func adminClusterRoleBindings() []client.Object {
 func viewerClusterRoleBindings() []client.Object {
 	return []client.Object{
 		&rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: v1beta1constants.ShootSystemViewersGroupName,
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: v1beta1constants.ShootSystemViewersGroupName,
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -232,11 +224,9 @@ func viewerClusterRoleBindings() []client.Object {
 			}},
 		},
 		&rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: v1beta1constants.ShootProjectViewersGroupName,
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: v1beta1constants.ShootProjectViewersGroupName,
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,

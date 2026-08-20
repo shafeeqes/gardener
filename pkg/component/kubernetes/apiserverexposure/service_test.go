@@ -60,9 +60,7 @@ var _ = Describe("#Service", func() {
 		clusterIP = ""
 		namePrefix = "test-"
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-namespace",
-			},
+			Name: "test-namespace",
 		}
 		expectedName = "test-kube-apiserver"
 		sniServiceObjKey = client.ObjectKey{Name: "foo", Namespace: "bar"}
@@ -74,16 +72,14 @@ var _ = Describe("#Service", func() {
 			NamePrefix: namePrefix,
 		}
 		expected = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      expectedName,
-				Namespace: namespace.Name,
-				Labels: map[string]string{
-					"app":                   "kubernetes",
-					"role":                  "apiserver",
-					"metrics-scrape-target": "true",
-				},
-				ResourceVersion: "2",
+			Name:      expectedName,
+			Namespace: namespace.Name,
+			Labels: map[string]string{
+				"app":                   "kubernetes",
+				"role":                  "apiserver",
+				"metrics-scrape-target": "true",
 			},
+			ResourceVersion: "2",
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
 				Ports: []corev1.ServicePort{{
@@ -103,10 +99,8 @@ var _ = Describe("#Service", func() {
 		}
 
 		sniService := &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      sniServiceObjKey.Name,
-				Namespace: sniServiceObjKey.Namespace,
-			},
+			Name:      sniServiceObjKey.Name,
+			Namespace: sniServiceObjKey.Namespace,
 			Status: corev1.ServiceStatus{
 				LoadBalancer: corev1.LoadBalancerStatus{
 					Ingress: []corev1.LoadBalancerIngress{{IP: "2.2.2.2"}},
@@ -121,11 +115,9 @@ var _ = Describe("#Service", func() {
 	JustBeforeEach(func() {
 		expected.Name = expectedName
 		initialService := &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        expectedName,
-				Namespace:   namespace.Name,
-				Annotations: customAnnotations,
-			},
+			Name:        expectedName,
+			Namespace:   namespace.Name,
+			Annotations: customAnnotations,
 			Spec: corev1.ServiceSpec{
 				ClusterIP:  "1.1.1.1",
 				ClusterIPs: []string{"1.1.1.1"},

@@ -58,7 +58,7 @@ func OperatingSystemConfigSecret(
 				continue
 			}
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: file.Content.SecretRef.Name, Namespace: osc.Namespace}}
+			secret := &corev1.Secret{Name: file.Content.SecretRef.Name, Namespace: osc.Namespace}
 			if err := seedClient.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 				return nil, fmt.Errorf("cannot resolve secret ref from osc: %w", err)
 			}
@@ -77,16 +77,14 @@ func OperatingSystemConfigSecret(
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: metav1.NamespaceSystem,
-			Annotations: map[string]string{
-				nodeagentconfigv1alpha1.AnnotationKeyChecksumDownloadedOperatingSystemConfig: utils.ComputeSHA256Hex(operatingSystemConfigRaw),
-			},
-			Labels: map[string]string{
-				v1beta1constants.GardenRole:      v1beta1constants.GardenRoleOperatingSystemConfig,
-				v1beta1constants.LabelWorkerPool: workerPoolName,
-			},
+		Name:      secretName,
+		Namespace: metav1.NamespaceSystem,
+		Annotations: map[string]string{
+			nodeagentconfigv1alpha1.AnnotationKeyChecksumDownloadedOperatingSystemConfig: utils.ComputeSHA256Hex(operatingSystemConfigRaw),
+		},
+		Labels: map[string]string{
+			v1beta1constants.GardenRole:      v1beta1constants.GardenRoleOperatingSystemConfig,
+			v1beta1constants.LabelWorkerPool: workerPoolName,
 		},
 		Data: map[string][]byte{nodeagentconfigv1alpha1.DataKeyOperatingSystemConfig: operatingSystemConfigRaw},
 	}, nil

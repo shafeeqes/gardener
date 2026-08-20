@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -35,8 +34,8 @@ var _ = Describe("Service", func() {
 				},
 			}, BeNil()),
 			Entry("LoadBalancer w/o ingress status", &corev1.Service{
-				TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Service"},
-				Spec:     corev1.ServiceSpec{Type: corev1.ServiceTypeLoadBalancer},
+				APIVersion: "v1", Kind: "Service",
+				Spec: corev1.ServiceSpec{Type: corev1.ServiceTypeLoadBalancer},
 			}, MatchError("service is missing ingress status")),
 		)
 	})

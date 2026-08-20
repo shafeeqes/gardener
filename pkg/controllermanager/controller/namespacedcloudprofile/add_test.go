@@ -10,8 +10,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -50,16 +48,12 @@ var _ = Describe("NamespacedCloudProfile controller", func() {
 			namespaceName = "garden-test"
 
 			cloudProfile = &gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-profile",
-				},
+				Name: "test-profile",
 			}
 
 			namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "n-profile-1",
-					Namespace: namespaceName,
-				},
+				Name:      "n-profile-1",
+				Namespace: namespaceName,
 				Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 					Parent: gardencorev1beta1.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -73,7 +67,7 @@ var _ = Describe("NamespacedCloudProfile controller", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile)).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile)).To(Succeed())
 
-			Expect(reconciler.MapCloudProfileToNamespacedCloudProfile(log)(ctx, cloudProfile)).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: "n-profile-1", Namespace: namespaceName}}))
+			Expect(reconciler.MapCloudProfileToNamespacedCloudProfile(log)(ctx, cloudProfile)).To(ConsistOf(reconcile.Request{Name: "n-profile-1", Namespace: namespaceName}))
 		})
 
 		It("should successfully return an empty result if no referencing NamespacedCloudProfiles exist", func() {

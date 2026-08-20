@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -93,10 +92,8 @@ var _ = Describe("VPNShoot", func() {
 			vpnShoot = mockvpnshoot.NewMockInterface(ctrl)
 
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "bar",
-					Namespace: "foo",
-				},
+				Name:      "bar",
+				Namespace: "foo",
 			}
 			botanist.Shoot = &shootpkg.Shoot{
 				Components: &shootpkg.Components{

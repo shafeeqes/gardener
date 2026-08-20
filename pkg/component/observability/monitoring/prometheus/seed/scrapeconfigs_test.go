@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus/seed"
 )
@@ -19,9 +18,7 @@ var _ = Describe("ScrapeConfigs", func() {
 		It("should return the expected objects", func() {
 			Expect(seed.CentralScrapeConfigs()).To(HaveExactElements(
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "prometheus-seed",
-					},
+					Name: "prometheus-seed",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						RelabelConfigs: []monitoringv1.RelabelConfig{{
 							Action:      "replace",
@@ -34,9 +31,7 @@ var _ = Describe("ScrapeConfigs", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "cadvisor",
-					},
+					Name: "cadvisor",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels:     new(true),
 						HonorTimestamps: new(false),

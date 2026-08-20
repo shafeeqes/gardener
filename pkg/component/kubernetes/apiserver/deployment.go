@@ -99,7 +99,7 @@ const (
 )
 
 func (k *kubeAPIServer) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: k.values.NamePrefix + v1beta1constants.DeploymentNameKubeAPIServer, Namespace: k.namespace}}
+	return &appsv1.Deployment{Name: k.values.NamePrefix + v1beta1constants.DeploymentNameKubeAPIServer, Namespace: k.namespace}
 }
 
 func (k *kubeAPIServer) reconcileDeployment(
@@ -244,16 +244,14 @@ func (k *kubeAPIServer) reconcileDeployment(
 							AllowPrivilegeEscalation: new(false),
 						},
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/livez",
-									Scheme: corev1.URISchemeHTTPS,
-									Port:   intstr.FromInt32(kubeapiserverconstants.Port),
-									HTTPHeaders: []corev1.HTTPHeader{{
-										Name:  "Authorization",
-										Value: "Bearer " + healthCheckToken,
-									}},
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/livez",
+								Scheme: corev1.URISchemeHTTPS,
+								Port:   intstr.FromInt32(kubeapiserverconstants.Port),
+								HTTPHeaders: []corev1.HTTPHeader{{
+									Name:  "Authorization",
+									Value: "Bearer " + healthCheckToken,
+								}},
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    3,
@@ -262,16 +260,14 @@ func (k *kubeAPIServer) reconcileDeployment(
 							TimeoutSeconds:      15,
 						},
 						ReadinessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/readyz",
-									Scheme: corev1.URISchemeHTTPS,
-									Port:   intstr.FromInt32(kubeapiserverconstants.Port),
-									HTTPHeaders: []corev1.HTTPHeader{{
-										Name:  "Authorization",
-										Value: "Bearer " + healthCheckToken,
-									}},
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/readyz",
+								Scheme: corev1.URISchemeHTTPS,
+								Port:   intstr.FromInt32(kubeapiserverconstants.Port),
+								HTTPHeaders: []corev1.HTTPHeader{{
+									Name:  "Authorization",
+									Value: "Bearer " + healthCheckToken,
+								}},
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    3,
@@ -313,61 +309,47 @@ func (k *kubeAPIServer) reconcileDeployment(
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeNameCA,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: secretCACluster.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: secretCACluster.Name,
 							},
 						},
 						{
 							Name: volumeNameCAClient,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: secretCAClient.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: secretCAClient.Name,
 							},
 						},
 						{
 							Name: volumeNameCAFrontProxy,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: secretCAFrontProxy.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: secretCAFrontProxy.Name,
 							},
 						},
 						{
 							Name: volumeNameServiceAccountKey,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretServiceAccountKey.Name,
-									DefaultMode: new(int32(0640)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretServiceAccountKey.Name,
+								DefaultMode: new(int32(0640)),
 							},
 						},
 						{
 							Name: volumeNameServiceAccountKeyBundle,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretServiceAccountKeyBundle.Name,
-									DefaultMode: new(int32(0640)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretServiceAccountKeyBundle.Name,
+								DefaultMode: new(int32(0640)),
 							},
 						},
 						{
 							Name: volumeNameStaticToken,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: secretStaticToken.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: secretStaticToken.Name,
 							},
 						},
 						{
 							Name: volumeNameKubeAggregator,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretKubeAggregator.Name,
-									DefaultMode: new(int32(0640)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretKubeAggregator.Name,
+								DefaultMode: new(int32(0640)),
 							},
 						},
 					},
@@ -527,11 +509,9 @@ func (k *kubeAPIServer) handleTLSSNISettings(deployment *appsv1.Deployment, tlsS
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  sni.secretName,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  sni.secretName,
+				DefaultMode: new(int32(0640)),
 			},
 		})
 	}
@@ -592,29 +572,21 @@ func (k *kubeAPIServer) handleVPNSettingsNonHA(
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, []corev1.Volume{
 		{
 			Name: volumeNameCAVPN,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretCAVPN.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretCAVPN.Name,
 			},
 		},
 		{
 			Name: volumeNameHTTPProxyClient,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  secretHTTPProxyClient.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  secretHTTPProxyClient.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		},
 		{
 			Name: volumeNameEgressSelector,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: configMapEgressSelector.Name,
-					},
-				},
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				Name: configMapEgressSelector.Name,
 			},
 		},
 	}...)
@@ -687,37 +659,33 @@ func (k *kubeAPIServer) handleVPNSettingsHA(
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, []corev1.Volume{
 		{
 			Name: volumeNameAPIServerAccess,
-			VolumeSource: corev1.VolumeSource{
-				Projected: &corev1.ProjectedVolumeSource{
-					DefaultMode: new(int32(0640)),
-					Sources: []corev1.VolumeProjection{
-						{
-							ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
-								ExpirationSeconds: new(int64(60 * 60 * 12)),
-								Path:              "token",
-							},
+			Projected: &corev1.ProjectedVolumeSource{
+				DefaultMode: new(int32(0640)),
+				Sources: []corev1.VolumeProjection{
+					{
+						ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+							ExpirationSeconds: new(int64(60 * 60 * 12)),
+							Path:              "token",
 						},
-						{
-							ConfigMap: &corev1.ConfigMapProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: "kube-root-ca.crt",
+					},
+					{
+						ConfigMap: &corev1.ConfigMapProjection{
+							Name: "kube-root-ca.crt",
+							Items: []corev1.KeyToPath{{
+								Key:  "ca.crt",
+								Path: "ca.crt",
+							}},
+						},
+					},
+					{
+						DownwardAPI: &corev1.DownwardAPIProjection{
+							Items: []corev1.DownwardAPIVolumeFile{{
+								FieldRef: &corev1.ObjectFieldSelector{
+									APIVersion: "v1",
+									FieldPath:  "metadata.namespace",
 								},
-								Items: []corev1.KeyToPath{{
-									Key:  "ca.crt",
-									Path: "ca.crt",
-								}},
-							},
-						},
-						{
-							DownwardAPI: &corev1.DownwardAPIProjection{
-								Items: []corev1.DownwardAPIVolumeFile{{
-									FieldRef: &corev1.ObjectFieldSelector{
-										APIVersion: "v1",
-										FieldPath:  "metadata.namespace",
-									},
-									Path: "namespace",
-								}},
-							},
+								Path: "namespace",
+							}},
 						},
 					},
 				},
@@ -725,35 +693,29 @@ func (k *kubeAPIServer) handleVPNSettingsHA(
 		},
 		{
 			Name: volumeNameVPNSeedClient,
-			VolumeSource: corev1.VolumeSource{
-				Projected: &corev1.ProjectedVolumeSource{
-					DefaultMode: new(int32(0640)),
-					Sources: []corev1.VolumeProjection{
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: secretCAVPN.Name,
-								},
-								Items: []corev1.KeyToPath{{
-									Key:  secrets.DataKeyCertificateBundle,
-									Path: secrets.DataKeyCertificateCA,
-								}},
-							},
+			Projected: &corev1.ProjectedVolumeSource{
+				DefaultMode: new(int32(0640)),
+				Sources: []corev1.VolumeProjection{
+					{
+						Secret: &corev1.SecretProjection{
+							Name: secretCAVPN.Name,
+							Items: []corev1.KeyToPath{{
+								Key:  secrets.DataKeyCertificateBundle,
+								Path: secrets.DataKeyCertificateCA,
+							}},
 						},
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: secretHAVPNSeedClient.Name,
+					},
+					{
+						Secret: &corev1.SecretProjection{
+							Name: secretHAVPNSeedClient.Name,
+							Items: []corev1.KeyToPath{
+								{
+									Key:  secrets.DataKeyCertificate,
+									Path: secrets.DataKeyCertificate,
 								},
-								Items: []corev1.KeyToPath{
-									{
-										Key:  secrets.DataKeyCertificate,
-										Path: secrets.DataKeyCertificate,
-									},
-									{
-										Key:  secrets.DataKeyPrivateKey,
-										Path: secrets.DataKeyPrivateKey,
-									},
+								{
+									Key:  secrets.DataKeyPrivateKey,
+									Path: secrets.DataKeyPrivateKey,
 								},
 							},
 						},
@@ -763,20 +725,16 @@ func (k *kubeAPIServer) handleVPNSettingsHA(
 		},
 		{
 			Name: volumeNameVPNSeedTLSAuth,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  secretHAVPNSeedClientSeedTLSAuth.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  secretHAVPNSeedClientSeedTLSAuth.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		},
 		{
 			Name: volumeNameDevNetTun,
-			VolumeSource: corev1.VolumeSource{
-				HostPath: &corev1.HostPathVolumeSource{
-					Path: volumeMountPathDevNetTun,
-					Type: &hostPathCharDev,
-				},
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: volumeMountPathDevNetTun,
+				Type: &hostPathCharDev,
 			},
 		},
 	}...)
@@ -785,72 +743,54 @@ func (k *kubeAPIServer) handleVPNSettingsHA(
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, []corev1.Volume{
 			{
 				Name: volumeNameHTTPProxyClient,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName:  secretHTTPProxyClient.Name,
-						DefaultMode: new(int32(0640)),
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName:  secretHTTPProxyClient.Name,
+					DefaultMode: new(int32(0640)),
 				},
 			},
 			{
 				Name: volumeNameEgressSelector,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: configMapEgressSelector.Name,
-						},
-					},
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					Name: configMapEgressSelector.Name,
 				},
 			},
 			{
 				Name: volumeNameEnvoyConfig,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: configMapEnvoyConfig.Name,
-						},
-					},
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					Name: configMapEnvoyConfig.Name,
 				},
 			},
 			{
 				Name: volumeNameCAVPN,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: secretCAVPN.Name,
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: secretCAVPN.Name,
 				},
 			},
 			{
 				Name: volumeNameCerts,
-				VolumeSource: corev1.VolumeSource{
-					Projected: &corev1.ProjectedVolumeSource{
-						DefaultMode: new(int32(420)),
-						Sources: []corev1.VolumeProjection{
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: secretCAVPN.Name,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  secrets.DataKeyCertificateBundle,
-										Path: fileNameCABundle,
-									}},
-								},
+				Projected: &corev1.ProjectedVolumeSource{
+					DefaultMode: new(int32(420)),
+					Sources: []corev1.VolumeProjection{
+						{
+							Secret: &corev1.SecretProjection{
+								Name: secretCAVPN.Name,
+								Items: []corev1.KeyToPath{{
+									Key:  secrets.DataKeyCertificateBundle,
+									Path: fileNameCABundle,
+								}},
 							},
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: secretHTTPProxy.Name,
+						},
+						{
+							Secret: &corev1.SecretProjection{
+								Name: secretHTTPProxy.Name,
+								Items: []corev1.KeyToPath{
+									{
+										Key:  secrets.DataKeyCertificate,
+										Path: secrets.DataKeyCertificate,
 									},
-									Items: []corev1.KeyToPath{
-										{
-											Key:  secrets.DataKeyCertificate,
-											Path: secrets.DataKeyCertificate,
-										},
-										{
-											Key:  secrets.DataKeyPrivateKey,
-											Path: secrets.DataKeyPrivateKey,
-										},
+									{
+										Key:  secrets.DataKeyPrivateKey,
+										Path: secrets.DataKeyPrivateKey,
 									},
 								},
 							},
@@ -1104,19 +1044,15 @@ func (k *kubeAPIServer) handleKubeletSettings(deployment *appsv1.Deployment, sec
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, []corev1.Volume{
 		{
 			Name: volumeNameCAKubelet,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretCAKubelet.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretCAKubelet.Name,
 			},
 		},
 		{
 			Name: volumeNameKubeAPIServerToKubelet,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  secretKubeletClient.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  secretKubeletClient.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		},
 	}...)
@@ -1138,10 +1074,8 @@ func (k *kubeAPIServer) handleAuthenticationWebhookSettings(deployment *appsv1.D
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameAuthenticationWebhookKubeconfig,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretWebhookKubeconfig.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretWebhookKubeconfig.Name,
 			},
 		})
 	}

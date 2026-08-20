@@ -16,7 +16,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -132,10 +131,8 @@ var _ = Describe("Logging", func() {
 		})
 
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: projectNamespace,
-			},
+			Name:      shootName,
+			Namespace: projectNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				Purpose: &shootPurposeDevelopment,
 			},
@@ -207,10 +204,8 @@ var _ = Describe("Logging", func() {
 		Context("When gardener-resource-manager is present in the control plane", func() {
 			BeforeEach(func() {
 				grm := &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      v1beta1constants.DeploymentNameGardenerResourceManager,
-						Namespace: controlPlaneNamespace,
-					},
+					Name:      v1beta1constants.DeploymentNameGardenerResourceManager,
+					Namespace: controlPlaneNamespace,
 				}
 				Expect(fakeClient.Create(ctx, grm)).To(Succeed())
 				grm.Status = appsv1.DeploymentStatus{ReadyReplicas: 1}

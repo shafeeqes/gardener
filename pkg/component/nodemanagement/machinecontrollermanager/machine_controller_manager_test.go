@@ -86,21 +86,17 @@ var _ = Describe("MachineControllerManager", func() {
 		mcm = New(fakeClient, namespace, sm, values)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager",
-				Namespace: namespace,
-			},
+			Name:                         "machine-controller-manager",
+			Namespace:                    namespace,
 			AutomountServiceAccountToken: new(false),
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager",
-				Namespace: namespace,
-			},
+			Name:      "machine-controller-manager",
+			Namespace: namespace,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "Role",
@@ -114,10 +110,8 @@ var _ = Describe("MachineControllerManager", func() {
 		}
 
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager",
-				Namespace: namespace,
-			},
+			Name:      "machine-controller-manager",
+			Namespace: namespace,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{machinev1alpha1.GroupName},
@@ -158,16 +152,14 @@ var _ = Describe("MachineControllerManager", func() {
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "machine-controller-manager",
-				},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":10258},{"protocol":"TCP","port":10259}]`,
-				},
+			Name:      "machine-controller-manager",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "machine-controller-manager",
+			},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":10258},{"protocol":"TCP","port":10259}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Type:      corev1.ServiceTypeClusterIP,
@@ -192,32 +184,28 @@ var _ = Describe("MachineControllerManager", func() {
 		}
 
 		shootAccessSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-machine-controller-manager",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "machine-controller-manager",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
+			Name:      "shoot-access-machine-controller-manager",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "machine-controller-manager",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":                 "kubernetes",
-					"role":                "machine-controller-manager",
-					"gardener.cloud/role": "controlplane",
-					"high-availability-config.resources.gardener.cloud/type":             "controller",
-					"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-				},
+			Name:      "machine-controller-manager",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":                 "kubernetes",
+				"role":                "machine-controller-manager",
+				"gardener.cloud/role": "controlplane",
+				"high-availability-config.resources.gardener.cloud/type":             "controller",
+				"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 			},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             &replicas,
@@ -260,12 +248,10 @@ var _ = Describe("MachineControllerManager", func() {
 								"--v=3",
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromInt32(10258),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   intstr.FromInt32(10258),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								FailureThreshold:    3,
 								InitialDelaySeconds: 30,
@@ -298,13 +284,11 @@ var _ = Describe("MachineControllerManager", func() {
 		}
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "machine-controller-manager",
-				},
+			Name:      "machine-controller-manager",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "machine-controller-manager",
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
@@ -319,12 +303,10 @@ var _ = Describe("MachineControllerManager", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "machine-controller-manager-vpa",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
-				},
+			Name:      "machine-controller-manager-vpa",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"provider.extensions.gardener.cloud/mutated-by-controlplane-webhook": "true",
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -350,11 +332,9 @@ var _ = Describe("MachineControllerManager", func() {
 			},
 		}
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-machine-controller-manager",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "shoot"},
-			},
+			Name:      "shoot-machine-controller-manager",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "shoot"},
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "machine-controller-manager.rules",
@@ -377,11 +357,9 @@ var _ = Describe("MachineControllerManager", func() {
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-machine-controller-manager",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "shoot"},
-			},
+			Name:      "shoot-machine-controller-manager",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "shoot"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":  "kubernetes",
@@ -541,17 +519,13 @@ subjects:
 `
 
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-shoot-core-machine-controller-manager",
-				Namespace: namespace,
-			},
+			Name:      "managedresource-shoot-core-machine-controller-manager",
+			Namespace: namespace,
 		}
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-core-machine-controller-manager",
-				Namespace: namespace,
-				Labels:    map[string]string{"origin": "gardener"},
-			},
+			Name:      "shoot-core-machine-controller-manager",
+			Namespace: namespace,
+			Labels:    map[string]string{"origin": "gardener"},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs:   []corev1.LocalObjectReference{{Name: managedResourceSecret.Name}},
 				InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -741,11 +715,9 @@ subjects:
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(deploy), deploy)).To(Succeed())
 
 			Expect(fakeClient.Create(ctx, &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pod",
-					Namespace: deployment.Namespace,
-					Labels:    deployment.Spec.Selector.MatchLabels,
-				},
+				Name:      "pod",
+				Namespace: deployment.Namespace,
+				Labels:    deployment.Spec.Selector.MatchLabels,
 			})).To(Succeed())
 
 			timer := time.AfterFunc(10*time.Millisecond, func() {

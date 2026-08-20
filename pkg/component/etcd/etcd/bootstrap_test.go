@@ -160,21 +160,17 @@ webhooks:
 		sm = fakesecretsmanager.New(c, namespace)
 
 		// Create CA secret for etcd-components webhook handler
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretNameCA, Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: secretNameCA, Namespace: namespace})).To(Succeed())
 
 		bootstrapper = NewBootstrapper(c, namespace, etcdConfig, etcdDruidImage, imageVectorOverwrite, sm, secretNameCA, priorityClassName, false, isSelfHostedShoot)
 
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceSecretName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceSecretName,
+			Namespace: namespace,
 		}
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 	})
 
@@ -186,22 +182,18 @@ webhooks:
 			operatorConfigConfigMapName = "etcd-druid-operator-config-735336e3"
 
 			serviceAccount = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-					},
+				Name:      "etcd-druid",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
 				},
 				AutomountServiceAccountToken: new(bool),
 			}
 
 			clusterRole = &rbacv1.ClusterRole{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener.cloud:system:etcd-druid",
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-					},
+				Name: "gardener.cloud:system:etcd-druid",
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
 				},
 				Rules: []rbacv1.PolicyRule{
 					{
@@ -273,11 +265,9 @@ webhooks:
 			}
 
 			clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener.cloud:system:etcd-druid",
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-					},
+				Name: "gardener.cloud:system:etcd-druid",
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
 				},
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: "rbac.authorization.k8s.io",
@@ -294,12 +284,10 @@ webhooks:
 			}
 
 			vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid-vpa",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-					},
+				Name:      "etcd-druid-vpa",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
 				},
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					ResourcePolicy: &vpaautoscalingv1.PodResourcePolicy{
@@ -329,13 +317,11 @@ webhooks:
 			}
 
 			configMapImageVectorOverwrite = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      imageVectorConfigMapName,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-					},
+				Name:      imageVectorConfigMapName,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
 				},
 				Data: map[string]string{
 					"images_overwrite.yaml": *imageVectorOverwriteFull,
@@ -344,13 +330,11 @@ webhooks:
 			}
 
 			configMapOperatorConfig = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      operatorConfigConfigMapName,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-					},
+				Name:      operatorConfigConfigMapName,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
 				},
 				Data: map[string]string{
 					"config.yaml": *etcdOperatorConfigYAML,
@@ -359,17 +343,15 @@ webhooks:
 			}
 
 			deploymentWithoutImageVectorOverwriteFor = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-						"high-availability-config.resources.gardener.cloud/type": "controller",
-					},
-					Annotations: map[string]string{
-						references.AnnotationKey(references.KindConfigMap, operatorConfigConfigMapName): operatorConfigConfigMapName,
-						references.AnnotationKey(references.KindSecret, "etcd-druid-webhook"):           "etcd-druid-webhook",
-					},
+				Name:      "etcd-druid",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
+					"high-availability-config.resources.gardener.cloud/type": "controller",
+				},
+				Annotations: map[string]string{
+					references.AnnotationKey(references.KindConfigMap, operatorConfigConfigMapName): operatorConfigConfigMapName,
+					references.AnnotationKey(references.KindSecret, "etcd-druid-webhook"):           "etcd-druid-webhook",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -435,21 +417,15 @@ webhooks:
 							Volumes: []corev1.Volume{
 								{
 									Name: "webhook-server-tls-cert",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  "etcd-druid-webhook",
-											DefaultMode: new(int32(420)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  "etcd-druid-webhook",
+										DefaultMode: new(int32(420)),
 									},
 								},
 								{
 									Name: "operator-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: operatorConfigConfigMapName,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: operatorConfigConfigMapName,
 									},
 								},
 							},
@@ -459,18 +435,16 @@ webhooks:
 			}
 
 			deploymentWithImageVectorOverwrite = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-						"high-availability-config.resources.gardener.cloud/type": "controller",
-					},
-					Annotations: map[string]string{
-						references.AnnotationKey(references.KindConfigMap, imageVectorConfigMapName):    imageVectorConfigMapName,
-						references.AnnotationKey(references.KindConfigMap, operatorConfigConfigMapName): operatorConfigConfigMapName,
-						references.AnnotationKey(references.KindSecret, "etcd-druid-webhook"):           "etcd-druid-webhook",
-					},
+				Name:      "etcd-druid",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
+					"high-availability-config.resources.gardener.cloud/type": "controller",
+				},
+				Annotations: map[string]string{
+					references.AnnotationKey(references.KindConfigMap, imageVectorConfigMapName):    imageVectorConfigMapName,
+					references.AnnotationKey(references.KindConfigMap, operatorConfigConfigMapName): operatorConfigConfigMapName,
+					references.AnnotationKey(references.KindSecret, "etcd-druid-webhook"):           "etcd-druid-webhook",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -548,31 +522,21 @@ webhooks:
 							Volumes: []corev1.Volume{
 								{
 									Name: "webhook-server-tls-cert",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName:  "etcd-druid-webhook",
-											DefaultMode: new(int32(420)),
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName:  "etcd-druid-webhook",
+										DefaultMode: new(int32(420)),
 									},
 								},
 								{
 									Name: "operator-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: operatorConfigConfigMapName,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: operatorConfigConfigMapName,
 									},
 								},
 								{
 									Name: "imagevector-overwrite",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: imageVectorConfigMapName,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: imageVectorConfigMapName,
 									},
 								},
 							},
@@ -582,17 +546,15 @@ webhooks:
 			}
 
 			service = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-						"high-availability-config.resources.gardener.cloud/type": "controller",
-					},
-					Annotations: map[string]string{
-						"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8080}]`,
-						"networking.resources.gardener.cloud/from-world-to-ports":                        `[{"protocol":"TCP","port":10250}]`,
-					},
+				Name:      "etcd-druid",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
+					"high-availability-config.resources.gardener.cloud/type": "controller",
+				},
+				Annotations: map[string]string{
+					"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8080}]`,
+					"networking.resources.gardener.cloud/from-world-to-ports":                        `[{"protocol":"TCP","port":10250}]`,
 				},
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{
@@ -617,11 +579,9 @@ webhooks:
 			}
 
 			validatingWebhookConfiguration = &admissionregistrationv1.ValidatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid",
-					Namespace: namespace,
-					Labels:    map[string]string{"gardener.cloud/role": "etcd-druid"},
-				},
+				Name:      "etcd-druid",
+				Namespace: namespace,
+				Labels:    map[string]string{"gardener.cloud/role": "etcd-druid"},
 				Webhooks: []admissionregistrationv1.ValidatingWebhook{
 					{
 						Name: "etcdcomponents.webhooks.druid.gardener.cloud",
@@ -642,67 +602,53 @@ webhooks:
 						ObjectSelector:          &metav1.LabelSelector{MatchLabels: map[string]string{"app.kubernetes.io/managed-by": "etcd-druid"}},
 						Rules: []admissionregistrationv1.RuleWithOperations{
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{corev1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"serviceaccounts", "services", "configmaps"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
+								APIGroups:   []string{corev1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"serviceaccounts", "services", "configmaps"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{corev1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"persistentvolumeclaims"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
+								APIGroups:   []string{corev1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"persistentvolumeclaims"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{rbacv1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"roles", "rolebindings"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
+								APIGroups:   []string{rbacv1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"roles", "rolebindings"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{appsv1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"statefulsets"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
+								APIGroups:   []string{appsv1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"statefulsets"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{policyv1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"poddisruptionbudgets"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
+								APIGroups:   []string{policyv1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"poddisruptionbudgets"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{batchv1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"jobs"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
+								APIGroups:   []string{batchv1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"jobs"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{coordinationv1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"leases"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
+								APIGroups:   []string{coordinationv1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"leases"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
 							},
 						},
 					},
@@ -724,13 +670,11 @@ webhooks:
 						AdmissionReviewVersions: []string{"v1", "v1beta1"},
 						Rules: []admissionregistrationv1.RuleWithOperations{
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{appsv1.GroupName},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"statefulsets/scale"},
-									Scope:       new(admissionregistrationv1.AllScopes),
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
+								APIGroups:   []string{appsv1.GroupName},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"statefulsets/scale"},
+								Scope:       new(admissionregistrationv1.AllScopes),
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update, admissionregistrationv1.Delete},
 							},
 						},
 					},
@@ -738,12 +682,10 @@ webhooks:
 			}
 
 			podDisruption = &policyv1.PodDisruptionBudget{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-druid",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "etcd-druid",
-					},
+				Name:      "etcd-druid",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "etcd-druid",
 				},
 				Spec: policyv1.PodDisruptionBudgetSpec{
 					MaxUnavailable: new(intstr.FromInt32(1)),
@@ -763,12 +705,10 @@ webhooks:
 			}
 
 			serviceMonitor = &monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cache-etcd-druid",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"prometheus": "cache",
-					},
+				Name:      "cache-etcd-druid",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"prometheus": "cache",
 				},
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Endpoints: []monitoringv1.Endpoint{
@@ -807,11 +747,9 @@ webhooks:
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-				},
+				Name:            managedResourceName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -925,11 +863,9 @@ webhooks:
 
 			It("should fail because the runtime ManagedResource is unhealthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -954,11 +890,9 @@ webhooks:
 
 			It("should fail because the runtime ManagedResource is still progressing", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -983,11 +917,9 @@ webhooks:
 
 			It("should succeed because the ManagedResource is healthy and progressed", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

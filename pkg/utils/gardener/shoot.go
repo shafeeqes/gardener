@@ -333,10 +333,8 @@ func NewShootAccessSecret(name, namespace string) *AccessSecret {
 
 	return &AccessSecret{
 		Secret: &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		},
 		ServiceAccountName: strings.TrimPrefix(name, SecretNamePrefixShootAccess),
 		Class:              resourcesv1alpha1.ResourceManagerClassShoot,
@@ -482,33 +480,27 @@ func InjectGenericKubeconfig(obj runtime.Object, genericKubeconfigName, accessSe
 func GenerateGenericKubeconfigVolume(genericKubeconfigName, accessSecretName, volumeName string) corev1.Volume {
 	return corev1.Volume{
 		Name: volumeName,
-		VolumeSource: corev1.VolumeSource{
-			Projected: &corev1.ProjectedVolumeSource{
-				DefaultMode: new(int32(420)),
-				Sources: []corev1.VolumeProjection{
-					{
-						Secret: &corev1.SecretProjection{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: genericKubeconfigName,
-							},
-							Items: []corev1.KeyToPath{{
-								Key:  secrets.DataKeyKubeconfig,
-								Path: secrets.DataKeyKubeconfig,
-							}},
-							Optional: new(false),
-						},
+		Projected: &corev1.ProjectedVolumeSource{
+			DefaultMode: new(int32(420)),
+			Sources: []corev1.VolumeProjection{
+				{
+					Secret: &corev1.SecretProjection{
+						Name: genericKubeconfigName,
+						Items: []corev1.KeyToPath{{
+							Key:  secrets.DataKeyKubeconfig,
+							Path: secrets.DataKeyKubeconfig,
+						}},
+						Optional: new(false),
 					},
-					{
-						Secret: &corev1.SecretProjection{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: accessSecretName,
-							},
-							Items: []corev1.KeyToPath{{
-								Key:  resourcesv1alpha1.DataKeyToken,
-								Path: resourcesv1alpha1.DataKeyToken,
-							}},
-							Optional: new(false),
-						},
+				},
+				{
+					Secret: &corev1.SecretProjection{
+						Name: accessSecretName,
+						Items: []corev1.KeyToPath{{
+							Key:  resourcesv1alpha1.DataKeyToken,
+							Path: resourcesv1alpha1.DataKeyToken,
+						}},
+						Optional: new(false),
 					},
 				},
 			},

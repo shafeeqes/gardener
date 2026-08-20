@@ -118,7 +118,7 @@ func (m *ManagedResource) DeletePersistentVolumeClaims(v bool) *ManagedResource 
 // Reconcile creates or updates the ManagedResource as well as marks all referenced secrets as garbage collectable.
 func (m *ManagedResource) Reconcile(ctx context.Context) error {
 	resource := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{Name: m.resource.Name, Namespace: m.resource.Namespace},
+		Name: m.resource.Name, Namespace: m.resource.Namespace,
 	}
 
 	mutateFn := func(obj *resourcesv1alpha1.ManagedResource) {
@@ -199,10 +199,8 @@ func secretsFromRefs(obj *resourcesv1alpha1.ManagedResource) []*corev1.Secret {
 	secrets := make([]*corev1.Secret, 0, len(obj.Spec.SecretRefs))
 	for _, secretRef := range obj.Spec.SecretRefs {
 		secrets = append(secrets, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretRef.Name,
-				Namespace: obj.Namespace,
-			},
+			Name:      secretRef.Name,
+			Namespace: obj.Namespace,
 		})
 	}
 	return secrets

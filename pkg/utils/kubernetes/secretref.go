@@ -44,10 +44,8 @@ func GetSecretByObjectReference(ctx context.Context, c client.Reader, ref *corev
 // GetSecretMetadataByReference returns the secret referenced by the given secret reference.
 func GetSecretMetadataByReference(ctx context.Context, c client.Reader, ref *corev1.SecretReference) (*metav1.PartialObjectMetadata, error) {
 	metadata := &metav1.PartialObjectMetadata{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: "v1",
-		}}
+		Kind:       "Secret",
+		APIVersion: "v1"}
 	if err := c.Get(ctx, client.ObjectKey{Namespace: ref.Namespace, Name: ref.Name}, metadata); err != nil {
 		return nil, err
 	}
@@ -57,10 +55,8 @@ func GetSecretMetadataByReference(ctx context.Context, c client.Reader, ref *cor
 // DeleteSecretByReference deletes the secret referenced by the given secret reference.
 func DeleteSecretByReference(ctx context.Context, c client.Client, ref *corev1.SecretReference) error {
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ref.Name,
-			Namespace: ref.Namespace,
-		},
+		Name:      ref.Name,
+		Namespace: ref.Namespace,
 	}
 	return client.IgnoreNotFound(c.Delete(ctx, secret))
 }
@@ -74,10 +70,8 @@ func DeleteSecretByObjectReference(ctx context.Context, c client.Client, ref *co
 		return fmt.Errorf("objectRef does not refer to secret")
 	}
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ref.Name,
-			Namespace: ref.Namespace,
-		},
+		Name:      ref.Name,
+		Namespace: ref.Namespace,
 	}
 	return client.IgnoreNotFound(c.Delete(ctx, secret))
 }

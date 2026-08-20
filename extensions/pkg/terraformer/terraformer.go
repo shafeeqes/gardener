@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -305,7 +304,7 @@ const (
 )
 
 func (t *terraformer) ensureServiceAccount(ctx context.Context) error {
-	serviceAccount := &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: name}}
+	serviceAccount := &corev1.ServiceAccount{Namespace: t.namespace, Name: name}
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, t.client, serviceAccount, func() error {
 		if t.useProjectedTokenMount {
 			serviceAccount.AutomountServiceAccountToken = new(false)
@@ -318,7 +317,7 @@ func (t *terraformer) ensureServiceAccount(ctx context.Context) error {
 }
 
 func (t *terraformer) ensureRole(ctx context.Context) error {
-	role := &rbacv1.Role{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: rbacName}}
+	role := &rbacv1.Role{Namespace: t.namespace, Name: rbacName}
 	_, err := controllerutils.GetAndCreateOrMergePatch(ctx, t.client, role, func() error {
 		role.Rules = []rbacv1.PolicyRule{{
 			APIGroups: []string{""},
@@ -331,7 +330,7 @@ func (t *terraformer) ensureRole(ctx context.Context) error {
 }
 
 func (t *terraformer) ensureRoleBinding(ctx context.Context) error {
-	roleBinding := &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Namespace: t.namespace, Name: rbacName}}
+	roleBinding := &rbacv1.RoleBinding{Namespace: t.namespace, Name: rbacName}
 	_, err := controllerutils.GetAndCreateOrMergePatch(ctx, t.client, roleBinding, func() error {
 		roleBinding.RoleRef = rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
@@ -364,19 +363,17 @@ func (t *terraformer) deployTerraformerPod(ctx context.Context, generateName, co
 	}
 
 	pod := &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: generateName,
-			Namespace:    t.namespace,
-			Labels: map[string]string{
-				// Terraformer labels
-				LabelKeyName:    t.name,
-				LabelKeyPurpose: t.purpose,
-				// Network policy labels
-				v1beta1constants.LabelNetworkPolicyToDNS:              v1beta1constants.LabelNetworkPolicyAllowed,
-				v1beta1constants.LabelNetworkPolicyToPrivateNetworks:  v1beta1constants.LabelNetworkPolicyAllowed,
-				v1beta1constants.LabelNetworkPolicyToPublicNetworks:   v1beta1constants.LabelNetworkPolicyAllowed,
-				v1beta1constants.LabelNetworkPolicyToRuntimeAPIServer: v1beta1constants.LabelNetworkPolicyAllowed,
-			},
+		GenerateName: generateName,
+		Namespace:    t.namespace,
+		Labels: map[string]string{
+			// Terraformer labels
+			LabelKeyName:    t.name,
+			LabelKeyPurpose: t.purpose,
+			// Network policy labels
+			v1beta1constants.LabelNetworkPolicyToDNS:              v1beta1constants.LabelNetworkPolicyAllowed,
+			v1beta1constants.LabelNetworkPolicyToPrivateNetworks:  v1beta1constants.LabelNetworkPolicyAllowed,
+			v1beta1constants.LabelNetworkPolicyToPublicNetworks:   v1beta1constants.LabelNetworkPolicyAllowed,
+			v1beta1constants.LabelNetworkPolicyToRuntimeAPIServer: v1beta1constants.LabelNetworkPolicyAllowed,
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{

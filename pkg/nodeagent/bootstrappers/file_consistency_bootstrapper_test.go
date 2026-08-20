@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/afero"
 	"go.yaml.in/yaml/v4"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,9 +74,7 @@ var _ = Describe("FileConsistencyBootstrapper (OSCChecker)", func() {
 			It("should do nothing", func() {
 				// Create node
 				node := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: nodeName,
-					},
+					Name: nodeName,
 				}
 				Expect(fakeClient.Create(ctx, node)).To(Succeed())
 
@@ -94,9 +91,7 @@ var _ = Describe("FileConsistencyBootstrapper (OSCChecker)", func() {
 			It("should perform checks and emit expected events", func() {
 				// Create node
 				node := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: nodeName,
-					},
+					Name: nodeName,
 				}
 				Expect(fakeClient.Create(ctx, node)).To(Succeed())
 
@@ -134,9 +129,7 @@ var _ = Describe("FileConsistencyBootstrapper (OSCChecker)", func() {
 		Context("when node, OSC and all files exist with no mismatches", func() {
 			It("should complete successfully without emitting any events", func() {
 				node := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: nodeName,
-					},
+					Name: nodeName,
 				}
 				Expect(fakeClient.Create(ctx, node)).To(Succeed())
 
@@ -190,7 +183,7 @@ var _ = Describe("FileConsistencyBootstrapper (OSCChecker)", func() {
 			BeforeEach(func() {
 				// Node exists
 				node := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+					Name: nodeName,
 				}
 				Expect(fakeClient.Create(ctx, node)).To(Succeed())
 			})
@@ -303,7 +296,7 @@ var _ = Describe("FileConsistencyBootstrapper (OSCChecker)", func() {
 
 			BeforeEach(func() {
 				node := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+					Name: nodeName,
 				}
 				Expect(fakeClient.Create(ctx, node)).To(Succeed())
 			})
@@ -404,7 +397,7 @@ var _ = Describe("FileConsistencyBootstrapper (OSCChecker)", func() {
 
 			BeforeEach(func() {
 				node := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{Name: nodeName},
+					Name: nodeName,
 				}
 				Expect(fakeClient.Create(ctx, node)).To(Succeed())
 			})

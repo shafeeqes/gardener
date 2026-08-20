@@ -376,7 +376,7 @@ var _ = Describe("Shoot Tests", Label("Shoot", "default"), func() {
 						{
 							NewObject: func() client.Object {
 								return &corev1.Secret{
-									ObjectMeta: metav1.ObjectMeta{GenerateName: "test-foo-", Namespace: "default"},
+									GenerateName: "test-foo-", Namespace: "default",
 									StringData: map[string]string{"content": "foo"},
 								}
 							},

@@ -974,12 +974,10 @@ func (r *Reconciler) deployEtcdMainBackupBucket(ctx context.Context, garden *ope
 		metav1.SetMetaDataAnnotation(&backupBucket.ObjectMeta, v1beta1constants.GardenerTimestamp, time.Now().UTC().Format(time.RFC3339Nano))
 
 		backupBucket.Spec = extensionsv1alpha1.BackupBucketSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           backup.Provider,
-				ProviderConfig: backup.ProviderConfig,
-				Class:          new(extensionsv1alpha1.ExtensionClassGarden),
-			},
-			Region: bucketRegion,
+			Type:           backup.Provider,
+			ProviderConfig: backup.ProviderConfig,
+			Class:          new(extensionsv1alpha1.ExtensionClassGarden),
+			Region:         bucketRegion,
 			SecretRef: corev1.SecretReference{
 				Name:      backup.SecretRef.Name,
 				Namespace: r.GardenNamespace,
@@ -992,7 +990,7 @@ func (r *Reconciler) deployEtcdMainBackupBucket(ctx context.Context, garden *ope
 
 func etcdMainBackupBucket(garden *operatorv1alpha1.Garden) *extensionsv1alpha1.BackupBucket {
 	name, _ := etcdMainBackupBucketNameAndPrefix(garden)
-	return &extensionsv1alpha1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	return &extensionsv1alpha1.BackupBucket{Name: name}
 }
 
 func etcdMainBackupBucketNameAndPrefix(garden *operatorv1alpha1.Garden) (string, string) {
@@ -1278,10 +1276,9 @@ func (r *Reconciler) deployGardenPrometheus(ctx context.Context, prometheus prom
 }
 
 func (r *Reconciler) deployOperatorServiceMonitor(ctx context.Context) error {
-	sm := &monitoringv1.ServiceMonitor{ObjectMeta: metav1.ObjectMeta{
+	sm := &monitoringv1.ServiceMonitor{
 		Name:      gardenprometheus.Label + "-" + v1beta1constants.DeploymentNameGardenerOperator,
-		Namespace: r.GardenNamespace,
-	}}
+		Namespace: r.GardenNamespace}
 
 	_, err := controllerutils.CreateOrGetAndMergePatch(ctx, r.RuntimeClientSet.Client(), sm, func() error {
 		sm.Labels = utils.MergeStringMaps(sm.Labels, monitoringutils.Labels(gardenprometheus.Label))
@@ -1320,7 +1317,7 @@ func (r *Reconciler) deployGardenerDashboard(ctx context.Context, dashboard gard
 		// The dashboard can only handle managed seeds for terminals (otherwise, it has no chance to acquire a
 		// kubeconfig) - for managed seeds, it can use the shoots/adminkubeconfig subresource. Hence, let's find the
 		// first managed seed here.
-		if err := virtualGardenClient.Get(ctx, client.ObjectKey{Namespace: v1beta1constants.GardenNamespace, Name: seed.Name}, &metav1.PartialObjectMetadata{TypeMeta: metav1.TypeMeta{APIVersion: seedmanagementv1alpha1.SchemeGroupVersion.String(), Kind: "ManagedSeed"}}); err != nil {
+		if err := virtualGardenClient.Get(ctx, client.ObjectKey{Namespace: v1beta1constants.GardenNamespace, Name: seed.Name}, &metav1.PartialObjectMetadata{APIVersion: seedmanagementv1alpha1.SchemeGroupVersion.String(), Kind: "ManagedSeed"}); err != nil {
 			if !apierrors.IsNotFound(err) {
 				return fmt.Errorf("failed checking whether seed %s is a managed seed: %w", seed.Name, err)
 			}
@@ -1532,7 +1529,7 @@ func reconcileGardenerInfoConfigMap(ctx context.Context, log logr.Logger, virtua
 		return err
 	}
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: gardencorev1beta1.GardenerSystemPublicNamespace, Name: v1beta1constants.ConfigMapNameGardenerInfo}}
+	configMap := &corev1.ConfigMap{Namespace: gardencorev1beta1.GardenerSystemPublicNamespace, Name: v1beta1constants.ConfigMapNameGardenerInfo}
 	log.Info("Reconciling gardener-info ConfigMap", "configMap", configMap)
 	_, err = controllerutils.CreateOrGetAndMergePatch(ctx, virtualGardenClient, configMap, func() error {
 		if configMap.Data == nil {

@@ -40,34 +40,26 @@ var _ = Describe("Shoot Care controller tests", func() {
 
 	BeforeEach(func() {
 		seedNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   gardenerutils.ComputeGardenNamespace(seed.Name),
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   gardenerutils.ComputeGardenNamespace(seed.Name),
+			Labels: map[string]string{testID: testRunID},
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secret-" + testRunID,
-				Namespace: testNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      "secret-" + testRunID,
+			Namespace: testNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 		}
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secretbinding-" + testRunID,
-				Namespace: testNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      "secretbinding-" + testRunID,
+			Namespace: testNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 			SecretRef: corev1.SecretReference{Name: secret.Name},
 			Provider:  &gardencorev1beta1.SecretBindingProvider{Type: "foo"},
 		}
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: testNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      shootName,
+			Namespace: testNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new(secretBinding.Name),
 				CloudProfileName:  new("cloudprofile1"),
@@ -101,9 +93,7 @@ var _ = Describe("Shoot Care controller tests", func() {
 			},
 		}
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{testID: testRunID},
-			},
+			Labels: map[string]string{testID: testRunID},
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot:        runtime.RawExtension{Object: shoot},
 				Seed:         &runtime.RawExtension{Object: seed},
@@ -357,12 +347,10 @@ var _ = Describe("Shoot Care controller tests", func() {
 				createDeployment([]string{"kube-apiserver"})
 
 				managedResource1 := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-1",
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							testID: testRunID,
-						},
+					Name:      "test-1",
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						testID: testRunID,
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						SecretRefs: []corev1.LocalObjectReference{
@@ -406,12 +394,10 @@ var _ = Describe("Shoot Care controller tests", func() {
 				}).Should(Succeed())
 
 				managedResource2 := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-2",
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							testID: testRunID,
-						},
+					Name:      "test-2",
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						testID: testRunID,
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("test"),
@@ -484,12 +470,10 @@ var _ = Describe("Shoot Care controller tests", func() {
 				createDeployment([]string{"kube-apiserver"})
 
 				managedResource1 := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-1",
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							testID: testRunID,
-						},
+					Name:      "test-1",
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						testID: testRunID,
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						SecretRefs: []corev1.LocalObjectReference{
@@ -590,11 +574,9 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 
 	BeforeEach(func() {
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: v1beta1constants.GardenNamespace,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      shootName,
+			Namespace: v1beta1constants.GardenNamespace,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName: new("cloudprofile1"),
 				Region:           "europe-central-1",
@@ -628,9 +610,7 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 			},
 		}
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{testID: testRunID},
-			},
+			Labels: map[string]string{testID: testRunID},
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot:        runtime.RawExtension{Object: shoot},
 				Seed:         &runtime.RawExtension{Object: &gardencorev1beta1.Seed{}},
@@ -727,10 +707,8 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				backupBucket := &gardencorev1beta1.BackupBucket{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "bb-" + testRunID,
-						Labels: map[string]string{testID: testRunID},
-					},
+					Name:   "bb-" + testRunID,
+					Labels: map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.BackupBucketSpec{
 						Provider: gardencorev1beta1.BackupBucketProvider{
 							Type:   "foo",
@@ -750,11 +728,9 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 				Expect(testClient.Create(ctx, backupBucket)).To(Succeed())
 
 				backupEntry := &gardencorev1beta1.BackupEntry{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      backupEntryName,
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{testID: testRunID},
-					},
+					Name:      backupEntryName,
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.BackupEntrySpec{
 						BucketName: backupBucket.Name,
 						SeedName:   new("some-seed"),
@@ -797,10 +773,8 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 
 				errMsg := "some error message"
 				backupBucket := &gardencorev1beta1.BackupBucket{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "bb-err-" + testRunID,
-						Labels: map[string]string{testID: testRunID},
-					},
+					Name:   "bb-err-" + testRunID,
+					Labels: map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.BackupBucketSpec{
 						Provider: gardencorev1beta1.BackupBucketProvider{
 							Type:   "foo",
@@ -830,11 +804,9 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 				}).Should(Succeed())
 
 				backupEntry := &gardencorev1beta1.BackupEntry{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      backupEntryName,
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{testID: testRunID},
-					},
+					Name:      backupEntryName,
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.BackupEntrySpec{
 						BucketName: backupBucket.Name,
 						SeedName:   new("some-seed"),
@@ -876,13 +848,11 @@ var _ = Describe("Shoot Care controller tests (self-hosted shoot)", func() {
 func createDeployment(names []string) {
 	for _, name := range names {
 		deployment := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: getRole(name),
-				},
+			Name:      name,
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: getRole(name),
 			},
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"foo": "bar"}},
@@ -938,13 +908,11 @@ func getRole(name string) string {
 func createETCDs(names []string) {
 	for _, name := range names {
 		etcd := &druidcorev1alpha1.Etcd{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
-				},
+			Name:      name,
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleControlPlane,
 			},
 			Spec: druidcorev1alpha1.EtcdSpec{
 				Labels:   map[string]string{"foo": "bar"},
@@ -980,7 +948,7 @@ func createETCDs(names []string) {
 
 func updateETCDStatusToHealthy(name string) {
 	By("Update status to healthy for ETCD " + name)
-	etcd := &druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: testNamespace.Name}}
+	etcd := &druidcorev1alpha1.Etcd{Name: name, Namespace: testNamespace.Name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(etcd), etcd)).To(Succeed())
 
 	etcd.Status.ObservedGeneration = &etcd.Generation

@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	certutil "k8s.io/client-go/util/cert"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -36,10 +35,8 @@ var _ = Describe("CSR autoapprove controller tests", func() {
 
 		csr = &certificatesv1.CertificateSigningRequest{
 			// Username, UID, Groups will be injected by API server.
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: certificatesv1.CertificateSigningRequestSpec{
 				Usages: []certificatesv1.KeyUsage{
 					certificatesv1.UsageDigitalSignature,
@@ -120,11 +117,9 @@ var _ = Describe("CSR autoapprove controller tests", func() {
 			csr.Spec.Username = "system:bootstrap:123abc"
 
 			bootstrapTokenSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "bootstrap-token-" + bootstrapTokenID,
-					Namespace: "kube-system",
-					Labels:    map[string]string{testID: testRunID},
-				},
+				Name:      "bootstrap-token-" + bootstrapTokenID,
+				Namespace: "kube-system",
+				Labels:    map[string]string{testID: testRunID},
 				Data: map[string][]byte{
 					"description": fmt.Appendf(nil, "Used for connecting the self-hosted Shoot %s/%s", shootNamespace, shootName),
 				},
@@ -169,11 +164,9 @@ var _ = Describe("CSR autoapprove controller tests", func() {
 			csr.Spec.Username = "system:bootstrap:123abc"
 
 			bootstrapTokenSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "bootstrap-token-" + bootstrapTokenID,
-					Namespace: "kube-system",
-					Labels:    map[string]string{testID: testRunID},
-				},
+				Name:      "bootstrap-token-" + bootstrapTokenID,
+				Namespace: "kube-system",
+				Labels:    map[string]string{testID: testRunID},
 				Data: map[string][]byte{
 					"description": fmt.Appendf(nil, "Used for connecting the self-hosted Shoot %s/%s", shootNamespace, shootName),
 				},

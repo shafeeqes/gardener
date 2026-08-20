@@ -8,7 +8,6 @@ import (
 	"context"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -111,14 +110,13 @@ func (r *Reconciler) SeedPredicate() predicate.Predicate {
 
 // MapSeedToManagedSeed is a handler.MapFunc for mapping a Seed to the owning ManagedSeed.
 func (r *Reconciler) MapSeedToManagedSeed(_ context.Context, obj client.Object) []reconcile.Request {
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Namespace: r.GardenNamespaceGarden, Name: obj.GetName()}}}
+	return []reconcile.Request{{Namespace: r.GardenNamespaceGarden, Name: obj.GetName()}}
 }
 
 func reconcileRequest(obj client.Object) reconcile.Request {
-	return reconcile.Request{NamespacedName: types.NamespacedName{
+	return reconcile.Request{
 		Name:      obj.GetName(),
-		Namespace: obj.GetNamespace(),
-	}}
+		Namespace: obj.GetNamespace()}
 }
 
 // RandomDurationWithMetaDuration is an alias for `utils.RandomDurationWithMetaDuration`. Exposed for unit tests.

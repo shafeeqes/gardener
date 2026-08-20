@@ -16,7 +16,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/spf13/afero"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/component-base/version"
@@ -117,20 +116,16 @@ var _ = Describe("OperatingSystemConfig", func() {
 	Describe("#ApplyOperatingSystemConfig - Zone file handling", func() {
 		BeforeEach(func() {
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-node",
-					Labels: map[string]string{
-						corev1.LabelHostname: b.HostName,
-					},
+				Name: "test-node",
+				Labels: map[string]string{
+					corev1.LabelHostname: b.HostName,
 				},
 			}
 			Expect(fakeClient.Create(ctx, node)).To(Succeed())
 
 			oscSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "osc-secret",
-					Namespace: "kube-system",
-				},
+				Name:      "osc-secret",
+				Namespace: "kube-system",
 				Data: map[string][]byte{
 					"osc.yaml": []byte("test-data"),
 				},

@@ -7,7 +7,6 @@ package proxy_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeproxyv1alpha1 "k8s.io/kube-proxy/config/v1alpha1"
 
 	. "github.com/gardener/gardener/pkg/component/kubernetes/proxy"
@@ -17,10 +16,8 @@ import (
 var _ = Describe("ConfigCodec", func() {
 	var (
 		kubeProxyConfig = &kubeproxyv1alpha1.KubeProxyConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "kubeproxy.config.k8s.io/v1alpha1",
-				Kind:       "KubeProxyConfiguration",
-			},
+			APIVersion:  "kubeproxy.config.k8s.io/v1alpha1",
+			Kind:        "KubeProxyConfiguration",
 			ClusterCIDR: "1.2.3.4",
 		}
 

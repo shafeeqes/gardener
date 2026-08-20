@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -57,18 +56,16 @@ var _ = Describe("Resource Manager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, secret)).To(Succeed())
 
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        name,
-					Namespace:   namespace,
-					Annotations: annotations,
-					Labels: map[string]string{
-						"boo": "goo",
-						"one": "two",
-					},
-					ResourceVersion: "1",
+				Name:        name,
+				Namespace:   namespace,
+				Annotations: annotations,
+				Labels: map[string]string{
+					"boo": "goo",
+					"one": "two",
 				},
-				Type: corev1.SecretTypeOpaque,
-				Data: data,
+				ResourceVersion: "1",
+				Type:            corev1.SecretTypeOpaque,
+				Data:            data,
 			}))
 		})
 
@@ -87,28 +84,24 @@ var _ = Describe("Resource Manager", func() {
 			Expect(secretBuilder.Reconcile(ctx)).To(Succeed())
 
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      uniqueSecretName,
-					Namespace: namespace,
-				},
+				Name:      uniqueSecretName,
+				Namespace: namespace,
 			}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        uniqueSecretName,
-					Namespace:   namespace,
-					Annotations: annotations,
-					Labels: map[string]string{
-						"boo": "goo",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-						"one": "two",
-					},
-					ResourceVersion: "1",
+				Name:        uniqueSecretName,
+				Namespace:   namespace,
+				Annotations: annotations,
+				Labels: map[string]string{
+					"boo": "goo",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
+					"one": "two",
 				},
-				Type:      corev1.SecretTypeOpaque,
-				Data:      data,
-				Immutable: new(true),
+				ResourceVersion: "1",
+				Type:            corev1.SecretTypeOpaque,
+				Data:            data,
+				Immutable:       new(true),
 			}))
 		})
 
@@ -119,12 +112,10 @@ var _ = Describe("Resource Manager", func() {
 			)
 
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        name,
-					Namespace:   namespace,
-					Labels:      existingLabels,
-					Annotations: existingAnnotations,
-				},
+				Name:        name,
+				Namespace:   namespace,
+				Labels:      existingLabels,
+				Annotations: existingAnnotations,
 			}
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -139,14 +130,12 @@ var _ = Describe("Resource Manager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, secret)).To(Succeed())
 
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					Labels:          labels,
-					Annotations:     annotations,
-					ResourceVersion: "2",
-				},
-				Type: corev1.SecretTypeOpaque,
+				Name:            name,
+				Namespace:       namespace,
+				Labels:          labels,
+				Annotations:     annotations,
+				ResourceVersion: "2",
+				Type:            corev1.SecretTypeOpaque,
 			}))
 		})
 
@@ -159,30 +148,26 @@ var _ = Describe("Resource Manager", func() {
 			secret.WithLabels(map[string]string{"one": "two"})
 			Expect(secret.Reconcile(ctx)).To(Succeed())
 
-			actualSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace}}
+			actualSecret := &corev1.Secret{Name: secretName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualSecret), actualSecret)).To(Succeed())
 
 			Expect(actualSecret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"one": "two",
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-					},
-					ResourceVersion: "1",
+				Name:      secretName,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"one": "two",
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
 				},
-				Type:      corev1.SecretTypeOpaque,
-				Immutable: new(true),
+				ResourceVersion: "1",
+				Type:            corev1.SecretTypeOpaque,
+				Immutable:       new(true),
 			}))
 		})
 
 		It("should update the secret if it exists", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 				Data: map[string][]byte{
 					"foo": []byte("bar"),
 				},
@@ -201,12 +186,10 @@ var _ = Describe("Resource Manager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, secret)).To(Succeed())
 
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					ResourceVersion: "2",
-				},
-				Type: corev1.SecretTypeOpaque,
+				Name:            name,
+				Namespace:       namespace,
+				ResourceVersion: "2",
+				Type:            corev1.SecretTypeOpaque,
 				Data: map[string][]byte{
 					"bar": []byte("foo"),
 				},
@@ -235,29 +218,23 @@ var _ = Describe("Resource Manager", func() {
 		)
 		BeforeEach(func() {
 			secret1 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "test1",
-					Namespace:   namespace,
-					Labels:      map[string]string{"foo": "bar"},
-					Annotations: map[string]string{"foo": "bar"},
-				},
-				Data: map[string][]byte{"test": []byte("123")},
+				Name:        "test1",
+				Namespace:   namespace,
+				Labels:      map[string]string{"foo": "bar"},
+				Annotations: map[string]string{"foo": "bar"},
+				Data:        map[string][]byte{"test": []byte("123")},
 			}
 			secret2 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test2",
-					Namespace: namespace,
-					Labels:    map[string]string{"abc": "def"},
-				},
-				Data: map[string][]byte{"test": []byte("123")},
+				Name:      "test2",
+				Namespace: namespace,
+				Labels:    map[string]string{"abc": "def"},
+				Data:      map[string][]byte{"test": []byte("123")},
 			}
 			secret3 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test3",
-					Namespace: namespace,
-					Labels:    map[string]string{},
-				},
-				Data: map[string][]byte{"test": []byte("123")},
+				Name:      "test3",
+				Namespace: namespace,
+				Labels:    map[string]string{},
+				Data:      map[string][]byte{"test": []byte("123")},
 			}
 		})
 
@@ -303,13 +280,11 @@ var _ = Describe("Resource Manager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, mr)).To(Succeed())
 
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					Labels:          labels,
-					Annotations:     annotations,
-					ResourceVersion: "1",
-				},
+				Name:            name,
+				Namespace:       namespace,
+				Labels:          labels,
+				Annotations:     annotations,
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs:                   secretRefs,
 					InjectLabels:                 injectedLabels,
@@ -327,12 +302,10 @@ var _ = Describe("Resource Manager", func() {
 
 		It("should label existing managed resource secrets", func() {
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        name,
-					Namespace:   namespace,
-					Labels:      labels,
-					Annotations: annotations,
-				},
+				Name:        name,
+				Namespace:   namespace,
+				Labels:      labels,
+				Annotations: annotations,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{
 						{Name: secret1.Name},
@@ -376,12 +349,10 @@ var _ = Describe("Resource Manager", func() {
 			)
 
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        name,
-					Namespace:   namespace,
-					Labels:      existingLabels,
-					Annotations: existingAnnotations,
-				},
+				Name:        name,
+				Namespace:   namespace,
+				Labels:      existingLabels,
+				Annotations: existingAnnotations,
 			}
 			Expect(fakeClient.Create(ctx, mr)).To(Succeed())
 
@@ -396,13 +367,11 @@ var _ = Describe("Resource Manager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, mr)).To(Succeed())
 
 			Expect(mr).To(Equal(&resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					Labels:          utils.MergeStringMaps(existingLabels, labels),
-					Annotations:     utils.MergeStringMaps(existingAnnotations, annotations),
-					ResourceVersion: "2",
-				},
+				Name:            name,
+				Namespace:       namespace,
+				Labels:          utils.MergeStringMaps(existingLabels, labels),
+				Annotations:     utils.MergeStringMaps(existingAnnotations, annotations),
+				ResourceVersion: "2",
 			}))
 		})
 
@@ -413,12 +382,10 @@ var _ = Describe("Resource Manager", func() {
 			)
 
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        name,
-					Namespace:   namespace,
-					Labels:      existingLabels,
-					Annotations: existingAnnotations,
-				},
+				Name:        name,
+				Namespace:   namespace,
+				Labels:      existingLabels,
+				Annotations: existingAnnotations,
 			}
 			Expect(fakeClient.Create(ctx, mr)).To(Succeed())
 
@@ -434,22 +401,18 @@ var _ = Describe("Resource Manager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, mr)).To(Succeed())
 
 			Expect(mr).To(Equal(&resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name,
-					Namespace:       namespace,
-					Labels:          utils.MergeStringMaps(existingLabels, labels),
-					Annotations:     utils.MergeStringMaps(existingAnnotations, annotations),
-					ResourceVersion: "2",
-				},
+				Name:            name,
+				Namespace:       namespace,
+				Labels:          utils.MergeStringMaps(existingLabels, labels),
+				Annotations:     utils.MergeStringMaps(existingAnnotations, annotations),
+				ResourceVersion: "2",
 			}))
 		})
 
 		It("should fail updating the managed resource if it doesn't exists", func() {
 			mr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 			}
 
 			Expect(

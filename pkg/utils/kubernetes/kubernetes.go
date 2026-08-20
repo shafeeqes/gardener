@@ -161,7 +161,7 @@ func WaitUntilLoadBalancerIsReady(
 ) {
 	var (
 		loadBalancerIngress string
-		service             = &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace}}
+		service             = &corev1.Service{Name: name, Namespace: namespace}
 	)
 
 	log = log.WithValues("service", client.ObjectKeyFromObject(service))

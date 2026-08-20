@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1 "github.com/gardener/gardener/pkg/apis/core/v1"
@@ -135,7 +134,7 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 					{
 						NewObject: func() client.Object {
 							return &corev1.Secret{
-								ObjectMeta: metav1.ObjectMeta{GenerateName: "test-foo-", Namespace: "default"},
+								GenerateName: "test-foo-", Namespace: "default",
 								StringData: map[string]string{"content": "foo"},
 							}
 						},
@@ -144,7 +143,7 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 					{
 						NewObject: func() client.Object {
 							return &gardencorev1beta1.InternalSecret{
-								ObjectMeta: metav1.ObjectMeta{GenerateName: "test-foo-", Namespace: "default"},
+								GenerateName: "test-foo-", Namespace: "default",
 								StringData: map[string]string{"content": "foo"},
 							}
 						},
@@ -153,8 +152,8 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 					{
 						NewObject: func() client.Object {
 							return &gardencorev1beta1.ShootState{
-								ObjectMeta: metav1.ObjectMeta{GenerateName: "test-foo-", Namespace: "default"},
-								Spec:       gardencorev1beta1.ShootStateSpec{Gardener: []gardencorev1beta1.GardenerResourceData{{Name: "foo"}}},
+								GenerateName: "test-foo-", Namespace: "default",
+								Spec: gardencorev1beta1.ShootStateSpec{Gardener: []gardencorev1beta1.GardenerResourceData{{Name: "foo"}}},
 							}
 						},
 						NewEmptyList: func() client.ObjectList { return &gardencorev1beta1.ShootStateList{} },
@@ -162,7 +161,7 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 					{
 						NewObject: func() client.Object {
 							return &gardencorev1.ControllerDeployment{
-								ObjectMeta: metav1.ObjectMeta{GenerateName: "test-foo-", Namespace: "default"},
+								GenerateName: "test-foo-", Namespace: "default",
 								Helm: &gardencorev1.HelmControllerDeployment{
 									RawChart: []byte("foo"),
 								},
@@ -175,8 +174,8 @@ var _ = Describe("Garden Tests", Label("Garden", "default"), func() {
 							suffix, err := utils.GenerateRandomString(5)
 							Expect(err).NotTo(HaveOccurred())
 							return &gardencorev1beta1.ControllerRegistration{
-								ObjectMeta: metav1.ObjectMeta{GenerateName: "test-foo-", Namespace: "default"},
-								Spec:       gardencorev1beta1.ControllerRegistrationSpec{Resources: []gardencorev1beta1.ControllerResource{{Kind: "Infrastructure", Type: "test-foo-" + suffix}}},
+								GenerateName: "test-foo-", Namespace: "default",
+								Spec: gardencorev1beta1.ControllerRegistrationSpec{Resources: []gardencorev1beta1.ControllerResource{{Kind: "Infrastructure", Type: "test-foo-" + suffix}}},
 							}
 						},
 						NewEmptyList: func() client.ObjectList { return &gardencorev1beta1.ControllerRegistrationList{} },

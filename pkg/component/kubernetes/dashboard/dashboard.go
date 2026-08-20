@@ -111,20 +111,16 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		controlledValues = vpaautoscalingv1.ContainerControlledValuesRequestsOnly
 
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: v1beta1constants.KubernetesDashboardNamespace,
-				Labels: map[string]string{
-					v1beta1constants.GardenerPurpose: name,
-				},
+			Name: v1beta1constants.KubernetesDashboardNamespace,
+			Labels: map[string]string{
+				v1beta1constants.GardenerPurpose: name,
 			},
 		}
 
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
+			Name:      name,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups:     []string{""},
@@ -154,13 +150,11 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name:      name,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -177,10 +171,8 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: map[string]string{labelKey: name},
-			},
+			Name:   name,
+			Labels: map[string]string{labelKey: name},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"metrics.k8s.io"},
@@ -191,11 +183,9 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-				Annotations: map[string]string{
-					resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
-				},
+			Name: name,
+			Annotations: map[string]string{
+				resourcesv1alpha1.DeleteOnInvalidUpdate: "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -212,58 +202,46 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
+			Name:                         name,
+			Namespace:                    v1beta1constants.KubernetesDashboardNamespace,
+			Labels:                       map[string]string{labelKey: name},
 			AutomountServiceAccountToken: new(false),
 		}
 
 		secretCerts = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-certs",
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
-			Type: corev1.SecretTypeOpaque,
+			Name:      "kubernetes-dashboard-certs",
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
+			Type:      corev1.SecretTypeOpaque,
 		}
 
 		secretCSRF = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-csrf",
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
-			Type: corev1.SecretTypeOpaque,
+			Name:      "kubernetes-dashboard-csrf",
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
+			Type:      corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
 				"csrf": {},
 			},
 		}
 
 		secretKeyHolder = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-key-holder",
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
-			Type: corev1.SecretTypeOpaque,
+			Name:      "kubernetes-dashboard-key-holder",
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
+			Type:      corev1.SecretTypeOpaque,
 		}
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes-dashboard-settings",
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
+			Name:      "kubernetes-dashboard-settings",
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
 		}
 
 		deploymentDashboard = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.DeploymentNameKubernetesDashboard,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    getLabels(name),
-			},
+			Name:      v1beta1constants.DeploymentNameKubernetesDashboard,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    getLabels(name),
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Replicas:             new(int32(1)),
@@ -309,12 +287,10 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 									},
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Scheme: corev1.URISchemeHTTPS,
-											Path:   "/",
-											Port:   intstr.FromInt32(8443),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Scheme: corev1.URISchemeHTTPS,
+										Path:   "/",
+										Port:   intstr.FromInt32(8443),
 									},
 									InitialDelaySeconds: int32(30),
 									TimeoutSeconds:      int32(30),
@@ -348,18 +324,14 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 						Volumes: []corev1.Volume{
 							{
 								Name: "kubernetes-dashboard-certs",
-								VolumeSource: corev1.VolumeSource{
-									// #nosec: G101 -- This references a secret name, not a credential.
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: "kubernetes-dashboard-certs",
-									},
+								// #nosec: G101 -- This references a secret name, not a credential.
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "kubernetes-dashboard-certs",
 								},
 							},
 							{
-								Name: "tmp-volume",
-								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{},
-								},
+								Name:     "tmp-volume",
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
 						},
 					},
@@ -368,11 +340,9 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		deploymentMetricsScraper = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.DeploymentNameDashboardMetricsScraper,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    getLabels(scraperName),
-			},
+			Name:      v1beta1constants.DeploymentNameDashboardMetricsScraper,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    getLabels(scraperName),
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Replicas:             new(int32(1)),
@@ -399,12 +369,10 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 									},
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Scheme: corev1.URISchemeHTTP,
-											Path:   "/",
-											Port:   intstr.FromInt32(8000),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Scheme: corev1.URISchemeHTTP,
+										Path:   "/",
+										Port:   intstr.FromInt32(8000),
 									},
 									InitialDelaySeconds: int32(30),
 									TimeoutSeconds:      int32(30),
@@ -430,10 +398,8 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 						ServiceAccountName: name,
 						Volumes: []corev1.Volume{
 							{
-								Name: "tmp-volume",
-								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{},
-								},
+								Name:     "tmp-volume",
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
 						},
 					},
@@ -442,11 +408,9 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		serviceDashboard = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: name},
-			},
+			Name:      name,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: name},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
 					{
@@ -459,11 +423,9 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 		}
 
 		serviceMetricsScraper = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      scraperName,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-				Labels:    map[string]string{labelKey: scraperName},
-			},
+			Name:      scraperName,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
+			Labels:    map[string]string{labelKey: scraperName},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
 					{
@@ -480,10 +442,8 @@ func (k *kubernetesDashboard) computeResourcesData() (map[string][]byte, error) 
 
 	if k.values.VPAEnabled {
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: v1beta1constants.KubernetesDashboardNamespace,
-			},
+			Name:      name,
+			Namespace: v1beta1constants.KubernetesDashboardNamespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),

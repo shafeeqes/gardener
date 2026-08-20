@@ -148,13 +148,11 @@ func (e *etcdDeployer) Deploy(ctx context.Context) error {
 						Image:           e.values.Image,
 						ImagePullPolicy: corev1.PullIfNotPresent,
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Host:   "localhost",
-									Path:   "/livez",
-									Scheme: corev1.URISchemeHTTP,
-									Port:   intstr.FromInt32(e.values.PortMetrics),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Host:   "localhost",
+								Path:   "/livez",
+								Scheme: corev1.URISchemeHTTP,
+								Port:   intstr.FromInt32(e.values.PortMetrics),
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    8,
@@ -170,13 +168,11 @@ func (e *etcdDeployer) Deploy(ctx context.Context) error {
 							},
 						},
 						StartupProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Host:   "localhost",
-									Path:   "/health",
-									Scheme: corev1.URISchemeHTTP,
-									Port:   intstr.FromInt32(e.values.PortMetrics),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Host:   "localhost",
+								Path:   "/health",
+								Scheme: corev1.URISchemeHTTP,
+								Port:   intstr.FromInt32(e.values.PortMetrics),
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    24,
@@ -219,56 +215,44 @@ func (e *etcdDeployer) Deploy(ctx context.Context) error {
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeNameData,
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									// etcds managed by etcd-druid store their data in <data-dir>/new.etcd, so let's
-									// prepare for the take-over already now
-									// new.etcd is not part of path as backup-restore init container needs to do initial cleanup
-									// of the data directory before restoring the backup, and having new.etcd in the volume path
-									// causes the cleanup to fail
-									Path: staticpodtranslator.StatefulSetVolumeClaimTemplateHostPath(etcd.Name(e.values.Role)),
-									Type: new(corev1.HostPathDirectoryOrCreate),
-								},
+							HostPath: &corev1.HostPathVolumeSource{
+								// etcds managed by etcd-druid store their data in <data-dir>/new.etcd, so let's
+								// prepare for the take-over already now
+								// new.etcd is not part of path as backup-restore init container needs to do initial cleanup
+								// of the data directory before restoring the backup, and having new.etcd in the volume path
+								// causes the cleanup to fail
+								Path: staticpodtranslator.StatefulSetVolumeClaimTemplateHostPath(etcd.Name(e.values.Role)),
+								Type: new(corev1.HostPathDirectoryOrCreate),
 							},
 						},
 						{
 							Name: volumeNameETCDCA,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: etcdCASecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: etcdCASecret.Name,
 							},
 						},
 						{
 							Name: volumeNamePeerCA,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: etcdPeerCASecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: etcdPeerCASecret.Name,
 							},
 						},
 						{
 							Name: volumeNameServerTLS,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: serverSecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: serverSecret.Name,
 							},
 						},
 						{
 							Name: volumeNameClientTLS,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: clientSecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: clientSecret.Name,
 							},
 						},
 						{
 							Name: volumeNamePeerServerTLS,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: peerServerSecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: peerServerSecret.Name,
 							},
 						},
 					},
@@ -292,7 +276,7 @@ func (e *etcdDeployer) Destroy(_ context.Context) error {
 }
 
 func (e *etcdDeployer) emptyStatefulSet() *appsv1.StatefulSet {
-	return &appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Name: Name(e.values.Role), Namespace: e.namespace}}
+	return &appsv1.StatefulSet{Name: Name(e.values.Role), Namespace: e.namespace}
 }
 
 func (e *etcdDeployer) labels() map[string]string {

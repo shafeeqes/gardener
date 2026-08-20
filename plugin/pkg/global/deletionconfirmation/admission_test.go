@@ -61,24 +61,18 @@ var _ = Describe("deleteconfirmation", func() {
 			shootStateStore = coreInformerFactory.Core().V1beta1().ShootStates().Informer().GetStore()
 
 			shoot = gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "dummy",
-					Namespace: "dummy",
-				},
+				Name:      "dummy",
+				Namespace: "dummy",
 			}
 			project = gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "dummy",
-				},
+				Name: "dummy",
 				Spec: gardencorev1beta1.ProjectSpec{
 					Namespace: new("dummy"),
 				},
 			}
 			shootState = gardencorev1beta1.ShootState{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "dummy",
-					Namespace: "dummy",
-				},
+				Name:      "dummy",
+				Namespace: "dummy",
 			}
 
 			userInfo = &user.DefaultInfo{Name: userName}
@@ -261,12 +255,10 @@ var _ = Describe("deleteconfirmation", func() {
 						Expect(shootStore.Add(&shoot)).NotTo(HaveOccurred())
 						gardenClient.AddReactor("get", "shoots", func(_ testing.Action) (bool, runtime.Object, error) {
 							return true, &gardencorev1beta1.Shoot{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shoot.Name,
-									Namespace: shoot.Namespace,
-									Annotations: map[string]string{
-										"confirmation.gardener.cloud/deletion": "true",
-									},
+								Name:      shoot.Name,
+								Namespace: shoot.Namespace,
+								Annotations: map[string]string{
+									"confirmation.gardener.cloud/deletion": "true",
 								},
 							}, nil
 						})
@@ -496,11 +488,9 @@ var _ = Describe("deleteconfirmation", func() {
 
 						gardenClient.AddReactor("get", "projects", func(_ testing.Action) (bool, runtime.Object, error) {
 							return true, &gardencorev1beta1.Project{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: project.Name,
-									Annotations: map[string]string{
-										"confirmation.gardener.cloud/deletion": "true",
-									},
+								Name: project.Name,
+								Annotations: map[string]string{
+									"confirmation.gardener.cloud/deletion": "true",
 								},
 							}, nil
 						})
@@ -598,12 +588,10 @@ var _ = Describe("deleteconfirmation", func() {
 						Expect(shootStateStore.Add(&shootState)).NotTo(HaveOccurred())
 						gardenClient.AddReactor("get", "shootstates", func(_ testing.Action) (bool, runtime.Object, error) {
 							return true, &gardencorev1beta1.ShootState{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      shootState.Name,
-									Namespace: shootState.Namespace,
-									Annotations: map[string]string{
-										"confirmation.gardener.cloud/deletion": "true",
-									},
+								Name:      shootState.Name,
+								Namespace: shootState.Namespace,
+								Annotations: map[string]string{
+									"confirmation.gardener.cloud/deletion": "true",
 								},
 							}, nil
 						})

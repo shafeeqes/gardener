@@ -27,9 +27,7 @@ var _ = Describe("Extension Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create Extension")
 			extension = &operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: extensionName,
-				},
+				Name: extensionName,
 			}
 			Expect(testClient.Create(ctx, extension)).To(Succeed())
 			log.Info("Created Extension for test", "extension", client.ObjectKeyFromObject(extension))
@@ -45,15 +43,13 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete Extension")
-				Expect(testClient.Delete(ctx, &operatorv1alpha1.Extension{ObjectMeta: metav1.ObjectMeta{Name: extensionName}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &operatorv1alpha1.Extension{Name: extensionName})).To(Succeed())
 			})
 
 			By("Create ManagedResource for runtime cluster")
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: testNamespace.Name,
-				},
+				Name:      managedResourceName,
+				Namespace: testNamespace.Name,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class:      new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{Name: "foo-secret"}},
@@ -64,7 +60,7 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource for extension in runtime cluster")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: testNamespace.Name}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: testNamespace.Name})).To(Succeed())
 			})
 		})
 
@@ -105,9 +101,7 @@ var _ = Describe("Extension Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create Extension")
 			extension = &operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: extensionName,
-				},
+				Name: extensionName,
 				Spec: operatorv1alpha1.ExtensionSpec{
 					Deployment: &operatorv1alpha1.Deployment{
 						AdmissionDeployment: &operatorv1alpha1.AdmissionDeploymentSpec{},
@@ -119,15 +113,13 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete Extension")
-				Expect(testClient.Delete(ctx, &operatorv1alpha1.Extension{ObjectMeta: metav1.ObjectMeta{Name: extensionName}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &operatorv1alpha1.Extension{Name: extensionName})).To(Succeed())
 			})
 
 			By("Create ManagedResource for runtime cluster")
 			managedResourceRuntime := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceRuntimeName,
-					Namespace: testNamespace.Name,
-				},
+				Name:      managedResourceRuntimeName,
+				Namespace: testNamespace.Name,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class:      new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{Name: "bar-runtime-secret"}},
@@ -138,15 +130,13 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource for extension admission in runtime cluster")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceRuntimeName, Namespace: testNamespace.Name}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceRuntimeName, Namespace: testNamespace.Name})).To(Succeed())
 			})
 
 			By("Create ManagedResource for virtual cluster")
 			managedResourceVirtual := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceVirtualName,
-					Namespace: testNamespace.Name,
-				},
+				Name:      managedResourceVirtualName,
+				Namespace: testNamespace.Name,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{{Name: "bar-virtual-secret"}},
 				},
@@ -156,7 +146,7 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ManagedResource for extension admission in virtual cluster")
-				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceVirtualName, Namespace: testNamespace.Name}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &resourcesv1alpha1.ManagedResource{Name: managedResourceVirtualName, Namespace: testNamespace.Name})).To(Succeed())
 			})
 		})
 
@@ -227,9 +217,7 @@ var _ = Describe("Extension Care controller tests", func() {
 		BeforeEach(func() {
 			By("Create Extension")
 			extension = &operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: extensionName,
-				},
+				Name: extensionName,
 			}
 			Expect(testClient.Create(ctx, extension)).To(Succeed())
 			log.Info("Created Extension for test", "extension", client.ObjectKeyFromObject(extension))
@@ -245,28 +233,24 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete Extension")
-				Expect(testClient.Delete(ctx, &operatorv1alpha1.Extension{ObjectMeta: metav1.ObjectMeta{Name: extensionName}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &operatorv1alpha1.Extension{Name: extensionName})).To(Succeed())
 			})
 
 			By("Create ControllerRegistration")
 			controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foobar",
-				},
+				Name: "foobar",
 			}
 			Expect(testClient.Create(ctx, controllerRegistration)).To(Succeed())
 			log.Info("Created ControllerRegistration", "controllerRegistration", client.ObjectKeyFromObject(controllerRegistration))
 
 			DeferCleanup(func() {
 				By("Delete ControllerRegistration")
-				Expect(testClient.Delete(ctx, &gardencorev1beta1.ControllerRegistration{ObjectMeta: metav1.ObjectMeta{Name: controllerRegistration.Name}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &gardencorev1beta1.ControllerRegistration{Name: controllerRegistration.Name})).To(Succeed())
 			})
 
 			By("Create ControllerInstallation")
 			controllerInstallation := &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: controllerinstallationName,
-				},
+				Name: controllerinstallationName,
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					RegistrationRef: corev1.ObjectReference{
 						Name:            controllerRegistration.Name,
@@ -283,7 +267,7 @@ var _ = Describe("Extension Care controller tests", func() {
 
 			DeferCleanup(func() {
 				By("Delete ControllerInstallation")
-				Expect(testClient.Delete(ctx, &gardencorev1beta1.ControllerInstallation{ObjectMeta: metav1.ObjectMeta{Name: controllerinstallationName}})).To(Succeed())
+				Expect(testClient.Delete(ctx, &gardencorev1beta1.ControllerInstallation{Name: controllerinstallationName})).To(Succeed())
 			})
 		})
 
@@ -321,7 +305,7 @@ var _ = Describe("Extension Care controller tests", func() {
 
 func updateManagedResourceStatusToHealthy(name string) {
 	By("Update status to healthy for ManagedResource " + name)
-	managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: testNamespace.Name}}
+	managedResource := &resourcesv1alpha1.ManagedResource{Name: name, Namespace: testNamespace.Name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
 	managedResource.Status.ObservedGeneration = managedResource.Generation
@@ -335,7 +319,7 @@ func updateManagedResourceStatusToHealthy(name string) {
 
 func updateControllerInstallationStatusToHealthy(name string) {
 	By("Update status to healthy for ControllerInstallation " + name)
-	controllerInstallation := &gardencorev1beta1.ControllerInstallation{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	controllerInstallation := &gardencorev1beta1.ControllerInstallation{Name: name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(controllerInstallation), controllerInstallation)).To(Succeed())
 
 	controllerInstallation.Status.Conditions = []gardencorev1beta1.Condition{
@@ -349,7 +333,7 @@ func updateControllerInstallationStatusToHealthy(name string) {
 
 func updateControllerInstallationToOutdated(name string) {
 	By("Update ControllerInstallation " + name + " to outdated")
-	controllerInstallation := &gardencorev1beta1.ControllerInstallation{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	controllerInstallation := &gardencorev1beta1.ControllerInstallation{Name: name}
 	ExpectWithOffset(1, testClient.Get(ctx, client.ObjectKeyFromObject(controllerInstallation), controllerInstallation)).To(Succeed())
 
 	controllerInstallation.Spec.RegistrationRef.ResourceVersion = "0"

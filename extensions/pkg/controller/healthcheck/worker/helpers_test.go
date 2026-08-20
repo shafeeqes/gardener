@@ -169,9 +169,7 @@ var _ = Describe("health", func() {
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						DeletionTimestamp: &now,
-					},
+					DeletionTimestamp: &now,
 					Spec: machinev1alpha1.MachineDeploymentSpec{
 						Replicas: 2,
 					},
@@ -185,9 +183,7 @@ var _ = Describe("health", func() {
 			now := metav1.NewTime(time.Now())
 			machineDeployments := []machinev1alpha1.MachineDeployment{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						DeletionTimestamp: &now,
-					},
+					DeletionTimestamp: &now,
 					Spec: machinev1alpha1.MachineDeploymentSpec{
 						Replicas: 3,
 					},

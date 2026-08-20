@@ -728,10 +728,8 @@ var _ = Describe("Add", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			obj = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: v1beta1constants.GardenNamespace,
-					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference},
-				},
+				Namespace: v1beta1constants.GardenNamespace,
+				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference},
 			}
 		})
 

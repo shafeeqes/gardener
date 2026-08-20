@@ -194,10 +194,8 @@ func (s *service) Wait(ctx context.Context) error {
 	return s.waiter.Until(ctx, DefaultInterval, func(ctx context.Context) (done bool, err error) {
 		// this ingress can be either the kube-apiserver's service or istio's IGW loadbalancer.
 		svc := &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      s.loadBalancerServiceKeyFunc().Name,
-				Namespace: s.loadBalancerServiceKeyFunc().Namespace,
-			},
+			Name:      s.loadBalancerServiceKeyFunc().Name,
+			Namespace: s.loadBalancerServiceKeyFunc().Namespace,
 		}
 
 		loadBalancerIngress, err := kubernetesutils.GetLoadBalancerIngress(ctx, s.client, svc)
@@ -216,7 +214,7 @@ func (s *service) WaitCleanup(ctx context.Context) error {
 }
 
 func (s *service) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: s.values.namePrefix + v1beta1constants.DeploymentNameKubeAPIServer + s.values.nameSuffix, Namespace: s.namespace}}
+	return &corev1.Service{Name: s.values.namePrefix + v1beta1constants.DeploymentNameKubeAPIServer + s.values.nameSuffix, Namespace: s.namespace}
 }
 
 func getLabels() map[string]string {

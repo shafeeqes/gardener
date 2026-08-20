@@ -31,19 +31,15 @@ func newCustomResourceStateGaugeMetricForVPA(path, valueFrom []string, help, uni
 	return customresourcestate.Generator{
 		Name: newCustomResourceStateMetricNameForVPA(path, valueFrom),
 		Help: help,
-		Labels: customresourcestate.Labels{
-			CommonLabels: map[string]string{
-				"unit": unit,
-			},
+		CommonLabels: map[string]string{
+			"unit": unit,
 		},
 		Each: customresourcestate.Metric{
 			Type: metric.Gauge,
 			Gauge: &customresourcestate.MetricGauge{
-				MetricMeta: customresourcestate.MetricMeta{
-					Path: path,
-					LabelsFromPath: map[string][]string{
-						"container": {"containerName"},
-					},
+				Path: path,
+				LabelsFromPath: map[string][]string{
+					"container": {"containerName"},
 				},
 				ValueFrom: valueFrom,
 				NilIsZero: true,
@@ -59,14 +55,12 @@ func newCustomResourceStateMetricsForVPA() customresourcestate.Resource {
 			Kind:    "VerticalPodAutoscaler",
 			Version: "v1",
 		},
-		Labels: customresourcestate.Labels{
-			LabelsFromPath: map[string][]string{
-				"verticalpodautoscaler": {"metadata", "name"},
-				"namespace":             {"metadata", "namespace"},
-				"target_api_version":    {"spec", "targetRef", "apiVersion"},
-				"target_kind":           {"spec", "targetRef", "kind"},
-				"target_name":           {"spec", "targetRef", "name"},
-			},
+		LabelsFromPath: map[string][]string{
+			"verticalpodautoscaler": {"metadata", "name"},
+			"namespace":             {"metadata", "namespace"},
+			"target_api_version":    {"spec", "targetRef", "apiVersion"},
+			"target_kind":           {"spec", "targetRef", "kind"},
+			"target_name":           {"spec", "targetRef", "name"},
 		},
 	}
 
@@ -115,9 +109,7 @@ func newCustomResourceStateMetricsForVPA() customresourcestate.Resource {
 		Each: customresourcestate.Metric{
 			Type: metric.StateSet,
 			StateSet: &customresourcestate.MetricStateSet{
-				MetricMeta: customresourcestate.MetricMeta{
-					Path: path,
-				},
+				Path:      path,
 				LabelName: "update_mode",
 				List:      []string{"Off", "Initial", "Recreate", "Auto"},
 			},
@@ -137,10 +129,8 @@ func newGardenCustomResourceStateMetrics() customresourcestate.Resource {
 			Version: "v1alpha1",
 		},
 		MetricNamePrefix: &gardenMetricNamePrefix,
-		Labels: customresourcestate.Labels{
-			LabelsFromPath: map[string][]string{
-				"name": {"metadata", "name"},
-			},
+		LabelsFromPath: map[string][]string{
+			"name": {"metadata", "name"},
 		},
 	}
 
@@ -153,12 +143,10 @@ func newGardenCustomResourceStateMetrics() customresourcestate.Resource {
 				LabelName: "status",
 				List:      []string{"Progressing", "True", "False", "Unknown"},
 				ValueFrom: []string{"status"},
-				MetricMeta: customresourcestate.MetricMeta{
-					LabelsFromPath: map[string][]string{
-						"condition": {"type"},
-					},
-					Path: []string{"status", "conditions"},
+				LabelsFromPath: map[string][]string{
+					"condition": {"type"},
 				},
+				Path: []string{"status", "conditions"},
 			},
 		},
 	})
@@ -172,11 +160,9 @@ func newGardenCustomResourceStateMetrics() customresourcestate.Resource {
 				LabelName: "state",
 				List:      []string{"Processing", "Succeeded", "Error", "Failed", "Pending", "Aborted"},
 				ValueFrom: []string{"state"},
-				MetricMeta: customresourcestate.MetricMeta{
-					Path: []string{"status", "lastOperation"},
-					LabelsFromPath: map[string][]string{
-						"type": {"type"},
-					},
+				Path:      []string{"status", "lastOperation"},
+				LabelsFromPath: map[string][]string{
+					"type": {"type"},
 				},
 			},
 		},
@@ -193,10 +179,8 @@ func newOperatorExtensionCustomResourceStateMetrics() customresourcestate.Resour
 			Version: "v1alpha1",
 		},
 		MetricNamePrefix: new("garden"),
-		Labels: customresourcestate.Labels{
-			LabelsFromPath: map[string][]string{
-				"name": {"metadata", "name"},
-			},
+		LabelsFromPath: map[string][]string{
+			"name": {"metadata", "name"},
 		},
 	}
 
@@ -209,12 +193,10 @@ func newOperatorExtensionCustomResourceStateMetrics() customresourcestate.Resour
 				LabelName: "status",
 				List:      []string{"Progressing", "True", "False", "Unknown"},
 				ValueFrom: []string{"status"},
-				MetricMeta: customresourcestate.MetricMeta{
-					LabelsFromPath: map[string][]string{
-						"condition": {"type"},
-					},
-					Path: []string{"status", "conditions"},
+				LabelsFromPath: map[string][]string{
+					"condition": {"type"},
 				},
+				Path: []string{"status", "conditions"},
 			},
 		},
 	})

@@ -45,9 +45,7 @@ var _ = Describe("ExtensionValidator", func() {
 
 	Context("BackupBucket", func() {
 		var backupBucket = &core.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "bb",
-			},
+			Name: "bb",
 			Spec: core.BackupBucketSpec{
 				Provider: core.BackupBucketProvider{
 					Type: "foo",
@@ -105,9 +103,7 @@ var _ = Describe("ExtensionValidator", func() {
 	Context("BackupEntry", func() {
 		var (
 			backupBucket = &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "bb",
-				},
+				Name: "bb",
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					Provider: gardencorev1beta1.BackupBucketProvider{
 						Type: "foo",
@@ -115,9 +111,7 @@ var _ = Describe("ExtensionValidator", func() {
 				},
 			}
 			backupEntry = &core.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "be",
-				},
+				Name: "be",
 				Spec: core.BackupEntrySpec{
 					BucketName: backupBucket.Name,
 				},
@@ -176,9 +170,7 @@ var _ = Describe("ExtensionValidator", func() {
 	Context("Seed", func() {
 		var (
 			seed = &core.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "seed",
-				},
+				Name: "seed",
 				Spec: core.SeedSpec{
 					Provider: core.SeedProvider{
 						Type: "foo",
@@ -292,9 +284,7 @@ var _ = Describe("ExtensionValidator", func() {
 
 	Context("Shoot", func() {
 		var shoot = &core.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "shoot",
-			},
+			Name: "shoot",
 			Spec: core.ShootSpec{
 				DNS: &core.DNS{
 					Providers: []core.DNSProvider{
@@ -549,9 +539,7 @@ var _ = Describe("ExtensionValidator", func() {
 
 func createControllerRegistrationForKindType(extensionKind, extensionType string, primary bool, workerlessSupported *bool, clusterCompatibility ...gardencorev1beta1.ClusterType) *gardencorev1beta1.ControllerRegistration {
 	return &gardencorev1beta1.ControllerRegistration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: extensionKind + extensionType,
-		},
+		Name: extensionKind + extensionType,
 		Spec: gardencorev1beta1.ControllerRegistrationSpec{
 			Resources: []gardencorev1beta1.ControllerResource{
 				{

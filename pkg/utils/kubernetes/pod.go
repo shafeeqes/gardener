@@ -171,7 +171,7 @@ func GetDeploymentForPod(ctx context.Context, reader client.Reader, namespace st
 		return nil, nil
 	}
 
-	replicaSet := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{Name: replicaSetName, Namespace: namespace}}
+	replicaSet := &metav1.PartialObjectMetadata{Name: replicaSetName, Namespace: namespace}
 	replicaSet.SetGroupVersionKind(appsv1.SchemeGroupVersion.WithKind("ReplicaSet"))
 	if err := reader.Get(ctx, client.ObjectKeyFromObject(replicaSet), replicaSet); err != nil {
 		return nil, fmt.Errorf("failed reading ReplicaSet %s: %w", client.ObjectKeyFromObject(replicaSet), err)
@@ -188,7 +188,7 @@ func GetDeploymentForPod(ctx context.Context, reader client.Reader, namespace st
 		return nil, nil
 	}
 
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: replicaSet.Namespace}}
+	deployment := &appsv1.Deployment{Name: deploymentName, Namespace: replicaSet.Namespace}
 	if err := reader.Get(ctx, client.ObjectKeyFromObject(deployment), deployment); err != nil {
 		return nil, fmt.Errorf("failed reading Deployment %s: %w", client.ObjectKeyFromObject(deployment), err)
 	}

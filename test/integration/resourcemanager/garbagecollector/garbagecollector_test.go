@@ -63,13 +63,11 @@ var _ = Describe("Garbage collector tests", func() {
 	It("should only garbage collect unreferenced resources", func() {
 		referencingResources := []client.Object{
 			&monitoringv1.Prometheus{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret0",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap8",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret0",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap8",
 				},
 				Spec: monitoringv1.PrometheusSpec{
 					CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
@@ -88,13 +86,11 @@ var _ = Describe("Garbage collector tests", func() {
 			},
 
 			&appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret1",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap7",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret1",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap7",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Template: podTemplateSpec(corev1.RestartPolicyAlways),
@@ -103,13 +99,11 @@ var _ = Describe("Garbage collector tests", func() {
 			},
 
 			&appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret2",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap6",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret2",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap6",
 				},
 				Spec: appsv1.StatefulSetSpec{
 					Template: podTemplateSpec(corev1.RestartPolicyAlways),
@@ -118,13 +112,11 @@ var _ = Describe("Garbage collector tests", func() {
 			},
 
 			&appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret3",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap5",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret3",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap5",
 				},
 				Spec: appsv1.DaemonSetSpec{
 					Template: podTemplateSpec(corev1.RestartPolicyAlways),
@@ -133,13 +125,11 @@ var _ = Describe("Garbage collector tests", func() {
 			},
 
 			&batchv1.Job{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret4",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap4",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret4",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap4",
 				},
 				Spec: batchv1.JobSpec{
 					Template: podTemplateSpec(corev1.RestartPolicyNever),
@@ -147,13 +137,11 @@ var _ = Describe("Garbage collector tests", func() {
 			},
 
 			&batchv1.CronJob{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret5",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap3",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret5",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap3",
 				},
 				Spec: batchv1.CronJobSpec{
 					Schedule: "5 4 * * *",
@@ -166,25 +154,21 @@ var _ = Describe("Garbage collector tests", func() {
 			},
 
 			&corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret6",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap2",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret6",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap2",
 				},
 				Spec: podTemplateSpec(corev1.RestartPolicyAlways).Spec,
 			},
 
 			&resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: testNamespace.Name,
-					Annotations: map[string]string{
-						"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret7",
-						"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap1",
-					},
+				Name:      resourceName,
+				Namespace: testNamespace.Name,
+				Annotations: map[string]string{
+					"reference.resources.gardener.cloud/secret-foo":    resourceName + "-secret7",
+					"reference.resources.gardener.cloud/configmap-foo": resourceName + "-configmap1",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{{Name: resourceName + "-secret7"}},
@@ -259,9 +243,7 @@ func objectMeta(name string, testLabels map[string]string) metav1.ObjectMeta {
 
 func podTemplateSpec(restartPolicy corev1.RestartPolicy) corev1.PodTemplateSpec {
 	return corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{"foo": "bar"},
-		},
+		Labels: map[string]string{"foo": "bar"},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{
 				Name:  "foo",

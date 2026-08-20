@@ -15,7 +15,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -50,10 +49,8 @@ var _ = Describe("Add", func() {
 		}
 
 		backupEntry = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      entryName,
-				Namespace: projectNamespace,
-			},
+			Name:      entryName,
+			Namespace: projectNamespace,
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				SeedName: new("seed"),
 			},
@@ -71,26 +68,18 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			extensionBackupEntry = &extensionsv1alpha1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: entryName,
-				},
+				Name: entryName,
 			}
 
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: shootTechnicalID,
-				},
+				Name: shootTechnicalID,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Object: &gardencorev1beta1.Shoot{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: "core.gardener.cloud/v1beta1",
-								Kind:       "Shoot",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      shootName,
-								Namespace: projectNamespace,
-							},
+							APIVersion: "core.gardener.cloud/v1beta1",
+							Kind:       "Shoot",
+							Name:       shootName,
+							Namespace:  projectNamespace,
 						},
 					},
 				},
@@ -109,7 +98,7 @@ var _ = Describe("Add", func() {
 		It("should return a request with the core.gardener.cloud/v1beta1.BackupEntry name and namespace", func() {
 			Expect(fakeClient.Create(ctx, cluster)).To(Succeed())
 			Expect(reconciler.MapExtensionBackupEntryToCoreBackupEntry(log)(ctx, extensionBackupEntry)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: backupEntry.Name, Namespace: backupEntry.Namespace}},
+				reconcile.Request{Name: backupEntry.Name, Namespace: backupEntry.Namespace},
 			))
 		})
 
@@ -132,13 +121,13 @@ var _ = Describe("Add", func() {
 
 		It("should return nil for backup entries created by gardener-operator", func() {
 			Expect(reconciler.MapExtensionBackupEntryToCoreBackupEntry(log)(ctx, &extensionsv1alpha1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{Name: "garden--gardenUID"},
+				Name: "garden--gardenUID",
 			})).To(BeNil())
 		})
 
 		It("should return nil for backup entries created by the shoot gardenlet of a self-hosted shoot", func() {
 			Expect(reconciler.MapExtensionBackupEntryToCoreBackupEntry(log)(ctx, &extensionsv1alpha1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{Name: "kube-system--shootUID"},
+				Name: "kube-system--shootUID",
 			})).To(BeNil())
 		})
 	})
@@ -156,36 +145,28 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			backupBucket = &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "bucket",
-				},
+				Name: "bucket",
 			}
 
 			backupEntry1 = &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "entry-1",
-					Namespace: "garden-test1",
-				},
+				Name:      "entry-1",
+				Namespace: "garden-test1",
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					BucketName: backupBucket.Name,
 				},
 			}
 
 			backupEntry2 = &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "entry-2",
-					Namespace: "garden-test2",
-				},
+				Name:      "entry-2",
+				Namespace: "garden-test2",
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					BucketName: "random-bucket",
 				},
 			}
 
 			backupEntry3 = &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "entry-3",
-					Namespace: "garden-test3",
-				},
+				Name:      "entry-3",
+				Namespace: "garden-test3",
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					BucketName: backupBucket.Name,
 				},
@@ -213,8 +194,8 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, backupEntry3)).To(Succeed())
 
 			Expect(reconciler.MapBackupBucketToBackupEntry(log)(ctx, backupBucket)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: backupEntry1.Name, Namespace: backupEntry1.Namespace}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: backupEntry3.Name, Namespace: backupEntry3.Namespace}},
+				reconcile.Request{Name: backupEntry1.Name, Namespace: backupEntry1.Namespace},
+				reconcile.Request{Name: backupEntry3.Name, Namespace: backupEntry3.Namespace},
 			))
 		})
 
@@ -238,7 +219,7 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, backupEntry3)).To(Succeed())
 
 				Expect(reconciler.MapBackupBucketToBackupEntry(log)(ctx, backupBucket)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: backupEntry1.Name, Namespace: backupEntry1.Namespace}},
+					reconcile.Request{Name: backupEntry1.Name, Namespace: backupEntry1.Namespace},
 				))
 			})
 
@@ -251,7 +232,7 @@ var _ = Describe("Add", func() {
 				Expect(fakeClient.Create(ctx, backupEntry1)).To(Succeed())
 
 				Expect(reconciler.MapBackupBucketToBackupEntry(log)(ctx, backupBucket)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: backupEntry1.Name, Namespace: backupEntry1.Namespace}},
+					reconcile.Request{Name: backupEntry1.Name, Namespace: backupEntry1.Namespace},
 				))
 			})
 		})
@@ -265,10 +246,8 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			backupEntry = &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      entryName,
-					Namespace: projectNamespace,
-				},
+				Name:      entryName,
+				Namespace: projectNamespace,
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					SeedName: new("seed"),
 				},

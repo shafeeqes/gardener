@@ -46,10 +46,8 @@ var _ = Describe("Replica", func() {
 		ctx = context.TODO()
 
 		managedSeedSet = &seedmanagementv1alpha1.ManagedSeedSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: seedmanagementv1alpha1.ManagedSeedSetSpec{
 				Template: seedmanagementv1alpha1.ManagedSeedTemplate{
 					ObjectMeta: metav1.ObjectMeta{
@@ -62,11 +60,9 @@ var _ = Describe("Replica", func() {
 							Config: runtime.RawExtension{
 								Object: &gardenletconfigv1alpha1.GardenletConfiguration{
 									SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-										SeedTemplate: gardencorev1beta1.SeedTemplate{
-											Spec: gardencorev1beta1.SeedSpec{
-												Ingress: &gardencorev1beta1.Ingress{
-													Domain: "ingress.replica-name.example.com",
-												},
+										Spec: gardencorev1beta1.SeedSpec{
+											Ingress: &gardencorev1beta1.Ingress{
+												Domain: "ingress.replica-name.example.com",
 											},
 										},
 									},
@@ -115,13 +111,11 @@ var _ = Describe("Replica", func() {
 				}
 			}
 			return &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              replicaName,
-					Namespace:         namespace,
-					DeletionTimestamp: deletionTimestamp,
-					Labels:            labels,
-					Annotations:       annotations,
-				},
+				Name:              replicaName,
+				Namespace:         namespace,
+				DeletionTimestamp: deletionTimestamp,
+				Labels:            labels,
+				Annotations:       annotations,
 				Status: gardencorev1beta1.ShootStatus{
 					LastOperation: lastOperation,
 				},
@@ -140,12 +134,10 @@ var _ = Describe("Replica", func() {
 				})
 			}
 			return &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              replicaName,
-					Namespace:         namespace,
-					DeletionTimestamp: deletionTimestamp,
-					Annotations:       annotations,
-				},
+				Name:              replicaName,
+				Namespace:         namespace,
+				DeletionTimestamp: deletionTimestamp,
+				Annotations:       annotations,
 				Status: seedmanagementv1alpha1.ManagedSeedStatus{
 					Conditions: conditions,
 				},
@@ -172,10 +164,8 @@ var _ = Describe("Replica", func() {
 				})
 			}
 			return &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              replicaName,
-					DeletionTimestamp: deletionTimestamp,
-				},
+				Name:              replicaName,
+				DeletionTimestamp: deletionTimestamp,
 				Status: gardencorev1beta1.SeedStatus{
 					Conditions: conditions,
 				},

@@ -170,10 +170,8 @@ func objectMetaForBastion(bastion *extensionsv1alpha1.Bastion, technicalID strin
 
 func userDataSecretForBastion(bastion *extensionsv1alpha1.Bastion, technicalID string) *corev1.Secret {
 	return &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Secret",
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Secret",
 		ObjectMeta: objectMetaForBastion(bastion, technicalID),
 		Data: map[string][]byte{
 			"userdata": bastion.Spec.UserData,
@@ -184,10 +182,8 @@ func userDataSecretForBastion(bastion *extensionsv1alpha1.Bastion, technicalID s
 func podForBastion(bastion *extensionsv1alpha1.Bastion, technicalID, image, userDataSecretName string) *corev1.Pod {
 	objectMeta := objectMetaForBastion(bastion, technicalID)
 	return &corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Pod",
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Pod",
 		ObjectMeta: objectMeta,
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
@@ -205,10 +201,8 @@ func podForBastion(bastion *extensionsv1alpha1.Bastion, technicalID, image, user
 						},
 					},
 					ReadinessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							TCPSocket: &corev1.TCPSocketAction{
-								Port: intstr.FromString("ssh"),
-							},
+						TCPSocket: &corev1.TCPSocketAction{
+							Port: intstr.FromString("ssh"),
 						},
 					},
 					Ports: []corev1.ContainerPort{{
@@ -221,11 +215,9 @@ func podForBastion(bastion *extensionsv1alpha1.Bastion, technicalID, image, user
 			Volumes: []corev1.Volume{
 				{
 					Name: "userdata",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  userDataSecretName,
-							DefaultMode: new(int32(0o777)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  userDataSecretName,
+						DefaultMode: new(int32(0o777)),
 					},
 				},
 			},
@@ -237,10 +229,8 @@ func serviceForBastion(bastion *extensionsv1alpha1.Bastion, technicalID string) 
 	objectMeta := objectMetaForBastion(bastion, technicalID)
 
 	return &corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Service",
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Service",
 		ObjectMeta: objectMeta,
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeLoadBalancer,
@@ -259,10 +249,8 @@ func networkPolicyForBastion(bastion *extensionsv1alpha1.Bastion, technicalID st
 	objectMeta := objectMetaForBastion(bastion, technicalID)
 
 	return &networkingv1.NetworkPolicy{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: networkingv1.SchemeGroupVersion.String(),
-			Kind:       "NetworkPolicy",
-		},
+		APIVersion: networkingv1.SchemeGroupVersion.String(),
+		Kind:       "NetworkPolicy",
 		ObjectMeta: objectMeta,
 		Spec: networkingv1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{

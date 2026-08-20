@@ -225,14 +225,12 @@ var _ = Describe("Reloader", func() {
 
 func newServerSecret(name, namespace, configName, identity string, cert, key []byte) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				secretsmanager.LabelKeyName:            configName,
-				secretsmanager.LabelKeyManagedBy:       secretsmanager.LabelValueSecretsManager,
-				secretsmanager.LabelKeyManagerIdentity: identity,
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			secretsmanager.LabelKeyName:            configName,
+			secretsmanager.LabelKeyManagedBy:       secretsmanager.LabelValueSecretsManager,
+			secretsmanager.LabelKeyManagerIdentity: identity,
 		},
 		Data: map[string][]byte{
 			secretsutils.DataKeyCertificate: cert,

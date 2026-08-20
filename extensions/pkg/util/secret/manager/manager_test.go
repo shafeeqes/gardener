@@ -316,9 +316,7 @@ var _ = Describe("SecretsManager Extension Utils", func() {
 
 		BeforeEach(func() {
 			garden = &operatorv1alpha1.Garden{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-garden",
-				},
+				Name: "test-garden",
 			}
 		})
 

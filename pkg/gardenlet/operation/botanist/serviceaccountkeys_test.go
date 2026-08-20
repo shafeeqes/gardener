@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	fakerest "k8s.io/client-go/rest/fake"
@@ -72,31 +71,25 @@ var _ = Describe("ServiceAccountKeys", func() {
 				Shoot:          &shootpkg.Shoot{},
 				Garden: &garden.Garden{
 					Project: &gardencorev1beta1.Project{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "project-name",
-						},
+						Name: "project-name",
 					},
 				},
 			},
 		}
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-				UID:       "uid",
-			},
+			Name:      shootName,
+			Namespace: shootNamespace,
+			UID:       "uid",
 		})
 		expectedSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "project-name--uid",
-				Namespace:       "gardener-system-shoot-issuer",
-				ResourceVersion: "1",
-				Labels: map[string]string{
-					"shoot.gardener.cloud/namespace":  "bar",
-					"discovery.gardener.cloud/public": "serviceaccount",
-					"project.gardener.cloud/name":     "project-name",
-					"shoot.gardener.cloud/name":       "foo",
-				},
+			Name:            "project-name--uid",
+			Namespace:       "gardener-system-shoot-issuer",
+			ResourceVersion: "1",
+			Labels: map[string]string{
+				"shoot.gardener.cloud/namespace":  "bar",
+				"discovery.gardener.cloud/public": "serviceaccount",
+				"project.gardener.cloud/name":     "project-name",
+				"shoot.gardener.cloud/name":       "foo",
 			},
 			Data: map[string][]byte{
 				"jwks":          []byte("jwks"),
@@ -110,10 +103,8 @@ var _ = Describe("ServiceAccountKeys", func() {
 			Expect(botanist.SyncPublicServiceAccountKeys(ctx)).To(Succeed())
 
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "project-name--uid",
-					Namespace: "gardener-system-shoot-issuer",
-				},
+				Name:      "project-name--uid",
+				Namespace: "gardener-system-shoot-issuer",
 			}
 			Expect(gardenClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 			Expect(secret).To(Equal(expectedSecret))
@@ -121,12 +112,10 @@ var _ = Describe("ServiceAccountKeys", func() {
 
 		It("should overwrite the public info", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "project-name--uid",
-					Namespace: "gardener-system-shoot-issuer",
-					Labels: map[string]string{
-						"foo": "bar",
-					},
+				Name:      "project-name--uid",
+				Namespace: "gardener-system-shoot-issuer",
+				Labels: map[string]string{
+					"foo": "bar",
 				},
 				Data: map[string][]byte{
 					"foo": []byte("bar"),
@@ -191,11 +180,9 @@ var _ = Describe("ServiceAccountKeys", func() {
 	Describe("#DeletePublicServiceAccountKeys", func() {
 		It("should delete the public info", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "project-name--uid",
-					Namespace: "gardener-system-shoot-issuer",
-				},
-				Data: map[string][]byte{"foo": []byte("bar")},
+				Name:      "project-name--uid",
+				Namespace: "gardener-system-shoot-issuer",
+				Data:      map[string][]byte{"foo": []byte("bar")},
 			}
 			Expect(gardenClient.Create(ctx, secret)).To(Succeed())
 			Expect(botanist.DeletePublicServiceAccountKeys(ctx)).To(Succeed())

@@ -79,18 +79,16 @@ var _ = Describe("Preconditions", func() {
 			fakeClient = fakeclient.NewClientBuilder().
 				WithScheme(kubernetes.SeedScheme).
 				WithObjects(&corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: namespace,
-						Labels: map[string]string{
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot,
-						},
+					Name: namespace,
+					Labels: map[string]string{
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot,
 					},
 				}).
 				Build()
 
 			pred = ShootNotFailedPredicate(ctx, test.FakeManager{Client: fakeClient})
 
-			obj = &extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{Namespace: namespace}}
+			obj = &extensionsv1alpha1.Infrastructure{Namespace: namespace}
 		})
 
 		Describe("#Create, #Update", func() {
@@ -169,10 +167,8 @@ func computeClusterWithShoot(
 	shootStatus *gardencorev1beta1.ShootStatus,
 ) *extensionsv1alpha1.Cluster {
 	shoot := &gardencorev1beta1.Shoot{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-			Kind:       "Shoot",
-		},
+		APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+		Kind:       "Shoot",
 	}
 
 	if shootMeta != nil {
@@ -189,9 +185,7 @@ func computeClusterWithShoot(
 	Expect(err).To(Succeed())
 
 	return &extensionsv1alpha1.Cluster{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 		Spec: extensionsv1alpha1.ClusterSpec{
 			Shoot: runtime.RawExtension{Raw: shootJSON},
 		},

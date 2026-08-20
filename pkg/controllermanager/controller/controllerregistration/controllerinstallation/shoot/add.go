@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -121,7 +120,7 @@ func MapBackupBucketToShoot(_ context.Context, obj client.Object) []reconcile.Re
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: backupBucket.Spec.ShootRef.Name, Namespace: backupBucket.Spec.ShootRef.Namespace}}}
+	return []reconcile.Request{{Name: backupBucket.Spec.ShootRef.Name, Namespace: backupBucket.Spec.ShootRef.Namespace}}
 }
 
 // MapBackupEntryToShoot returns a reconcile.Request object for the Shoot for the shoot specified in the
@@ -132,7 +131,7 @@ func MapBackupEntryToShoot(_ context.Context, obj client.Object) []reconcile.Req
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: backupEntry.Spec.ShootRef.Name, Namespace: backupEntry.Spec.ShootRef.Namespace}}}
+	return []reconcile.Request{{Name: backupEntry.Spec.ShootRef.Name, Namespace: backupEntry.Spec.ShootRef.Namespace}}
 }
 
 // MapControllerInstallationToShoot returns a reconcile.Request object for the shoot specified in the
@@ -143,7 +142,7 @@ func MapControllerInstallationToShoot(_ context.Context, obj client.Object) []re
 		return nil
 	}
 
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.ShootRef.Name, Namespace: controllerInstallation.Spec.ShootRef.Namespace}}}
+	return []reconcile.Request{{Name: controllerInstallation.Spec.ShootRef.Name, Namespace: controllerInstallation.Spec.ShootRef.Namespace}}
 }
 
 // MapControllerDeploymentToAllSelfHostedShoots returns reconcile.Request objects for all self-hosted shoots in case

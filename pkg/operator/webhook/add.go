@@ -47,20 +47,16 @@ func GetValidatingWebhookConfiguration(mode, url string) *admissionregistrationv
 	)
 
 	return &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener-operator",
-		},
+		Name: "gardener-operator",
 		Webhooks: []admissionregistrationv1.ValidatingWebhook{
 			{
 				Name:                    "garden-validation.operator.gardener.cloud",
 				ClientConfig:            getClientConfig(gardenvalidation.WebhookPath, mode, url),
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
-						APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
-						Resources:   []string{"gardens"},
-					},
+					APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
+					APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
+					Resources:   []string{"gardens"},
 					Operations: []admissionregistrationv1.OperationType{
 						admissionregistrationv1.Create,
 						admissionregistrationv1.Update,
@@ -77,11 +73,9 @@ func GetValidatingWebhookConfiguration(mode, url string) *admissionregistrationv
 				ClientConfig:            getClientConfig(extensionvalidation.WebhookPath, mode, url),
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
-						APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
-						Resources:   []string{"extensions"},
-					},
+					APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
+					APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
+					Resources:   []string{"extensions"},
 					Operations: []admissionregistrationv1.OperationType{
 						admissionregistrationv1.Update,
 						admissionregistrationv1.Delete,
@@ -97,11 +91,9 @@ func GetValidatingWebhookConfiguration(mode, url string) *admissionregistrationv
 				ClientConfig:            getClientConfig(namespace.WebhookPath, mode, url),
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{corev1.SchemeGroupVersion.Group},
-						APIVersions: []string{corev1.SchemeGroupVersion.Version},
-						Resources:   []string{"namespaces"},
-					},
+					APIGroups:   []string{corev1.SchemeGroupVersion.Group},
+					APIVersions: []string{corev1.SchemeGroupVersion.Version},
+					Resources:   []string{"namespaces"},
 					Operations: []admissionregistrationv1.OperationType{
 						admissionregistrationv1.Delete,
 					},
@@ -122,19 +114,15 @@ func GetValidatingWebhookConfiguration(mode, url string) *admissionregistrationv
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
 						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
-							APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
-							Resources:   []string{"gardens"},
-						},
+						APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
+						APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
+						Resources:   []string{"gardens"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				NamespaceSelector: &metav1.LabelSelector{
@@ -158,20 +146,16 @@ func GetMutatingWebhookConfiguration(mode, url string) *admissionregistrationv1.
 	)
 
 	return &admissionregistrationv1.MutatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener-operator",
-		},
+		Name: "gardener-operator",
 		Webhooks: []admissionregistrationv1.MutatingWebhook{
 			{
 				Name:                    "garden-defaulting.operator.gardener.cloud",
 				ClientConfig:            getClientConfig(gardendefaulting.WebhookPath, mode, url),
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
-						APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
-						Resources:   []string{"gardens"},
-					},
+					APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
+					APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
+					Resources:   []string{"gardens"},
 					Operations: []admissionregistrationv1.OperationType{
 						admissionregistrationv1.Create,
 						admissionregistrationv1.Update,
@@ -188,11 +172,9 @@ func GetMutatingWebhookConfiguration(mode, url string) *admissionregistrationv1.
 				ClientConfig:            getClientConfig(extensiondefaulting.WebhookPath, mode, url),
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
-						APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
-						Resources:   []string{"extensions"},
-					},
+					APIGroups:   []string{operatorv1alpha1.SchemeGroupVersion.Group},
+					APIVersions: []string{operatorv1alpha1.SchemeGroupVersion.Version},
+					Resources:   []string{"extensions"},
 					Operations: []admissionregistrationv1.OperationType{
 						admissionregistrationv1.Create,
 						admissionregistrationv1.Update,

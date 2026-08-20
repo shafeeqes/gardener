@@ -41,10 +41,8 @@ var _ = Describe("toleration restriction", func() {
 			admissionHandler.SetCoreInformerFactory(gardenCoreInformerFactory)
 
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "dummy",
-					Namespace: namespace,
-				},
+				Name:      "dummy",
+				Namespace: namespace,
 			}
 			project = &gardencorev1beta1.Project{
 				Spec: gardencorev1beta1.ProjectSpec{

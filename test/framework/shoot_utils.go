@@ -231,9 +231,7 @@ func setKubernetesVersionDependentSettings(shoot *gardencorev1beta1.Shoot) {
 		}
 		if shoot.Spec.Addons.KubernetesDashboard == nil {
 			shoot.Spec.Addons.KubernetesDashboard = &gardencorev1beta1.KubernetesDashboard{
-				Addon: gardencorev1beta1.Addon{
-					Enabled: true,
-				},
+				Enabled:            true,
 				AuthenticationMode: new(gardencorev1beta1.KubernetesDashboardAuthModeToken),
 			}
 		}

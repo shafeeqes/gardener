@@ -82,19 +82,15 @@ var _ = Describe("PVCAutoscaler", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:                         name,
+			Namespace:                    namespace,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:autoscaling:pvc-autoscaler",
-				Labels: getLabels(),
-			},
+			Name:   "gardener.cloud:autoscaling:pvc-autoscaler",
+			Labels: getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"*"},
@@ -145,10 +141,8 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:autoscaling:pvc-autoscaler",
-				Labels: getLabels(),
-			},
+			Name:   "gardener.cloud:autoscaling:pvc-autoscaler",
+			Labels: getLabels(),
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -162,11 +156,9 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:autoscaling:pvc-autoscaler",
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      "gardener.cloud:autoscaling:pvc-autoscaler",
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"coordination.k8s.io"},
@@ -182,11 +174,9 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:autoscaling:pvc-autoscaler",
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      "gardener.cloud:autoscaling:pvc-autoscaler",
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Subjects: []rbacv1.Subject{{
 				Kind:      rbacv1.ServiceAccountKind,
 				Name:      name,
@@ -200,13 +190,11 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8080}]`,
-				},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    getLabels(),
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8080}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{
@@ -222,13 +210,11 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.DeploymentNamePVCAutoscaler,
-				Namespace: namespace,
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-				}),
-			},
+			Name:      v1beta1constants.DeploymentNamePVCAutoscaler,
+			Namespace: namespace,
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
+			}),
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Replicas:             new(int32(1)),
@@ -285,22 +271,18 @@ var _ = Describe("PVCAutoscaler", func() {
 									},
 								},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/healthz",
-											Port: intstr.FromString("health"),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: intstr.FromString("health"),
 									},
 									InitialDelaySeconds: 15,
 									PeriodSeconds:       20,
 									FailureThreshold:    3,
 								},
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/readyz",
-											Port: intstr.FromString("health"),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/readyz",
+										Port: intstr.FromString("health"),
 									},
 									InitialDelaySeconds: 5,
 									PeriodSeconds:       10,
@@ -323,11 +305,9 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		pdb = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
 				Selector: &metav1.LabelSelector{
@@ -338,11 +318,9 @@ var _ = Describe("PVCAutoscaler", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels:    getLabels(),
-			},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    getLabels(),
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -394,16 +372,12 @@ var _ = Describe("PVCAutoscaler", func() {
 
 	JustBeforeEach(func() {
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "pvc-autoscaler",
-				Namespace: namespace,
-			},
+			Name:      "pvc-autoscaler",
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -415,12 +389,10 @@ var _ = Describe("PVCAutoscaler", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            "pvc-autoscaler",
-					Namespace:       namespace,
-					Labels:          map[string]string{v1beta1constants.GardenRole: "seed-system-component"},
-					ResourceVersion: "1",
-				},
+				Name:            "pvc-autoscaler",
+				Namespace:       namespace,
+				Labels:          map[string]string{v1beta1constants.GardenRole: "seed-system-component"},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -487,11 +459,9 @@ var _ = Describe("PVCAutoscaler", func() {
 
 			It("should fail because the ManagedResource doesn't become healthy", func() {
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       "pvc-autoscaler",
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       "pvc-autoscaler",
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -514,11 +484,9 @@ var _ = Describe("PVCAutoscaler", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       "pvc-autoscaler",
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       "pvc-autoscaler",
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -543,10 +511,8 @@ var _ = Describe("PVCAutoscaler", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "pvc-autoscaler",
-						Namespace: namespace,
-					},
+					Name:      "pvc-autoscaler",
+					Namespace: namespace,
 				})).To(Succeed())
 
 				Expect(comp.WaitCleanup(ctx)).To(MatchError(ContainSubstring("still exists")))

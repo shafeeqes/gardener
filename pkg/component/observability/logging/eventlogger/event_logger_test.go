@@ -59,13 +59,11 @@ var _ = Describe("EventLogger", func() {
 
 		clusterRoleForShoot = func() *rbacv1.ClusterRole {
 			return &rbacv1.ClusterRole{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: name,
-					Labels: map[string]string{
-						v1beta1constants.LabelApp:   name,
-						v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-					},
+				Name: name,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp:   name,
+					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 				},
 				Rules: []rbacv1.PolicyRule{
 					{
@@ -86,13 +84,11 @@ var _ = Describe("EventLogger", func() {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:logging:event-logger",
-				Labels: map[string]string{
-					v1beta1constants.LabelApp:   name,
-					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-				},
+			Name: "gardener.cloud:logging:event-logger",
+			Labels: map[string]string{
+				v1beta1constants.LabelApp:   name,
+				v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -108,16 +104,14 @@ var _ = Describe("EventLogger", func() {
 
 		roleBindingFor = func(clusterType component.ClusterType, namespace string, removeResourceVersion bool) *rbacv1.RoleBinding {
 			obj := &rbacv1.RoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud:logging:event-logger",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.LabelApp:   name,
-						v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-					},
-					ResourceVersion: "1",
+				Name:      "gardener.cloud:logging:event-logger",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp:   name,
+					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 				},
+				ResourceVersion: "1",
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: rbacv1.GroupName,
 					Kind:     "ClusterRole",
@@ -224,56 +218,42 @@ var _ = Describe("EventLogger", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Create secrets managed outside of this package for which secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 	})
 
 	JustBeforeEach(func() {
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		eventLoggerServiceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 
 		seedEventLoggerRole = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 
 		seedEventLoggerRoleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 
 		eventLoggerDeployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      vpaName,
-				Namespace: namespace,
-			},
+			Name:      vpaName,
+			Namespace: namespace,
 		}
 
 	})
@@ -291,12 +271,10 @@ var _ = Describe("EventLogger", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResourceName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -317,31 +295,27 @@ var _ = Describe("EventLogger", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(eventLoggerServiceAccount), eventLoggerServiceAccount)).To(Succeed())
 			Expect(eventLoggerServiceAccount).To(DeepEqual(&corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.LabelApp:   name,
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-						v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-					},
-					ResourceVersion: "1",
+				Name:      name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp:   name,
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
+					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
 				},
+				ResourceVersion:              "1",
 				AutomountServiceAccountToken: new(false),
 			}))
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(seedEventLoggerRole), seedEventLoggerRole)).To(Succeed())
 			Expect(seedEventLoggerRole).To(DeepEqual(&rbacv1.Role{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.LabelApp:   name,
-						v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-					},
-					ResourceVersion: "1",
+				Name:      name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.LabelApp:   name,
+					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 				},
+				ResourceVersion: "1",
 				Rules: []rbacv1.PolicyRule{
 					{
 						APIGroups: []string{
@@ -363,16 +337,14 @@ var _ = Describe("EventLogger", func() {
 			Expect(seedEventLoggerRoleBinding).To(DeepEqual(roleBindingFor(component.ClusterTypeSeed, namespace, false)))
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(eventLoggerDeployment), eventLoggerDeployment)).To(Succeed())
 			Expect(eventLoggerDeployment).To(DeepEqual(&appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 name,
-						"role":                "logging",
-						"gardener.cloud/role": "logging",
-					},
-					ResourceVersion: "1",
+				Name:      name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 name,
+					"role":                "logging",
+					"gardener.cloud/role": "logging",
 				},
+				ResourceVersion: "1",
 				Spec: appsv1.DeploymentSpec{
 					RevisionHistoryLimit: new(int32(1)),
 					Replicas:             new(int32(1)),
@@ -429,37 +401,31 @@ var _ = Describe("EventLogger", func() {
 							Volumes: []corev1.Volume{
 								{
 									Name: "kubeconfig",
-									VolumeSource: corev1.VolumeSource{
-										Projected: &corev1.ProjectedVolumeSource{
-											DefaultMode: new(int32(420)),
-											Sources: []corev1.VolumeProjection{
-												{
-													Secret: &corev1.SecretProjection{
-														Items: []corev1.KeyToPath{
-															{
-																Key:  "kubeconfig",
-																Path: "kubeconfig",
-															},
+									Projected: &corev1.ProjectedVolumeSource{
+										DefaultMode: new(int32(420)),
+										Sources: []corev1.VolumeProjection{
+											{
+												Secret: &corev1.SecretProjection{
+													Items: []corev1.KeyToPath{
+														{
+															Key:  "kubeconfig",
+															Path: "kubeconfig",
 														},
-														LocalObjectReference: corev1.LocalObjectReference{
-															Name: "generic-token-kubeconfig",
-														},
-														Optional: new(false),
 													},
+													Name:     "generic-token-kubeconfig",
+													Optional: new(false),
 												},
-												{
-													Secret: &corev1.SecretProjection{
-														Items: []corev1.KeyToPath{
-															{
-																Key:  "token",
-																Path: "token",
-															},
+											},
+											{
+												Secret: &corev1.SecretProjection{
+													Items: []corev1.KeyToPath{
+														{
+															Key:  "token",
+															Path: "token",
 														},
-														LocalObjectReference: corev1.LocalObjectReference{
-															Name: "shoot-access-" + name,
-														},
-														Optional: new(false),
 													},
+													Name:     "shoot-access-" + name,
+													Optional: new(false),
 												},
 											},
 										},
@@ -473,11 +439,9 @@ var _ = Describe("EventLogger", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(vpa), vpa)).To(Succeed())
 			Expect(vpa).To(DeepEqual(&vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            vpaName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-				},
+				Name:            vpaName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: appsv1.SchemeGroupVersion.String(),

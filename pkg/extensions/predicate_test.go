@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -48,11 +47,11 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should return false because object is no extensions object", func() {
-				Expect(p.Update(event.UpdateEvent{ObjectOld: &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{ResourceVersion: "123"}}, ObjectNew: infrastructure})).To(BeFalse())
+				Expect(p.Update(event.UpdateEvent{ObjectOld: &corev1.ConfigMap{ResourceVersion: "123"}, ObjectNew: infrastructure})).To(BeFalse())
 			})
 
 			It("should return false because old object is no extensions object", func() {
-				Expect(p.Update(event.UpdateEvent{ObjectOld: infrastructure, ObjectNew: &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{ResourceVersion: "123"}}})).To(BeFalse())
+				Expect(p.Update(event.UpdateEvent{ObjectOld: infrastructure, ObjectNew: &corev1.ConfigMap{ResourceVersion: "123"}})).To(BeFalse())
 			})
 
 			It("should return false because extensions type did not change", func() {

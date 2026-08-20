@@ -66,7 +66,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, fmt.Errorf("failed computing subjects for ClusterRoleBinding: %w", err)
 	}
 
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: clusterRole.Name}}
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{Name: clusterRole.Name}
 	_, err = controllerutils.GetAndCreateOrMergePatch(ctx, r.Client, clusterRoleBinding, func() error {
 		ownerReference := metav1.NewControllerRef(clusterRole, rbacv1.SchemeGroupVersion.WithKind("ClusterRole"))
 		ownerReference.BlockOwnerDeletion = new(false)

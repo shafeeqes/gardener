@@ -94,11 +94,9 @@ func (a *actuator) Reconcile(ctx context.Context, _ logr.Logger, ex *extensionsv
 		if kubernetesutils.HasMetaDataAnnotation(cluster.Shoot, AnnotationTestForceDeleteShoot, "true") {
 			for i := 1; i <= 2; i++ {
 				networkPolicy := &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "test-netpol-",
-						Namespace:    ex.Namespace,
-						Finalizers:   []string{finalizer},
-					},
+					GenerateName: "test-netpol-",
+					Namespace:    ex.Namespace,
+					Finalizers:   []string{finalizer},
 				}
 
 				if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, a.client, networkPolicy, func() error {
@@ -160,11 +158,9 @@ func getResources() (map[string][]byte, error) {
 	shootRegistry := managedresources.NewRegistry(kubernetesclient.ShootScheme, kubernetesclient.ShootCodec, kubernetesclient.ShootSerializer)
 	return shootRegistry.AddAllAndSerialize(
 		&corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ApplicationName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getLabels(),
-			},
+			Name:                         ApplicationName,
+			Namespace:                    metav1.NamespaceSystem,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		},
 	)

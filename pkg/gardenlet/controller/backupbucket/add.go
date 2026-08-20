@@ -7,7 +7,6 @@ package backupbucket
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -92,5 +91,5 @@ func (r *Reconciler) SeedNamePredicate() predicate.Predicate {
 // MapExtensionBackupBucketToCoreBackupBucket is handler.MapFunc for mapping a extensions.gardener.cloud/v1alpha1.BackupBucket
 // to the owning core.gardener.cloud/v1beta1.BackupBucket.
 func (r *Reconciler) MapExtensionBackupBucketToCoreBackupBucket(_ context.Context, obj client.Object) []reconcile.Request {
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: obj.GetName()}}}
+	return []reconcile.Request{{Name: obj.GetName()}}
 }

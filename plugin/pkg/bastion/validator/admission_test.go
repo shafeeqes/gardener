@@ -51,11 +51,9 @@ var _ = Describe("Bastion", func() {
 
 		BeforeEach(func() {
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: namespace,
-					UID:       "shoot-uid",
-				},
+				Name:      shootName,
+				Namespace: namespace,
+				UID:       "shoot-uid",
 				Spec: gardencorev1beta1.ShootSpec{
 					SeedName: new(seedName),
 					Provider: gardencorev1beta1.Provider{
@@ -77,11 +75,9 @@ var _ = Describe("Bastion", func() {
 			}
 
 			bastion = &operations.Bastion{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            bastionName,
-					Namespace:       namespace,
-					OwnerReferences: []metav1.OwnerReference{*dummyOwnerRef},
-				},
+				Name:            bastionName,
+				Namespace:       namespace,
+				OwnerReferences: []metav1.OwnerReference{*dummyOwnerRef},
 				Spec: operations.BastionSpec{
 					ShootRef: corev1.LocalObjectReference{
 						Name: shootName,

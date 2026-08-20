@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -155,16 +154,12 @@ var _ = Describe("Add", func() {
 		It("should map the shoot to bastions", func() {
 			var (
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "some-namespace",
-					},
+					Name:      "foo",
+					Namespace: "some-namespace",
 				}
 				bastion1 = &operationsv1alpha1.Bastion{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bastion1",
-						Namespace: shoot.Namespace,
-					},
+					Name:      "bastion1",
+					Namespace: shoot.Namespace,
 					Spec: operationsv1alpha1.BastionSpec{
 						ShootRef: corev1.LocalObjectReference{
 							Name: shoot.Name,
@@ -172,10 +167,8 @@ var _ = Describe("Add", func() {
 					},
 				}
 				bastion2 = &operationsv1alpha1.Bastion{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bastion2",
-						Namespace: shoot.Namespace,
-					},
+					Name:      "bastion2",
+					Namespace: shoot.Namespace,
 					Spec: operationsv1alpha1.BastionSpec{
 						ShootRef: corev1.LocalObjectReference{
 							// the fake client does not implement the field selector options, so we should better use
@@ -185,10 +178,8 @@ var _ = Describe("Add", func() {
 					},
 				}
 				bastion3 = &operationsv1alpha1.Bastion{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bastion3",
-						Namespace: shoot.Namespace,
-					},
+					Name:      "bastion3",
+					Namespace: shoot.Namespace,
 					Spec: operationsv1alpha1.BastionSpec{
 						ShootRef: corev1.LocalObjectReference{
 							Name: "other",
@@ -202,8 +193,8 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, bastion3)).To(Succeed())
 
 			Expect(reconciler.MapShootToBastions(log)(ctx, shoot)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: bastion1.Name, Namespace: bastion1.Namespace}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: bastion2.Name, Namespace: bastion2.Namespace}},
+				reconcile.Request{Name: bastion1.Name, Namespace: bastion1.Namespace},
+				reconcile.Request{Name: bastion2.Name, Namespace: bastion2.Namespace},
 			))
 		})
 	})

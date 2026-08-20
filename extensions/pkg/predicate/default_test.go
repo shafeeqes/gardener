@@ -25,7 +25,7 @@ var _ = Describe("Default", func() {
 		)
 
 		BeforeEach(func() {
-			obj = &extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{Namespace: namespace}}
+			obj = &extensionsv1alpha1.Infrastructure{Namespace: namespace}
 		})
 
 		When("operation annotation is not ignored", func() {

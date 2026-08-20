@@ -158,7 +158,7 @@ func defaultEncryptedResources() []rotationutils.EncryptedResource {
 		{
 			NewObject: func() client.Object {
 				return &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{GenerateName: "test-encr-", Namespace: "default"},
+					GenerateName: "test-encr-", Namespace: "default",
 					StringData: map[string]string{"content": "foo"},
 				}
 			},

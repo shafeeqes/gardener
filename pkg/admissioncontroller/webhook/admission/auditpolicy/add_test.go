@@ -132,14 +132,10 @@ rules:
 		request = admission.Request{}
 
 		shootv1beta1 = &gardencorev1beta1.Shoot{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				Kind:       "Shoot",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+			Kind:       "Shoot",
+			Name:       shootName,
+			Namespace:  shootNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				Kubernetes: gardencorev1beta1.Kubernetes{
 					Version: "1.31.1",
@@ -208,8 +204,8 @@ rules:
 
 			It("references a valid auditPolicy (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, true, statusCodeAllowed, "referenced audit policy is valid", "")
 			})
@@ -222,8 +218,8 @@ rules:
 
 			It("auditPolicy name was added (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				apiServerConfig := shootv1beta1.Spec.Kubernetes.KubeAPIServer.DeepCopy()
 				shootv1beta1.Spec.Kubernetes.KubeAPIServer = nil
@@ -234,8 +230,8 @@ rules:
 
 			It("referenced auditPolicy name was changed (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmNameOther, Namespace: shootNamespace},
-					Data:       map[string]string{"policy": validAuditPolicy},
+					Name: cmNameOther, Namespace: shootNamespace,
+					Data: map[string]string{"policy": validAuditPolicy},
 				})).To(Succeed())
 				newShoot := shootv1beta1.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.AuditConfig.AuditPolicy.ConfigMapRef.Name = cmNameOther
@@ -288,32 +284,32 @@ rules:
 
 			It("references configmap without a policy key", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       nil,
+					Name: cmName, Namespace: shootNamespace,
+					Data: nil,
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "error getting audit policy from ConfigMap fake-cm-namespace/fake-cm-name: missing audit policy key in policy ConfigMap data", "")
 			})
 
 			It("references audit policy which breaks validation rules", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"policy": invalidAuditPolicy},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"policy": invalidAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "Unsupported value: \"FakeLevel\"", "")
 			})
 
 			It("references audit policy with invalid structure", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"policy": missingKeyAuditPolicy},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"policy": missingKeyAuditPolicy},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "did not find expected key", "")
 			})
 
 			It("references a deprecated auditPolicy/v1alpha1", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"policy": validAuditPolicyV1alpha1},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"policy": validAuditPolicyV1alpha1},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "no kind \"Policy\" is registered for version \"audit.k8s.io/v1alpha1\"", "")
 			})
@@ -325,14 +321,10 @@ rules:
 			request.Kind = metav1.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"}
 
 			cm = &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      cmName,
-					Namespace: cmNamespace,
-				},
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+				Name:       cmName,
+				Namespace:  cmNamespace,
 				Data: map[string]string{
 					"policy": validAuditPolicy,
 				},

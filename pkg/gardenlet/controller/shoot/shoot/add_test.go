@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -61,8 +60,8 @@ var _ = Describe("Add", func() {
 				Clock:  cl,
 			}).EventHandler(log)
 			queue = &test.FakeQueue[reconcile.Request]{}
-			obj = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "namespace"}}
-			req = reconcile.Request{NamespacedName: types.NamespacedName{Name: obj.Name, Namespace: obj.Namespace}}
+			obj = &gardencorev1beta1.Shoot{Name: "shoot", Namespace: "namespace"}
+			req = reconcile.Request{Name: obj.Name, Namespace: obj.Namespace}
 		})
 
 		It("should enqueue the object for Create events according to the calculated duration", func() {

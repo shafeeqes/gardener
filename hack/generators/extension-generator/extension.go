@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
 	gardencorev1 "github.com/gardener/gardener/pkg/apis/core/v1"
@@ -43,21 +42,15 @@ func GenerateExtension(opts *Options) ([]byte, error) {
 
 func newBaseExtension(opts *Options) *operatorv1alpha1.Extension {
 	return &operatorv1alpha1.Extension{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: operatorv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "Extension",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: opts.ExtensionName,
-		},
+		APIVersion: operatorv1alpha1.SchemeGroupVersion.String(),
+		Kind:       "Extension",
+		Name:       opts.ExtensionName,
 		Spec: operatorv1alpha1.ExtensionSpec{
 			Deployment: &operatorv1alpha1.Deployment{
 				ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-					DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-						Helm: &operatorv1alpha1.ExtensionHelm{
-							OCIRepository: &gardencorev1.OCIRepository{
-								Ref: &opts.ExtensionOCIRepository,
-							},
+					Helm: &operatorv1alpha1.ExtensionHelm{
+						OCIRepository: &gardencorev1.OCIRepository{
+							Ref: &opts.ExtensionOCIRepository,
 						},
 					},
 				},

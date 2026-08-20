@@ -17,10 +17,8 @@ var _ = Describe("PodTopologySpreadConstraints tests", func() {
 
 	BeforeEach(func() {
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{
 					{

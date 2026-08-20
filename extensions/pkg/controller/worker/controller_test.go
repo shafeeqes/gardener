@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,10 +44,8 @@ var _ = Describe("Controller", func() {
 			c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).WithObjectTracker(objectTracker).Build()
 
 			machineDeployment = &machinev1alpha1.MachineDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machineDeployment",
-					Namespace: "namespace",
-				},
+				Name:      "machineDeployment",
+				Namespace: "namespace",
 				Spec: machinev1alpha1.MachineDeploymentSpec{
 					Strategy: machinev1alpha1.MachineDeploymentStrategy{
 						Type: machinev1alpha1.InPlaceUpdateMachineDeploymentStrategyType,
@@ -64,12 +61,10 @@ var _ = Describe("Controller", func() {
 			}
 
 			machine = &machinev1alpha1.Machine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "machine",
-					Namespace: "namespace",
-					Labels: map[string]string{
-						"name": machineDeployment.Name,
-					},
+				Name:      "machine",
+				Namespace: "namespace",
+				Labels: map[string]string{
+					"name": machineDeployment.Name,
 				},
 				Status: machinev1alpha1.MachineStatus{
 					Conditions: []corev1.NodeCondition{

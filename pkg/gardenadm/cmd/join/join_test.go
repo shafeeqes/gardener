@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,7 +59,7 @@ var _ = Describe("Join", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{Name: "kube-system"},
+				Name: "kube-system",
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{Raw: shootRaw},
 				},
@@ -74,7 +73,7 @@ var _ = Describe("Join", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				cluster = &extensionsv1alpha1.Cluster{
-					ObjectMeta: metav1.ObjectMeta{Name: "kube-system"},
+					Name: "kube-system",
 					Spec: extensionsv1alpha1.ClusterSpec{
 						Shoot: runtime.RawExtension{Raw: shootRaw},
 					},
@@ -100,14 +99,13 @@ var _ = Describe("Join", func() {
 					})
 
 					It("should succeed when there are gardener-node-agent secrets", func() {
-						secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+						secret := &corev1.Secret{
 							Name:      "gardener-node-agent-test-pool",
 							Namespace: "kube-system",
 							Labels: map[string]string{
 								"gardener.cloud/role":        "operating-system-config",
 								"worker.gardener.cloud/pool": options.WorkerPoolName,
-							},
-						}}
+							}}
 
 						Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -152,14 +150,13 @@ var _ = Describe("Join", func() {
 						})
 
 						It("should succeed when there are gardener-node-agent secrets", func() {
-							secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+							secret := &corev1.Secret{
 								Name:      "gardener-node-agent-cp",
 								Namespace: "kube-system",
 								Labels: map[string]string{
 									"gardener.cloud/role":        "operating-system-config",
 									"worker.gardener.cloud/pool": "cp",
-								},
-							}}
+								}}
 
 							Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -198,14 +195,13 @@ var _ = Describe("Join", func() {
 						})
 
 						It("should succeed when there are gardener-node-agent secrets", func() {
-							secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+							secret := &corev1.Secret{
 								Name:      "gardener-node-agent-worker1",
 								Namespace: "kube-system",
 								Labels: map[string]string{
 									"gardener.cloud/role":        "operating-system-config",
 									"worker.gardener.cloud/pool": "worker1",
-								},
-							}}
+								}}
 
 							Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 

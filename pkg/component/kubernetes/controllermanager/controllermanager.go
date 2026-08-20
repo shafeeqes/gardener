@@ -299,14 +299,12 @@ func (k *kubeControllerManager) Deploy(ctx context.Context) error {
 		deployment.Spec.RevisionHistoryLimit = new(int32(1))
 		deployment.Spec.Selector = &metav1.LabelSelector{MatchLabels: getLabels()}
 		deployment.Spec.Template = corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleControlPlane,
-					v1beta1constants.LabelPodMaintenanceRestart: "true",
-					v1beta1constants.LabelNetworkPolicyToDNS:    v1beta1constants.LabelNetworkPolicyAllowed,
-					gardenerutils.NetworkPolicyLabel(k.values.NamePrefix+v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
-				}),
-			},
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				v1beta1constants.GardenRole:                 v1beta1constants.GardenRoleControlPlane,
+				v1beta1constants.LabelPodMaintenanceRestart: "true",
+				v1beta1constants.LabelNetworkPolicyToDNS:    v1beta1constants.LabelNetworkPolicyAllowed,
+				gardenerutils.NetworkPolicyLabel(k.values.NamePrefix+v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
+			}),
 			Spec: corev1.PodSpec{
 				AutomountServiceAccountToken: new(false),
 				PriorityClassName:            k.values.PriorityClassName,
@@ -325,12 +323,10 @@ func (k *kubeControllerManager) Deploy(ctx context.Context) error {
 						ImagePullPolicy: corev1.PullIfNotPresent,
 						Command:         command,
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/healthz",
-									Scheme: probeURIScheme,
-									Port:   intstr.FromInt32(port),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/healthz",
+								Scheme: probeURIScheme,
+								Port:   intstr.FromInt32(port),
 							},
 							SuccessThreshold:    1,
 							FailureThreshold:    2,
@@ -377,37 +373,29 @@ func (k *kubeControllerManager) Deploy(ctx context.Context) error {
 				Volumes: []corev1.Volume{
 					{
 						Name: volumeNameCA,
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName: secretCACluster.Name,
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName: secretCACluster.Name,
 						},
 					},
 					{
 						Name: volumeNameCAClient,
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName:  secretCAClient.Name,
-								DefaultMode: new(int32(0640)),
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName:  secretCAClient.Name,
+							DefaultMode: new(int32(0640)),
 						},
 					},
 					{
 						Name: volumeNameServiceAccountKey,
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName:  serviceAccountKeySecret.Name,
-								DefaultMode: new(int32(0640)),
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName:  serviceAccountKeySecret.Name,
+							DefaultMode: new(int32(0640)),
 						},
 					},
 					{
 						Name: volumeNameServer,
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName:  serverSecret.Name,
-								DefaultMode: new(int32(0640)),
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName:  serverSecret.Name,
+							DefaultMode: new(int32(0640)),
 						},
 					},
 				},
@@ -422,11 +410,9 @@ func (k *kubeControllerManager) Deploy(ctx context.Context) error {
 
 			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 				Name: volumeNameCAKubelet,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName:  secretCAKubelet.Name,
-						DefaultMode: new(int32(0640)),
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName:  secretCAKubelet.Name,
+					DefaultMode: new(int32(0640)),
 				},
 			})
 		}
@@ -523,19 +509,13 @@ func (k *kubeControllerManager) Deploy(ctx context.Context) error {
 		serviceMonitor.Spec = monitoringv1.ServiceMonitorSpec{
 			Selector: metav1.LabelSelector{MatchLabels: getLabels()},
 			Endpoints: []monitoringv1.Endpoint{{
-				Port:   portNameMetrics,
-				Scheme: new(monitoringv1.SchemeHTTPS),
-				HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-					HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-						TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-						HTTPConfigWithoutTLS: monitoringv1.HTTPConfigWithoutTLS{
-							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: k.prometheusAccessSecretName()},
-								Key:                  resourcesv1alpha1.DataKeyToken,
-							}},
-						},
-					},
-				},
+				Port:      portNameMetrics,
+				Scheme:    new(monitoringv1.SchemeHTTPS),
+				TLSConfig: &monitoringv1.TLSConfig{InsecureSkipVerify: new(true)},
+				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
+					Name: k.prometheusAccessSecretName(),
+					Key:  resourcesv1alpha1.DataKeyToken,
+				}},
 				RelabelConfigs: []monitoringv1.RelabelConfig{{
 					Action: "labelmap",
 					Regex:  `__meta_kubernetes_service_label_(.+)`,
@@ -583,19 +563,19 @@ func (k *kubeControllerManager) SetServiceNetworks(services []net.IPNet) {
 }
 
 func (k *kubeControllerManager) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: k.values.NamePrefix + "kube-controller-manager-vpa", Namespace: k.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: k.values.NamePrefix + "kube-controller-manager-vpa", Namespace: k.namespace}
 }
 
 func (k *kubeControllerManager) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: k.values.NamePrefix + serviceName, Namespace: k.namespace}}
+	return &corev1.Service{Name: k.values.NamePrefix + serviceName, Namespace: k.namespace}
 }
 
 func (k *kubeControllerManager) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: k.values.NamePrefix + v1beta1constants.DeploymentNameKubeControllerManager, Namespace: k.namespace}}
+	return &appsv1.Deployment{Name: k.values.NamePrefix + v1beta1constants.DeploymentNameKubeControllerManager, Namespace: k.namespace}
 }
 
 func (k *kubeControllerManager) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: k.values.NamePrefix + v1beta1constants.DeploymentNameKubeControllerManager, Namespace: k.namespace}}
+	return &policyv1.PodDisruptionBudget{Name: k.values.NamePrefix + v1beta1constants.DeploymentNameKubeControllerManager, Namespace: k.namespace}
 }
 
 func (k *kubeControllerManager) newShootAccessSecret() *gardenerutils.AccessSecret {
@@ -603,7 +583,7 @@ func (k *kubeControllerManager) newShootAccessSecret() *gardenerutils.AccessSecr
 }
 
 func (k *kubeControllerManager) emptyManagedResource() *resourcesv1alpha1.ManagedResource {
-	return &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: ManagedResourceName, Namespace: k.namespace}}
+	return &resourcesv1alpha1.ManagedResource{Name: ManagedResourceName, Namespace: k.namespace}
 }
 
 func (k *kubeControllerManager) prometheusAccessSecretName() string {

@@ -317,7 +317,7 @@ func (b *Botanist) generateGenericTokenKubeconfig(ctx context.Context) error {
 		return err
 	}
 
-	cluster := &extensionsv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Name: b.Shoot.ControlPlaneNamespace}}
+	cluster := &extensionsv1alpha1.Cluster{Name: b.Shoot.ControlPlaneNamespace}
 	_, err = controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), cluster, func() error {
 		metav1.SetMetaDataAnnotation(&cluster.ObjectMeta, v1beta1constants.AnnotationKeyGenericTokenKubeconfigSecretName, genericTokenKubeconfigSecret.Name)
 		return nil
@@ -404,10 +404,8 @@ func (b *Botanist) syncShootCredentialToGarden(
 	data map[string][]byte,
 ) error {
 	gardenSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
-			Namespace: b.Shoot.GetInfo().Namespace,
-		},
+		Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
+		Namespace: b.Shoot.GetInfo().Namespace,
 	}
 
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.GardenClient, gardenSecret, func() error {
@@ -435,10 +433,8 @@ func (b *Botanist) syncInternalSecretToGarden(
 	data map[string][]byte,
 ) error {
 	gardenSecret := &gardencorev1beta1.InternalSecret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
-			Namespace: b.Shoot.GetInfo().Namespace,
-		},
+		Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
+		Namespace: b.Shoot.GetInfo().Namespace,
 	}
 
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.GardenClient, gardenSecret, func() error {
@@ -463,10 +459,8 @@ func (b *Botanist) syncShootConfigMapToGarden(
 	data map[string]string,
 ) error {
 	gardenConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
-			Namespace: b.Shoot.GetInfo().Namespace,
-		},
+		Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
+		Namespace: b.Shoot.GetInfo().Namespace,
 	}
 
 	_, err := controllerutils.GetAndCreateOrStrategicMergePatch(ctx, b.GardenClient, gardenConfigMap, func() error {
@@ -493,10 +487,8 @@ func (b *Botanist) deleteShootCredentialFromGarden(ctx context.Context, nameSuff
 	var secretsToDelete []client.Object
 	for _, nameSuffix := range nameSuffixes {
 		secretsToDelete = append(secretsToDelete, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
-				Namespace: b.Shoot.GetInfo().Namespace,
-			},
+			Name:      gardenerutils.ComputeShootProjectResourceName(b.Shoot.GetInfo().Name, nameSuffix),
+			Namespace: b.Shoot.GetInfo().Namespace,
 		})
 	}
 
@@ -514,10 +506,8 @@ func (b *Botanist) reconcileWildcardIngressCertificate(ctx context.Context) erro
 
 	// Copy certificate to shoot namespace
 	certSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      wildcardCert.GetName(),
-			Namespace: b.Shoot.ControlPlaneNamespace,
-		},
+		Name:      wildcardCert.GetName(),
+		Namespace: b.Shoot.ControlPlaneNamespace,
 	}
 
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), certSecret, func() error {
@@ -552,10 +542,8 @@ func (b *Botanist) DeployCloudProviderSecret(ctx context.Context) error {
 	}
 
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      v1beta1constants.SecretNameCloudProvider,
-			Namespace: b.Shoot.ControlPlaneNamespace,
-		},
+		Name:      v1beta1constants.SecretNameCloudProvider,
+		Namespace: b.Shoot.ControlPlaneNamespace,
 	}
 	_, err := controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), secret, func() error {
 		secret.Annotations = map[string]string{}

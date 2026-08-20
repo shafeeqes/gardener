@@ -113,9 +113,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create seed")
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "seed-",
-		},
+		GenerateName: "seed-",
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",
@@ -165,9 +163,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create garden namespace for garden")
 	gardenNamespaceGarden = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "garden-",
-		},
+		GenerateName: "garden-",
 	}
 
 	Expect(testClient.Create(ctx, gardenNamespaceGarden)).To(Succeed())
@@ -180,9 +176,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create garden namespace for seed")
 	gardenNamespaceSeed = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "garden-",
-		},
+		GenerateName: "garden-",
 	}
 
 	Expect(testClient.Create(ctx, gardenNamespaceSeed)).To(Succeed())
@@ -198,11 +192,9 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	gardenletKubeconfigSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardenlet-kubeconfig",
-			Namespace: gardenNamespaceSeed.Name,
-		},
-		Data: map[string][]byte{"kubeconfig": gardenletKubeconfig},
+		Name:      "gardenlet-kubeconfig",
+		Namespace: gardenNamespaceSeed.Name,
+		Data:      map[string][]byte{"kubeconfig": gardenletKubeconfig},
 	}
 	Expect(testClient.Create(ctx, gardenletKubeconfigSecret)).To(Succeed())
 
@@ -239,7 +231,7 @@ var _ = BeforeSuite(func() {
 
 	By("Register controller")
 	shootName = "shoot-" + testRunID
-	shootClientMap = fakeclientmap.NewClientMapBuilder().WithClientSetForKey(keys.ForShoot(&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: gardenNamespaceGarden.Name}}), testClientSet).Build()
+	shootClientMap = fakeclientmap.NewClientMapBuilder().WithClientSetForKey(keys.ForShoot(&gardencorev1beta1.Shoot{Name: shootName, Namespace: gardenNamespaceGarden.Name}), testClientSet).Build()
 
 	cfg := gardenletconfigv1alpha1.GardenletConfiguration{
 		Controllers: &gardenletconfigv1alpha1.GardenletControllerConfiguration{
@@ -252,11 +244,7 @@ var _ = BeforeSuite(func() {
 			},
 		},
 		SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-			SeedTemplate: gardencorev1beta1.SeedTemplate{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seed.Name,
-				},
-			},
+			Name: seed.Name,
 		},
 	}
 

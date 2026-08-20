@@ -16,7 +16,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -312,15 +311,15 @@ var _ = Describe("Add", func() {
 		)
 
 		BeforeEach(func() {
-			networkPolicy = &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{
+			networkPolicy = &networkingv1.NetworkPolicy{Labels: map[string]string{
 				"networking.resources.gardener.cloud/service-name":      serviceName,
 				"networking.resources.gardener.cloud/service-namespace": serviceNamespace,
-			}}}
+			}}
 		})
 
 		It("should map to the referenced service", func() {
 			Expect(reconciler.MapNetworkPolicyToService(ctx, networkPolicy)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: serviceNamespace, Name: serviceName}},
+				reconcile.Request{Namespace: serviceNamespace, Name: serviceName},
 			))
 		})
 
@@ -349,7 +348,7 @@ var _ = Describe("Add", func() {
 			DeferCleanup(func() { queue.ShutDown() })
 			handler = reconciler.EventHandlerForNamespace(log)
 
-			ns1 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nsName1}}
+			ns1 = &corev1.Namespace{Name: nsName1}
 			Expect(fakeClient.Create(ctx, ns1)).To(Succeed())
 
 			// Service annotation that selects namespaces with label foo=bar
@@ -357,17 +356,15 @@ var _ = Describe("Add", func() {
 			encoded, _ := json.Marshal(namespaceSelectors)
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      svcName,
-					Namespace: nsName1,
-					Annotations: map[string]string{
-						"networking.resources.gardener.cloud/namespace-selectors": string(encoded),
-					},
+				Name:      svcName,
+				Namespace: nsName1,
+				Annotations: map[string]string{
+					"networking.resources.gardener.cloud/namespace-selectors": string(encoded),
 				},
 			}
 			Expect(fakeClient.Create(ctx, service)).To(Succeed())
 
-			ns2 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nsName2}}
+			ns2 = &corev1.Namespace{Name: nsName2}
 		})
 
 		It("should enqueue no services on Create", func() {
@@ -437,7 +434,7 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			p = reconciler.PodPredicate()
-			pod = &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "pod", Namespace: "ns"}}
+			pod = &corev1.Pod{Name: "pod", Namespace: "ns"}
 		})
 
 		Describe("#Create", func() {
@@ -517,19 +514,17 @@ var _ = Describe("Add", func() {
 			DeferCleanup(func() { queue.ShutDown() })
 			handler = reconciler.EventHandlerForPod(log)
 
-			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nsName, Labels: map[string]string{"foo": "bar"}}}
+			ns := &corev1.Namespace{Name: nsName, Labels: map[string]string{"foo": "bar"}}
 			Expect(fakeClient.Create(ctx, ns)).To(Succeed())
 
 			namespaceSelectors := []metav1.LabelSelector{{MatchLabels: map[string]string{"foo": "bar"}}}
 			encoded, _ := json.Marshal(namespaceSelectors)
 
 			service := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      svcName,
-					Namespace: "other-ns",
-					Annotations: map[string]string{
-						"networking.resources.gardener.cloud/namespace-selectors": string(encoded),
-					},
+				Name:      svcName,
+				Namespace: "other-ns",
+				Annotations: map[string]string{
+					"networking.resources.gardener.cloud/namespace-selectors": string(encoded),
 				},
 			}
 			Expect(fakeClient.Create(ctx, service)).To(Succeed())
@@ -537,10 +532,9 @@ var _ = Describe("Add", func() {
 
 		Describe("#Create", func() {
 			It("should enqueue services when pod with new label keys is created", func() {
-				pod := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Create(ctx, event.CreateEvent{Object: pod}, queue)
@@ -548,20 +542,18 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should not enqueue when all label keys are already tracked", func() {
-				pod1 := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod1 := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod1.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Create(ctx, event.CreateEvent{Object: pod1}, queue)
 				item, _ := queue.Get()
 				queue.Done(item)
 
-				pod2 := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod2 := &metav1.PartialObjectMetadata{
 					Name: "pod-2", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod2.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Create(ctx, event.CreateEvent{Object: pod2}, queue)
@@ -569,20 +561,18 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should enqueue when pod brings a new label key", func() {
-				pod1 := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod1 := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod1.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Create(ctx, event.CreateEvent{Object: pod1}, queue)
 				item, _ := queue.Get()
 				queue.Done(item)
 
-				pod2 := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod2 := &metav1.PartialObjectMetadata{
 					Name: "pod-2", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-bar-tcp-9090": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-bar-tcp-9090": "allowed"}}
 				pod2.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Create(ctx, event.CreateEvent{Object: pod2}, queue)
@@ -592,10 +582,9 @@ var _ = Describe("Add", func() {
 
 		Describe("#Delete", func() {
 			It("should always enqueue and clear tracking so re-create enqueues again", func() {
-				pod := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Create(ctx, event.CreateEvent{Object: pod}, queue)
@@ -613,16 +602,14 @@ var _ = Describe("Add", func() {
 
 		Describe("#Update", func() {
 			It("should enqueue when labels change", func() {
-				oldPod := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				oldPod := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				oldPod.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
-				newPod := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				newPod := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-bar-tcp-9090": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-bar-tcp-9090": "allowed"}}
 				newPod.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Update(ctx, event.UpdateEvent{ObjectOld: oldPod, ObjectNew: newPod}, queue)
@@ -632,10 +619,9 @@ var _ = Describe("Add", func() {
 
 		Describe("#Generic", func() {
 			It("should enqueue when keys are new", func() {
-				pod := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Generic(ctx, event.GenericEvent{Object: pod}, queue)
@@ -643,10 +629,9 @@ var _ = Describe("Add", func() {
 			})
 
 			It("should not enqueue when keys are already tracked", func() {
-				pod := &metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{
+				pod := &metav1.PartialObjectMetadata{
 					Name: "pod-1", Namespace: nsName,
-					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"},
-				}}
+					Labels: map[string]string{"networking.resources.gardener.cloud/to-foo-tcp-8080": "allowed"}}
 				pod.SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
 
 				handler.Generic(ctx, event.GenericEvent{Object: pod}, queue)
@@ -668,18 +653,16 @@ var _ = Describe("Add", func() {
 				service3  = "svc3"
 
 				ingress = &networkingv1.Ingress{
-					ObjectMeta: metav1.ObjectMeta{Namespace: namespace},
+					Namespace: namespace,
 					Spec: networkingv1.IngressSpec{
 						Rules: []networkingv1.IngressRule{
 							{
-								IngressRuleValue: networkingv1.IngressRuleValue{
-									HTTP: &networkingv1.HTTPIngressRuleValue{
-										Paths: []networkingv1.HTTPIngressPath{
-											{
-												Backend: networkingv1.IngressBackend{
-													Resource: &corev1.TypedLocalObjectReference{
-														Name: "foo",
-													},
+								HTTP: &networkingv1.HTTPIngressRuleValue{
+									Paths: []networkingv1.HTTPIngressPath{
+										{
+											Backend: networkingv1.IngressBackend{
+												Resource: &corev1.TypedLocalObjectReference{
+													Name: "foo",
 												},
 											},
 										},
@@ -687,14 +670,12 @@ var _ = Describe("Add", func() {
 								},
 							},
 							{
-								IngressRuleValue: networkingv1.IngressRuleValue{
-									HTTP: &networkingv1.HTTPIngressRuleValue{
-										Paths: []networkingv1.HTTPIngressPath{
-											{
-												Backend: networkingv1.IngressBackend{
-													Service: &networkingv1.IngressServiceBackend{
-														Name: service1,
-													},
+								HTTP: &networkingv1.HTTPIngressRuleValue{
+									Paths: []networkingv1.HTTPIngressPath{
+										{
+											Backend: networkingv1.IngressBackend{
+												Service: &networkingv1.IngressServiceBackend{
+													Name: service1,
 												},
 											},
 										},
@@ -702,21 +683,19 @@ var _ = Describe("Add", func() {
 								},
 							},
 							{
-								IngressRuleValue: networkingv1.IngressRuleValue{
-									HTTP: &networkingv1.HTTPIngressRuleValue{
-										Paths: []networkingv1.HTTPIngressPath{
-											{
-												Backend: networkingv1.IngressBackend{
-													Service: &networkingv1.IngressServiceBackend{
-														Name: service2,
-													},
+								HTTP: &networkingv1.HTTPIngressRuleValue{
+									Paths: []networkingv1.HTTPIngressPath{
+										{
+											Backend: networkingv1.IngressBackend{
+												Service: &networkingv1.IngressServiceBackend{
+													Name: service2,
 												},
 											},
-											{
-												Backend: networkingv1.IngressBackend{
-													Service: &networkingv1.IngressServiceBackend{
-														Name: service3,
-													},
+										},
+										{
+											Backend: networkingv1.IngressBackend{
+												Service: &networkingv1.IngressServiceBackend{
+													Name: service3,
 												},
 											},
 										},
@@ -729,9 +708,9 @@ var _ = Describe("Add", func() {
 			)
 
 			Expect(reconciler.MapIngressToServices(ctx, ingress)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: service1}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: service2}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: service3}},
+				reconcile.Request{Namespace: namespace, Name: service1},
+				reconcile.Request{Namespace: namespace, Name: service2},
+				reconcile.Request{Namespace: namespace, Name: service3},
 			))
 		})
 	})
@@ -798,9 +777,9 @@ var _ = Describe("Add", func() {
 			)
 
 			Expect(reconciler.MapVirtualServiceToServices(ctx, virtualService)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: service1}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: service2}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: service3}},
+				reconcile.Request{Namespace: namespace, Name: service1},
+				reconcile.Request{Namespace: namespace, Name: service2},
+				reconcile.Request{Namespace: namespace, Name: service3},
 			))
 		})
 	})

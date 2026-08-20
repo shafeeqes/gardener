@@ -57,7 +57,7 @@ func (m *manager) Generate(ctx context.Context, config secretsutils.ConfigInterf
 	}
 	desiredLabels := utils.MergeStringMaps(objectMeta.Labels) // copy labels map
 
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: objectMeta.Name, Namespace: objectMeta.Namespace}}
+	secret := &corev1.Secret{Name: objectMeta.Name, Namespace: objectMeta.Namespace}
 	if err := m.client.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return nil, fmt.Errorf("failed reading secret %s for config %s: %w", client.ObjectKeyFromObject(secret), config.GetName(), err)

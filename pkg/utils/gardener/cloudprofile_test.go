@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -50,23 +49,17 @@ var _ = Describe("CloudProfile", func() {
 				namespacedCloudProfileName = "n-profile-1"
 
 				cloudProfile = &gardencorev1beta1.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: cloudProfileName,
-					},
+					Name: cloudProfileName,
 				}
 
 				namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespaceName,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespaceName,
 				}
 
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespaceName,
-					},
-					Spec: gardencorev1beta1.ShootSpec{},
+					Namespace: namespaceName,
+					Spec:      gardencorev1beta1.ShootSpec{},
 				}
 			})
 
@@ -256,9 +249,7 @@ var _ = Describe("CloudProfile", func() {
 			namespacedCloudProfileName = "n-profile-1"
 
 			cloudProfile = &gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: cloudProfileName,
-				},
+				Name: cloudProfileName,
 			}
 
 			namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
@@ -268,16 +259,12 @@ var _ = Describe("CloudProfile", func() {
 						Name: cloudProfileName,
 					},
 				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      namespacedCloudProfileName,
-					Namespace: namespaceName,
-				},
+				Name:      namespacedCloudProfileName,
+				Namespace: namespaceName,
 			}
 
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespaceName,
-				},
+				Namespace: namespaceName,
 			}
 		})
 		Describe("#GetCloudProfile", func() {
@@ -881,23 +868,17 @@ var _ = Describe("CloudProfile", func() {
 				namespacedCloudProfileName = "n-profile-1"
 
 				cloudProfile = &gardencorev1beta1.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: cloudProfileName,
-					},
+					Name: cloudProfileName,
 				}
 
 				namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespaceName,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespaceName,
 				}
 
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespaceName,
-					},
-					Spec: gardencorev1beta1.ShootSpec{},
+					Namespace: namespaceName,
+					Spec:      gardencorev1beta1.ShootSpec{},
 				}
 			})
 
@@ -968,11 +949,11 @@ var _ = Describe("CloudProfile", func() {
 			It("should successfully construct an ImagesContext from core.MachineImage slice", func() {
 				imagesContext := gardenerutils.NewCoreImagesContext([]core.MachineImage{
 					{Name: "image-1", Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "2.0.0"}},
+						{Version: "1.0.0"},
+						{Version: "2.0.0"},
 					}},
 					{Name: "image-2", Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "3.0.0"}},
+						{Version: "3.0.0"},
 					}},
 				})
 
@@ -980,15 +961,15 @@ var _ = Describe("CloudProfile", func() {
 				Expect(exists).To(BeTrue())
 				Expect(i.Name).To(Equal("image-1"))
 				Expect(i.Versions).To(ConsistOf(
-					core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0"}},
-					core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "2.0.0"}},
+					core.MachineImageVersion{Version: "1.0.0"},
+					core.MachineImageVersion{Version: "2.0.0"},
 				))
 
 				i, exists = imagesContext.GetImage("image-2")
 				Expect(exists).To(BeTrue())
 				Expect(i.Name).To(Equal("image-2"))
 				Expect(i.Versions).To(ConsistOf(
-					core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "3.0.0"}},
+					core.MachineImageVersion{Version: "3.0.0"},
 				))
 
 				i, exists = imagesContext.GetImage("image-99")
@@ -998,7 +979,7 @@ var _ = Describe("CloudProfile", func() {
 
 				v, exists := imagesContext.GetImageVersion("image-1", "1.0.0")
 				Expect(exists).To(BeTrue())
-				Expect(v).To(Equal(core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "1.0.0"}}))
+				Expect(v).To(Equal(core.MachineImageVersion{Version: "1.0.0"}))
 
 				v, exists = imagesContext.GetImageVersion("image-1", "99.0.0")
 				Expect(exists).To(BeFalse())
@@ -1014,11 +995,11 @@ var _ = Describe("CloudProfile", func() {
 			It("should successfully construct an ImagesContext from v1beta1.MachineImage slice", func() {
 				imagesContext := gardenerutils.NewV1beta1ImagesContext([]gardencorev1beta1.MachineImage{
 					{Name: "image-1", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"}},
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "2.0.0"}},
+						{Version: "1.0.0"},
+						{Version: "2.0.0"},
 					}},
 					{Name: "image-2", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "3.0.0"}},
+						{Version: "3.0.0"},
 					}},
 				})
 
@@ -1026,15 +1007,15 @@ var _ = Describe("CloudProfile", func() {
 				Expect(exists).To(BeTrue())
 				Expect(i.Name).To(Equal("image-1"))
 				Expect(i.Versions).To(ConsistOf(
-					gardencorev1beta1.MachineImageVersion{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"}},
-					gardencorev1beta1.MachineImageVersion{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "2.0.0"}},
+					gardencorev1beta1.MachineImageVersion{Version: "1.0.0"},
+					gardencorev1beta1.MachineImageVersion{Version: "2.0.0"},
 				))
 
 				i, exists = imagesContext.GetImage("image-2")
 				Expect(exists).To(BeTrue())
 				Expect(i.Name).To(Equal("image-2"))
 				Expect(i.Versions).To(ConsistOf(
-					gardencorev1beta1.MachineImageVersion{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "3.0.0"}},
+					gardencorev1beta1.MachineImageVersion{Version: "3.0.0"},
 				))
 
 				i, exists = imagesContext.GetImage("image-99")
@@ -1044,7 +1025,7 @@ var _ = Describe("CloudProfile", func() {
 
 				v, exists := imagesContext.GetImageVersion("image-1", "1.0.0")
 				Expect(exists).To(BeTrue())
-				Expect(v).To(Equal(gardencorev1beta1.MachineImageVersion{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"}}))
+				Expect(v).To(Equal(gardencorev1beta1.MachineImageVersion{Version: "1.0.0"}))
 
 				v, exists = imagesContext.GetImageVersion("image-1", "99.0.0")
 				Expect(exists).To(BeFalse())

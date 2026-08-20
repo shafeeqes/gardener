@@ -99,11 +99,9 @@ var _ = Describe("MatchManagedSeedSet", func() {
 
 func newManagedSeedSet() *seedmanagement.ManagedSeedSet {
 	return &seedmanagement.ManagedSeedSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
-			Labels:    map[string]string{"foo": "bar"},
-		},
-		Spec: seedmanagement.ManagedSeedSetSpec{},
+		Name:      "test",
+		Namespace: "test-namespace",
+		Labels:    map[string]string{"foo": "bar"},
+		Spec:      seedmanagement.ManagedSeedSetSpec{},
 	}
 }

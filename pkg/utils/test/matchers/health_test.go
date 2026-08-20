@@ -10,7 +10,6 @@ import (
 	gomegatypes "github.com/onsi/gomega/types"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 	. "github.com/gardener/gardener/pkg/utils/test/matchers"
@@ -27,10 +26,8 @@ var _ = Describe("BeHealthy", func() {
 		matcher = BeHealthy(health.CheckPod)
 
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: "bar",
-			},
+			Name:      "foo",
+			Namespace: "bar",
 			Status: corev1.PodStatus{
 				Phase: corev1.PodRunning,
 			},

@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
@@ -132,9 +131,7 @@ var _ = Describe("VPNSeedServer", func() {
 				},
 			}
 			botanist.SeedNamespaceObject = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					UID: "1234",
-				},
+				UID: "1234",
 			}
 		})
 

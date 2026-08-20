@@ -103,10 +103,8 @@ var _ = Describe("#SNI", func() {
 		wildcardConfiguration = nil
 		wildcardHosts = []string{"foo.wildcard", "bar.wildcard"}
 		wildcardTLSSecret = corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "wildcard-tls-secret",
-				Namespace: namespace,
-			},
+			Name:      "wildcard-tls-secret",
+			Namespace: namespace,
 		}
 		wildcardIstioIngressGateway = &IstioIngressGateway{
 			Labels:    istioWildcardLabels,
@@ -125,15 +123,13 @@ var _ = Describe("#SNI", func() {
 		}}
 
 		expectedDestinationRule = &istionetworkingv1beta1.DestinationRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
-				ResourceVersion: "1",
+			Name:      "kube-apiserver",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
+			ResourceVersion: "1",
 			Spec: istioapinetworkingv1beta1.DestinationRule{
 				ExportTo: []string{"istio-foo"},
 				Host:     hostName,
@@ -193,15 +189,13 @@ var _ = Describe("#SNI", func() {
 			OwnerReferences: expectedOwnerReferences,
 		}
 		expectedGateway = &istionetworkingv1beta1.Gateway{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
-				ResourceVersion: "1",
+			Name:      "kube-apiserver",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
+			ResourceVersion: "1",
 			Spec: istioapinetworkingv1beta1.Gateway{
 				Selector: istioLabels,
 				Servers: []*istioapinetworkingv1beta1.Server{{
@@ -218,15 +212,13 @@ var _ = Describe("#SNI", func() {
 			},
 		}
 		expectedWildcardGateway = &istionetworkingv1beta1.Gateway{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver-wildcard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
-				ResourceVersion: "1",
+			Name:      "kube-apiserver-wildcard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
+			ResourceVersion: "1",
 			Spec: istioapinetworkingv1beta1.Gateway{
 				Selector: istioWildcardLabels,
 				Servers: []*istioapinetworkingv1beta1.Server{{
@@ -243,15 +235,13 @@ var _ = Describe("#SNI", func() {
 			},
 		}
 		expectedVirtualService = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
-				ResourceVersion: "1",
+			Name:      "kube-apiserver",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
+			ResourceVersion: "1",
 			Spec: istioapinetworkingv1beta1.VirtualService{
 				ExportTo: []string{"istio-foo"},
 				Hosts:    hosts,
@@ -271,15 +261,13 @@ var _ = Describe("#SNI", func() {
 			},
 		}
 		expectedWildcardVirtualService = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver-wildcard",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
-				ResourceVersion: "1",
+			Name:      "kube-apiserver-wildcard",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
+			ResourceVersion: "1",
 			Spec: istioapinetworkingv1beta1.VirtualService{
 				ExportTo: []string{"istio-bar", "istio-foo"},
 				Hosts:    wildcardHosts,
@@ -299,24 +287,20 @@ var _ = Describe("#SNI", func() {
 			},
 		}
 		expectedManagedResourceSNI = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "kube-apiserver-sni",
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-			},
+			Name:            "kube-apiserver-sni",
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class:       new("seed"),
 				KeepObjects: new(false),
 			},
 		}
 		expectedManagedResourceTLSSecrets = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "istio-tls-secrets",
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-			},
+			Name:            "istio-tls-secrets",
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class:       new("seed"),
 				KeepObjects: new(false),
@@ -326,12 +310,12 @@ var _ = Describe("#SNI", func() {
 
 	JustBeforeEach(func() {
 		By("Create namespace")
-		Expect(c.Create(ctx, &corev1.Namespace{TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Namespace"}, ObjectMeta: metav1.ObjectMeta{Name: namespace, UID: "foo"}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Namespace{APIVersion: "v1", Kind: "Namespace", Name: namespace, UID: "foo"})).To(Succeed())
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-client", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver-current", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-client", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "kube-apiserver", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "kube-apiserver-current", Namespace: namespace})).To(Succeed())
 
 		defaultDepWaiter = NewSNI(c, v1beta1constants.DeploymentNameKubeAPIServer, namespace, sm, func() *SNIValues {
 			val := &SNIValues{
@@ -365,7 +349,7 @@ var _ = Describe("#SNI", func() {
 			Expect(c.Get(ctx, client.ObjectKey{Namespace: expectedVirtualService.Namespace, Name: expectedVirtualService.Name}, actualVirtualService)).To(Succeed())
 			Expect(actualVirtualService).To(BeComparableTo(expectedVirtualService, comptest.CmpOptsForVirtualService()))
 
-			managedResourceIstioTLS := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "istio-tls-secrets", Namespace: namespace}}
+			managedResourceIstioTLS := &resourcesv1alpha1.ManagedResource{Name: "istio-tls-secrets", Namespace: namespace}
 			if istioTLSTermination {
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceIstioTLS), managedResourceIstioTLS)).To(Succeed())
 			} else {
@@ -373,10 +357,8 @@ var _ = Describe("#SNI", func() {
 			}
 
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: expectedManagedResourceSNI.Namespace,
-					Name:      expectedManagedResourceSNI.Name,
-				},
+				Namespace: expectedManagedResourceSNI.Namespace,
+				Name:      expectedManagedResourceSNI.Name,
 			}
 
 			if istioTLSTermination {
@@ -985,11 +967,9 @@ var _ = Describe("#SNI", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       expectedManagedResourceSNI.Name,
-							Namespace:  expectedManagedResourceSNI.Namespace,
-							Generation: 1,
-						},
+						Name:       expectedManagedResourceSNI.Name,
+						Namespace:  expectedManagedResourceSNI.Namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1006,11 +986,9 @@ var _ = Describe("#SNI", func() {
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       expectedManagedResourceTLSSecrets.Name,
-							Namespace:  expectedManagedResourceTLSSecrets.Namespace,
-							Generation: 1,
-						},
+						Name:       expectedManagedResourceTLSSecrets.Name,
+						Namespace:  expectedManagedResourceTLSSecrets.Namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1033,11 +1011,9 @@ var _ = Describe("#SNI", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       expectedManagedResourceSNI.Name,
-							Namespace:  expectedManagedResourceSNI.Namespace,
-							Generation: 1,
-						},
+						Name:       expectedManagedResourceSNI.Name,
+						Namespace:  expectedManagedResourceSNI.Namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1054,11 +1030,9 @@ var _ = Describe("#SNI", func() {
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       expectedManagedResourceTLSSecrets.Name,
-							Namespace:  expectedManagedResourceTLSSecrets.Namespace,
-							Generation: 1,
-						},
+						Name:       expectedManagedResourceTLSSecrets.Name,
+						Namespace:  expectedManagedResourceTLSSecrets.Namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1081,11 +1055,9 @@ var _ = Describe("#SNI", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       expectedManagedResourceSNI.Name,
-							Namespace:  expectedManagedResourceSNI.Namespace,
-							Generation: 1,
-						},
+						Name:       expectedManagedResourceSNI.Name,
+						Namespace:  expectedManagedResourceSNI.Namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1102,11 +1074,9 @@ var _ = Describe("#SNI", func() {
 					})).To(Succeed())
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       expectedManagedResourceTLSSecrets.Name,
-							Namespace:  expectedManagedResourceTLSSecrets.Namespace,
-							Generation: 1,
-						},
+						Name:       expectedManagedResourceTLSSecrets.Name,
+						Namespace:  expectedManagedResourceTLSSecrets.Namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{

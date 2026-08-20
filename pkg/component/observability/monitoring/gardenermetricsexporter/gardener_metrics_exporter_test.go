@@ -82,38 +82,28 @@ var _ = Describe("GardenerMetricsExporter", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 
 		managedResourceRuntime = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameRuntime,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameRuntime,
+			Namespace: namespace,
 		}
 		managedResourceVirtual = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameVirtual,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameVirtual,
+			Namespace: namespace,
 		}
 		managedResourceSecretRuntime = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceRuntime.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceRuntime.Name,
+			Namespace: namespace,
 		}
 		managedResourceSecretVirtual = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceVirtual.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceVirtual.Name,
+			Namespace: namespace,
 		}
 		serviceRuntime = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "gardener-metrics-exporter",
-				Namespace:   namespace,
-				Annotations: map[string]string{"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":2718}]`},
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "metrics-exporter",
-				},
+			Name:        "gardener-metrics-exporter",
+			Namespace:   namespace,
+			Annotations: map[string]string{"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":2718}]`},
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "metrics-exporter",
 			},
 			Spec: corev1.ServiceSpec{
 				Type:            corev1.ServiceTypeClusterIP,
@@ -130,11 +120,9 @@ var _ = Describe("GardenerMetricsExporter", func() {
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "garden-gardener-metrics-exporter",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "garden"},
-			},
+			Name:      "garden-gardener-metrics-exporter",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "garden"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{"app": "gardener", "role": "metrics-exporter"}},
 				Endpoints: []monitoringv1.Endpoint{{
@@ -148,12 +136,10 @@ var _ = Describe("GardenerMetricsExporter", func() {
 			},
 		}
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:metrics-exporter",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "metrics-exporter",
-				},
+			Name: "gardener.cloud:metrics-exporter",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "metrics-exporter",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -184,12 +170,10 @@ var _ = Describe("GardenerMetricsExporter", func() {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:metrics-exporter",
-				Labels: map[string]string{
-					"app":  "gardener",
-					"role": "metrics-exporter",
-				},
+			Name: "gardener.cloud:metrics-exporter",
+			Labels: map[string]string{
+				"app":  "gardener",
+				"role": "metrics-exporter",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
@@ -203,7 +187,7 @@ var _ = Describe("GardenerMetricsExporter", func() {
 			}},
 		}
 
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 	})
 
 	JustBeforeEach(func() {
@@ -219,21 +203,17 @@ var _ = Describe("GardenerMetricsExporter", func() {
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretVirtual), managedResourceSecretVirtual)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 			})
 
@@ -242,15 +222,13 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceRuntime), managedResourceRuntime)).To(Succeed())
 				expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceRuntime.Name,
-						Namespace:       managedResourceRuntime.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
+					Name:            managedResourceRuntime.Name,
+					Namespace:       managedResourceRuntime.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class:       new("seed"),
@@ -272,15 +250,13 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceVirtual), managedResourceVirtual)).To(Succeed())
 				expectedVirtualMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceVirtual.Name,
-						Namespace:       managedResourceVirtual.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"origin":                             "gardener",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
+					Name:            managedResourceVirtual.Name,
+					Namespace:       managedResourceVirtual.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"origin":                             "gardener",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -309,17 +285,15 @@ var _ = Describe("GardenerMetricsExporter", func() {
 		Context("secrets", func() {
 			It("should successfully deploy the access secret for the virtual garden", func() {
 				accessSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-access-gardener-metrics-exporter",
-						Namespace: namespace,
-						Labels: map[string]string{
-							"resources.gardener.cloud/purpose": "token-requestor",
-							"resources.gardener.cloud/class":   "shoot",
-						},
-						Annotations: map[string]string{
-							"serviceaccount.resources.gardener.cloud/name":      "gardener-metrics-exporter",
-							"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-						},
+					Name:      "shoot-access-gardener-metrics-exporter",
+					Namespace: namespace,
+					Labels: map[string]string{
+						"resources.gardener.cloud/purpose": "token-requestor",
+						"resources.gardener.cloud/class":   "shoot",
+					},
+					Annotations: map[string]string{
+						"serviceaccount.resources.gardener.cloud/name":      "gardener-metrics-exporter",
+						"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 					},
 					Type: corev1.SecretTypeOpaque,
 				}
@@ -363,21 +337,17 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 			It("should fail because the runtime and virtual ManagedResources are unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -385,20 +355,16 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 			It("should fail because the runtime ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -423,11 +389,9 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 			It("should fail because the virtual ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -448,12 +412,10 @@ var _ = Describe("GardenerMetricsExporter", func() {
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -461,11 +423,9 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 			It("should succeed because the runtime and virtual ManagedResource are healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -486,11 +446,9 @@ var _ = Describe("GardenerMetricsExporter", func() {
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -515,11 +473,9 @@ var _ = Describe("GardenerMetricsExporter", func() {
 
 			It("should succeed because the both ManagedResource are healthy and progressed", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -540,11 +496,9 @@ var _ = Describe("GardenerMetricsExporter", func() {
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -619,13 +573,11 @@ var (
 
 func deployment(namespace string, testValues Values) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardener-metrics-exporter",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "metrics-exporter",
-			},
+		Name:      "gardener-metrics-exporter",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "metrics-exporter",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
@@ -677,34 +629,28 @@ func deployment(namespace string, testValues Values) *appsv1.Deployment {
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/",
-										Port:   intstr.FromInt32(2718),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/",
+									Port:   intstr.FromInt32(2718),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								PeriodSeconds: 5,
 							},
 							StartupProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/",
-										Port:   intstr.FromInt32(2718),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/",
+									Port:   intstr.FromInt32(2718),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								// Wait for 2 minutes to allow the informer cache to sync
 								PeriodSeconds:    5,
 								FailureThreshold: 24,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/metrics",
-										Port:   intstr.FromInt32(2718),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/metrics",
+									Port:   intstr.FromInt32(2718),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								TimeoutSeconds: 10,
 								PeriodSeconds:  15,
@@ -721,33 +667,27 @@ func deployment(namespace string, testValues Values) *appsv1.Deployment {
 					Volumes: []corev1.Volume{
 						{
 							Name: "kubeconfig",
-							VolumeSource: corev1.VolumeSource{
-								Projected: &corev1.ProjectedVolumeSource{
-									DefaultMode: new(int32(420)),
-									Sources: []corev1.VolumeProjection{
-										{
-											Secret: &corev1.SecretProjection{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "generic-token-kubeconfig",
-												},
-												Items: []corev1.KeyToPath{{
-													Key:  "kubeconfig",
-													Path: "kubeconfig",
-												}},
-												Optional: new(false),
-											},
+							Projected: &corev1.ProjectedVolumeSource{
+								DefaultMode: new(int32(420)),
+								Sources: []corev1.VolumeProjection{
+									{
+										Secret: &corev1.SecretProjection{
+											Name: "generic-token-kubeconfig",
+											Items: []corev1.KeyToPath{{
+												Key:  "kubeconfig",
+												Path: "kubeconfig",
+											}},
+											Optional: new(false),
 										},
-										{
-											Secret: &corev1.SecretProjection{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "shoot-access-gardener-metrics-exporter",
-												},
-												Items: []corev1.KeyToPath{{
-													Key:  "token",
-													Path: "token",
-												}},
-												Optional: new(false),
-											},
+									},
+									{
+										Secret: &corev1.SecretProjection{
+											Name: "shoot-access-gardener-metrics-exporter",
+											Items: []corev1.KeyToPath{{
+												Key:  "token",
+												Path: "token",
+											}},
+											Optional: new(false),
 										},
 									},
 								},

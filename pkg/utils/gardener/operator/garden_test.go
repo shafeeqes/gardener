@@ -65,7 +65,7 @@ var _ = Describe("Garden", func() {
 			extensionList = &operatorv1alpha1.ExtensionList{
 				Items: []operatorv1alpha1.Extension{
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "local-extension-1"},
+						Name: "local-extension-1",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: "Extension", Type: "local-extension-1"},
@@ -73,7 +73,7 @@ var _ = Describe("Garden", func() {
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "local-extension-2"},
+						Name: "local-extension-2",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: "Extension", Type: "local-extension-2-1", AutoEnable: []gardencorev1beta1.ClusterType{"shoot"}},
@@ -120,7 +120,7 @@ var _ = Describe("Garden", func() {
 
 		It("should return required Extension extension types", func() {
 			autoEnabledExtension := operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{Name: "local-extension-3"},
+				Name: "local-extension-3",
 				Spec: operatorv1alpha1.ExtensionSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: "Extension", Type: "auto-enabled-local-extension", AutoEnable: []gardencorev1beta1.ClusterType{"garden"}},
@@ -186,10 +186,8 @@ var _ = Describe("Garden", func() {
 			extensionName = "test"
 			gardenNamespace = "test-namespace"
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "extension-test-garden",
-					Namespace: gardenNamespace,
-				},
+				Name:      "extension-test-garden",
+				Namespace: gardenNamespace,
 			}
 
 			Expect(fakeClient.Create(ctx, managedResource)).To(Succeed())
@@ -263,9 +261,7 @@ var _ = Describe("Garden", func() {
 			gardenNamespace = "test-namespace"
 
 			extension = &operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: extensionName,
-				},
+				Name: extensionName,
 				Spec: operatorv1alpha1.ExtensionSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: "BackupBucket", Type: "local-infrastructure"},
@@ -275,10 +271,8 @@ var _ = Describe("Garden", func() {
 				},
 			}
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "extension-test-garden",
-					Namespace: gardenNamespace,
-				},
+				Name:      "extension-test-garden",
+				Namespace: gardenNamespace,
 			}
 
 			Expect(fakeClient.Create(ctx, extension)).To(Succeed())

@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -53,17 +52,15 @@ var _ = Describe("Reconciler", func() {
 			},
 		}
 		quota = &gardencorev1beta1.Quota{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      quotaName,
-				Namespace: namespace,
-			},
+			Name:      quotaName,
+			Namespace: namespace,
 			Spec: gardencorev1beta1.QuotaSpec{
 				ClusterLifetimeDays: new(int32(1)),
 			},
 		}
 
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{Name: "test-secretbinding", Namespace: namespace},
+			Name: "test-secretbinding", Namespace: namespace,
 			Quotas: []corev1.ObjectReference{
 				{
 					Name:      quotaName,
@@ -73,7 +70,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		credentialsBinding = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta: metav1.ObjectMeta{Name: "test-credentialsbinding", Namespace: namespace},
+			Name: "test-credentialsbinding", Namespace: namespace,
 			Quotas: []corev1.ObjectReference{
 				{
 					Name:      quotaName,
@@ -83,7 +80,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{Name: "test-shoot", Namespace: namespace, CreationTimestamp: metav1.Now()},
+			Name: "test-shoot", Namespace: namespace, CreationTimestamp: metav1.Now(),
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("test-secretbinding"),
 			},
@@ -100,7 +97,7 @@ var _ = Describe("Reconciler", func() {
 		Expect(fakeClient.Create(ctx, secretBinding)).To(Succeed())
 		Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(BeNotFoundError())
@@ -116,7 +113,7 @@ var _ = Describe("Reconciler", func() {
 		Expect(fakeClient.Create(ctx, secretBinding)).To(Succeed())
 		Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(Succeed())
@@ -134,7 +131,7 @@ var _ = Describe("Reconciler", func() {
 		Expect(fakeClient.Create(ctx, credentialsBinding)).To(Succeed())
 		Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(BeNotFoundError())
@@ -152,7 +149,7 @@ var _ = Describe("Reconciler", func() {
 		Expect(fakeClient.Create(ctx, credentialsBinding)).To(Succeed())
 		Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(Succeed())
@@ -163,7 +160,7 @@ var _ = Describe("Reconciler", func() {
 		Expect(fakeClient.Create(ctx, secretBinding)).To(Succeed())
 		Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(Succeed())

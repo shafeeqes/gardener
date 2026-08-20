@@ -85,11 +85,9 @@ var _ = Describe("Authorizer", func() {
 		}
 
 		machine = &machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      machineName,
-				Namespace: machineNamespace,
-				Labels:    map[string]string{machinev1alpha1.NodeLabelKey: nodeName},
-			},
+			Name:      machineName,
+			Namespace: machineNamespace,
+			Labels:    map[string]string{machinev1alpha1.NodeLabelKey: nodeName},
 			Spec: machinev1alpha1.MachineSpec{
 				NodeTemplateSpec: machinev1alpha1.NodeTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
@@ -101,10 +99,8 @@ var _ = Describe("Authorizer", func() {
 		Expect(sourceClient.Create(ctx, machine)).To(Succeed())
 
 		newMachine = &machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      newMachineName,
-				Namespace: machineNamespace,
-			},
+			Name:      newMachineName,
+			Namespace: machineNamespace,
 			Spec: machinev1alpha1.MachineSpec{
 				NodeTemplateSpec: machinev1alpha1.NodeTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
@@ -116,10 +112,8 @@ var _ = Describe("Authorizer", func() {
 		Expect(sourceClient.Create(ctx, newMachine)).To(Succeed())
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   nodeName,
-				Labels: map[string]string{"node.gardener.cloud/machine-name": machineName},
-			},
+			Name:   nodeName,
+			Labels: map[string]string{"node.gardener.cloud/machine-name": machineName},
 		}
 		Expect(targetClient.Create(ctx, node)).To(Succeed())
 
@@ -192,9 +186,7 @@ var _ = Describe("Authorizer", func() {
 
 			It("should allow to get a certificate signing request created by the same user", func() {
 				csr := &certificatesv1.CertificateSigningRequest{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "foo-csr",
-					},
+					Name: "foo-csr",
 					Spec: certificatesv1.CertificateSigningRequestSpec{
 						Username: nodeAgentUser.GetName(),
 					},
@@ -218,9 +210,7 @@ var _ = Describe("Authorizer", func() {
 
 			It("should deny to get a certificate signing request created by a different user", func() {
 				csr := &certificatesv1.CertificateSigningRequest{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "foo-csr",
-					},
+					Name: "foo-csr",
 					Spec: certificatesv1.CertificateSigningRequestSpec{
 						Username: newNodeAgentUser.GetName(),
 					},
@@ -752,11 +742,9 @@ var _ = Describe("Authorizer", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				oscSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      machineSecretName,
-						Namespace: metav1.NamespaceSystem,
-					},
-					Data: map[string][]byte{"osc.yaml": oscRaw},
+					Name:      machineSecretName,
+					Namespace: metav1.NamespaceSystem,
+					Data:      map[string][]byte{"osc.yaml": oscRaw},
 				}
 				Expect(targetClient.Create(ctx, oscSecret)).To(Succeed())
 				DeferCleanup(func() { Expect(targetClient.Delete(ctx, oscSecret)).To(Succeed()) })
@@ -813,11 +801,9 @@ var _ = Describe("Authorizer", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				oscSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      machineSecretName,
-						Namespace: metav1.NamespaceSystem,
-					},
-					Data: map[string][]byte{"osc.yaml": oscRaw},
+					Name:      machineSecretName,
+					Namespace: metav1.NamespaceSystem,
+					Data:      map[string][]byte{"osc.yaml": oscRaw},
 				}
 				Expect(targetClient.Create(ctx, oscSecret)).To(Succeed())
 				DeferCleanup(func() { Expect(targetClient.Delete(ctx, oscSecret)).To(Succeed()) })
@@ -867,22 +853,18 @@ var _ = Describe("Authorizer", func() {
 
 					oscSecretName := "gardenadm-osc-secret"
 					oscSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      oscSecretName,
-							Namespace: metav1.NamespaceSystem,
-							Labels:    map[string]string{v1beta1constants.LabelWorkerPool: "pool"},
-						},
-						Data: map[string][]byte{"osc.yaml": oscRaw},
+						Name:      oscSecretName,
+						Namespace: metav1.NamespaceSystem,
+						Labels:    map[string]string{v1beta1constants.LabelWorkerPool: "pool"},
+						Data:      map[string][]byte{"osc.yaml": oscRaw},
 					}
 					Expect(targetClient.Create(ctx, oscSecret)).To(Succeed())
 					DeferCleanup(func() { Expect(targetClient.Delete(ctx, oscSecret)).To(Succeed()) })
 
 					gardenadmNode := &corev1.Node{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardenadm-node",
-							Labels: map[string]string{
-								v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: oscSecretName,
-							},
+						Name: "gardenadm-node",
+						Labels: map[string]string{
+							v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: oscSecretName,
 						},
 					}
 					Expect(targetClient.Create(ctx, gardenadmNode)).To(Succeed())
@@ -937,23 +919,19 @@ var _ = Describe("Authorizer", func() {
 
 					oscSecretName := "gardenadm-hostname-osc-secret"
 					oscSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      oscSecretName,
-							Namespace: metav1.NamespaceSystem,
-							Labels:    map[string]string{v1beta1constants.LabelWorkerPool: "pool"},
-						},
-						Data: map[string][]byte{"osc.yaml": oscRaw},
+						Name:      oscSecretName,
+						Namespace: metav1.NamespaceSystem,
+						Labels:    map[string]string{v1beta1constants.LabelWorkerPool: "pool"},
+						Data:      map[string][]byte{"osc.yaml": oscRaw},
 					}
 					Expect(targetClient.Create(ctx, oscSecret)).To(Succeed())
 					DeferCleanup(func() { Expect(targetClient.Delete(ctx, oscSecret)).To(Succeed()) })
 
 					gardenadmNode := &corev1.Node{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardenadm-hostname-node",
-							Labels: map[string]string{
-								v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: oscSecretName,
-								corev1.LabelHostname: "gardenadm-hostname",
-							},
+						Name: "gardenadm-hostname-node",
+						Labels: map[string]string{
+							v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName: oscSecretName,
+							corev1.LabelHostname: "gardenadm-hostname",
 						},
 					}
 					Expect(targetClient.Create(ctx, gardenadmNode)).To(Succeed())
@@ -1001,12 +979,10 @@ var _ = Describe("Authorizer", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					oscSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "bootstrap-osc-secret",
-							Namespace: metav1.NamespaceSystem,
-							Labels:    map[string]string{v1beta1constants.LabelWorkerPool: "pool"},
-						},
-						Data: map[string][]byte{"osc.yaml": oscRaw},
+						Name:      "bootstrap-osc-secret",
+						Namespace: metav1.NamespaceSystem,
+						Labels:    map[string]string{v1beta1constants.LabelWorkerPool: "pool"},
+						Data:      map[string][]byte{"osc.yaml": oscRaw},
 					}
 					Expect(targetClient.Create(ctx, oscSecret)).To(Succeed())
 					DeferCleanup(func() { Expect(targetClient.Delete(ctx, oscSecret)).To(Succeed()) })
@@ -1049,10 +1025,8 @@ var _ = Describe("Authorizer", func() {
 				podNamespace = "default"
 
 				pod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      podName,
-						Namespace: podNamespace,
-					},
+					Name:      podName,
+					Namespace: podNamespace,
 					Spec: corev1.PodSpec{
 						NodeName: nodeName,
 					},

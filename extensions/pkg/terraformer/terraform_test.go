@@ -48,11 +48,9 @@ var _ = Describe("terraformer", func() {
 		scheme *runtime.Scheme
 
 		infra = extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      name,
-				UID:       infraUID,
-			},
+			Namespace: namespace,
+			Name:      name,
+			UID:       infraUID,
 		}
 		ownerRef = metav1.NewControllerRef(&infra.ObjectMeta, extensionsv1alpha1.SchemeGroupVersion.WithKind(extensionsv1alpha1.InfrastructureResource))
 	)
@@ -73,11 +71,9 @@ var _ = Describe("terraformer", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			expected := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:       namespace,
-					Name:            name,
-					ResourceVersion: "1",
-				},
+				Namespace:       namespace,
+				Name:            name,
+				ResourceVersion: "1",
 				Data: map[string]string{
 					MainKey:      mainName,
 					VariablesKey: variablesName,
@@ -96,13 +92,11 @@ var _ = Describe("terraformer", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			expected := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:       namespace,
-					Name:            name,
-					ResourceVersion: "1",
-					OwnerReferences: []metav1.OwnerReference{
-						*ownerRef,
-					},
+				Namespace:       namespace,
+				Name:            name,
+				ResourceVersion: "1",
+				OwnerReferences: []metav1.OwnerReference{
+					*ownerRef,
 				},
 				Data: map[string]string{
 					MainKey:      mainName,
@@ -142,10 +136,8 @@ var _ = Describe("terraformer", func() {
 			It("should return nil when the ConfigMap already exists", func() {
 				// Pre-create the ConfigMap
 				existing := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-						Name:      name,
-					},
+					Namespace: namespace,
+					Name:      name,
 					Data: map[string]string{
 						StateKey: "existing-state",
 					},
@@ -200,11 +192,9 @@ var _ = Describe("terraformer", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			expected := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:       namespace,
-					Name:            name,
-					ResourceVersion: "1",
-				},
+				Namespace:       namespace,
+				Name:            name,
+				ResourceVersion: "1",
 				Data: map[string][]byte{
 					TFVarsKey: tfVars,
 				},
@@ -224,13 +214,11 @@ var _ = Describe("terraformer", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			expected := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:       namespace,
-					Name:            name,
-					ResourceVersion: "1",
-					OwnerReferences: []metav1.OwnerReference{
-						*ownerRef,
-					},
+				Namespace:       namespace,
+				Name:            name,
+				ResourceVersion: "1",
+				OwnerReferences: []metav1.OwnerReference{
+					*ownerRef,
 				},
 				Data: map[string][]byte{
 					TFVarsKey: tfVars,
@@ -393,10 +381,8 @@ var _ = Describe("terraformer", func() {
 
 			// Create the state ConfigMap
 			stateCM := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      tfStateName,
-				},
+				Namespace: namespace,
+				Name:      tfStateName,
 				Data: map[string]string{
 					StateKey: string(stateJSON),
 				},
@@ -428,10 +414,8 @@ var _ = Describe("terraformer", func() {
 
 			// Create the state ConfigMap
 			stateCM := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      tfStateName,
-				},
+				Namespace: namespace,
+				Name:      tfStateName,
 				Data: map[string]string{
 					StateKey: string(stateJSON),
 				},
@@ -462,10 +446,8 @@ var _ = Describe("terraformer", func() {
 
 			// Create the state ConfigMap
 			stateCM := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      tfStateName,
-				},
+				Namespace: namespace,
+				Name:      tfStateName,
 				Data: map[string]string{
 					StateKey: string(stateJSON),
 				},
@@ -495,13 +477,13 @@ var _ = Describe("terraformer", func() {
 		It("should delete all resources", func() {
 			// Create the resources to be deleted
 			Expect(c.Create(ctx, &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: tfStateName},
+				Namespace: namespace, Name: tfStateName,
 			})).To(Succeed())
 			Expect(c.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: tfVariablesName},
+				Namespace: namespace, Name: tfVariablesName,
 			})).To(Succeed())
 			Expect(c.Create(ctx, &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: tfConfigName},
+				Namespace: namespace, Name: tfConfigName,
 			})).To(Succeed())
 
 			t := New(log, c, nil, purpose, namespace, name, image)
@@ -516,25 +498,19 @@ var _ = Describe("terraformer", func() {
 		It("should remove the terraform finalizer from all resources", func() {
 			// Create the resources with the terraformer finalizer
 			Expect(c.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:  namespace,
-					Name:       tfVariablesName,
-					Finalizers: []string{TerraformerFinalizer},
-				},
+				Namespace:  namespace,
+				Name:       tfVariablesName,
+				Finalizers: []string{TerraformerFinalizer},
 			})).To(Succeed())
 			Expect(c.Create(ctx, &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:  namespace,
-					Name:       tfStateName,
-					Finalizers: []string{TerraformerFinalizer},
-				},
+				Namespace:  namespace,
+				Name:       tfStateName,
+				Finalizers: []string{TerraformerFinalizer},
 			})).To(Succeed())
 			Expect(c.Create(ctx, &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:  namespace,
-					Name:       tfConfigName,
-					Finalizers: []string{TerraformerFinalizer},
-				},
+				Namespace:  namespace,
+				Name:       tfConfigName,
+				Finalizers: []string{TerraformerFinalizer},
 			})).To(Succeed())
 
 			t := New(log, c, nil, purpose, namespace, name, image)

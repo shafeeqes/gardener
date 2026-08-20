@@ -144,10 +144,8 @@ var _ = ginkgo.Describe("Shoot clusterautoscaler testing", func() {
 
 		ginkgo.By("Delete pod-anti-affinity deployment")
 		err = kubernetesutils.DeleteObject(ctx, f.ShootClient.Client(), &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      podAntiAffinityDeploymentName,
-				Namespace: podAntiAffinityDeploymentNamespace,
-			},
+			Name:      podAntiAffinityDeploymentName,
+			Namespace: podAntiAffinityDeploymentNamespace,
 		})
 		framework.ExpectNoError(err)
 	}, cleanupTimeout))
@@ -254,10 +252,8 @@ var _ = ginkgo.Describe("Shoot clusterautoscaler testing", func() {
 
 		ginkgo.By("Delete pod-anti-affinity deployment")
 		err = kubernetesutils.DeleteObject(ctx, f.ShootClient.Client(), &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      podAntiAffinityDeploymentName,
-				Namespace: podAntiAffinityDeploymentNamespace,
-			},
+			Name:      podAntiAffinityDeploymentName,
+			Namespace: podAntiAffinityDeploymentNamespace,
 		})
 		framework.ExpectNoError(err)
 	}, cleanupTimeout))

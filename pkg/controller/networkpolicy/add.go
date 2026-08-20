@@ -13,7 +13,6 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -146,7 +145,7 @@ func (r *Reconciler) MapToNamespaces(log logr.Logger) handler.MapFunc {
 
 		var requests []reconcile.Request
 		for _, namespaceName := range namespaceNames.UnsortedList() {
-			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespaceName}})
+			requests = append(requests, reconcile.Request{Name: namespaceName})
 		}
 		return requests
 	}
@@ -154,12 +153,12 @@ func (r *Reconciler) MapToNamespaces(log logr.Logger) handler.MapFunc {
 
 // MapObjectToName is a mapper function which maps an object to its name.
 func (r *Reconciler) MapObjectToName(_ context.Context, obj client.Object) []reconcile.Request {
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: obj.GetName()}}}
+	return []reconcile.Request{{Name: obj.GetName()}}
 }
 
 // MapObjectToNamespace is a mapper function which maps an object to its namespace.
 func (r *Reconciler) MapObjectToNamespace(_ context.Context, obj client.Object) []reconcile.Request {
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: obj.GetNamespace()}}}
+	return []reconcile.Request{{Name: obj.GetNamespace()}}
 }
 
 // IsKubernetesEndpoint returns a predicate which evaluates if the object is the kubernetes endpoint.

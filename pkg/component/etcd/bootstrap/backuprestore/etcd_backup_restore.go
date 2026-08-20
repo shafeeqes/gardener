@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/component/etcd/etcd"
@@ -81,10 +80,8 @@ func (cfg *Config) ShouldRun() bool {
 // ConfigMap returns the fully populated etcd-config ConfigMap for the etcdbrctl-initialize init container.
 func (cfg *Config) ConfigMap(namespace string) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: namespace,
-		},
+		Name:      configMapName,
+		Namespace: namespace,
 		Data: map[string]string{
 			EtcdConfigFileName: cfg.EtcdInitializeConfig(),
 		},
@@ -136,9 +133,9 @@ func (cfg *Config) InitContainer(dataVolumeName string) corev1.Container {
 // Volumes returns the volumes needed by the etcdbrctl-initialize init container.
 func (cfg *Config) Volumes() []corev1.Volume {
 	return []corev1.Volume{
-		{Name: volumeNameBackupBuckets, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: cfg.BackupBucketsHostPath, Type: new(corev1.HostPathDirectoryOrCreate)}}},
-		{Name: volumeNameRestoreTmp, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}},
-		{Name: volumeNameEtcdConf, VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: configMapName}, Items: []corev1.KeyToPath{{Key: EtcdConfigFileName, Path: EtcdConfigFileName}}}}},
+		{Name: volumeNameBackupBuckets, HostPath: &corev1.HostPathVolumeSource{Path: cfg.BackupBucketsHostPath, Type: new(corev1.HostPathDirectoryOrCreate)}},
+		{Name: volumeNameRestoreTmp, EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		{Name: volumeNameEtcdConf, ConfigMap: &corev1.ConfigMapVolumeSource{Name: configMapName, Items: []corev1.KeyToPath{{Key: EtcdConfigFileName, Path: EtcdConfigFileName}}}},
 	}
 }
 

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -61,28 +60,26 @@ resources:
 
 			By("Verify encryption config secret")
 			expectedSecretETCDEncryptionConfiguration := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace},
-				Data:       map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
+				Name: "apiserver-encryption-config", Namespace: namespace,
+				Data: map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
 			}
 			Expect(kubernetesutils.MakeUnique(expectedSecretETCDEncryptionConfiguration)).To(Succeed())
 
-			actualSecretETCDEncryptionConfiguration := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace}}
+			actualSecretETCDEncryptionConfiguration := &corev1.Secret{Name: "apiserver-encryption-config", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(BeNotFoundError())
 
 			Expect(ReconcileSecretETCDEncryptionConfiguration(ctx, fakeClient, fakeSecretManager, config, actualSecretETCDEncryptionConfiguration, secretNameETCDEncryptionKey, encryptionRoleLabel)).To(Succeed())
 
 			Expect(actualSecretETCDEncryptionConfiguration).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      expectedSecretETCDEncryptionConfiguration.Name,
-					Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
-					Labels: map[string]string{
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-						"role": encryptionRoleLabel,
-					},
-					ResourceVersion: "1",
+				Name:      expectedSecretETCDEncryptionConfiguration.Name,
+				Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
+				Labels: map[string]string{
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
+					"role": encryptionRoleLabel,
 				},
-				Immutable: new(true),
-				Data:      expectedSecretETCDEncryptionConfiguration.Data,
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            expectedSecretETCDEncryptionConfiguration.Data,
 			}))
 
 			By("Deploy again and ensure that labels are still present")
@@ -131,28 +128,26 @@ resources:
 
 			By("Verify encryption config secret")
 			expectedSecretETCDEncryptionConfiguration := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace},
-				Data:       map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
+				Name: "apiserver-encryption-config", Namespace: namespace,
+				Data: map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
 			}
 			Expect(kubernetesutils.MakeUnique(expectedSecretETCDEncryptionConfiguration)).To(Succeed())
 
-			actualSecretETCDEncryptionConfiguration := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace}}
+			actualSecretETCDEncryptionConfiguration := &corev1.Secret{Name: "apiserver-encryption-config", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(BeNotFoundError())
 
 			Expect(ReconcileSecretETCDEncryptionConfiguration(ctx, fakeClient, fakeSecretManager, config, actualSecretETCDEncryptionConfiguration, secretNameETCDEncryptionKey, encryptionRoleLabel)).To(Succeed())
 
 			Expect(actualSecretETCDEncryptionConfiguration).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      expectedSecretETCDEncryptionConfiguration.Name,
-					Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
-					Labels: map[string]string{
-						"resources.gardener.cloud/garbage-collectable-reference": "true",
-						"role": encryptionRoleLabel,
-					},
-					ResourceVersion: "1",
+				Name:      expectedSecretETCDEncryptionConfiguration.Name,
+				Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
+				Labels: map[string]string{
+					"resources.gardener.cloud/garbage-collectable-reference": "true",
+					"role": encryptionRoleLabel,
 				},
-				Immutable: new(true),
-				Data:      expectedSecretETCDEncryptionConfiguration.Data,
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            expectedSecretETCDEncryptionConfiguration.Data,
 			}))
 
 			By("Deploy again and ensure that labels are still present")
@@ -177,7 +172,7 @@ resources:
 		It("should error when unknown encryption provider is used", func() {
 			config.EncryptionProvider = "unknown"
 
-			secretETCDEncryptionConfiguration := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace}}
+			secretETCDEncryptionConfiguration := &corev1.Secret{Name: "apiserver-encryption-config", Namespace: namespace}
 			err := ReconcileSecretETCDEncryptionConfiguration(ctx, fakeClient, fakeSecretManager, config, secretETCDEncryptionConfiguration, secretNameETCDEncryptionKey, encryptionRoleLabel)
 			Expect(err).To(MatchError("unknown encryption provider 'unknown'"))
 		})
@@ -189,10 +184,8 @@ resources:
 
 				oldKeyName, oldKeySecret := "key-old", "old-secret"
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      secretNameETCDEncryptionKey + "-old",
-						Namespace: namespace,
-					},
+					Name:      secretNameETCDEncryptionKey + "-old",
+					Namespace: namespace,
 					Data: map[string][]byte{
 						"key":      []byte(oldKeyName),
 						"secret":   []byte(oldKeySecret),
@@ -231,29 +224,27 @@ resources:
 `
 
 				expectedSecretETCDEncryptionConfiguration := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace},
-					Data:       map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
+					Name: "apiserver-encryption-config", Namespace: namespace,
+					Data: map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
 				}
 				Expect(kubernetesutils.MakeUnique(expectedSecretETCDEncryptionConfiguration)).To(Succeed())
 
-				actualSecretETCDEncryptionConfiguration := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace}}
+				actualSecretETCDEncryptionConfiguration := &corev1.Secret{Name: "apiserver-encryption-config", Namespace: namespace}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(BeNotFoundError())
 
 				Expect(ReconcileSecretETCDEncryptionConfiguration(ctx, fakeClient, fakeSecretManager, config, actualSecretETCDEncryptionConfiguration, secretNameETCDEncryptionKey, encryptionRoleLabel)).To(Succeed())
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(Succeed())
 				Expect(actualSecretETCDEncryptionConfiguration).To(Equal(&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      expectedSecretETCDEncryptionConfiguration.Name,
-						Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
-						Labels: map[string]string{
-							"resources.gardener.cloud/garbage-collectable-reference": "true",
-							"role": encryptionRoleLabel,
-						},
-						ResourceVersion: "1",
+					Name:      expectedSecretETCDEncryptionConfiguration.Name,
+					Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
+					Labels: map[string]string{
+						"resources.gardener.cloud/garbage-collectable-reference": "true",
+						"role": encryptionRoleLabel,
 					},
-					Immutable: new(true),
-					Data:      expectedSecretETCDEncryptionConfiguration.Data,
+					ResourceVersion: "1",
+					Immutable:       new(true),
+					Data:            expectedSecretETCDEncryptionConfiguration.Data,
 				}))
 
 				secretList := &corev1.SecretList{}
@@ -279,10 +270,8 @@ resources:
 
 				oldKeyName, oldKeySecret := "key-old", "old-secret"
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      secretNameETCDEncryptionKey + "-old",
-						Namespace: namespace,
-					},
+					Name:      secretNameETCDEncryptionKey + "-old",
+					Namespace: namespace,
 					Data: map[string][]byte{
 						"key":    []byte(oldKeyName),
 						"secret": []byte(oldKeySecret),
@@ -317,29 +306,27 @@ resources:
 `
 
 				expectedSecretETCDEncryptionConfiguration := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace},
-					Data:       map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
+					Name: "apiserver-encryption-config", Namespace: namespace,
+					Data: map[string][]byte{"encryption-configuration.yaml": []byte(etcdEncryptionConfiguration)},
 				}
 				Expect(kubernetesutils.MakeUnique(expectedSecretETCDEncryptionConfiguration)).To(Succeed())
 
-				actualSecretETCDEncryptionConfiguration := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-encryption-config", Namespace: namespace}}
+				actualSecretETCDEncryptionConfiguration := &corev1.Secret{Name: "apiserver-encryption-config", Namespace: namespace}
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(BeNotFoundError())
 
 				Expect(ReconcileSecretETCDEncryptionConfiguration(ctx, fakeClient, fakeSecretManager, config, actualSecretETCDEncryptionConfiguration, secretNameETCDEncryptionKey, encryptionRoleLabel)).To(Succeed())
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecretETCDEncryptionConfiguration), actualSecretETCDEncryptionConfiguration)).To(Succeed())
 				Expect(actualSecretETCDEncryptionConfiguration).To(Equal(&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      expectedSecretETCDEncryptionConfiguration.Name,
-						Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
-						Labels: map[string]string{
-							"resources.gardener.cloud/garbage-collectable-reference": "true",
-							"role": encryptionRoleLabel,
-						},
-						ResourceVersion: "1",
+					Name:      expectedSecretETCDEncryptionConfiguration.Name,
+					Namespace: expectedSecretETCDEncryptionConfiguration.Namespace,
+					Labels: map[string]string{
+						"resources.gardener.cloud/garbage-collectable-reference": "true",
+						"role": encryptionRoleLabel,
 					},
-					Immutable: new(true),
-					Data:      expectedSecretETCDEncryptionConfiguration.Data,
+					ResourceVersion: "1",
+					Immutable:       new(true),
+					Data:            expectedSecretETCDEncryptionConfiguration.Data,
 				}))
 
 				secretList := &corev1.SecretList{}
@@ -361,7 +348,7 @@ resources:
 			deployment := &appsv1.Deployment{}
 			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{})
 
-			secretETCDEncryptionConfiguration := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "etcd-enc-config"}}
+			secretETCDEncryptionConfiguration := &corev1.Secret{Name: "etcd-enc-config"}
 
 			InjectEncryptionSettings(deployment, secretETCDEncryptionConfiguration)
 
@@ -381,11 +368,9 @@ resources:
 							}},
 							Volumes: []corev1.Volume{{
 								Name: "etcd-encryption-secret",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName:  secretETCDEncryptionConfiguration.Name,
-										DefaultMode: new(int32(0640)),
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName:  secretETCDEncryptionConfiguration.Name,
+									DefaultMode: new(int32(0640)),
 								},
 							}},
 						},

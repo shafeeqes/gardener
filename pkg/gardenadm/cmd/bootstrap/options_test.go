@@ -44,10 +44,8 @@ var _ = Describe("Options", func() {
 		globalOpts.IOStreams, _, stdOut, _ = clitest.NewTestIOStreams()
 
 		options = &Options{
-			Options: globalOpts,
-			ManifestOptions: cmd.ManifestOptions{
-				ConfigDir: "some-path-to-config-dir",
-			},
+			Options:          globalOpts,
+			ConfigDir:        "some-path-to-config-dir",
 			Kubeconfig:       "some-path-to-kubeconfig",
 			PublicIPDetector: detector,
 		}

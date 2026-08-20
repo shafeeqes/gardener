@@ -14,7 +14,6 @@ import (
 	istionetworkingv1alpha3 "istio.io/api/networking/v1alpha3"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -299,8 +298,8 @@ var _ = Describe("Istio", func() {
 				JustBeforeEach(func() {
 					testValues.client = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 					testValues.enforceSpreadAcrossHosts = true
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}})).To(Succeed())
 					istioDeploy = createIstio(testValues)
 				})
 
@@ -323,12 +322,12 @@ var _ = Describe("Istio", func() {
 				JustBeforeEach(func() {
 					testValues.client = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 					testValues.enforceSpreadAcrossHosts = false
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "2"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-3", Labels: map[string]string{"topology.kubernetes.io/zone": "2"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-4", Labels: map[string]string{"topology.kubernetes.io/zone": "3"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-5", Labels: map[string]string{"topology.kubernetes.io/zone": "3"}}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "2"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-3", Labels: map[string]string{"topology.kubernetes.io/zone": "2"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-4", Labels: map[string]string{"topology.kubernetes.io/zone": "3"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-5", Labels: map[string]string{"topology.kubernetes.io/zone": "3"}})).To(Succeed())
 					istioDeploy = createIstio(testValues)
 				})
 
@@ -457,8 +456,8 @@ var _ = Describe("Istio", func() {
 				JustBeforeEach(func() {
 					testValues.client = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 					testValues.enforceSpreadAcrossHosts = true
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}}})).To(Succeed())
-					Expect(testValues.client.Create(context.Background(), &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}})).To(Succeed())
+					Expect(testValues.client.Create(context.Background(), &corev1.Node{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "1"}})).To(Succeed())
 					istioDeploy = createIstio(testValues)
 				})
 
@@ -586,32 +585,32 @@ var _ = Describe("Istio", func() {
 		},
 
 		Entry("no nodes", []corev1.Node{}, []string{}, false),
-		Entry("single node", []corev1.Node{{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}}}, []string{"z1"}, false),
+		Entry("single node", []corev1.Node{{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}}, []string{"z1"}, false),
 		Entry("two nodes", []corev1.Node{
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
+			{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
 		}, []string{"z1"}, true),
 		Entry("three nodes with different zones targeting one zone", []corev1.Node{
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}}},
+			{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}},
 		}, []string{"z1"}, true),
 		Entry("three nodes with different zones targeting two zones", []corev1.Node{
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}}},
+			{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}},
 		}, []string{"z1", "z2"}, false),
 		Entry("four nodes with different zones targeting two zones", []corev1.Node{
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-3", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}}},
+			{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}},
+			{Name: "node-3", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}},
 		}, []string{"z1", "z2"}, false),
 		Entry("four nodes with different zones targeting different zone", []corev1.Node{
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "node-3", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}}},
+			{Name: "node-0", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-1", Labels: map[string]string{"topology.kubernetes.io/zone": "z1"}},
+			{Name: "node-2", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}},
+			{Name: "node-3", Labels: map[string]string{"topology.kubernetes.io/zone": "z2"}},
 		}, []string{"z3"}, false),
 	)
 
@@ -636,10 +635,8 @@ var _ = Describe("Istio", func() {
 
 		It("should return false when only non-zonal gateways exist", func() {
 			gateway := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameKubeAPIServer,
-					Namespace: "shoot--project--test",
-				},
+				Name:      v1beta1constants.DeploymentNameKubeAPIServer,
+				Namespace: "shoot--project--test",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway",
@@ -655,10 +652,8 @@ var _ = Describe("Istio", func() {
 
 		It("should return false when gateway uses zonal ingress for different zone", func() {
 			gateway := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameKubeAPIServer,
-					Namespace: "shoot--project--test",
-				},
+				Name:      v1beta1constants.DeploymentNameKubeAPIServer,
+				Namespace: "shoot--project--test",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway--zone--zone-x",
@@ -674,10 +669,8 @@ var _ = Describe("Istio", func() {
 
 		It("should ignore non-shoot control plane gateways", func() {
 			gateway := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gateway-test",
-					Namespace: "shoot--project--test",
-				},
+				Name:      "gateway-test",
+				Namespace: "shoot--project--test",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway--zone--zone-a",
@@ -693,10 +686,8 @@ var _ = Describe("Istio", func() {
 
 		It("should return false when multiple non-zonal gateways exist", func() {
 			gateway1 := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameKubeAPIServer,
-					Namespace: "shoot--project--test",
-				},
+				Name:      v1beta1constants.DeploymentNameKubeAPIServer,
+				Namespace: "shoot--project--test",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway",
@@ -704,10 +695,8 @@ var _ = Describe("Istio", func() {
 				},
 			}
 			gateway2 := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameVPNSeedServer,
-					Namespace: "shoot--project--test",
-				},
+				Name:      v1beta1constants.DeploymentNameVPNSeedServer,
+				Namespace: "shoot--project--test",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway",
@@ -724,10 +713,8 @@ var _ = Describe("Istio", func() {
 
 		It("should return true when one gateway is zonal and one is not", func() {
 			gateway1 := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameKubeAPIServer,
-					Namespace: "shoot--project--test1",
-				},
+				Name:      v1beta1constants.DeploymentNameKubeAPIServer,
+				Namespace: "shoot--project--test1",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway--zone--zone-c",
@@ -735,10 +722,8 @@ var _ = Describe("Istio", func() {
 				},
 			}
 			gateway2 := &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameKubeAPIServer,
-					Namespace: "shoot--project--test2",
-				},
+				Name:      v1beta1constants.DeploymentNameKubeAPIServer,
+				Namespace: "shoot--project--test2",
 				Spec: istionetworkingv1alpha3.Gateway{
 					Selector: map[string]string{
 						istio.DefaultZoneKey: "ingressgateway",

@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -38,10 +36,8 @@ var _ = Describe("#MapSecretToManagedResources", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "mr-secret",
-				Namespace: "mr-namespace",
-			},
+			Name:      "mr-secret",
+			Namespace: "mr-namespace",
 		}
 
 		filter = predicate.NewClassFilter("seed")
@@ -79,11 +75,9 @@ var _ = Describe("#MapSecretToManagedResources", func() {
 
 	It("should do nothing, if there are no ManagedResources we are responsible for", func() {
 		mr := &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "other-mr",
-				Namespace: secret.Namespace,
-			},
-			Spec: resourcesv1alpha1.ManagedResourceSpec{Class: new("other")},
+			Name:      "other-mr",
+			Namespace: secret.Namespace,
+			Spec:      resourcesv1alpha1.ManagedResourceSpec{Class: new("other")},
 		}
 		Expect(fakeClient.Create(ctx, mr)).To(Succeed())
 
@@ -93,10 +87,8 @@ var _ = Describe("#MapSecretToManagedResources", func() {
 
 	It("should correctly map to ManagedResources that reference the secret", func() {
 		mr := &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "mr",
-				Namespace: secret.Namespace,
-			},
+			Name:      "mr",
+			Namespace: secret.Namespace,
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class:      new(filter.ResourceClass()),
 				SecretRefs: []corev1.LocalObjectReference{{Name: secret.Name}},
@@ -106,10 +98,9 @@ var _ = Describe("#MapSecretToManagedResources", func() {
 
 		requests := m(ctx, secret)
 		Expect(requests).To(ConsistOf(
-			reconcile.Request{NamespacedName: types.NamespacedName{
+			reconcile.Request{
 				Name:      mr.Name,
-				Namespace: mr.Namespace,
-			}},
+				Namespace: mr.Namespace},
 		))
 	})
 })

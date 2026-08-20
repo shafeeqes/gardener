@@ -10,7 +10,6 @@ import (
 	fluentbitv1alpha2parser "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/parser"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/networking/vpn/shoot"
 )
@@ -24,10 +23,8 @@ var _ = Describe("Logging", func() {
 			Expect(loggingConfig.Filters).To(Equal(
 				[]*fluentbitv1alpha2.ClusterFilter{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "vpn-shoot",
-							Labels: map[string]string{"fluentbit.gardener/type": "seed"},
-						},
+						Name:   "vpn-shoot",
+						Labels: map[string]string{"fluentbit.gardener/type": "seed"},
 						Spec: fluentbitv1alpha2.FilterSpec{
 							Match: "kubernetes.*vpn-shoot*vpn-shoot*",
 							FilterItems: []fluentbitv1alpha2.FilterItem{
@@ -45,10 +42,8 @@ var _ = Describe("Logging", func() {
 			Expect(loggingConfig.Parsers).To(Equal(
 				[]*fluentbitv1alpha2.ClusterParser{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "vpn-shoot-parser",
-							Labels: map[string]string{"fluentbit.gardener/type": "seed"},
-						},
+						Name:   "vpn-shoot-parser",
+						Labels: map[string]string{"fluentbit.gardener/type": "seed"},
 						Spec: fluentbitv1alpha2.ParserSpec{
 							Regex: &fluentbitv1alpha2parser.Regex{
 								Regex:      "^(?<time>[^0-9]*\\d{1,2}\\s+[^\\s]+\\s+\\d{4})\\s+(?<log>.*)",

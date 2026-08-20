@@ -75,14 +75,10 @@ var _ = Describe("extensions", func() {
 		name = "test-name"
 
 		expected = &extensionsv1alpha1.Worker{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       extensionsv1alpha1.WorkerResource,
-				APIVersion: extensionsv1alpha1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Kind:       extensionsv1alpha1.WorkerResource,
+			APIVersion: extensionsv1alpha1.SchemeGroupVersion.String(),
+			Name:       name,
+			Namespace:  namespace,
 		}
 
 		c = fake.NewClientBuilder().WithScheme(scheme).WithStatusSubresource(&extensionsv1alpha1.Worker{}).Build()
@@ -743,10 +739,8 @@ var _ = Describe("extensions", func() {
 							Replicas: 3,
 							MachineSets: []machinev1alpha1.MachineSet{
 								{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      "shoot--foo--bar-worker-z1-hash1",
-										Namespace: namespace,
-									},
+									Name:      "shoot--foo--bar-worker-z1-hash1",
+									Namespace: namespace,
 									Spec: machinev1alpha1.MachineSetSpec{
 										Replicas: 3,
 										MachineClass: machinev1alpha1.ClassSpec{
@@ -762,10 +756,8 @@ var _ = Describe("extensions", func() {
 									},
 								},
 								{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      "shoot--foo--bar-worker-z1-hash2",
-										Namespace: namespace,
-									},
+									Name:      "shoot--foo--bar-worker-z1-hash2",
+									Namespace: namespace,
 									Spec: machinev1alpha1.MachineSetSpec{
 										Replicas: 3,
 										MachineClass: machinev1alpha1.ClassSpec{
@@ -783,10 +775,8 @@ var _ = Describe("extensions", func() {
 							},
 							Machines: []machinev1alpha1.Machine{
 								{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      "shoot--foo--bar-worker-z1-hash1-abcde",
-										Namespace: namespace,
-									},
+									Name:      "shoot--foo--bar-worker-z1-hash1-abcde",
+									Namespace: namespace,
 									Spec: machinev1alpha1.MachineSpec{
 										Class: machinev1alpha1.ClassSpec{
 											Name: "shoot--foo--bar-worker-z1-hash1-abcde",
@@ -794,10 +784,8 @@ var _ = Describe("extensions", func() {
 									},
 								},
 								{
-									ObjectMeta: metav1.ObjectMeta{
-										Name:      "shoot--foo--bar-worker-z1-hash2-abcde",
-										Namespace: namespace,
-									},
+									Name:      "shoot--foo--bar-worker-z1-hash2-abcde",
+									Namespace: namespace,
 									Spec: machinev1alpha1.MachineSpec{
 										Class: machinev1alpha1.ClassSpec{
 											Name: "shoot--foo--bar-worker-z1-hash2-abcde",
@@ -889,10 +877,8 @@ var _ = Describe("extensions", func() {
 		It("should properly annotate all extension objects for migration", func() {
 			for i := range 4 {
 				containerRuntimeExtension := &extensionsv1alpha1.ContainerRuntime{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-						Name:      fmt.Sprintf("containerruntime-%d", i),
-					},
+					Namespace: namespace,
+					Name:      fmt.Sprintf("containerruntime-%d", i),
 				}
 				Expect(c.Create(ctx, containerRuntimeExtension)).To(Succeed())
 			}
@@ -912,10 +898,8 @@ var _ = Describe("extensions", func() {
 		It("should properly annotate only the desired extension objects for migration", func() {
 			for i := range 4 {
 				containerRuntimeExtension := &extensionsv1alpha1.ContainerRuntime{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-						Name:      fmt.Sprintf("containerruntime-%d", i),
-					},
+					Namespace: namespace,
+					Name:      fmt.Sprintf("containerruntime-%d", i),
 				}
 				Expect(c.Create(ctx, containerRuntimeExtension)).To(Succeed(), containerRuntimeExtension.Name+" should get created")
 			}

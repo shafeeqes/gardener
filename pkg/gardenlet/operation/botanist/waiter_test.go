@@ -53,9 +53,7 @@ var _ = Describe("Waiter", func() {
 
 		BeforeEach(func() {
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "infinity-node",
-				},
+				Name: "infinity-node",
 			}
 		})
 
@@ -82,9 +80,7 @@ var _ = Describe("Waiter", func() {
 
 		BeforeEach(func() {
 			pod = &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "infinity-pod",
-				},
+				Name: "infinity-pod",
 			}
 		})
 
@@ -160,9 +156,7 @@ var _ = Describe("Waiter", func() {
 
 		BeforeEach(func() {
 			endpoint = &corev1.Endpoints{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: "default", Name: "basic-endpoint",
-				},
+				Namespace: "default", Name: "basic-endpoint",
 				Subsets: []corev1.EndpointSubset{
 					{
 						Addresses: []corev1.EndpointAddress{{

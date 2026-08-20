@@ -95,51 +95,37 @@ var _ = Describe("resourcereferencemanager", func() {
 			defaultUserInfo = &user.DefaultInfo{Name: defaultUserName}
 
 			secret = corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       secretName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       secretName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 			}
 			internalSecret = gardencorev1beta1.InternalSecret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       internalSecretName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       internalSecretName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 			}
 			workloadIdentity = securityv1alpha1.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       workloadIdentityName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       workloadIdentityName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 			}
 
 			configMap = corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMapName,
-					Namespace:       namespace,
-					Finalizers:      finalizers,
-					ResourceVersion: resourceVersion,
-				},
+				Name:            configMapName,
+				Namespace:       namespace,
+				Finalizers:      finalizers,
+				ResourceVersion: resourceVersion,
 			}
 
 			controllerDeployment = gardencorev1beta1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: controllerDeploymentName,
-				},
+				Name: controllerDeploymentName,
 			}
 
 			cloudProfile = gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: cloudProfileName,
-				},
+				Name: cloudProfileName,
 			}
 			controllerRegistration = core.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: controllerRegistrationName,
-				},
+				Name: controllerRegistrationName,
 				Spec: core.ControllerRegistrationSpec{
 					Deployment: &core.ControllerRegistrationDeployment{
 						DeploymentRefs: []core.DeploymentRef{
@@ -151,15 +137,11 @@ var _ = Describe("resourcereferencemanager", func() {
 			project     = gardencorev1beta1.Project{}
 			coreProject = core.Project{}
 			seed        = gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       seedName,
-					Finalizers: finalizers,
-				}}
+				Name:       seedName,
+				Finalizers: finalizers}
 			quota = gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      quotaName,
-					Namespace: namespace,
-				},
+				Name:      quotaName,
+				Namespace: namespace,
 				Spec: gardencorev1beta1.QuotaSpec{
 					Scope: corev1.ObjectReference{
 						APIVersion: "core.gardener.cloud/v1beta1",
@@ -168,11 +150,9 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			coreSecretBinding = core.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       bindingName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       bindingName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				SecretRef: corev1.SecretReference{
 					Name:      secretName,
 					Namespace: namespace,
@@ -188,11 +168,9 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			secretBinding = gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       bindingName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       bindingName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				SecretRef: corev1.SecretReference{
 					Name:      secretName,
 					Namespace: namespace,
@@ -208,11 +186,9 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			securityCredentialsBindingRefSecret = security.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       credentialsBindingName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       credentialsBindingName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				CredentialsRef: corev1.ObjectReference{
 					APIVersion: corev1.SchemeGroupVersion.String(),
 					Name:       secretName,
@@ -229,11 +205,9 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			credentialsBindingRefSecret = securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       credentialsBindingName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       credentialsBindingName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				CredentialsRef: corev1.ObjectReference{
 					APIVersion: corev1.SchemeGroupVersion.String(),
 					Name:       secretName,
@@ -250,11 +224,9 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			securityCredentialsBindingRefInternalSecret = security.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       credentialsBindingName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       credentialsBindingName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "InternalSecret",
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
@@ -270,11 +242,9 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			securityCredentialsBindingRefWorkloadIdentity = security.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       credentialsBindingName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       credentialsBindingName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "WorkloadIdentity",
 					APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
@@ -290,17 +260,13 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			projectBase = core.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: projectName,
-				},
+				Name: projectName,
 			}
 			shoot     = gardencorev1beta1.Shoot{}
 			shootBase = core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       shootName,
-					Namespace:  namespace,
-					Finalizers: finalizers,
-				},
+				Name:       shootName,
+				Namespace:  namespace,
+				Finalizers: finalizers,
 				Spec: core.ShootSpec{
 					CloudProfileName:       &cloudProfileName,
 					SeedName:               &seedName,
@@ -331,9 +297,7 @@ var _ = Describe("resourcereferencemanager", func() {
 			}
 
 			seedBase = core.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seedName,
-				},
+				Name: seedName,
 				Spec: core.SeedSpec{
 					Resources: []core.NamedResourceReference{
 						{
@@ -349,9 +313,7 @@ var _ = Describe("resourcereferencemanager", func() {
 			}
 
 			coreBackupBucket = core.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "bucket",
-				},
+				Name: "bucket",
 				Spec: core.BackupBucketSpec{
 					SeedName: &seedName,
 					CredentialsRef: &corev1.ObjectReference{
@@ -363,9 +325,7 @@ var _ = Describe("resourcereferencemanager", func() {
 				},
 			}
 			backupBucketBase = gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "bucket",
-				},
+				Name: "bucket",
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					SeedName: &seedName,
 					CredentialsRef: &corev1.ObjectReference{
@@ -378,20 +338,16 @@ var _ = Describe("resourcereferencemanager", func() {
 			}
 
 			coreBackupEntry = core.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "entry",
-					Namespace: namespace,
-				},
+				Name:      "entry",
+				Namespace: namespace,
 				Spec: core.BackupEntrySpec{
 					BucketName: backupBucketBase.Name,
 					SeedName:   &seedName,
 				},
 			}
 			backupEntryBase = gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "entry",
-					Namespace: namespace,
-				},
+				Name:      "entry",
+				Namespace: namespace,
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					BucketName: backupBucketBase.Name,
 					SeedName:   &seedName,
@@ -561,10 +517,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().Quotas().Informer().GetStore().Add(&quota)).To(Succeed())
 				kubeClient.AddReactor("get", "secrets", func(_ testing.Action) (bool, runtime.Object, error) {
 					return true, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: secret.Namespace,
-							Name:      secret.Name,
-						},
+						Namespace: secret.Namespace,
+						Name:      secret.Name,
 					}, nil
 				})
 
@@ -584,10 +538,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().Quotas().Informer().GetStore().Add(&quota)).To(Succeed())
 				kubeClient.AddReactor("get", "secrets", func(_ testing.Action) (bool, runtime.Object, error) {
 					return true, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: secret.Namespace,
-							Name:      secret.Name,
-						},
+						Namespace: secret.Namespace,
+						Name:      secret.Name,
 					}, nil
 				})
 
@@ -699,10 +651,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should pass because exact one quota per scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",
@@ -734,10 +684,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should reject because more than one quota of the same scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "core.gardener.cloud/v1beta1",
@@ -797,10 +745,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().Quotas().Informer().GetStore().Add(&quota)).To(Succeed())
 				kubeClient.AddReactor("get", "secrets", func(_ testing.Action) (bool, runtime.Object, error) {
 					return true, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: secret.Namespace,
-							Name:      secret.Name,
-						},
+						Namespace: secret.Namespace,
+						Name:      secret.Name,
 					}, nil
 				})
 
@@ -820,10 +766,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().Quotas().Informer().GetStore().Add(&quota)).To(Succeed())
 				kubeClient.AddReactor("get", "secrets", func(_ testing.Action) (bool, runtime.Object, error) {
 					return true, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: secret.Namespace,
-							Name:      secret.Name,
-						},
+						Namespace: secret.Namespace,
+						Name:      secret.Name,
 					}, nil
 				})
 
@@ -935,10 +879,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should pass because exact one quota per scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",
@@ -970,10 +912,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should reject because more than one quota of the same scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "core.gardener.cloud/v1beta1",
@@ -1141,10 +1081,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should pass because exact one quota per scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",
@@ -1177,10 +1115,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should reject because more than one quota of the same scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",
@@ -1191,10 +1127,8 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				quotaName3 := "quota-3"
 				quota3 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName3,
-						Namespace: namespace,
-					},
+					Name:      quotaName3,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
@@ -1367,10 +1301,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should pass because exact one quota per scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",
@@ -1403,10 +1335,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should reject because more than one quota of the same scope is referenced", func() {
 				quotaName2 := "quota-2"
 				quota2 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName2,
-						Namespace: namespace,
-					},
+					Name:      quotaName2,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",
@@ -1417,10 +1347,8 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				quotaName3 := "quota-3"
 				quota3 := gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      quotaName3,
-						Namespace: namespace,
-					},
+					Name:      quotaName3,
+					Namespace: namespace,
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
@@ -1612,9 +1540,7 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				It("should accept because the referenced exposure class exists", func() {
 					var exposureClass = core.ExposureClass{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: exposureClassName,
-						},
+						Name: exposureClassName,
 					}
 
 					Expect(gardenCoreInformerFactory.Core().V1beta1().ExposureClasses().Informer().GetStore().Add(&exposureClass)).To(Succeed())
@@ -2019,10 +1945,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should accept (direct secret lookup)", func() {
 				kubeClient.AddReactor("get", "secrets", func(_ testing.Action) (bool, runtime.Object, error) {
 					return true, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: secret.Namespace,
-							Name:      secret.Name,
-						},
+						Namespace: secret.Namespace,
+						Name:      secret.Name,
 					}, nil
 				})
 				Expect(gardenCoreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Add(&seed)).To(Succeed())
@@ -2048,10 +1972,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should accept (direct WorkloadIdentity lookup)", func() {
 				gardenSecurityClient.AddReactor("get", "workloadidentities", func(_ testing.Action) (bool, runtime.Object, error) {
 					return true, &securityv1alpha1.WorkloadIdentity{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: workloadIdentity.Namespace,
-							Name:      workloadIdentity.Name,
-						},
+						Namespace: workloadIdentity.Namespace,
+						Name:      workloadIdentity.Name,
 					}, nil
 				})
 				Expect(gardenCoreInformerFactory.Core().V1beta1().Seeds().Informer().GetStore().Add(&seed)).To(Succeed())
@@ -2314,7 +2236,7 @@ var _ = Describe("resourcereferencemanager", func() {
 			shootTwo.Spec.Kubernetes.Version = "1.24.1"
 			var (
 				cloudProfile = core.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{Name: "aws-profile"},
+					Name: "aws-profile",
 					Spec: core.CloudProfileSpec{
 						Kubernetes: core.KubernetesSettings{
 							Versions: versions,
@@ -2511,29 +2433,19 @@ var _ = Describe("resourcereferencemanager", func() {
 		Context("CloudProfile - Update Machine image versions", func() {
 			versions := []core.MachineImageVersion{
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "1.17.3",
-					},
+					Version: "1.17.3",
 				},
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "1.17.2",
-					},
+					Version: "1.17.2",
 				},
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "1.17.1",
-					},
+					Version: "1.17.1",
 				},
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "1.17.0",
-					},
+					Version: "1.17.0",
 				},
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "1.16.0",
-					},
+					Version: "1.16.0",
 				},
 			}
 			shootOne := shoot.DeepCopy()
@@ -2577,7 +2489,7 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			var (
 				cloudProfile = core.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{Name: "aws-profile"},
+					Name: "aws-profile",
 					Spec: core.CloudProfileSpec{
 						MachineImages: []core.MachineImage{
 							{
@@ -2608,19 +2520,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.2",
-						},
+						Version: "1.17.2",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.1",
-						},
+						Version: "1.17.1",
 					},
 				}
 
@@ -2652,19 +2558,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.0",
-						},
+						Version: "1.17.0",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.16.0",
-						},
+						Version: "1.16.0",
 					},
 				}
 
@@ -2704,19 +2604,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.0",
-						},
+						Version: "1.17.0",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.16.0",
-						},
+						Version: "1.16.0",
 					},
 				}
 
@@ -2772,19 +2666,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.0",
-						},
+						Version: "1.17.0",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.16.0",
-						},
+						Version: "1.16.0",
 					},
 				}
 
@@ -2817,29 +2705,19 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.2",
-						},
+						Version: "1.17.2",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.1",
-						},
+						Version: "1.17.1",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.0",
-						},
+						Version: "1.17.0",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.16.0",
-						},
+						Version: "1.16.0",
 					},
 				}
 
@@ -2874,10 +2752,8 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "coreos",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version:        "1.16.0",
-											ExpirationDate: new(metav1.Now()),
-										},
+										Version:        "1.16.0",
+										ExpirationDate: new(metav1.Now()),
 									},
 								},
 							},
@@ -2888,19 +2764,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.2",
-						},
+						Version: "1.17.2",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.1",
-						},
+						Version: "1.17.1",
 					},
 				}
 
@@ -2933,10 +2803,8 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "coreos",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version:        "1.16.0",
-											ExpirationDate: new(metav1.Now()),
-										},
+										Version:        "1.16.0",
+										ExpirationDate: new(metav1.Now()),
 									},
 								},
 							},
@@ -2947,19 +2815,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				newVersions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.3",
-						},
+						Version: "1.17.3",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.2",
-						},
+						Version: "1.17.2",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "1.17.1",
-						},
+						Version: "1.17.1",
 					},
 				}
 
@@ -2996,10 +2858,8 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "coreos",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version:        "1.16.0",
-											ExpirationDate: new(metav1.Now()),
-										},
+										Version:        "1.16.0",
+										ExpirationDate: new(metav1.Now()),
 									},
 								},
 							},
@@ -3016,9 +2876,7 @@ var _ = Describe("resourcereferencemanager", func() {
 							Name: "ubuntu",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.17.3",
-									},
+									Version: "1.17.3",
 								},
 							},
 						},
@@ -3043,10 +2901,8 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "coreos",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version:        "1.15.0",
-											ExpirationDate: new(metav1.Now()),
-										},
+										Version:        "1.15.0",
+										ExpirationDate: new(metav1.Now()),
 									},
 								},
 							},
@@ -3063,9 +2919,7 @@ var _ = Describe("resourcereferencemanager", func() {
 							Name: "ubuntu",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.17.3",
-									},
+									Version: "1.17.3",
 								},
 							},
 						},
@@ -3083,10 +2937,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should fail for adding a new machine image with an existing definition in a NamespacedCloudProfile", func() {
 				updateStrategy := gardencorev1beta1.MachineImageUpdateStrategy("major")
 				namespacedCloudProfile := &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "profile-42",
-						Namespace: "project-123",
-					},
+					Name:      "profile-42",
+					Namespace: "project-123",
 					Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 						Parent: gardencorev1beta1.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfile.Name},
 						MachineImages: []gardencorev1beta1.MachineImage{
@@ -3094,9 +2946,7 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "gardenlinux",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-											Version: "1.0.0",
-										},
+										Version:       "1.0.0",
 										Architectures: []string{"amd64"},
 										CRI:           []gardencorev1beta1.CRI{{Name: "containerd"}},
 									},
@@ -3116,9 +2966,7 @@ var _ = Describe("resourcereferencemanager", func() {
 							Name: "gardenlinux",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.17.3",
-									},
+									Version: "1.17.3",
 								},
 							},
 						},
@@ -3145,9 +2993,7 @@ var _ = Describe("resourcereferencemanager", func() {
 				ctx = context.Background()
 
 				cloudProfile = &core.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: cloudProfileName,
-					},
+					Name: cloudProfileName,
 				}
 				oldCloudProfile = cloudProfile.DeepCopy()
 
@@ -3247,10 +3093,8 @@ var _ = Describe("resourcereferencemanager", func() {
 					Name: "namespaced-profile",
 				}
 				namespacedCloudProfile := &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 						Parent: gardencorev1beta1.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfile.Name},
 					},
@@ -3283,9 +3127,7 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				// Base CloudProfile with MachineCapabilities
 				cloudProfile = &core.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: cloudProfileName,
-					},
+					Name: cloudProfileName,
 					Spec: core.CloudProfileSpec{
 						MachineCapabilities: []core.CapabilityDefinition{
 							{Name: "architecture", Values: []string{"amd64", "arm64"}},
@@ -3297,7 +3139,7 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "ubuntu",
 								Versions: []core.MachineImageVersion{
 									{
-										ExpirableVersion: core.ExpirableVersion{Version: "20.04"},
+										Version: "20.04",
 										CapabilityFlavors: []core.MachineImageFlavor{
 											{Capabilities: core.Capabilities{
 												"architecture": []string{"amd64"},
@@ -3327,10 +3169,8 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				// NamespacedCloudProfile that uses capabilities from parent
 				namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 						Parent: gardencorev1beta1.CloudProfileReference{
 							Kind: "CloudProfile",
@@ -3341,7 +3181,7 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "debian",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "11"},
+										Version: "11",
 										CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 											{Capabilities: gardencorev1beta1.Capabilities{
 												"architecture": []string{"arm64"},
@@ -3393,10 +3233,8 @@ var _ = Describe("resourcereferencemanager", func() {
 			It("should allow removing capability values not used by any NamespacedCloudProfile", func() {
 				// Create another NamespacedCloudProfile that doesn't use certain capabilities
 				anotherNamespacedCloudProfile := &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "another-profile",
-						Namespace: namespace,
-					},
+					Name:      "another-profile",
+					Namespace: namespace,
 					Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 						Parent: gardencorev1beta1.CloudProfileReference{
 							Kind: "CloudProfile",
@@ -3407,7 +3245,7 @@ var _ = Describe("resourcereferencemanager", func() {
 								Name: "centos",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "8"},
+										Version: "8",
 										CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 											{Capabilities: gardencorev1beta1.Capabilities{
 												"architecture": []string{"amd64"},  // only uses amd64
@@ -3517,7 +3355,7 @@ var _ = Describe("resourcereferencemanager", func() {
 						Name: "ubuntu",
 						Versions: []core.MachineImageVersion{
 							{
-								ExpirableVersion: core.ExpirableVersion{Version: "20.04"},
+								Version: "20.04",
 								CapabilityFlavors: []core.MachineImageFlavor{
 									{Capabilities: core.Capabilities{
 										"architecture": []string{"amd64"},
@@ -3543,7 +3381,7 @@ var _ = Describe("resourcereferencemanager", func() {
 						Name: "debian",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "11"},
+								Version: "11",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{Capabilities: gardencorev1beta1.Capabilities{
 										"architecture": []string{"arm64"},
@@ -3587,18 +3425,15 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed for an update without Kubernetes versions being provided", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
-					Spec: core.NamespacedCloudProfileSpec{},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
+					Spec:      core.NamespacedCloudProfileSpec{},
 				}
 
 				updatedNamespacedCloudProfile := namespacedCloudProfile.DeepCopy()
 				updatedNamespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
-					{Name: "coreos", Versions: []core.MachineImageVersion{{ExpirableVersion: core.ExpirableVersion{
-						Version: "1.0.0", ExpirationDate: &expirationDateFuture1,
-					}}}},
+					{Name: "coreos", Versions: []core.MachineImageVersion{{
+						Version: "1.0.0", ExpirationDate: &expirationDateFuture1}}},
 				}
 
 				attrs := admission.NewAttributesRecord(updatedNamespacedCloudProfile, namespacedCloudProfile, core.Kind("NamespacedCloudProfile").WithVersion("version"), namespace, namespacedCloudProfile.Name, core.Resource("NamespacedCloudProfile").WithVersion("version"), "", admission.Update, &metav1.UpdateOptions{}, false, defaultUserInfo)
@@ -3610,10 +3445,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Add(&cloudProfile)).To(Succeed())
 
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent:     core.CloudProfileReference{Name: cloudProfile.Name, Kind: "CloudProfile"},
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{{Version: "1.30.0", ExpirationDate: &expirationDateFuture1}}},
@@ -3630,10 +3463,8 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed if a used and already extended kubernetes version expiration is changed to another value still in the future", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{
 							{Version: "1.30.0", ExpirationDate: &expirationDateFuture1},
@@ -3665,10 +3496,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Add(&cloudProfile)).To(Succeed())
 
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Name: cloudProfile.Name, Kind: "CloudProfile"},
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{
@@ -3699,10 +3528,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				}
 
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{
@@ -3733,10 +3560,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				}
 
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{
@@ -3771,10 +3596,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Add(&cloudProfile)).To(Succeed())
 
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent:     core.CloudProfileReference{Name: cloudProfile.Name, Kind: "CloudProfile"},
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{{Version: "1.30.0", ExpirationDate: new(metav1.Time{Time: time.Now().Add(96 * time.Hour)})}}},
@@ -3805,10 +3628,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				}
 
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: namespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						Kubernetes: &core.KubernetesSettings{Versions: []core.ExpirableVersion{
@@ -3848,7 +3669,7 @@ var _ = Describe("resourcereferencemanager", func() {
 
 				cloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{
 					{Name: "coreos", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.17.3"}},
+						{Version: "1.17.3"},
 					}},
 				}
 
@@ -3874,15 +3695,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed if a used and already extended MachineImage version expiration is changed to another value still in the future", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.17.3", ExpirationDate: &expirationDateFuture1}},
+								{Version: "1.17.3", ExpirationDate: &expirationDateFuture1},
 							}},
 						},
 					},
@@ -3901,15 +3720,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed if a used and extended MachineImage version already expired is not modified", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.17.3", ExpirationDate: &expirationDatePast}},
+								{Version: "1.17.3", ExpirationDate: &expirationDatePast},
 							}},
 						},
 					},
@@ -3928,15 +3745,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed if an extended and used MachineImage version is removed with the base version still being valid", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.17.3", ExpirationDate: &expirationDateFuture1}},
+								{Version: "1.17.3", ExpirationDate: &expirationDateFuture1},
 							}},
 						},
 					},
@@ -3955,15 +3770,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should fail if an extended and used MachineImage version is being removed with the base version being already expired", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.17.3", ExpirationDate: &expirationDateFuture1}},
+								{Version: "1.17.3", ExpirationDate: &expirationDateFuture1},
 							}},
 						},
 					},
@@ -3988,15 +3801,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should fail if a used MachineImage version from the NamespacedCloudProfile is removed", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.1.2"}},
+								{Version: "1.1.2"},
 							}},
 						},
 					},
@@ -4032,15 +3843,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should fail if a used MachineImage version only in the NamespacedCloudProfile is removed", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "custom-namespaced-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.1.2"}},
+								{Version: "1.1.2"},
 							}},
 						},
 					},
@@ -4076,15 +3885,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should fail for the complete MachineImage section being removed with Shoots using overridden versions rendering expired afterwards", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Name: cloudProfile.Name, Kind: "CloudProfile"},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.17.3", ExpirationDate: &expirationDateFuture1}},
+								{Version: "1.17.3", ExpirationDate: &expirationDateFuture1},
 							}},
 						},
 					},
@@ -4108,15 +3915,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed if a MachineImage version extended before but not used anymore is removed", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "coreos", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.17.3", ExpirationDate: &expirationDateFuture1}},
+								{Version: "1.17.3", ExpirationDate: &expirationDateFuture1},
 							}},
 						},
 					},
@@ -4135,15 +3940,13 @@ var _ = Describe("resourcereferencemanager", func() {
 
 			It("should succeed if a new but unused MachineImage version is removed", func() {
 				namespacedCloudProfile := &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      namespacedCloudProfileName,
-						Namespace: namespace,
-					},
+					Name:      namespacedCloudProfileName,
+					Namespace: namespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Kind: "CloudProfile", Name: cloudProfileName},
 						MachineImages: []core.MachineImage{
 							{Name: "custom-image", Versions: []core.MachineImageVersion{
-								{ExpirableVersion: core.ExpirableVersion{Version: "1.1.2"}},
+								{Version: "1.1.2"},
 							}},
 						},
 					},
@@ -4181,10 +3984,8 @@ var _ = Describe("resourcereferencemanager", func() {
 				Expect(gardenCoreInformerFactory.Core().V1beta1().CloudProfiles().Informer().GetStore().Add(&cloudProfile)).To(Succeed())
 
 				namespacedCloudProfile = &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "namespaced-profile",
-						Namespace: projectNamespace,
-					},
+					Name:      "namespaced-profile",
+					Namespace: projectNamespace,
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{Name: cloudProfileName, Kind: "CloudProfile"},
 					},
@@ -4286,7 +4087,7 @@ var _ = Describe("resourcereferencemanager", func() {
 			)
 
 			BeforeEach(func() {
-				gardenlet = &seedmanagement.Gardenlet{ObjectMeta: metav1.ObjectMeta{Name: "some-seed", Namespace: "some-namespace"}}
+				gardenlet = &seedmanagement.Gardenlet{Name: "some-seed", Namespace: "some-namespace"}
 				managedSeed = &seedmanagementv1alpha1.ManagedSeed{ObjectMeta: gardenlet.ObjectMeta}
 			})
 
@@ -4312,7 +4113,7 @@ var _ = Describe("resourcereferencemanager", func() {
 			)
 
 			BeforeEach(func() {
-				managedSeed = &seedmanagement.ManagedSeed{ObjectMeta: metav1.ObjectMeta{Name: "some-seed", Namespace: "some-namespace"}}
+				managedSeed = &seedmanagement.ManagedSeed{Name: "some-seed", Namespace: "some-namespace"}
 				gardenlet = &seedmanagementv1alpha1.Gardenlet{ObjectMeta: managedSeed.ObjectMeta}
 			})
 

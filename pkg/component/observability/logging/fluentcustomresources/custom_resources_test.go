@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -42,10 +41,8 @@ var _ = Describe("Custom Resources", func() {
 			Suffix: "-garden",
 			Inputs: []*fluentbitv1alpha2.ClusterInput{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "journald-kubelet",
-						Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-					},
+					Name:   "journald-kubelet",
+					Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 					Spec: fluentbitv1alpha2.InputSpec{
 						Systemd: &fluentbitv1alpha2input.Systemd{
 							Tag:           "journald.kubelet",
@@ -57,10 +54,8 @@ var _ = Describe("Custom Resources", func() {
 			},
 			Filters: []*fluentbitv1alpha2.ClusterFilter{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener-extension",
-						Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-					},
+					Name:   "gardener-extension",
+					Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 					Spec: fluentbitv1alpha2.FilterSpec{
 						Match: "kubernetes.*gardener-extension*",
 						FilterItems: []fluentbitv1alpha2.FilterItem{
@@ -89,10 +84,8 @@ var _ = Describe("Custom Resources", func() {
 			},
 			Parsers: []*fluentbitv1alpha2.ClusterParser{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "extensions-parser",
-						Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-					},
+					Name:   "extensions-parser",
+					Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 					Spec: fluentbitv1alpha2.ParserSpec{
 						JSON: &fluentbitv1alpha2parser.JSON{
 							TimeKey:    "ts",
@@ -103,10 +96,8 @@ var _ = Describe("Custom Resources", func() {
 			},
 			Outputs: []*fluentbitv1alpha2.ClusterOutput{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "journald2",
-						Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
-					},
+					Name:   "journald2",
+					Labels: map[string]string{v1beta1constants.LabelKeyCustomLoggingResource: v1beta1constants.LabelValueCustomLoggingResource},
 					Spec: fluentbitv1alpha2.OutputSpec{
 						CustomPlugin: &custom.CustomPlugin{
 							Config: `Name gardenervali
@@ -137,16 +128,12 @@ var _ = Describe("Custom Resources", func() {
 
 	JustBeforeEach(func() {
 		customResourcesManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      customResourcesManagedResourceName,
-				Namespace: namespace,
-			},
+			Name:      customResourcesManagedResourceName,
+			Namespace: namespace,
 		}
 		customResourcesManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + customResourcesManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + customResourcesManagedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -158,15 +145,13 @@ var _ = Describe("Custom Resources", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      customResourcesManagedResourceName,
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:          "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
-					ResourceVersion: "1",
+				Name:      customResourcesManagedResourceName,
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:          "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -224,11 +209,9 @@ var _ = Describe("Custom Resources", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -251,11 +234,9 @@ var _ = Describe("Custom Resources", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -280,10 +261,8 @@ var _ = Describe("Custom Resources", func() {
 				fakeOps.MaxAttempts = 2
 
 				customResourcesManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      customResourcesManagedResourceName,
-						Namespace: namespace,
-					},
+					Name:      customResourcesManagedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, customResourcesManagedResource)).To(Succeed())
 

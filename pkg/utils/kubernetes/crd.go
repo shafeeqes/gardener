@@ -10,7 +10,6 @@ import (
 	"time"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -70,9 +69,7 @@ func WaitUntilCRDManifestsDestroyed(ctx context.Context, c client.Client, crdNam
 
 	for _, resourceName := range crdNames {
 		crd := &apiextensionsv1.CustomResourceDefinition{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: resourceName,
-			},
+			Name: resourceName,
 		}
 
 		fns = append(fns, func(ctx context.Context) error {

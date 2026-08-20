@@ -101,11 +101,9 @@ var _ = Describe("Actuator", func() {
 				}
 			}
 			return &seedmanagementv1alpha1.ManagedSeedSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       name,
-					Namespace:  namespace,
-					Generation: 1,
-				},
+				Name:       name,
+				Namespace:  namespace,
+				Generation: 1,
 				Spec: seedmanagementv1alpha1.ManagedSeedSetSpec{
 					Replicas: new(replicas),
 				},

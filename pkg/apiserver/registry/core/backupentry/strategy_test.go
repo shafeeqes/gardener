@@ -230,11 +230,9 @@ var _ = Describe("MatchBackupEntry", func() {
 
 func newBackupEntry(seedName string, bucketName string) *core.BackupEntry {
 	return &core.BackupEntry{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
-			Labels:    map[string]string{"foo": "bar"},
-		},
+		Name:      "test",
+		Namespace: "test-namespace",
+		Labels:    map[string]string{"foo": "bar"},
 		Spec: core.BackupEntrySpec{
 			SeedName:   &seedName,
 			BucketName: bucketName,

@@ -8,7 +8,6 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -80,6 +79,6 @@ func (r *Reconciler) MapExtensionsBastionToOperationsBastion(log logr.Logger) ha
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: obj.GetName(), Namespace: shoot.Namespace}}}
+		return []reconcile.Request{{Name: obj.GetName(), Namespace: shoot.Namespace}}
 	}
 }

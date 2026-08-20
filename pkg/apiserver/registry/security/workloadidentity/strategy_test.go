@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/gardener/gardener/pkg/apis/security"
@@ -26,9 +25,7 @@ var _ = Describe("WorkloadIdentity Strategy Test", func() {
 
 	BeforeEach(func() {
 		wi = &security.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "garden",
-			},
+			Namespace: "garden",
 		}
 		ctx = context.Background()
 	})

@@ -153,7 +153,7 @@ func (r *Reconciler) reconcile(
 
 	var seed *gardencorev1beta1.Seed
 	if controllerInstallation.Spec.SeedRef != nil {
-		seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: controllerInstallation.Spec.SeedRef.Name}}
+		seed = &gardencorev1beta1.Seed{Name: controllerInstallation.Spec.SeedRef.Name}
 		if err := r.GardenClient.Get(gardenCtx, client.ObjectKeyFromObject(seed), seed); err != nil {
 			if apierrors.IsNotFound(err) {
 				conditionValid = v1beta1helper.UpdatedConditionWithClock(r.Clock, conditionValid, gardencorev1beta1.ConditionFalse, "SeedNotFound", fmt.Sprintf("Referenced Seed does not exist: %+v", err))
@@ -164,7 +164,7 @@ func (r *Reconciler) reconcile(
 		}
 	} else if r.SelfHostedShootMeta != nil {
 		// The self-hosted shoot might be a Seed as well - we don't know and have to check.
-		seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: r.SelfHostedShootMeta.Name}}
+		seed = &gardencorev1beta1.Seed{Name: r.SelfHostedShootMeta.Name}
 		if err := r.GardenClient.Get(gardenCtx, client.ObjectKeyFromObject(seed), seed); err != nil {
 			if !apierrors.IsNotFound(err) {
 				return reconcile.Result{}, fmt.Errorf("failed while checking if self-hosted shoot is a seed: %w", err)
@@ -175,7 +175,7 @@ func (r *Reconciler) reconcile(
 
 	var shoot *gardencorev1beta1.Shoot
 	if r.SelfHostedShootMeta != nil {
-		shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: r.SelfHostedShootMeta.Name, Namespace: r.SelfHostedShootMeta.Namespace}}
+		shoot = &gardencorev1beta1.Shoot{Name: r.SelfHostedShootMeta.Name, Namespace: r.SelfHostedShootMeta.Namespace}
 		if err := r.GardenClient.Get(gardenCtx, client.ObjectKeyFromObject(shoot), shoot); err != nil {
 			return reconcile.Result{}, fmt.Errorf("failed reading self-hosted Shoot: %w", err)
 		}
@@ -504,7 +504,7 @@ func (r *Reconciler) delete(
 
 	var seed *gardencorev1beta1.Seed
 	if controllerInstallation.Spec.SeedRef != nil {
-		seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: controllerInstallation.Spec.SeedRef.Name}}
+		seed = &gardencorev1beta1.Seed{Name: controllerInstallation.Spec.SeedRef.Name}
 		if err := r.GardenClient.Get(gardenCtx, client.ObjectKeyFromObject(seed), seed); err != nil {
 			if apierrors.IsNotFound(err) {
 				conditionValid = v1beta1helper.UpdatedConditionWithClock(r.Clock, conditionValid, gardencorev1beta1.ConditionFalse, "SeedNotFound", fmt.Sprintf("Referenced Seed does not exist: %+v", err))
@@ -518,10 +518,8 @@ func (r *Reconciler) delete(
 	managedResourceName := gardenerutils.ManagedResourceNameForControllerInstallation(controllerInstallation)
 
 	mr := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      managedResourceName,
-			Namespace: r.GardenNamespace,
-		},
+		Name:      managedResourceName,
+		Namespace: r.GardenNamespace,
 	}
 
 	if err := client.IgnoreNotFound(managedresources.Delete(seedCtx, r.SeedClientSet.Client(), mr.Namespace, mr.Name, false)); err != nil {
@@ -556,15 +554,13 @@ func (r *Reconciler) delete(
 
 	var gardenClusterServiceAccount *corev1.ServiceAccount
 	if r.SelfHostedShootMeta != nil {
-		gardenClusterServiceAccount = &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{
+		gardenClusterServiceAccount = &corev1.ServiceAccount{
 			Name:      extensionServiceAccountName(r.SelfHostedShootMeta.Name, controllerInstallation.Name),
-			Namespace: r.SelfHostedShootMeta.Namespace,
-		}}
+			Namespace: r.SelfHostedShootMeta.Namespace}
 	} else {
-		gardenClusterServiceAccount = &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{
+		gardenClusterServiceAccount = &corev1.ServiceAccount{
 			Name:      v1beta1constants.ExtensionGardenServiceAccountPrefix + controllerInstallation.Name,
-			Namespace: gardenerutils.ComputeGardenNamespace(seed.Name),
-		}}
+			Namespace: gardenerutils.ComputeGardenNamespace(seed.Name)}
 	}
 	if err := r.GardenClient.Delete(gardenCtx, gardenClusterServiceAccount); client.IgnoreNotFound(err) != nil {
 		conditionInstalled = v1beta1helper.UpdatedConditionWithClock(r.Clock, conditionInstalled, gardencorev1beta1.ConditionFalse, "DeletionFailed", fmt.Sprintf("Deletion of ServiceAccount %q in garden cluster failed: %+v", client.ObjectKeyFromObject(gardenClusterServiceAccount), err))
@@ -589,9 +585,7 @@ func patchConditions(ctx context.Context, c client.StatusClient, controllerInsta
 
 func getNamespaceForControllerInstallation(controllerInstallation *gardencorev1beta1.ControllerInstallation) *corev1.Namespace {
 	return &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: gardenerutils.NamespaceNameForControllerInstallation(controllerInstallation),
-		},
+		Name: gardenerutils.NamespaceNameForControllerInstallation(controllerInstallation),
 	}
 }
 
@@ -624,10 +618,8 @@ func (r *Reconciler) reconcileGenericGardenKubeconfig(ctx context.Context, names
 	}
 
 	kubeconfigSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      v1beta1constants.SecretNameGenericGardenKubeconfig,
-			Namespace: namespace,
-		},
+		Name:      v1beta1constants.SecretNameGenericGardenKubeconfig,
+		Namespace: namespace,
 		Data: map[string][]byte{
 			secretsutils.DataKeyKubeconfig: kubeconfig,
 		},

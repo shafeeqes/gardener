@@ -49,9 +49,7 @@ var _ = Describe("Seed health", func() {
 		c = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			Name: "foo",
 			Spec: gardencorev1beta1.SeedSpec{
 				Ingress: &gardencorev1beta1.Ingress{
 					Controller: gardencorev1beta1.IngressController{
@@ -116,11 +114,9 @@ var _ = Describe("Seed health", func() {
 				DeferCleanup(test.WithFeatureGate(features.DefaultFeatureGate, features.PrometheusHealthChecks, true))
 
 				prometheus = &monitoringv1.Prometheus{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{"health-check-by": "gardenlet"},
-					},
+					Name:      "foo",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{"health-check-by": "gardenlet"},
 				}
 
 				Expect(c.Create(ctx, prometheus)).To(Succeed())
@@ -500,10 +496,8 @@ func managedResource(name string, conditions []gardencorev1beta1.Condition) *res
 	}
 
 	return &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: resourcesv1alpha1.ManagedResourceSpec{
 			Class: new("seed"),
 		},

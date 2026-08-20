@@ -12,7 +12,6 @@ import (
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -52,9 +51,7 @@ var _ = Describe("ClusterAutoscaler", func() {
 	Describe("#Deploy", func() {
 		var (
 			clusterRole = &rbacv1.ClusterRole{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "system:cluster-autoscaler-seed",
-				},
+				Name: "system:cluster-autoscaler-seed",
 				Rules: []rbacv1.PolicyRule{
 					{
 						APIGroups: []string{"machine.sapcloud.io"},
@@ -70,11 +67,9 @@ var _ = Describe("ClusterAutoscaler", func() {
 			}
 
 			expectedMr = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceName,
-					Namespace:       namespace,
-					ResourceVersion: "1",
-				},
+				Name:            managedResourceName,
+				Namespace:       namespace,
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs:  []corev1.LocalObjectReference{},
 					Class:       new("seed"),
@@ -123,11 +118,9 @@ var _ = Describe("ClusterAutoscaler", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -150,11 +143,9 @@ var _ = Describe("ClusterAutoscaler", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -179,10 +170,8 @@ var _ = Describe("ClusterAutoscaler", func() {
 				fakeOps.MaxAttempts = 2
 
 				managedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: namespace,
-					},
+					Name:      managedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, managedResource)).To(Succeed())
 
@@ -198,16 +187,12 @@ var _ = Describe("ClusterAutoscaler", func() {
 	Describe("#Destroy", func() {
 		It("should successfully destroy all resources", func() {
 			managedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: namespace,
-				},
+				Name:      managedResourceName,
+				Namespace: namespace,
 			}
 			managedResourceSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceSecretName,
-					Namespace: namespace,
-				},
+				Name:      managedResourceSecretName,
+				Namespace: namespace,
 			}
 			Expect(c.Create(ctx, managedResource)).To(Succeed())
 			Expect(c.Create(ctx, managedResourceSecret)).To(Succeed())

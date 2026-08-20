@@ -49,9 +49,9 @@ func (in *internalNameService) Destroy(ctx context.Context) error {
 }
 
 func (in *internalNameService) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameKubeAPIServer, Namespace: in.namespace}}
+	return &corev1.Service{Name: v1beta1constants.DeploymentNameKubeAPIServer, Namespace: in.namespace}
 }
 
 func (in *internalNameService) emptyKubernetesDefaultService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: "kubernetes", Namespace: metav1.NamespaceDefault}}
+	return &corev1.Service{Name: "kubernetes", Namespace: metav1.NamespaceDefault}
 }

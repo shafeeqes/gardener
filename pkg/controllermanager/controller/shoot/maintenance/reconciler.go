@@ -926,10 +926,8 @@ func (r *Reconciler) migrateSecretBindingToCredentialsBinding(ctx context.Contex
 	secretBindingName := *shoot.Spec.SecretBindingName
 
 	secretBinding := &gardencorev1beta1.SecretBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretBindingName,
-			Namespace: shoot.Namespace,
-		},
+		Name:      secretBindingName,
+		Namespace: shoot.Namespace,
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(secretBinding), secretBinding); err != nil {
 		return fmt.Errorf("failed to get SecretBinding %s: %w", client.ObjectKeyFromObject(secretBinding), err)
@@ -938,10 +936,8 @@ func (r *Reconciler) migrateSecretBindingToCredentialsBinding(ctx context.Contex
 	// First, check if the migration-created CredentialsBinding exists
 	migratedCredentialsBindingName := "force-migrated-" + secretBindingName
 	migratedCredentialsBinding := &securityv1alpha1.CredentialsBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      migratedCredentialsBindingName,
-			Namespace: shoot.Namespace,
-		},
+		Name:      migratedCredentialsBindingName,
+		Namespace: shoot.Namespace,
 	}
 
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(migratedCredentialsBinding), migratedCredentialsBinding); err == nil {
@@ -998,12 +994,10 @@ func (r *Reconciler) migrateSecretBindingToCredentialsBinding(ctx context.Contex
 
 	// No existing CredentialsBinding found, create a new migration-created one
 	credentialsBinding := &securityv1alpha1.CredentialsBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      migratedCredentialsBindingName,
-			Namespace: shoot.Namespace,
-			Labels: map[string]string{
-				"credentialsbinding.gardener.cloud/status": "force-migrated",
-			},
+		Name:      migratedCredentialsBindingName,
+		Namespace: shoot.Namespace,
+		Labels: map[string]string{
+			"credentialsbinding.gardener.cloud/status": "force-migrated",
 		},
 		Provider: securityv1alpha1.CredentialsBindingProvider{
 			Type: secretBinding.Provider.Type,

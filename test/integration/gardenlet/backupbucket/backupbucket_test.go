@@ -57,11 +57,9 @@ var _ = Describe("BackupBucket controller tests", func() {
 
 			By("Create generated secret in seed")
 			seedGeneratedSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      generateGeneratedBackupBucketSecretName(resourceName),
-					Namespace: seedGardenNamespace.Name,
-					Labels:    map[string]string{testID: testRunID},
-				},
+				Name:      generateGeneratedBackupBucketSecretName(resourceName),
+				Namespace: seedGardenNamespace.Name,
+				Labels:    map[string]string{testID: testRunID},
 				Data: map[string][]byte{
 					"baz": []byte("dash"),
 				},
@@ -85,13 +83,11 @@ var _ = Describe("BackupBucket controller tests", func() {
 				lastOperationState = gardencorev1beta1.LastOperationStateError
 			}
 			extensionBackupBucket.Status = extensionsv1alpha1.BackupBucketStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					ObservedGeneration: extensionBackupBucket.Generation,
-					ProviderStatus:     providerStatus,
-					LastOperation: &gardencorev1beta1.LastOperation{
-						State:          lastOperationState,
-						LastUpdateTime: metav1.NewTime(fakeClock.Now()),
-					},
+				ObservedGeneration: extensionBackupBucket.Generation,
+				ProviderStatus:     providerStatus,
+				LastOperation: &gardencorev1beta1.LastOperation{
+					State:          lastOperationState,
+					LastUpdateTime: metav1.NewTime(fakeClock.Now()),
 				},
 				GeneratedSecretRef: &corev1.SecretReference{
 					Name:      seedGeneratedSecret.Name,
@@ -105,11 +101,9 @@ var _ = Describe("BackupBucket controller tests", func() {
 
 		By("Create BackupBucket secret in garden")
 		gardenSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-secret-",
-				Namespace:    gardenNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-secret-",
+			Namespace:    gardenNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
@@ -125,11 +119,9 @@ var _ = Describe("BackupBucket controller tests", func() {
 
 		By("Create BackupBucket")
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        resourceName,
-				Labels:      map[string]string{testID: testRunID},
-				Annotations: map[string]string{v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile},
-			},
+			Name:        resourceName,
+			Labels:      map[string]string{testID: testRunID},
+			Annotations: map[string]string{v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile},
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				Provider: gardencorev1beta1.BackupBucketProvider{
 					Type:   "provider-type",
@@ -160,24 +152,18 @@ var _ = Describe("BackupBucket controller tests", func() {
 		})
 
 		extensionSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      generateBackupBucketSecretName(resourceName),
-				Namespace: gardenNamespace.Name,
-			},
+			Name:      generateBackupBucketSecretName(resourceName),
+			Namespace: gardenNamespace.Name,
 		}
 
 		extensionBackupBucket = &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: resourceName,
-			},
+			Name: resourceName,
 		}
 
 		expectedExtensionBackupBucketSpec = extensionsv1alpha1.BackupBucketSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type:           backupBucket.Spec.Provider.Type,
-				ProviderConfig: backupBucket.Spec.ProviderConfig,
-			},
-			Region: backupBucket.Spec.Provider.Region,
+			Type:           backupBucket.Spec.Provider.Type,
+			ProviderConfig: backupBucket.Spec.ProviderConfig,
+			Region:         backupBucket.Spec.Provider.Region,
 			SecretRef: corev1.SecretReference{
 				Name:      extensionSecret.Name,
 				Namespace: extensionSecret.Namespace,
@@ -185,10 +171,8 @@ var _ = Describe("BackupBucket controller tests", func() {
 		}
 
 		gardenGeneratedSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      generateGeneratedBackupBucketSecretName(resourceName),
-				Namespace: gardenNamespace.Name,
-			},
+			Name:      generateGeneratedBackupBucketSecretName(resourceName),
+			Namespace: gardenNamespace.Name,
 		}
 	})
 

@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -35,11 +33,9 @@ var _ = Describe("Add", func() {
 			GardenNamespace: "garden",
 		}
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "garden",
-				Labels: map[string]string{
-					"gardener.cloud/role": "foo",
-				},
+			Namespace: "garden",
+			Labels: map[string]string{
+				"gardener.cloud/role": "foo",
 			},
 		}
 	})
@@ -162,8 +158,8 @@ var _ = Describe("Add", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 			reconciler.Client = fakeClient
 
-			seed1 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed1"}}
-			seed2 = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed2"}}
+			seed1 = &gardencorev1beta1.Seed{Name: "seed1"}
+			seed2 = &gardencorev1beta1.Seed{Name: "seed2"}
 
 			Expect(fakeClient.Create(ctx, seed1)).To(Succeed())
 			Expect(fakeClient.Create(ctx, seed2)).To(Succeed())
@@ -171,8 +167,8 @@ var _ = Describe("Add", func() {
 
 		It("should map to all seeds", func() {
 			Expect(reconciler.MapToAllSeeds(log)(ctx, nil)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: seed1.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: seed2.Name}},
+				reconcile.Request{Name: seed1.Name},
+				reconcile.Request{Name: seed2.Name},
 			))
 		})
 	})

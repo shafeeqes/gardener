@@ -122,8 +122,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 				TopologyAwareRoutingEnabled:   false,
 			}
 
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-gardener", Namespace: namespace}})).To(Succeed())
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-gardener", Namespace: namespace})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 		})
 
 		Context("with common values", func() {
@@ -188,10 +188,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 		Context("when ManagedResources are ready", func() {
 			It("should successfully wait", func() {
 				runtimeManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameRuntime,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameRuntime,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -202,10 +200,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 				Expect(fakeClient.Create(ctx, runtimeManagedResource)).To(Succeed())
 
 				virtualManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameVirtual,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameVirtual,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -222,10 +218,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 		Context("when Runtime ManagedResource doesn't get ready", func() {
 			It("should time out waiting", func() {
 				runtimeManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameRuntime,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameRuntime,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionFalse},
@@ -236,10 +230,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 				Expect(fakeClient.Create(ctx, runtimeManagedResource)).To(Succeed())
 
 				virtualManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameVirtual,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameVirtual,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -261,10 +253,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 		Context("when Virtual ManagedResource doesn't get ready", func() {
 			It("should time out waiting", func() {
 				runtimeManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameRuntime,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameRuntime,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -275,10 +265,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 				Expect(fakeClient.Create(ctx, runtimeManagedResource)).To(Succeed())
 
 				virtualManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameVirtual,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameVirtual,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -317,10 +305,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 		Context("when Runtime ManagedResource is still available", func() {
 			It("should time out waiting", func() {
 				runtimeManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameRuntime,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameRuntime,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionFalse},
@@ -342,10 +328,8 @@ var _ = Describe("GardenerAdmissionController", func() {
 		Context("when Virtual ManagedResource is still available", func() {
 			It("should time out waiting", func() {
 				runtimeManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceNameVirtual,
-						Namespace: namespace,
-					},
+					Name:      managedResourceNameVirtual,
+					Namespace: namespace,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						Conditions: []gardencorev1beta1.Condition{
 							{Type: resourcesv1alpha1.ResourcesApplied, Status: gardencorev1beta1.ConditionTrue},
@@ -376,19 +360,15 @@ var _ = Describe("GardenerAdmissionController", func() {
 
 		It("should successful destroy", func() {
 			runtimeManagedResource := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceNameRuntime,
-					Namespace: namespace,
-				},
+				Name:      managedResourceNameRuntime,
+				Namespace: namespace,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{{Name: "managedresource-" + managedResourceNameRuntime}},
 				},
 			}
 			runtimeManagedResourceSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      runtimeManagedResource.Spec.SecretRefs[0].Name,
-					Namespace: namespace,
-				},
+				Name:      runtimeManagedResource.Spec.SecretRefs[0].Name,
+				Namespace: namespace,
 			}
 
 			Expect(fakeClient.Create(ctx, runtimeManagedResourceSecret)).To(Succeed())
@@ -412,17 +392,15 @@ func verifyResourcesGone(ctx context.Context, fakeClient client.Client, namespac
 func verifyExpectations(ctx context.Context, fakeClient client.Client, consistOf func(...client.Object) types.GomegaMatcher, fakeSecretManager secretsmanager.Interface, namespace, configMapChecksum string, testValues Values) {
 	By("Check Gardener Access Secret")
 	accessSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "shoot-access-gardener-admission-controller",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"resources.gardener.cloud/purpose": "token-requestor",
-				"resources.gardener.cloud/class":   "shoot",
-			},
-			Annotations: map[string]string{
-				"serviceaccount.resources.gardener.cloud/name":      "gardener-admission-controller",
-				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-			},
+		Name:      "shoot-access-gardener-admission-controller",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"resources.gardener.cloud/purpose": "token-requestor",
+			"resources.gardener.cloud/class":   "shoot",
+		},
+		Annotations: map[string]string{
+			"serviceaccount.resources.gardener.cloud/name":      "gardener-admission-controller",
+			"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 		},
 		Type: corev1.SecretTypeOpaque,
 	}
@@ -436,10 +414,9 @@ func verifyExpectations(ctx context.Context, fakeClient client.Client, consistOf
 	serverCert, ok := fakeSecretManager.Get("gardener-admission-controller-cert")
 	ExpectWithOffset(1, ok).To(BeTrue())
 
-	runtimeMr := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{
+	runtimeMr := &resourcesv1alpha1.ManagedResource{
 		Name:      managedResourceNameRuntime,
-		Namespace: namespace,
-	}}
+		Namespace: namespace}
 	ExpectWithOffset(1, fakeClient.Get(ctx, client.ObjectKeyFromObject(runtimeMr), runtimeMr)).To(Succeed())
 	ExpectWithOffset(1, runtimeMr.Labels).To(Equal(map[string]string{
 		"gardener.cloud/role":                "seed-system-component",
@@ -455,20 +432,17 @@ func verifyExpectations(ctx context.Context, fakeClient client.Client, consistOf
 	))
 
 	runtimeManagedResourceSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      runtimeMr.Spec.SecretRefs[0].Name,
-			Namespace: namespace,
-		},
+		Name:      runtimeMr.Spec.SecretRefs[0].Name,
+		Namespace: namespace,
 	}
 	ExpectWithOffset(1, fakeClient.Get(ctx, client.ObjectKeyFromObject(runtimeManagedResourceSecret), runtimeManagedResourceSecret)).To(Succeed())
 	ExpectWithOffset(1, runtimeManagedResourceSecret.Immutable).To(Equal(new(true)))
 	ExpectWithOffset(1, runtimeManagedResourceSecret.Labels["resources.gardener.cloud/garbage-collectable-reference"]).To(Equal("true"))
 
 	By("Check Virtual Cluster Resources")
-	virtualMr := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{
+	virtualMr := &resourcesv1alpha1.ManagedResource{
 		Name:      managedResourceNameVirtual,
-		Namespace: namespace,
-	}}
+		Namespace: namespace}
 	ExpectWithOffset(1, fakeClient.Get(ctx, client.ObjectKeyFromObject(virtualMr), virtualMr)).To(Succeed())
 	ExpectWithOffset(1, virtualMr.Labels).To(Equal(map[string]string{
 		"origin":                             "gardener",
@@ -483,10 +457,8 @@ func verifyExpectations(ctx context.Context, fakeClient client.Client, consistOf
 	))
 
 	virtualManagedResourceSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      virtualMr.Spec.SecretRefs[0].Name,
-			Namespace: namespace,
-		},
+		Name:      virtualMr.Spec.SecretRefs[0].Name,
+		Namespace: namespace,
 	}
 	ExpectWithOffset(1, fakeClient.Get(ctx, client.ObjectKeyFromObject(virtualManagedResourceSecret), virtualManagedResourceSecret)).To(Succeed())
 	ExpectWithOffset(1, ok).To(BeTrue())
@@ -496,10 +468,8 @@ func verifyExpectations(ctx context.Context, fakeClient client.Client, consistOf
 
 func configMap(namespace string, testValues Values) *corev1.ConfigMap {
 	admissionConfig := &admissioncontrollerconfigv1alpha1.AdmissionControllerConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "admissioncontroller.config.gardener.cloud/v1alpha1",
-			Kind:       "AdmissionControllerConfiguration",
-		},
+		APIVersion: "admissioncontroller.config.gardener.cloud/v1alpha1",
+		Kind:       "AdmissionControllerConfiguration",
 		GardenClientConnection: componentbaseconfigv1alpha1.ClientConnectionConfiguration{
 			QPS:        100,
 			Burst:      130,
@@ -524,14 +494,12 @@ func configMap(namespace string, testValues Values) *corev1.ConfigMap {
 	utilruntime.Must(err)
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "admission-controller",
-			},
-			Name:      "gardener-admission-controller",
-			Namespace: namespace,
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "admission-controller",
 		},
+		Name:      "gardener-admission-controller",
+		Namespace: namespace,
 		Data: map[string]string{
 			"config.yaml": string(data),
 		},
@@ -543,14 +511,12 @@ func configMap(namespace string, testValues Values) *corev1.ConfigMap {
 
 func deployment(namespace, configSecretName, serverCertSecretName string, testValues Values) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardener-admission-controller",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "admission-controller",
-				"high-availability-config.resources.gardener.cloud/type": "server",
-			},
+		Name:      "gardener-admission-controller",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "admission-controller",
+			"high-availability-config.resources.gardener.cloud/type": "server",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
@@ -594,23 +560,19 @@ func deployment(namespace, configSecretName, serverCertSecretName string, testVa
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromInt32(2722),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   intstr.FromInt32(2722),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 15,
 								TimeoutSeconds:      5,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromInt32(2722),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/readyz",
+									Port:   intstr.FromInt32(2722),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 10,
 								TimeoutSeconds:      5,
@@ -639,50 +601,40 @@ func deployment(namespace, configSecretName, serverCertSecretName string, testVa
 					Volumes: []corev1.Volume{
 						{
 							Name: "gardener-admission-controller-cert",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  serverCertSecretName,
-									DefaultMode: new(int32(0640)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  serverCertSecretName,
+								DefaultMode: new(int32(0640)),
 							},
 						},
 						{
 							Name: "gardener-admission-controller-config",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configSecretName},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: configSecretName,
 							},
 						},
 						{
 							Name: "kubeconfig",
-							VolumeSource: corev1.VolumeSource{
-								Projected: &corev1.ProjectedVolumeSource{
-									DefaultMode: new(int32(420)),
-									Sources: []corev1.VolumeProjection{
-										{
-											Secret: &corev1.SecretProjection{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "generic-token-kubeconfig",
-												},
-												Items: []corev1.KeyToPath{{
-													Key:  "kubeconfig",
-													Path: "kubeconfig",
-												}},
-												Optional: new(false),
-											},
+							Projected: &corev1.ProjectedVolumeSource{
+								DefaultMode: new(int32(420)),
+								Sources: []corev1.VolumeProjection{
+									{
+										Secret: &corev1.SecretProjection{
+											Name: "generic-token-kubeconfig",
+											Items: []corev1.KeyToPath{{
+												Key:  "kubeconfig",
+												Path: "kubeconfig",
+											}},
+											Optional: new(false),
 										},
-										{
-											Secret: &corev1.SecretProjection{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "shoot-access-gardener-admission-controller",
-												},
-												Items: []corev1.KeyToPath{{
-													Key:  "token",
-													Path: "token",
-												}},
-												Optional: new(false),
-											},
+									},
+									{
+										Secret: &corev1.SecretProjection{
+											Name: "shoot-access-gardener-admission-controller",
+											Items: []corev1.KeyToPath{{
+												Key:  "token",
+												Path: "token",
+											}},
+											Optional: new(false),
 										},
 									},
 								},
@@ -701,17 +653,15 @@ func deployment(namespace, configSecretName, serverCertSecretName string, testVa
 
 func service(namespace string, testValues Values) *corev1.Service {
 	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardener-admission-controller",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "admission-controller",
-			},
-			Annotations: map[string]string{
-				"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports":       `[{"protocol":"TCP","port":2719}]`,
-				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":2723}]`,
-			},
+		Name:      "gardener-admission-controller",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "admission-controller",
+		},
+		Annotations: map[string]string{
+			"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports":       `[{"protocol":"TCP","port":2719}]`,
+			"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":2723}]`,
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeClusterIP,
@@ -750,11 +700,9 @@ func service(namespace string, testValues Values) *corev1.Service {
 
 func podDisruptionBudget(namespace string) *policyv1.PodDisruptionBudget {
 	return &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      DeploymentName,
-			Namespace: namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      DeploymentName,
+		Namespace: namespace,
+		Labels:    GetLabels(),
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             new(intstr.FromInt32(1)),
 			Selector:                   &metav1.LabelSelector{MatchLabels: GetLabels()},
@@ -765,11 +713,9 @@ func podDisruptionBudget(namespace string) *policyv1.PodDisruptionBudget {
 
 func serviceMonitor(namespace string) *monitoringv1.ServiceMonitor {
 	return &monitoringv1.ServiceMonitor{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "garden-gardener-admission-controller",
-			Namespace: namespace,
-			Labels:    map[string]string{"prometheus": "garden"},
-		},
+		Name:      "garden-gardener-admission-controller",
+		Namespace: namespace,
+		Labels:    map[string]string{"prometheus": "garden"},
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Selector: metav1.LabelSelector{MatchLabels: map[string]string{"app": "gardener", "role": "admission-controller"}},
 			Endpoints: []monitoringv1.Endpoint{{
@@ -788,13 +734,11 @@ func vpa(namespace string) *vpaautoscalingv1.VerticalPodAutoscaler {
 	updateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardener-admission-controller-vpa",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "admission-controller",
-			},
+		Name:      "gardener-admission-controller-vpa",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "admission-controller",
 		},
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -825,12 +769,10 @@ func vpa(namespace string) *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener.cloud:system:admission-controller",
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "admission-controller",
-			},
+		Name: "gardener.cloud:system:admission-controller",
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "admission-controller",
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
@@ -898,12 +840,10 @@ func clusterRole() *rbacv1.ClusterRole {
 
 func clusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener.cloud:admission-controller",
-			Labels: map[string]string{
-				"app":  "gardener",
-				"role": "admission-controller",
-			},
+		Name: "gardener.cloud:admission-controller",
+		Labels: map[string]string{
+			"app":  "gardener",
+			"role": "admission-controller",
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
@@ -926,21 +866,17 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 	)
 
 	webhookConfig := &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener-admission-controller",
-		},
+		Name: "gardener-admission-controller",
 		Webhooks: []admissionregistrationv1.ValidatingWebhook{
 			{
 				Name:                    "validate-namespace-deletion.gardener.cloud",
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{""},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"namespaces"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
+					APIGroups:   []string{""},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"namespaces"},
 				}},
 				FailurePolicy: &failurePolicyFail,
 				NamespaceSelector: &metav1.LabelSelector{
@@ -959,12 +895,10 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{""},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"secrets"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+					APIGroups:   []string{""},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"secrets"},
 				}},
 				FailurePolicy: &failurePolicyFail,
 				NamespaceSelector: &metav1.LabelSelector{
@@ -984,12 +918,10 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{""},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"secrets"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
+					APIGroups:   []string{""},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"secrets"},
 				}},
 				FailurePolicy: &failurePolicyFail,
 				ObjectSelector: &metav1.LabelSelector{
@@ -1009,20 +941,16 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"shoots"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1043,20 +971,16 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"shoots"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1077,20 +1001,16 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"shoots"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1111,12 +1031,10 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"secrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"secrets"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1142,11 +1060,9 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 							admissionregistrationv1.Update,
 							admissionregistrationv1.Delete,
 						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"secrets", "configmaps"},
-						},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"secrets", "configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1171,20 +1087,16 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 			TimeoutSeconds:          new(int32(10)),
 			Rules: []admissionregistrationv1.RuleWithOperations{
 				{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{""},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"secrets", "configmaps"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+					APIGroups:   []string{""},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"secrets", "configmaps"},
 				},
 				{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{"core.gardener.cloud"},
-						APIVersions: []string{"v1beta1"},
-						Resources:   []string{"shoots"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+					APIGroups:   []string{"core.gardener.cloud"},
+					APIVersions: []string{"v1beta1"},
+					Resources:   []string{"shoots"},
 				},
 			},
 			FailurePolicy: &failurePolicyFail,
@@ -1210,68 +1122,52 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps", "secrets", "serviceaccounts"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps", "secrets", "serviceaccounts"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{rbacv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"clusterrolebindings"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{rbacv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"clusterrolebindings"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{coordinationv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"leases"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{coordinationv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"leases"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{certificatesv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"certificatesigningrequests"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{certificatesv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"certificatesigningrequests"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"backupentries", "internalsecrets", "shootstates"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"backupentries", "internalsecrets", "shootstates"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Delete},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"backupbuckets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Delete},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"backupbuckets"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"seeds"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"seeds"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{operationsv1alpha1.GroupName},
-							APIVersions: []string{"v1alpha1"},
-							Resources:   []string{"bastions"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{operationsv1alpha1.GroupName},
+						APIVersions: []string{"v1alpha1"},
+						Resources:   []string{"bastions"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1288,20 +1184,16 @@ func validatingWebhookConfiguration(namespace string, caBundle []byte, testValue
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps", "secrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps", "secrets"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{"core.gardener.cloud"},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"backupbuckets", "backupentries", "internalsecrets", "projects", "shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{"core.gardener.cloud"},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"backupbuckets", "backupentries", "internalsecrets", "projects", "shoots"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -1325,9 +1217,7 @@ func mutatingWebhookConfiguration(namespace string, caBundle []byte) *admissionr
 	)
 
 	return &admissionregistrationv1.MutatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "gardener-admission-controller",
-		},
+		Name: "gardener-admission-controller",
 		Webhooks: []admissionregistrationv1.MutatingWebhook{
 			{
 				Name:                    "sync-provider-secret-labels.gardener.cloud",
@@ -1335,20 +1225,16 @@ func mutatingWebhookConfiguration(namespace string, caBundle []byte) *admissionr
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"secrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"secrets"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{"core.gardener.cloud"},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"internalsecrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{"core.gardener.cloud"},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"internalsecrets"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,

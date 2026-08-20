@@ -26,11 +26,9 @@ var _ = Describe("Project Activity controller tests", func() {
 	BeforeEach(func() {
 		By("Create test Namespace")
 		testNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-				GenerateName: "garden-" + testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+			GenerateName: "garden-" + testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 		}
 		Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 		log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -41,10 +39,8 @@ var _ = Describe("Project Activity controller tests", func() {
 		})
 
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5],
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5],
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: &testNamespace.Name,
 			},
@@ -187,11 +183,9 @@ var _ = Describe("Project Activity controller tests", func() {
 			"Shoot",
 			func() client.Object {
 				return &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "test-",
-						Namespace:    testNamespace.Name,
-						Labels:       map[string]string{testID: testRunID},
-					},
+					GenerateName: "test-",
+					Namespace:    testNamespace.Name,
+					Labels:       map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.ShootSpec{
 						SecretBindingName: new("mysecretbinding"),
 						CloudProfileName:  new("cloudprofile1"),
@@ -237,11 +231,9 @@ var _ = Describe("Project Activity controller tests", func() {
 			"BackupEntry",
 			func() client.Object {
 				return &gardencorev1beta1.BackupEntry{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "test-",
-						Namespace:    testNamespace.Name,
-						Labels:       map[string]string{testID: testRunID},
-					},
+					GenerateName: "test-",
+					Namespace:    testNamespace.Name,
+					Labels:       map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.BackupEntrySpec{
 						BucketName: "foo",
 						SeedName:   new("bar"),
@@ -260,11 +252,9 @@ var _ = Describe("Project Activity controller tests", func() {
 			"Secret",
 			func() client.Object {
 				return &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "test-",
-						Namespace:    testNamespace.Name,
-						Labels:       map[string]string{testID: testRunID},
-					},
+					GenerateName: "test-",
+					Namespace:    testNamespace.Name,
+					Labels:       map[string]string{testID: testRunID},
 				}
 			},
 			func(obj client.Object) {
@@ -279,11 +269,9 @@ var _ = Describe("Project Activity controller tests", func() {
 			"Quota",
 			func() client.Object {
 				return &gardencorev1beta1.Quota{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "test-",
-						Namespace:    testNamespace.Name,
-						Labels:       map[string]string{testID: testRunID},
-					},
+					GenerateName: "test-",
+					Namespace:    testNamespace.Name,
+					Labels:       map[string]string{testID: testRunID},
 					Spec: gardencorev1beta1.QuotaSpec{
 						Scope: corev1.ObjectReference{
 							APIVersion: "v1",

@@ -206,7 +206,7 @@ func (b *Botanist) deployControlPlaneComponent(ctx context.Context, deploy func(
 }
 
 func (b *Botanist) populateStaticAdminTokenToAccessTokenSecret(ctx context.Context, componentName string) error {
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenerutils.SecretNamePrefixShootAccess + componentName, Namespace: b.Shoot.ControlPlaneNamespace}}
+	secret := &corev1.Secret{Name: gardenerutils.SecretNamePrefixShootAccess + componentName, Namespace: b.Shoot.ControlPlaneNamespace}
 	if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 		if apierrors.IsNotFound(err) {
 			return nil
@@ -416,7 +416,7 @@ func (b *Botanist) useShootAccessTokensForSelfHostedShootControlPlane(ctx contex
 		return false, nil
 	}
 
-	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: b.Shoot.ControlPlaneNamespace}}
+	deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: b.Shoot.ControlPlaneNamespace}
 	if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(deployment), deployment); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return false, fmt.Errorf("failed fetching deployment %s: %w", client.ObjectKeyFromObject(deployment), err)

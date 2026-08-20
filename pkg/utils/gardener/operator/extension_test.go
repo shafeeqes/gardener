@@ -81,9 +81,7 @@ var _ = Describe("Extension", func() {
 
 		BeforeEach(func() {
 			extension = &operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
-				},
+				Name: "test",
 				Spec: operatorv1alpha1.ExtensionSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -97,11 +95,9 @@ var _ = Describe("Extension", func() {
 					},
 					Deployment: &operatorv1alpha1.Deployment{
 						ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-							DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-								Helm: &operatorv1alpha1.ExtensionHelm{
-									OCIRepository: &gardencorev1.OCIRepository{
-										Ref: new("garden.local/extension:test"),
-									},
+							Helm: &operatorv1alpha1.ExtensionHelm{
+								OCIRepository: &gardencorev1.OCIRepository{
+									Ref: new("garden.local/extension:test"),
 								},
 							},
 							Values: &apiextensionsv1.JSON{

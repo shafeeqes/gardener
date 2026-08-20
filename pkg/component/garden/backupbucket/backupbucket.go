@@ -65,9 +65,7 @@ func New(
 		waitTimeout:  waitTimeout,
 
 		backupBucket: &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: values.Name,
-			},
+			Name: values.Name,
 		},
 	}
 }

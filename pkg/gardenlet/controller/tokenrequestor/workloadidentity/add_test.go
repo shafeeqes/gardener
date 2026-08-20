@@ -25,9 +25,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			p = (&workloadidentity.Reconciler{}).SecretPredicate()
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{"security.gardener.cloud/purpose": "workload-identity-token-requestor"},
-				},
+				Labels: map[string]string{"security.gardener.cloud/purpose": "workload-identity-token-requestor"},
 			}
 		})
 

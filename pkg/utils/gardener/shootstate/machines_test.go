@@ -8,7 +8,6 @@ import (
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/utils/gardener/shootstate"
 	. "github.com/gardener/gardener/pkg/utils/test/matchers"
@@ -28,10 +27,8 @@ var _ = Describe("MachineState", func() {
 						Replicas: 3,
 						MachineSets: []machinev1alpha1.MachineSet{
 							{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      "shoot--foo--bar-worker-z1-hash1",
-									Namespace: "shoot--foo--bar",
-								},
+								Name:      "shoot--foo--bar-worker-z1-hash1",
+								Namespace: "shoot--foo--bar",
 								Spec: machinev1alpha1.MachineSetSpec{
 									Replicas: 3,
 									MachineClass: machinev1alpha1.ClassSpec{
@@ -47,10 +44,8 @@ var _ = Describe("MachineState", func() {
 								},
 							},
 							{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      "shoot--foo--bar-worker-z1-hash2",
-									Namespace: "shoot--foo--bar",
-								},
+								Name:      "shoot--foo--bar-worker-z1-hash2",
+								Namespace: "shoot--foo--bar",
 								Spec: machinev1alpha1.MachineSetSpec{
 									Replicas: 3,
 									MachineClass: machinev1alpha1.ClassSpec{
@@ -68,10 +63,8 @@ var _ = Describe("MachineState", func() {
 						},
 						Machines: []machinev1alpha1.Machine{
 							{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      "shoot--foo--bar-worker-z1-hash1-abcde",
-									Namespace: "shoot--foo--bar",
-								},
+								Name:      "shoot--foo--bar-worker-z1-hash1-abcde",
+								Namespace: "shoot--foo--bar",
 								Spec: machinev1alpha1.MachineSpec{
 									Class: machinev1alpha1.ClassSpec{
 										Name: "shoot--foo--bar-worker-z1-hash1-abcde",
@@ -79,10 +72,8 @@ var _ = Describe("MachineState", func() {
 								},
 							},
 							{
-								ObjectMeta: metav1.ObjectMeta{
-									Name:      "shoot--foo--bar-worker-z1-hash2-abcde",
-									Namespace: "shoot--foo--bar",
-								},
+								Name:      "shoot--foo--bar-worker-z1-hash2-abcde",
+								Namespace: "shoot--foo--bar",
 								Spec: machinev1alpha1.MachineSpec{
 									Class: machinev1alpha1.ClassSpec{
 										Name: "shoot--foo--bar-worker-z1-hash2-abcde",

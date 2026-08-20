@@ -107,10 +107,10 @@ var _ = Describe("Helper", func() {
 			&core.Shoot{},
 			BeFalse()),
 		Entry("force-delete annotation present but value is false",
-			&core.Shoot{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "0"}}},
+			&core.Shoot{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "0"}},
 			BeFalse()),
 		Entry("force-delete annotation present and value is true",
-			&core.Shoot{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "t"}}},
+			&core.Shoot{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "t"}},
 			BeTrue()),
 	)
 
@@ -419,9 +419,7 @@ var _ = Describe("Helper", func() {
 
 		It("should return true when the shoot has managed issuer", func() {
 			shoot := &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{"authentication.gardener.cloud/issuer": "managed"},
-				},
+				Annotations: map[string]string{"authentication.gardener.cloud/issuer": "managed"},
 			}
 			Expect(HasManagedIssuer(shoot)).To(BeTrue())
 		})
@@ -434,8 +432,8 @@ var _ = Describe("Helper", func() {
 
 		Entry("addons nil", nil, BeFalse()),
 		Entry("kubernetesDashboard nil", &core.Addons{}, BeFalse()),
-		Entry("kubernetesDashboard disabled", &core.Addons{KubernetesDashboard: &core.KubernetesDashboard{Addon: core.Addon{Enabled: false}}}, BeFalse()),
-		Entry("kubernetesDashboard enabled", &core.Addons{KubernetesDashboard: &core.KubernetesDashboard{Addon: core.Addon{Enabled: true}}}, BeTrue()),
+		Entry("kubernetesDashboard disabled", &core.Addons{KubernetesDashboard: &core.KubernetesDashboard{Enabled: false}}, BeFalse()),
+		Entry("kubernetesDashboard enabled", &core.Addons{KubernetesDashboard: &core.KubernetesDashboard{Enabled: true}}, BeTrue()),
 	)
 
 	DescribeTable("#NginxIngressEnabled",
@@ -445,8 +443,8 @@ var _ = Describe("Helper", func() {
 
 		Entry("addons nil", nil, BeFalse()),
 		Entry("nginxIngress nil", &core.Addons{}, BeFalse()),
-		Entry("nginxIngress disabled", &core.Addons{NginxIngress: &core.NginxIngress{Addon: core.Addon{Enabled: false}}}, BeFalse()),
-		Entry("nginxIngress enabled", &core.Addons{NginxIngress: &core.NginxIngress{Addon: core.Addon{Enabled: true}}}, BeTrue()),
+		Entry("nginxIngress disabled", &core.Addons{NginxIngress: &core.NginxIngress{Enabled: false}}, BeFalse()),
+		Entry("nginxIngress enabled", &core.Addons{NginxIngress: &core.NginxIngress{Enabled: true}}, BeTrue()),
 	)
 
 	DescribeTable("#FindPrimaryDNSProvider",
@@ -570,17 +568,17 @@ var _ = Describe("Helper", func() {
 		),
 		Entry("seed has no access restrictions",
 			nil,
-			[]core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}},
+			[]core.AccessRestrictionWithOptions{{Name: "foo"}},
 			false,
 		),
 		Entry("both have access restrictions and they match",
 			[]core.AccessRestriction{{Name: "foo"}},
-			[]core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}},
+			[]core.AccessRestrictionWithOptions{{Name: "foo"}},
 			true,
 		),
 		Entry("both have access restrictions and they don't match",
 			[]core.AccessRestriction{{Name: "bar"}},
-			[]core.AccessRestrictionWithOptions{{AccessRestriction: core.AccessRestriction{Name: "foo"}}},
+			[]core.AccessRestrictionWithOptions{{Name: "foo"}},
 			false,
 		),
 	)

@@ -14,7 +14,6 @@ import (
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -45,22 +44,16 @@ var _ = Describe("Scheduler_Control", func() {
 		region           = "europe"
 
 		cloudProfileBase = gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: cloudProfileName,
-			},
+			Name: cloudProfileName,
 		}
 		projectBase = gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "project-1",
-			},
+			Name: "project-1",
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: new("my-namespace"),
 			},
 		}
 		seedBase = gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: seedName,
-			},
+			Name: seedName,
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Type:   providerType,
@@ -88,10 +81,8 @@ var _ = Describe("Scheduler_Control", func() {
 			},
 		}
 		shootBase = gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot",
-				Namespace: "my-namespace",
-			},
+			Name:      "shoot",
+			Namespace: "my-namespace",
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName: &cloudProfileName,
 				Region:           region,
@@ -112,10 +103,8 @@ var _ = Describe("Scheduler_Control", func() {
 		}
 
 		schedulerConfigurationBase = schedulerconfigv1alpha1.SchedulerConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: schedulerconfigv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "SchedulerConfiguration",
-			},
+			APIVersion: schedulerconfigv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "SchedulerConfiguration",
 			Schedulers: schedulerconfigv1alpha1.SchedulerControllerConfiguration{
 				Shoot: &schedulerconfigv1alpha1.ShootSchedulerConfiguration{
 					Strategy: schedulerconfigv1alpha1.SameRegion,
@@ -352,10 +341,8 @@ var _ = Describe("Scheduler_Control", func() {
 
 		It("should succeed because it cannot find a seed cluster 1) 'MinimalDistance' seed determination strategy 2) matching labels", func() {
 			cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"select": "true",
-					},
+				MatchLabels: map[string]string{
+					"select": "true",
 				},
 				ProviderTypes: []string{"*"},
 			}
@@ -385,10 +372,8 @@ var _ = Describe("Scheduler_Control", func() {
 
 		It("should fail because it cannot find a seed cluster 1) 'MinimalDistance' seed determination strategy 2) no matching labels", func() {
 			cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"select": "true",
-					},
+				MatchLabels: map[string]string{
+					"select": "true",
 				},
 				ProviderTypes: []string{providerType},
 			}
@@ -403,10 +388,8 @@ var _ = Describe("Scheduler_Control", func() {
 
 		It("should fail because it cannot find a seed cluster 1) 'MinimalDistance' seed determination strategy 2) matching labels but not type", func() {
 			cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"select": "true",
-					},
+				MatchLabels: map[string]string{
+					"select": "true",
 				},
 			}
 			seed.Labels = map[string]string{"select": "true"}
@@ -512,10 +495,8 @@ var _ = Describe("Scheduler_Control", func() {
 			newCloudProfile := cloudProfile.DeepCopy()
 			newCloudProfile.Name = "cloudprofile2"
 			newCloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"environment": "two",
-					},
+				MatchLabels: map[string]string{
+					"environment": "two",
 				},
 			}
 			newCloudProfile.Spec.Regions = []gardencorev1beta1.Region{{Name: "name: eu-nl-1"}}
@@ -553,10 +534,8 @@ var _ = Describe("Scheduler_Control", func() {
 			newCloudProfile := cloudProfile
 			newCloudProfile.Name = "cloudprofile2"
 			newCloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"environment": "two",
-					},
+				MatchLabels: map[string]string{
+					"environment": "two",
 				},
 			}
 			newCloudProfile.Spec.Regions = []gardencorev1beta1.Region{{Name: "name: eu-nl-1"}}
@@ -586,7 +565,7 @@ var _ = Describe("Scheduler_Control", func() {
 			testShoot.Spec.CloudProfileName = new("cloudprofile2")
 			testShoot.Spec.Provider.Type = "some-type"
 			testShoot.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{MatchLabels: map[string]string{"my-preferred": "seed"}},
+				MatchLabels: map[string]string{"my-preferred": "seed"},
 			}
 
 			Expect(fakeGardenClient.Create(ctx, newCloudProfile)).To(Succeed())
@@ -814,10 +793,8 @@ var _ = Describe("Scheduler_Control", func() {
 
 		It("should fail because the cloudprofile used by the shoot doesn't select any seed candidate", func() {
 			cloudProfile.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"foo": "bar",
-					},
+				MatchLabels: map[string]string{
+					"foo": "bar",
 				},
 			}
 			Expect(fakeGardenClient.Create(ctx, cloudProfile)).To(Succeed())
@@ -831,10 +808,8 @@ var _ = Describe("Scheduler_Control", func() {
 
 		It("should fail because the shoot doesn't select any seed candidate", func() {
 			shoot.Spec.SeedSelector = &gardencorev1beta1.SeedSelector{
-				LabelSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"foo": "bar",
-					},
+				MatchLabels: map[string]string{
+					"foo": "bar",
 				},
 			}
 
@@ -1173,7 +1148,7 @@ var _ = DescribeTable("condition is false",
 var _ = Describe("filterSeedsForZoneSelection", func() {
 	makeSeed := func(name string, zones []string, mode gardencorev1beta1.ZoneSelectionMode) gardencorev1beta1.Seed {
 		s := gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: name},
+			Name: name,
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{Zones: zones},
 			},

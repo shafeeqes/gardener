@@ -23,7 +23,6 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
@@ -54,7 +53,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 	var (
 		shootNamespace        = "garden"
 		shootName             = "root"
-		shoot                 = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: shootNamespace}}
+		shoot                 = &gardencorev1beta1.Shoot{Name: shootName, Namespace: shootNamespace}
 		controlPlaneNamespace = "kube-system"
 	)
 
@@ -123,7 +122,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 
 			It("should ensure the control plane namespace is properly labeled", func(ctx SpecContext) {
 				Eventually(ctx, func(g Gomega) map[string]string {
-					namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: controlPlaneNamespace}}
+					namespace := &corev1.Namespace{Name: controlPlaneNamespace}
 					g.Expect(shootClientSet.Client().Get(ctx, client.ObjectKeyFromObject(namespace), namespace)).To(Succeed())
 					return namespace.Labels
 				}).Should(HaveKeyWithValue("gardener.cloud/role", "shoot"))
@@ -190,7 +189,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 
 			It("should no longer see the node in the cluster", func(ctx SpecContext) {
 				Eventually(ctx, func(g Gomega) {
-					node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: machineContainerName(1)}}
+					node := &corev1.Node{Name: machineContainerName(1)}
 					g.Expect(shootClientSet.Client().Get(ctx, client.ObjectKeyFromObject(node), node)).Should(HaveOccurred())
 				}).Should(Succeed())
 			}, SpecTimeout(time.Minute))
@@ -291,7 +290,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 			}, SpecTimeout(time.Minute))
 
 			It("should deploy and reconcile the BackupBucket resource", func(ctx SpecContext) {
-				backupBucket := &gardencorev1beta1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: string(shoot.Status.UID)}}
+				backupBucket := &gardencorev1beta1.BackupBucket{Name: string(shoot.Status.UID)}
 				Eventually(ctx, gardenKomega.Object(backupBucket)).Should(BeHealthy(health.CheckBackupBucket))
 			}, SpecTimeout(time.Minute))
 
@@ -299,7 +298,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 				backupEntryName, err := gardenerutils.GenerateBackupEntryName(controlPlaneNamespace, shoot.Status.UID, shoot.UID)
 				Expect(err).NotTo(HaveOccurred())
 
-				backupEntry := &gardencorev1beta1.BackupEntry{ObjectMeta: metav1.ObjectMeta{Name: backupEntryName, Namespace: shootNamespace}}
+				backupEntry := &gardencorev1beta1.BackupEntry{Name: backupEntryName, Namespace: shootNamespace}
 				Eventually(ctx, gardenKomega.Object(backupEntry)).Should(BeHealthy(health.CheckBackupEntry))
 			}, SpecTimeout(time.Minute))
 
@@ -391,9 +390,9 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 
 					By("Verifying kube-apiserver no longer trusts the old cluster-admin static token")
 					unauthenticatedClient, err := client.New(&rest.Config{
-						Host:            shootClientSet.RESTConfig().Host,
-						TLSClientConfig: rest.TLSClientConfig{CAData: shootClientSet.RESTConfig().CAData},
-						BearerToken:     clusterAdminStaticToken,
+						Host:        shootClientSet.RESTConfig().Host,
+						CAData:      shootClientSet.RESTConfig().CAData,
+						BearerToken: clusterAdminStaticToken,
 					}, client.Options{})
 					Expect(err).NotTo(HaveOccurred())
 					Expect(unauthenticatedClient.List(ctx, &corev1.NamespaceList{})).To(MatchError(apierrors.IsUnauthorized, "IsUnauthorized"))
@@ -486,7 +485,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 			}, SpecTimeout(time.Minute))
 
 			It("should ensure the ManagedSeed is healthy", func(ctx SpecContext) {
-				managedSeed := &seedmanagementv1alpha1.ManagedSeed{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: shootNamespace}}
+				managedSeed := &seedmanagementv1alpha1.ManagedSeed{Name: shootName, Namespace: shootNamespace}
 				Eventually(ctx, func(g Gomega) {
 					g.Expect(gardenClientSet.Client().Get(ctx, client.ObjectKeyFromObject(managedSeed), managedSeed)).To(Succeed())
 					g.Expect(health.CheckManagedSeed(managedSeed)).To(Succeed())
@@ -494,7 +493,7 @@ var _ = Describe("gardenadm unmanaged infrastructure scenario tests", Label("gar
 			}, SpecTimeout(5*time.Minute))
 
 			It("should ensure the Seed is healthy", func(ctx SpecContext) {
-				seed := &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: shootName}}
+				seed := &gardencorev1beta1.Seed{Name: shootName}
 				Eventually(ctx, func(g Gomega) {
 					g.Expect(gardenClientSet.Client().Get(ctx, client.ObjectKeyFromObject(seed), seed)).To(Succeed())
 					g.Expect(health.CheckSeed(seed, seed.Status.Gardener)).To(Succeed())
@@ -623,7 +622,7 @@ func itShouldSeeJoinedNodeAndCheckHealth(shootClientSet func() kubernetes.Interf
 
 	It("should see the joined node and observe its readiness", func(ctx SpecContext) {
 		Eventually(ctx, func(g Gomega) {
-			node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: machineContainerName(1)}}
+			node := &corev1.Node{Name: machineContainerName(1)}
 			g.Expect(shootClientSet().Client().Get(ctx, client.ObjectKeyFromObject(node), node)).To(Succeed())
 
 			g.Expect(node.Status.Conditions).To(ContainCondition(

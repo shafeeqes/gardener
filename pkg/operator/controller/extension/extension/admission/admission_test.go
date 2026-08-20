@@ -16,7 +16,6 @@ import (
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -77,9 +76,7 @@ var _ = Describe("Admission", func() {
 
 		extensionName = "test-extension"
 		extension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionName,
-			},
+			Name: extensionName,
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					AdmissionDeployment: &operatorv1alpha1.AdmissionDeploymentSpec{
@@ -184,10 +181,10 @@ var _ = Describe("Admission", func() {
 		})
 
 		It("should delete the admission deployment", func() {
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}})).To(Succeed())
 
 			extension.Spec.Deployment.AdmissionDeployment = nil
 
@@ -209,11 +206,11 @@ var _ = Describe("Admission", func() {
 				return nil
 			})()
 
-			runtimeManagedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}}
+			runtimeManagedResource := &resourcesv1alpha1.ManagedResource{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}}
 
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"})).To(Succeed())
 			Expect(runtimeClient.Create(ctx, runtimeManagedResource)).To(Succeed())
 
 			extension.Spec.Deployment.AdmissionDeployment.VirtualCluster = nil
@@ -237,12 +234,12 @@ var _ = Describe("Admission", func() {
 				return nil
 			})()
 
-			virtualManagedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}}
+			virtualManagedResource := &resourcesv1alpha1.ManagedResource{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}}
 
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"})).To(Succeed())
 			Expect(runtimeClient.Create(ctx, virtualManagedResource)).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}})).To(Succeed())
 
 			extension.Spec.Deployment.AdmissionDeployment.RuntimeCluster = nil
 
@@ -269,11 +266,11 @@ var _ = Describe("Admission", func() {
 		})
 
 		It("should succeed if extension was deployed before", func() {
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "shoot-access-extension-admission-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "shoot-access-extension-admission-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: "extension-admission-virtual-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-virtual-" + extensionName}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: "extension-admission-runtime-" + extensionName, Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: "extension-admission-runtime-" + extensionName}}}})).To(Succeed())
 
 			Expect(admission.Delete(ctx, log, extension)).To(Succeed())
 

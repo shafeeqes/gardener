@@ -64,7 +64,7 @@ const LabelPurposeGlobalMonitoringSecret = "global-monitoring-secret-replica"
 // transformed name. The replicaName function receives the source secret name and returns the desired replica name.
 // Staled replicas are deleted.
 func ReplicateGlobalMonitoringSecret(ctx context.Context, c client.Client, globalMonitoringSecret *corev1.Secret, replicaNamespace string, replicaName func(string) string) (*corev1.Secret, error) {
-	globalMonitoringSecretReplica := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: replicaName(globalMonitoringSecret.Name), Namespace: replicaNamespace}}
+	globalMonitoringSecretReplica := &corev1.Secret{Name: replicaName(globalMonitoringSecret.Name), Namespace: replicaNamespace}
 	_, err := controllerutils.GetAndCreateOrMergePatch(ctx, c, globalMonitoringSecretReplica, func() error {
 		metav1.SetMetaDataLabel(&globalMonitoringSecretReplica.ObjectMeta, v1beta1constants.GardenRole, v1beta1constants.GardenRoleGlobalMonitoring)
 		metav1.SetMetaDataLabel(&globalMonitoringSecretReplica.ObjectMeta, v1beta1constants.GardenerPurpose, LabelPurposeGlobalMonitoringSecret)
@@ -99,7 +99,7 @@ func ReplicateGlobalMonitoringSecret(ctx context.Context, c client.Client, globa
 }
 
 func deleteStaleGlobalMonitoringSecretReplicas(ctx context.Context, c client.Client, currentReplica *corev1.Secret) error {
-	secretList := &metav1.PartialObjectMetadataList{TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "SecretList"}}
+	secretList := &metav1.PartialObjectMetadataList{APIVersion: "v1", Kind: "SecretList"}
 	if err := c.List(ctx, secretList,
 		client.InNamespace(currentReplica.Namespace),
 		client.MatchingLabels{v1beta1constants.GardenerPurpose: LabelPurposeGlobalMonitoringSecret},

@@ -85,21 +85,15 @@ var _ = Describe("Strategy", func() {
 							Name: "machineImage1",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "2.1.0",
-									},
+									Version: "2.1.0",
 								},
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "2.0.3",
-										ExpirationDate: validExpirationDate1,
-									},
+									Version:        "2.0.3",
+									ExpirationDate: validExpirationDate1,
 								},
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "1.9.7",
-										ExpirationDate: expiredExpirationDate2,
-									},
+									Version:        "1.9.7",
+									ExpirationDate: expiredExpirationDate2,
 								},
 							},
 						},
@@ -107,21 +101,15 @@ var _ = Describe("Strategy", func() {
 							Name: "machineImage2",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "4.3.0",
-										ExpirationDate: validExpirationDate2,
-									},
+									Version:        "4.3.0",
+									ExpirationDate: validExpirationDate2,
 								},
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "4.2.3",
-									},
+									Version: "4.2.3",
 								},
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "4.1.8",
-										ExpirationDate: expiredExpirationDate1,
-									},
+									Version:        "4.1.8",
+									ExpirationDate: expiredExpirationDate1,
 								},
 							},
 						},
@@ -129,40 +117,34 @@ var _ = Describe("Strategy", func() {
 							Name: "machineImage3",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.3.0",
-										Lifecycle: []core.LifecycleStage{
-											{
-												Classification: core.ClassificationSupported,
-											},
-											{
-												Classification: core.ClassificationExpired,
-												StartTime:      validExpirationDate1,
-											},
+									Version: "1.3.0",
+									Lifecycle: []core.LifecycleStage{
+										{
+											Classification: core.ClassificationSupported,
+										},
+										{
+											Classification: core.ClassificationExpired,
+											StartTime:      validExpirationDate1,
 										},
 									},
 								},
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.2.3",
-										Lifecycle: []core.LifecycleStage{
-											{
-												Classification: core.ClassificationSupported,
-											},
+									Version: "1.2.3",
+									Lifecycle: []core.LifecycleStage{
+										{
+											Classification: core.ClassificationSupported,
 										},
 									},
 								},
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.1.8",
-										Lifecycle: []core.LifecycleStage{
-											{
-												Classification: core.ClassificationSupported,
-											},
-											{
-												Classification: core.ClassificationExpired,
-												StartTime:      expiredExpirationDate1,
-											},
+									Version: "1.1.8",
+									Lifecycle: []core.LifecycleStage{
+										{
+											Classification: core.ClassificationSupported,
+										},
+										{
+											Classification: core.ClassificationExpired,
+											StartTime:      expiredExpirationDate1,
 										},
 									},
 								},
@@ -262,9 +244,7 @@ var _ = Describe("Strategy", func() {
 						{
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "1.0.0",
-									},
+									Version:       "1.0.0",
 									Architectures: []string{"amd64"},
 								},
 							},

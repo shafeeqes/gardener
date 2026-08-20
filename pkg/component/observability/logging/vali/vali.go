@@ -318,13 +318,11 @@ func (v *vali) newKubeRBACProxyShootAccessSecret() *gardenerutils.AccessSecret {
 
 func (v *vali) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 	vpa := &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      valiName + "-vpa",
-			Namespace: v.namespace,
-			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-				v1beta1constants.LabelObservabilityApplication: valiName,
-			}),
-		},
+		Name:      valiName + "-vpa",
+		Namespace: v.namespace,
+		Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+			v1beta1constants.LabelObservabilityApplication: valiName,
+		}),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				Kind:       "StatefulSet",
@@ -354,11 +352,9 @@ func (v *vali) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func (v *vali) getPVCA(pvcAutoscaling PVCAutoscalingConfig) *pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler {
 	pvca := &pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      valiconstants.ManagedResourceNameRuntime,
-			Namespace: v.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      valiconstants.ManagedResourceNameRuntime,
+		Namespace: v.namespace,
+		Labels:    getLabels(),
 		Spec: pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscalerSpec{
 			AutoscalerName: v.getAutoscalerName(),
 			TargetRef: autoscalingv1.CrossVersionObjectReference{
@@ -395,15 +391,13 @@ func (v *vali) getIstioResources(tlsSecret *corev1.Secret) ([]client.Object, err
 
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	tlsSecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", v.namespace, valiName, tlsSecret.Name),
-			Namespace: v.values.IstioIngressGatewayNamespace,
-			Labels:    getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      fmt.Sprintf("%s-%s-%s", v.namespace, valiName, tlsSecret.Name),
+		Namespace: v.values.IstioIngressGatewayNamespace,
+		Labels:    getLabels(),
+		Data:      tlsSecret.Data,
 	}
 
-	gateway := &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: v.namespace}}
+	gateway := &istionetworkingv1beta1.Gateway{Name: gatewayName, Namespace: v.namespace}
 	if err := istio.GatewayWithTLSTermination(
 		gateway,
 		getLabels(),
@@ -415,7 +409,7 @@ func (v *vali) getIstioResources(tlsSecret *corev1.Secret) ([]client.Object, err
 	}
 
 	destinationHost := kubernetesutils.FQDNForService(valiconstants.ServiceName, v.namespace)
-	virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: v.namespace}}
+	virtualService := &istionetworkingv1beta1.VirtualService{Name: gatewayName, Namespace: v.namespace}
 	if err := istio.VirtualServiceForTLSTermination(
 		virtualService,
 		getLabels(),
@@ -440,7 +434,7 @@ func (v *vali) getIstioResources(tlsSecret *corev1.Secret) ([]client.Object, err
 		},
 	}}
 
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: v.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: gatewayName, Namespace: v.namespace}
 	if err := istio.DestinationRuleWithLocalityPreference(destinationRule, getLabels(), []string{v.values.IstioIngressGatewayNamespace}, destinationHost)(); err != nil {
 		return nil, fmt.Errorf("failed to create destination rule resource: %w", err)
 	}
@@ -451,13 +445,11 @@ func (v *vali) getIstioResources(tlsSecret *corev1.Secret) ([]client.Object, err
 func (v *vali) getService() *corev1.Service {
 	var (
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      valiconstants.ServiceName,
-				Namespace: v.namespace,
-				Labels:    getLabels(),
-				Annotations: map[string]string{
-					istioapiannotation.NetworkingExportTo.Name: v.values.IstioIngressGatewayNamespace,
-				},
+			Name:      valiconstants.ServiceName,
+			Namespace: v.namespace,
+			Labels:    getLabels(),
+			Annotations: map[string]string{
+				istioapiannotation.NetworkingExportTo.Name: v.values.IstioIngressGatewayNamespace,
 			},
 			Spec: corev1.ServiceSpec{
 				Type:     corev1.ServiceTypeClusterIP,
@@ -513,11 +505,9 @@ func (v *vali) getService() *corev1.Service {
 
 func (v *vali) getValiConfigMap() *corev1.ConfigMap {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "vali-config",
-			Namespace: v.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "vali-config",
+		Namespace: v.namespace,
+		Labels:    getLabels(),
 		Data: map[string]string{
 			valiDataKeyConfig:     valiConfig,
 			curatorDataKeyConfig:  curatorConfig,
@@ -541,11 +531,9 @@ func (v *vali) getTelegrafConfigMap() (*corev1.ConfigMap, error) {
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "telegraf-config",
-			Namespace: v.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "telegraf-config",
+		Namespace: v.namespace,
+		Labels:    getLabels(),
 		Data: map[string]string{
 			telegrafDataKeyConfig:      telegrafConfig.String(),
 			telegrafDataKeyStartScript: telegrafStartScript.String(),
@@ -561,11 +549,9 @@ func (v *vali) getStatefulSet(valiConfigMapName, telegrafConfigMapName, genericT
 		fsGroupChangeOnRootMismatch = corev1.FSGroupChangeOnRootMismatch
 
 		statefulSet = &appsv1.StatefulSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      valiName,
-				Namespace: v.namespace,
-				Labels:    getLabels(),
-			},
+			Name:      valiName,
+			Namespace: v.namespace,
+			Labels:    getLabels(),
 			Spec: appsv1.StatefulSetSpec{
 				Replicas: new(v.values.Replicas),
 				Selector: &metav1.LabelSelector{
@@ -634,21 +620,17 @@ func (v *vali) getStatefulSet(valiConfigMapName, telegrafConfigMapName, genericT
 									Protocol:      corev1.ProtocolTCP,
 								}},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/ready",
-											Port: intstr.FromString(valiMetricsPortName),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/ready",
+										Port: intstr.FromString(valiMetricsPortName),
 									},
 									InitialDelaySeconds: 120,
 									FailureThreshold:    5,
 								},
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/ready",
-											Port: intstr.FromString(valiMetricsPortName),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/ready",
+										Port: intstr.FromString(valiMetricsPortName),
 									},
 									FailureThreshold: 7,
 								},
@@ -703,21 +685,15 @@ func (v *vali) getStatefulSet(valiConfigMapName, telegrafConfigMapName, genericT
 						},
 						Volumes: []corev1.Volume{{
 							Name: valiConfigMapVolumeName,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: valiConfigMapName,
-									},
-									DefaultMode: new(int32(0520)),
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name:        valiConfigMapName,
+								DefaultMode: new(int32(0520)),
 							},
 						}},
 					},
 				},
 				VolumeClaimTemplates: []corev1.PersistentVolumeClaim{{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: valiPVCName,
-					},
+					Name: valiPVCName,
 					Spec: corev1.PersistentVolumeClaimSpec{
 						AccessModes: []corev1.PersistentVolumeAccessMode{
 							corev1.ReadWriteOnce,
@@ -791,12 +767,8 @@ wait
 	)
 	statefulSet.Spec.Template.Spec.Volumes = append(statefulSet.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name: telegrafVolumeName,
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: telegrafConfigMapName,
-				},
-			},
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			Name: telegrafConfigMapName,
 		},
 	})
 
@@ -840,10 +812,8 @@ wait
 
 func (v *vali) getKubeRBACProxyClusterRoleBinding(serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:logging:kube-rbac-proxy",
-			Labels: map[string]string{v1beta1constants.LabelApp: kubeRBACProxyName},
-		},
+		Name:   "gardener.cloud:logging:kube-rbac-proxy",
+		Labels: map[string]string{v1beta1constants.LabelApp: kubeRBACProxyName},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -865,10 +835,8 @@ func (v *vali) getLoggingAgentClusterRole() *rbacv1.ClusterRole {
 	)
 
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: map[string]string{v1beta1constants.LabelApp: appName},
-		},
+		Name:   clusterRoleName,
+		Labels: map[string]string{v1beta1constants.LabelApp: appName},
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"", "apps"},
@@ -900,10 +868,8 @@ func (v *vali) getLoggingAgentClusterRoleBinding(serviceAccountName, clusterRole
 	)
 
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: map[string]string{v1beta1constants.LabelApp: appName},
-		},
+		Name:   clusterRoleName,
+		Labels: map[string]string{v1beta1constants.LabelApp: appName},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -1057,7 +1023,7 @@ func getLabels() map[string]string {
 // current one.
 // Caution: If the passed storage capacity is less than the current one the existing PVC and its PV will be deleted.
 func (v *vali) resizeOrDeleteValiDataVolumeIfStorageNotTheSame(ctx context.Context) error {
-	managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: valiconstants.ManagedResourceNameRuntime, Namespace: v.namespace}}
+	managedResource := &resourcesv1alpha1.ManagedResource{Name: valiconstants.ManagedResourceNameRuntime, Namespace: v.namespace}
 	addOrRemoveIgnoreAnnotationFromManagedResource := func(addIgnoreAnnotation bool) error {
 		// In order to not create the managed resource here first check if exists.
 		if err := v.client.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource); err != nil {

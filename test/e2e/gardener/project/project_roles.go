@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,9 +36,7 @@ var _ = Describe("Project Tests", Ordered, Label("Project", "default"), Priority
 		projectName := "test-" + utils.ComputeSHA256Hex([]byte(CurrentSpecReport().LeafNodeLocation.String()))[:5]
 
 		project := &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: projectName,
-			},
+			Name: projectName,
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: new("garden-" + projectName),
 			},
@@ -85,10 +82,9 @@ var _ = Describe("Project Tests", Ordered, Label("Project", "default"), Priority
 	}, SpecTimeout(time.Minute))
 
 	It("Create test Endpoint", func(ctx SpecContext) {
-		testEndpoint = &corev1.Endpoints{ObjectMeta: metav1.ObjectMeta{
+		testEndpoint = &corev1.Endpoints{
 			GenerateName: "test-",
-			Namespace:    *s.Project.Spec.Namespace,
-		}}
+			Namespace:    *s.Project.Spec.Namespace}
 
 		Eventually(ctx, func() error {
 			return s.GardenClient.Create(ctx, testEndpoint)
@@ -104,11 +100,9 @@ var _ = Describe("Project Tests", Ordered, Label("Project", "default"), Priority
 	It("Create Extension Role", func(ctx SpecContext) {
 		// use dedicated role name per test run
 		extensionClusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:extension:aggregate-to-test",
-				Labels: map[string]string{
-					"rbac.gardener.cloud/aggregate-to-extension-role": "e2e-test",
-				},
+			Name: "gardener.cloud:extension:aggregate-to-test",
+			Labels: map[string]string{
+				"rbac.gardener.cloud/aggregate-to-extension-role": "e2e-test",
 			},
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups: []string{""},
@@ -125,12 +119,10 @@ var _ = Describe("Project Tests", Ordered, Label("Project", "default"), Priority
 	It("Add new member with extension role", func(ctx SpecContext) {
 		Eventually(ctx, s.GardenKomega.Update(s.Project, func() {
 			s.Project.Spec.Members = append(s.Project.Spec.Members, gardencorev1beta1.ProjectMember{
-				Subject: rbacv1.Subject{
-					APIGroup: rbacv1.GroupName,
-					Kind:     rbacv1.UserKind,
-					Name:     testUserName,
-				},
-				Role: "extension:e2e-test",
+				APIGroup: rbacv1.GroupName,
+				Kind:     rbacv1.UserKind,
+				Name:     testUserName,
+				Role:     "extension:e2e-test",
 			})
 		})).Should(Succeed())
 	}, SpecTimeout(time.Minute))

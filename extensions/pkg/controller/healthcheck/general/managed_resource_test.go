@@ -10,7 +10,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -104,11 +103,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the managed resource is missing the ResourcesApplied condition", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -135,11 +132,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the managed resource has ResourcesApplied=False", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -171,11 +166,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the managed resource is missing the ResourcesHealthy condition", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -202,11 +195,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the managed resource has ResourcesHealthy=False", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -238,11 +229,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the managed resource has empty conditions", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions:         []gardencorev1beta1.Condition{},
@@ -264,11 +253,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the unhealthy managed resource matches the configuration problem regex", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -300,11 +287,9 @@ var _ = Describe("ManagedResource", func() {
 		Context("when the unhealthy managed resource does not match the configuration problem regex", func() {
 			BeforeEach(func() {
 				mr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -355,11 +340,9 @@ var _ = Describe("ManagedResource", func() {
 
 func newHealthyManagedResource(name, namespace string) *resourcesv1alpha1.ManagedResource {
 	return &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:       name,
-			Namespace:  namespace,
-			Generation: 1,
-		},
+		Name:       name,
+		Namespace:  namespace,
+		Generation: 1,
 		Status: resourcesv1alpha1.ManagedResourceStatus{
 			ObservedGeneration: 1,
 			Conditions: []gardencorev1beta1.Condition{

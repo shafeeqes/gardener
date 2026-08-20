@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Get", func() {
@@ -114,8 +113,6 @@ var _ = Describe("Get", func() {
 
 func secretForClass(class secretClass) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: string(class) + "secret",
-		},
+		Name: string(class) + "secret",
 	}
 }

@@ -7,7 +7,6 @@ package aggregate
 import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus"
@@ -17,9 +16,7 @@ import (
 func CentralScrapeConfigs() []*monitoringv1alpha1.ScrapeConfig {
 	return []*monitoringv1alpha1.ScrapeConfig{
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "prometheus-" + Label,
-			},
+			Name: "prometheus-" + Label,
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				RelabelConfigs: []monitoringv1.RelabelConfig{{
 					Action:      "replace",
@@ -32,7 +29,7 @@ func CentralScrapeConfigs() []*monitoringv1alpha1.ScrapeConfig {
 			},
 		},
 		{
-			ObjectMeta: metav1.ObjectMeta{Name: "prometheus"},
+			Name: "prometheus",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorTimestamps: new(false),
 				MetricsPath:     new("/federate"),

@@ -46,13 +46,11 @@ func (g *gardenerDiscoveryServer) deployment(
 	secretNameWorkloadIdentity string,
 ) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: g.namespace,
-			Labels: utils.MergeStringMaps(labels(), map[string]string{
-				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
-			}),
-		},
+		Name:      deploymentName,
+		Namespace: g.namespace,
+		Labels: utils.MergeStringMaps(labels(), map[string]string{
+			resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
+		}),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -111,12 +109,10 @@ func (g *gardenerDiscoveryServer) deployment(
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromString(portNameHealthz),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   intstr.FromString(portNameHealthz),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 15,
 								TimeoutSeconds:      5,
@@ -125,12 +121,10 @@ func (g *gardenerDiscoveryServer) deployment(
 								PeriodSeconds:       20,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromString(portNameHealthz),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/readyz",
+									Port:   intstr.FromString(portNameHealthz),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 5,
 								TimeoutSeconds:      5,
@@ -158,20 +152,16 @@ func (g *gardenerDiscoveryServer) deployment(
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeNameTLS,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretNameTLS,
-									DefaultMode: new(int32(0400)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretNameTLS,
+								DefaultMode: new(int32(0400)),
 							},
 						},
 						{
 							Name: volumeNameWorkloadIdentity,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  secretNameWorkloadIdentity,
-									DefaultMode: new(int32(0400)),
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName:  secretNameWorkloadIdentity,
+								DefaultMode: new(int32(0400)),
 							},
 						},
 					},

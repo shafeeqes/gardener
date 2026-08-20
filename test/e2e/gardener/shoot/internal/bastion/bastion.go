@@ -19,7 +19,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	operationsv1alpha1 "github.com/gardener/gardener/pkg/apis/operations/v1alpha1"
@@ -44,10 +43,8 @@ func VerifyBastion(s *ShootContext) {
 
 		BeforeAll(func() {
 			bastion = &operationsv1alpha1.Bastion{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "-" + s.Shoot.Name,
-					Namespace: s.Shoot.Namespace,
-				},
+				Name:      name + "-" + s.Shoot.Name,
+				Namespace: s.Shoot.Namespace,
 				Spec: operationsv1alpha1.BastionSpec{
 					ShootRef: corev1.LocalObjectReference{
 						Name: s.Shoot.Name,
@@ -82,10 +79,9 @@ func VerifyBastion(s *ShootContext) {
 
 		var nodeSSHKey []byte
 		It("should fetch the shoot SSH key", func(ctx SpecContext) {
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			secret := &corev1.Secret{
 				Name:      gardenerutils.ComputeShootProjectResourceName(s.Shoot.Name, gardenerutils.ShootProjectSecretSuffixSSHKeypair),
-				Namespace: s.Shoot.Namespace,
-			}}
+				Namespace: s.Shoot.Namespace}
 			Eventually(ctx, s.GardenKomega.Get(secret)).Should(Succeed())
 
 			nodeSSHKey = secret.Data[secretsutils.DataKeyRSAPrivateKey]

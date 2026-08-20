@@ -115,11 +115,9 @@ func (g *gardenerControllerManager) configMapControllerManagerConfig() (*corev1.
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapControllerManagerPrefix,
-			Namespace: g.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      configMapControllerManagerPrefix,
+		Namespace: g.namespace,
+		Labels:    GetLabels(),
 		Data: map[string]string{
 			dataConfigKey: string(data),
 		},

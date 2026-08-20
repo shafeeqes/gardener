@@ -22,9 +22,7 @@ var _ = Describe("validation", func() {
 
 	BeforeEach(func() {
 		controllerInstallation = &core.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "extension-abc",
-			},
+			Name: "extension-abc",
 			Spec: core.ControllerInstallationSpec{
 				RegistrationRef: corev1.ObjectReference{
 					Name:            "extension",

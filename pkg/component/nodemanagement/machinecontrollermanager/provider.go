@@ -49,12 +49,10 @@ func ProviderSidecarContainer(shoot *gardencorev1beta1.Shoot, controlPlaneNamesp
 			"--v=3",
 		},
 		LivenessProbe: &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path:   "/healthz",
-					Port:   intstr.FromInt32(portProviderMetrics),
-					Scheme: corev1.URISchemeHTTP,
-				},
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   "/healthz",
+				Port:   intstr.FromInt32(portProviderMetrics),
+				Scheme: corev1.URISchemeHTTP,
 			},
 			InitialDelaySeconds: 30,
 			TimeoutSeconds:      5,

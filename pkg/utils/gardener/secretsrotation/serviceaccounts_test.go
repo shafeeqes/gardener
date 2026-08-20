@@ -51,23 +51,23 @@ var _ = Describe("Service accounts", func() {
 		)
 
 		BeforeEach(func() {
-			namespace1 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "ns1"}}
-			namespace2 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "ns2"}}
+			namespace1 = &corev1.Namespace{Name: "ns1"}
+			namespace2 = &corev1.Namespace{Name: "ns2"}
 
 			Expect(targetClient.Create(ctx, namespace1)).To(Succeed())
 			Expect(targetClient.Create(ctx, namespace2)).To(Succeed())
 
 			sa1 = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{Name: "sa1", Namespace: namespace1.Name},
-				Secrets:    []corev1.ObjectReference{{Name: "sa1secret1"}},
+				Name: "sa1", Namespace: namespace1.Name,
+				Secrets: []corev1.ObjectReference{{Name: "sa1secret1"}},
 			}
 			sa2 = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{Name: "sa2", Namespace: namespace2.Name},
-				Secrets:    []corev1.ObjectReference{{Name: "sa2-token" + suffix}, {Name: "sa2secret1"}},
+				Name: "sa2", Namespace: namespace2.Name,
+				Secrets: []corev1.ObjectReference{{Name: "sa2-token" + suffix}, {Name: "sa2secret1"}},
 			}
 			sa3 = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{Name: "sa3", Namespace: namespace2.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "service-account-key-current"}},
-				Secrets:    []corev1.ObjectReference{{Name: "sa3secret1"}},
+				Name: "sa3", Namespace: namespace2.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "service-account-key-current"},
+				Secrets: []corev1.ObjectReference{{Name: "sa3secret1"}},
 			}
 
 			Expect(targetClient.Create(ctx, sa1)).To(Succeed())
@@ -77,7 +77,7 @@ var _ = Describe("Service accounts", func() {
 
 		Describe("#CreateNewServiceAccountSecrets", func() {
 			It("should create new service account secrets and make them the first in the list", func() {
-				Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "service-account-key-current", Namespace: kubeAPIServerNamespace}})).To(Succeed())
+				Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "service-account-key-current", Namespace: kubeAPIServerNamespace})).To(Succeed())
 
 				Expect(CreateNewServiceAccountSecrets(ctx, logger, targetClient, fakeSecretsManager)).To(Succeed())
 
@@ -103,31 +103,27 @@ var _ = Describe("Service accounts", func() {
 				now := time.Now()
 
 				By("Create old ServiceAccount secrets")
-				Expect(targetClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				Expect(targetClient.Create(ctx, &corev1.Secret{
 					Name:              "sa1secret1",
 					Namespace:         sa1.Namespace,
-					CreationTimestamp: metav1.Time{Time: now},
-				}})).To(Succeed())
-				Expect(targetClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+					CreationTimestamp: metav1.Time{Time: now}})).To(Succeed())
+				Expect(targetClient.Create(ctx, &corev1.Secret{
 					Name:              "sa2secret1",
 					Namespace:         sa2.Namespace,
-					CreationTimestamp: metav1.Time{Time: now},
-				}})).To(Succeed())
-				Expect(targetClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+					CreationTimestamp: metav1.Time{Time: now}})).To(Succeed())
+				Expect(targetClient.Create(ctx, &corev1.Secret{
 					Name:              "sa3secret1",
 					Namespace:         sa3.Namespace,
-					CreationTimestamp: metav1.Time{Time: now},
-				}})).To(Succeed())
+					CreationTimestamp: metav1.Time{Time: now}})).To(Succeed())
 
 				By("Set time of last credentials rotation")
 				lastInitiationFinishedTime := now.Add(time.Minute)
 
 				By("Create new ServiceAccount secret")
-				Expect(targetClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+				Expect(targetClient.Create(ctx, &corev1.Secret{
 					Name:              sa2.Secrets[0].Name,
 					Namespace:         sa2.Namespace,
-					CreationTimestamp: metav1.Time{Time: lastInitiationFinishedTime.Add(time.Minute)},
-				}})).To(Succeed())
+					CreationTimestamp: metav1.Time{Time: lastInitiationFinishedTime.Add(time.Minute)}})).To(Succeed())
 
 				By("Run cleanup procedure")
 				Expect(DeleteOldServiceAccountSecrets(ctx, logger, targetClient, lastInitiationFinishedTime)).To(Succeed())

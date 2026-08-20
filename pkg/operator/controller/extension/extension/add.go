@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -194,7 +193,7 @@ func (r *Reconciler) MapSecretToExtensions(log logr.Logger) handler.MapFunc {
 				(caBundleSecretRef != nil && caBundleSecretRef.Name == secret.GetName()) {
 				// Helm pull secret and CA bundle secret of extension helm chart are considered,
 				// as they are used by gardenlets and need to be copied to the virtual garden.
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: ext.Name}})
+				requests = append(requests, reconcile.Request{Name: ext.Name})
 			}
 
 			if ext.Spec.Deployment == nil {
@@ -202,7 +201,7 @@ func (r *Reconciler) MapSecretToExtensions(log logr.Logger) handler.MapFunc {
 			}
 			for _, resourceRef := range ext.Spec.Deployment.Resources {
 				if resourceRef.ResourceRef.Kind == "Secret" && resourceRef.ResourceRef.Name == secret.GetName() {
-					requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: ext.Name}})
+					requests = append(requests, reconcile.Request{Name: ext.Name})
 				}
 			}
 		}
@@ -227,7 +226,7 @@ func (r *Reconciler) MapConfigMapToExtensions(log logr.Logger) handler.MapFunc {
 			}
 			for _, resourceRef := range ext.Spec.Deployment.Resources {
 				if resourceRef.ResourceRef.Kind == "ConfigMap" && resourceRef.ResourceRef.Name == configMap.GetName() {
-					requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: ext.Name}})
+					requests = append(requests, reconcile.Request{Name: ext.Name})
 				}
 			}
 		}

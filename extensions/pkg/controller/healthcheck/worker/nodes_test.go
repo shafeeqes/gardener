@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -94,10 +93,8 @@ var _ = Describe("DefaultHealthChecker", func() {
 		Context("when machine deployments have failed machines", func() {
 			BeforeEach(func() {
 				machineDeployment := &machinev1alpha1.MachineDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "md-1",
-						Namespace: namespace,
-					},
+					Name:      "md-1",
+					Namespace: namespace,
 					Spec: machinev1alpha1.MachineDeploymentSpec{
 						Replicas: 1,
 					},
@@ -141,10 +138,8 @@ var _ = Describe("DefaultHealthChecker", func() {
 		Context("when machine deployments are unhealthy", func() {
 			BeforeEach(func() {
 				machineDeployment := &machinev1alpha1.MachineDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "md-1",
-						Namespace: namespace,
-					},
+					Name:      "md-1",
+					Namespace: namespace,
 					Spec: machinev1alpha1.MachineDeploymentSpec{
 						Replicas: 1,
 					},
@@ -182,11 +177,9 @@ var _ = Describe("DefaultHealthChecker", func() {
 
 				managedNode := newReadyNode("node-managed")
 				unmanagedNode := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "node-unmanaged",
-						Annotations: map[string]string{
-							worker.AnnotationKeyNotManagedByMCM: "1",
-						},
+					Name: "node-unmanaged",
+					Annotations: map[string]string{
+						worker.AnnotationKeyNotManagedByMCM: "1",
 					},
 					Status: corev1.NodeStatus{
 						Conditions: []corev1.NodeCondition{
@@ -277,9 +270,7 @@ var _ = Describe("DefaultHealthChecker", func() {
 
 				readyNode := newReadyNode("node-ready")
 				unschedulableNode := &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "node-unschedulable",
-					},
+					Name: "node-unschedulable",
 					Spec: corev1.NodeSpec{
 						Unschedulable: true,
 					},
@@ -312,10 +303,8 @@ var _ = Describe("DefaultHealthChecker", func() {
 
 func newMachineDeployment(replicas int32) *machinev1alpha1.MachineDeployment {
 	return &machinev1alpha1.MachineDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "md-1",
-			Namespace: "shoot--dev--test",
-		},
+		Name:      "md-1",
+		Namespace: "shoot--dev--test",
 		Spec: machinev1alpha1.MachineDeploymentSpec{
 			Replicas: replicas,
 		},
@@ -336,9 +325,7 @@ func newMachineDeployment(replicas int32) *machinev1alpha1.MachineDeployment {
 
 func newReadyNode(name string) *corev1.Node {
 	return &corev1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 		Status: corev1.NodeStatus{
 			Conditions: []corev1.NodeCondition{
 				{

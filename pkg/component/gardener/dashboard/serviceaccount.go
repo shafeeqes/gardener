@@ -13,10 +13,8 @@ const serviceAccountNameTerminal = "dashboard-terminal-admin"
 
 func (g *gardenerDashboard) serviceAccountTerminal() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceAccountNameTerminal,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    GetLabels(),
-		},
+		Name:      serviceAccountNameTerminal,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    GetLabels(),
 	}
 }

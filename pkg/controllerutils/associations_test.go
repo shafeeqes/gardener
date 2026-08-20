@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -47,24 +46,18 @@ var _ = Describe("Associations", func() {
 			Build()
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot",
-				Namespace: namespace,
-			},
+			Name:      "shoot",
+			Namespace: namespace,
 		}
 
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secretbinding",
-				Namespace: namespace,
-			},
+			Name:      "secretbinding",
+			Namespace: namespace,
 		}
 
 		credentialsBinding = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "credentialsbinding",
-				Namespace: namespace,
-			},
+			Name:      "credentialsbinding",
+			Namespace: namespace,
 		}
 	})
 
@@ -85,46 +78,44 @@ var _ = Describe("Associations", func() {
 		},
 
 		Entry("should return shoots associated to cloudprofile by cloudprofilename",
-			&gardencorev1beta1.CloudProfile{ObjectMeta: metav1.ObjectMeta{Name: "cloudprofile"}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&gardencorev1beta1.CloudProfile{Name: "cloudprofile"}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.CloudProfileName = new(obj.GetName())
 			}, BeNil()),
 		Entry("should return shoots associated to cloudprofile by cloudprofile reference",
-			&gardencorev1beta1.CloudProfile{ObjectMeta: metav1.ObjectMeta{Name: "cloudprofile"}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&gardencorev1beta1.CloudProfile{Name: "cloudprofile"}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.CloudProfileName = nil
 				s.Spec.CloudProfile = &gardencorev1beta1.CloudProfileReference{Kind: "CloudProfile", Name: obj.GetName()}
 			}, BeNil()),
 		Entry("should return shoots associated to namespacedcloudprofile by cloudprofile reference",
-			&gardencorev1beta1.NamespacedCloudProfile{ObjectMeta: metav1.ObjectMeta{Name: "namespacedcloudprofile", Namespace: namespace}, Spec: gardencorev1beta1.NamespacedCloudProfileSpec{Parent: gardencorev1beta1.CloudProfileReference{Kind: "CloudProfile", Name: "cloudprofile"}}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&gardencorev1beta1.NamespacedCloudProfile{Name: "namespacedcloudprofile", Namespace: namespace, Spec: gardencorev1beta1.NamespacedCloudProfileSpec{Parent: gardencorev1beta1.CloudProfileReference{Kind: "CloudProfile", Name: "cloudprofile"}}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.CloudProfileName = nil
 				s.Spec.CloudProfile = &gardencorev1beta1.CloudProfileReference{Kind: "NamespacedCloudProfile", Name: obj.GetName()}
 			}, BeNil()),
 		Entry("should return shoots associated to seed",
-			&gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed"}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&gardencorev1beta1.Seed{Name: "seed"}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.SeedName = new(obj.GetName())
 			}, BeNil()),
 		Entry("should return shoots associated to secretbinding",
-			&gardencorev1beta1.SecretBinding{ObjectMeta: metav1.ObjectMeta{Name: "secretbinding", Namespace: namespace}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&gardencorev1beta1.SecretBinding{Name: "secretbinding", Namespace: namespace}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.SecretBindingName = new(obj.GetName())
 			}, BeNil()),
 		Entry("should return shoots associated to credentialsbinding",
-			&securityv1alpha1.CredentialsBinding{ObjectMeta: metav1.ObjectMeta{Name: "credentialsbinding", Namespace: namespace}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&securityv1alpha1.CredentialsBinding{Name: "credentialsbinding", Namespace: namespace}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.CredentialsBindingName = new(obj.GetName())
 			}, BeNil()),
 		Entry("should return shoots associated to exposureclass",
-			&gardencorev1beta1.ExposureClass{ObjectMeta: metav1.ObjectMeta{Name: "exposureclass"}}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
+			&gardencorev1beta1.ExposureClass{Name: "exposureclass"}, func(s *gardencorev1beta1.Shoot, obj client.Object) {
 				s.Spec.ExposureClassName = new(obj.GetName())
 			}, BeNil()),
 		Entry("should return error if the object is of not supported type",
-			&gardencorev1beta1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: "backupbucket"}}, func(_ *gardencorev1beta1.Shoot, _ client.Object) {}, HaveOccurred()),
+			&gardencorev1beta1.BackupBucket{Name: "backupbucket"}, func(_ *gardencorev1beta1.Shoot, _ client.Object) {}, HaveOccurred()),
 	)
 
 	Describe("#DetermineSecretBindingAssociations", func() {
 		It("should return secretBinding associated to quota", func() {
 			quota = &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "quota",
-					Namespace: namespace,
-				},
+				Name:      "quota",
+				Namespace: namespace,
 			}
 
 			secretBinding.Quotas = []corev1.ObjectReference{{Name: quota.Name, Namespace: quota.Namespace}}
@@ -140,10 +131,8 @@ var _ = Describe("Associations", func() {
 	Describe("#DetermineCredentialsBindingAssociations", func() {
 		It("should return credentialsBinding associated to quota", func() {
 			quota = &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "quota",
-					Namespace: namespace,
-				},
+				Name:      "quota",
+				Namespace: namespace,
 			}
 
 			credentialsBinding.Quotas = []corev1.ObjectReference{{Name: quota.Name, Namespace: quota.Namespace}}
@@ -159,9 +148,7 @@ var _ = Describe("Associations", func() {
 	Describe("#DetermineBackupBucketAssociations", func() {
 		It("should return backupbucket associated to seed", func() {
 			backupbucket = &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "backupbucket",
-				},
+				Name: "backupbucket",
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					SeedName: new("test"),
 				},
@@ -179,9 +166,7 @@ var _ = Describe("Associations", func() {
 	Describe("#DetermineControllerInstallationAssociations", func() {
 		It("should return controllerinstallation associated to seed", func() {
 			controllerinstallation = &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "controllerinstallation",
-				},
+				Name: "controllerinstallation",
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					SeedRef: &corev1.ObjectReference{Name: "test"},
 				},

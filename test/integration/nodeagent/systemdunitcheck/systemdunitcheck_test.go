@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/spf13/afero"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -26,10 +25,8 @@ var _ = Describe("SystemdUnitCheck controller tests", func() {
 
 	BeforeEach(func() {
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   nodeName,
-				Labels: map[string]string{testID: testID},
-			},
+			Name:   nodeName,
+			Labels: map[string]string{testID: testID},
 		}
 
 		By("Create Node")

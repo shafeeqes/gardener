@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -72,10 +71,8 @@ var _ = Describe("Network", func() {
 
 		BeforeEach(func() {
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "node-",
-					Labels:       map[string]string{"kubernetes.io/hostname": hostName},
-				},
+				GenerateName: "node-",
+				Labels:       map[string]string{"kubernetes.io/hostname": hostName},
 			}
 			b.HostName = hostName
 		})
@@ -208,10 +205,10 @@ var _ = Describe("Network", func() {
 
 	Describe("#ApplyNetworkPolicies", func() {
 		It("should apply the NetworkPolicies", func() {
-			namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "default", Labels: map[string]string{"gardener.cloud/role": "shoot"}}, Status: corev1.NamespaceStatus{Phase: corev1.NamespaceActive}}
+			namespace := &corev1.Namespace{Name: "default", Labels: map[string]string{"gardener.cloud/role": "shoot"}, Status: corev1.NamespaceStatus{Phase: corev1.NamespaceActive}}
 			Expect(b.SeedClientSet.Client().Create(ctx, namespace)).To(Succeed())
 
-			endpoints := &corev1.Endpoints{ObjectMeta: metav1.ObjectMeta{Name: "kubernetes", Namespace: "default"}}
+			endpoints := &corev1.Endpoints{Name: "kubernetes", Namespace: "default"}
 			Expect(b.SeedClientSet.Client().Create(ctx, endpoints)).To(Succeed())
 
 			networkPolicyList := &networkingv1.NetworkPolicyList{}

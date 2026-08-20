@@ -9,8 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -40,23 +38,17 @@ var _ = Describe("Mapper", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
+			Name: namespace,
 		}
 
 		dnsRecord = &extensionsv1alpha1.DNSRecord{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dns-record-1",
-				Namespace: namespace,
-			},
+			Name:      "dns-record-1",
+			Namespace: namespace,
 		}
 
 		dnsRecord2 = &extensionsv1alpha1.DNSRecord{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dns-record-2",
-				Namespace: namespace,
-			},
+			Name:      "dns-record-2",
+			Namespace: namespace,
 		}
 	})
 
@@ -73,16 +65,12 @@ var _ = Describe("Mapper", func() {
 
 			Expect(mapper(ctx, cluster)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      dnsRecord.Name,
-						Namespace: namespace,
-					},
+					Name:      dnsRecord.Name,
+					Namespace: namespace,
 				},
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      dnsRecord2.Name,
-						Namespace: namespace,
-					},
+					Name:      dnsRecord2.Name,
+					Namespace: namespace,
 				},
 			))
 		})
@@ -109,10 +97,8 @@ var _ = Describe("Mapper", func() {
 
 		It("should not return DNSRecords from a different namespace", func() {
 			otherDNSRecord := &extensionsv1alpha1.DNSRecord{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "dns-record-other",
-					Namespace: "other-namespace",
-				},
+				Name:      "dns-record-other",
+				Namespace: "other-namespace",
 			}
 			Expect(fakeClient.Create(ctx, dnsRecord)).To(Succeed())
 			Expect(fakeClient.Create(ctx, otherDNSRecord)).To(Succeed())
@@ -120,10 +106,8 @@ var _ = Describe("Mapper", func() {
 			result := mapper(ctx, cluster)
 			Expect(result).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      dnsRecord.Name,
-						Namespace: namespace,
-					},
+					Name:      dnsRecord.Name,
+					Namespace: namespace,
 				},
 			))
 		})

@@ -10,8 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -47,14 +45,12 @@ var _ = Describe("ControllerRegistration", func() {
 		BeforeEach(func() {
 			reconciler = &Reconciler{Client: c}
 			controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: controllerRegistrationName,
-				},
+				Name: controllerRegistrationName,
 			}
 		})
 
 		It("should return nil because object not found", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerRegistrationName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerRegistrationName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -65,7 +61,7 @@ var _ = Describe("ControllerRegistration", func() {
 			})
 
 			It("should ensure the finalizer", func() {
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerRegistrationName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerRegistrationName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -77,7 +73,7 @@ var _ = Describe("ControllerRegistration", func() {
 		Context("deletion timestamp set", func() {
 			BeforeEach(func() {
 				Expect(c.Create(ctx, controllerRegistration)).To(Succeed())
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerRegistrationName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerRegistrationName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(controllerRegistration), controllerRegistration)).To(Succeed())
@@ -88,9 +84,7 @@ var _ = Describe("ControllerRegistration", func() {
 
 			It("should return an error because installation referencing controllerRegistration exists", func() {
 				controllerInstallation := &gardencorev1beta1.ControllerInstallation{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "controllerInstallation",
-					},
+					Name: "controllerInstallation",
 					Spec: gardencorev1beta1.ControllerInstallationSpec{
 						RegistrationRef: corev1.ObjectReference{
 							Name: controllerRegistrationName,
@@ -104,13 +98,13 @@ var _ = Describe("ControllerRegistration", func() {
 				Expect(c.Create(ctx, controllerInstallation)).To(Succeed())
 				Expect(c.Create(ctx, controllerInstallation2)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerRegistrationName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerRegistrationName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).To(MatchError(ContainSubstring("cannot remove finalizer of ControllerRegistration %q because still found ControllerInstallations: [%s %s]", controllerRegistration.Name, controllerInstallation.Name, controllerInstallation2.Name)))
 			})
 
 			It("should remove the finalizer", func() {
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerRegistrationName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: controllerRegistrationName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 

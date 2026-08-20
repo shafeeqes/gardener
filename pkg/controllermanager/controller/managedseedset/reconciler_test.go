@@ -60,14 +60,12 @@ var _ = Describe("reconciler", func() {
 		reconciler = &Reconciler{Client: fakeClient, Actuator: actuator, Config: cfg}
 
 		ctx = context.TODO()
-		request = reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: name}}
+		request = reconcile.Request{Namespace: namespace, Name: name}
 
 		managedSeedSet = &seedmanagementv1alpha1.ManagedSeedSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       name,
-				Namespace:  namespace,
-				Generation: 1,
-			},
+			Name:       name,
+			Namespace:  namespace,
+			Generation: 1,
 		}
 		status = &seedmanagementv1alpha1.ManagedSeedSetStatus{
 			ObservedGeneration: 1,

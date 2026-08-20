@@ -39,7 +39,7 @@ import (
 )
 
 func (k *kubeStateMetrics) serviceAccount() *corev1.ServiceAccount {
-	serviceAccount := &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "kube-state-metrics" + k.values.NameSuffix, Namespace: k.namespace}}
+	serviceAccount := &corev1.ServiceAccount{Name: "kube-state-metrics" + k.values.NameSuffix, Namespace: k.namespace}
 	serviceAccount.Labels = k.getLabels()
 	serviceAccount.AutomountServiceAccountToken = new(false)
 	return serviceAccount
@@ -50,49 +50,49 @@ func (k *kubeStateMetrics) newShootAccessSecret() *gardenerutils.AccessSecret {
 }
 
 func (k *kubeStateMetrics) clusterRole() *rbacv1.ClusterRole {
-	clusterRole := rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{Name: "gardener.cloud:monitoring:" + k.nameSuffix()}}
-	clusterRole.Labels = k.getLabels()
-	clusterRole.Rules = []rbacv1.PolicyRule{
-		{
-			APIGroups: []string{""},
-			Resources: []string{
-				"nodes",
-				"pods",
-				"services",
-				"resourcequotas",
-				"replicationcontrollers",
-				"limitranges",
-				"persistentvolumeclaims",
-				"namespaces",
+	clusterRole := rbacv1.ClusterRole{Name: "gardener.cloud:monitoring:" + k.nameSuffix(),
+		Labels: k.getLabels(),
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{""},
+				Resources: []string{
+					"nodes",
+					"pods",
+					"services",
+					"resourcequotas",
+					"replicationcontrollers",
+					"limitranges",
+					"persistentvolumeclaims",
+					"namespaces",
+				},
+				Verbs: []string{"list", "watch"},
 			},
-			Verbs: []string{"list", "watch"},
-		},
-		{
-			APIGroups: []string{"apps", "extensions"},
-			Resources: []string{"daemonsets", "deployments", "replicasets", "statefulsets"},
-			Verbs:     []string{"list", "watch"},
-		},
-		{
-			APIGroups: []string{"batch"},
-			Resources: []string{"cronjobs", "jobs"},
-			Verbs:     []string{"list", "watch"},
-		},
-		{
-			APIGroups: []string{"apiextensions.k8s.io"},
-			Resources: []string{"customresourcedefinitions"},
-			Verbs:     []string{"list", "watch"},
-		},
-		{
-			APIGroups: []string{"autoscaling.k8s.io"},
-			Resources: []string{"verticalpodautoscalers"},
-			Verbs:     []string{"list", "watch"},
-		},
-		{
-			APIGroups: []string{"operator.gardener.cloud"},
-			Resources: []string{"gardens", "extensions"},
-			Verbs:     []string{"list", "watch"},
-		},
-	}
+			{
+				APIGroups: []string{"apps", "extensions"},
+				Resources: []string{"daemonsets", "deployments", "replicasets", "statefulsets"},
+				Verbs:     []string{"list", "watch"},
+			},
+			{
+				APIGroups: []string{"batch"},
+				Resources: []string{"cronjobs", "jobs"},
+				Verbs:     []string{"list", "watch"},
+			},
+			{
+				APIGroups: []string{"apiextensions.k8s.io"},
+				Resources: []string{"customresourcedefinitions"},
+				Verbs:     []string{"list", "watch"},
+			},
+			{
+				APIGroups: []string{"autoscaling.k8s.io"},
+				Resources: []string{"verticalpodautoscalers"},
+				Verbs:     []string{"list", "watch"},
+			},
+			{
+				APIGroups: []string{"operator.gardener.cloud"},
+				Resources: []string{"gardens", "extensions"},
+				Verbs:     []string{"list", "watch"},
+			},
+		}}
 
 	if k.values.ClusterType == component.ClusterTypeSeed {
 		clusterRole.Rules = append(clusterRole.Rules, rbacv1.PolicyRule{
@@ -105,7 +105,7 @@ func (k *kubeStateMetrics) clusterRole() *rbacv1.ClusterRole {
 }
 
 func (k *kubeStateMetrics) clusterRoleBinding(clusterRole *rbacv1.ClusterRole, serviceAccount *corev1.ServiceAccount) *rbacv1.ClusterRoleBinding {
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "gardener.cloud:monitoring:" + k.nameSuffix()}}
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{Name: "gardener.cloud:monitoring:" + k.nameSuffix()}
 	clusterRoleBinding.Labels = k.getLabels()
 	clusterRoleBinding.Annotations = map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"}
 	clusterRoleBinding.RoleRef = rbacv1.RoleRef{
@@ -123,7 +123,7 @@ func (k *kubeStateMetrics) clusterRoleBinding(clusterRole *rbacv1.ClusterRole, s
 }
 
 func (k *kubeStateMetrics) service() *corev1.Service {
-	service := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: "kube-state-metrics" + k.values.NameSuffix, Namespace: k.namespace}}
+	service := &corev1.Service{Name: "kube-state-metrics" + k.values.NameSuffix, Namespace: k.namespace}
 	service.Labels = k.getLabels()
 
 	metricsPort := networkingv1.NetworkPolicyPort{
@@ -160,7 +160,7 @@ func (k *kubeStateMetrics) deployment(
 	customResourceStateConfigMapName string,
 ) *appsv1.Deployment {
 	var (
-		deployment     = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-state-metrics" + k.values.NameSuffix, Namespace: k.namespace}}
+		deployment     = &appsv1.Deployment{Name: "kube-state-metrics" + k.values.NameSuffix, Namespace: k.namespace}
 		maxUnavailable = intstr.FromInt32(1)
 
 		deploymentLabels = k.getLabels()
@@ -224,9 +224,7 @@ func (k *kubeStateMetrics) deployment(
 		},
 	}
 	deployment.Spec.Template = corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: podLabels,
-		},
+		Labels: podLabels,
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{
 				Name:            containerName,
@@ -239,21 +237,17 @@ func (k *kubeStateMetrics) deployment(
 					Protocol:      corev1.ProtocolTCP,
 				}},
 				LivenessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						HTTPGet: &corev1.HTTPGetAction{
-							Path: "/healthz",
-							Port: intstr.FromInt32(port),
-						},
+					HTTPGet: &corev1.HTTPGetAction{
+						Path: "/healthz",
+						Port: intstr.FromInt32(port),
 					},
 					InitialDelaySeconds: 5,
 					TimeoutSeconds:      5,
 				},
 				ReadinessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						HTTPGet: &corev1.HTTPGetAction{
-							Path: "/healthz",
-							Port: intstr.FromInt32(port),
-						},
+					HTTPGet: &corev1.HTTPGetAction{
+						Path: "/healthz",
+						Port: intstr.FromInt32(port),
 					},
 					InitialDelaySeconds: 5,
 					PeriodSeconds:       30,
@@ -279,12 +273,8 @@ func (k *kubeStateMetrics) deployment(
 			PriorityClassName: k.values.PriorityClassName,
 			Volumes: []corev1.Volume{{
 				Name: customResourceStateConfigMapName,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: customResourceStateConfigMapName,
-						},
-					},
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					Name: customResourceStateConfigMapName,
 				},
 			}},
 		},
@@ -304,7 +294,7 @@ func (k *kubeStateMetrics) deployment(
 
 func (k *kubeStateMetrics) verticalPodAutoscaler(deployment *appsv1.Deployment) *vpaautoscalingv1.VerticalPodAutoscaler {
 	var (
-		vpa              = &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "kube-state-metrics-vpa" + k.values.NameSuffix, Namespace: k.namespace}}
+		vpa              = &vpaautoscalingv1.VerticalPodAutoscaler{Name: "kube-state-metrics-vpa" + k.values.NameSuffix, Namespace: k.namespace}
 		updateMode       = vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		controlledValues = vpaautoscalingv1.ContainerControlledValuesRequestsOnly
 	)
@@ -337,7 +327,7 @@ func (k *kubeStateMetrics) verticalPodAutoscaler(deployment *appsv1.Deployment) 
 }
 
 func (k *kubeStateMetrics) podDisruptionBudget(deployment *appsv1.Deployment) *policyv1.PodDisruptionBudget {
-	podDisruptionBudget := &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: "kube-state-metrics-pdb" + k.values.NameSuffix, Namespace: k.namespace}}
+	podDisruptionBudget := &policyv1.PodDisruptionBudget{Name: "kube-state-metrics-pdb" + k.values.NameSuffix, Namespace: k.namespace}
 	podDisruptionBudget.Labels = k.getLabels()
 	podDisruptionBudget.Spec = policyv1.PodDisruptionBudgetSpec{
 		MaxUnavailable:             new(intstr.FromInt32(1)),
@@ -734,7 +724,7 @@ func (k *kubeStateMetrics) customResourceStateConfigMap() (*corev1.ConfigMap, er
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{Name: customResourceStateConfigMapNamePrefix, Namespace: k.namespace},
+		Name: customResourceStateConfigMapNamePrefix, Namespace: k.namespace,
 		Data: map[string]string{
 			customResourceStateConfigMountFile: string(customResourceStateConfig),
 		},

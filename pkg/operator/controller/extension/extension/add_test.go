@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -42,23 +40,19 @@ var _ = Describe("Add", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.RuntimeScheme).Build()
 
 		secret1 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secret1",
-				Namespace: v1beta1constants.GardenNamespace,
-				Labels:    map[string]string{"gardener.cloud/role": "helm-pull-secret"},
-			},
+			Name:      "secret1",
+			Namespace: v1beta1constants.GardenNamespace,
+			Labels:    map[string]string{"gardener.cloud/role": "helm-pull-secret"},
 		}
 		secret2 = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secret2",
-				Namespace: v1beta1constants.GardenNamespace,
-				Labels:    map[string]string{"gardener.cloud/role": "helm-pull-secret"},
-			},
+			Name:      "secret2",
+			Namespace: v1beta1constants.GardenNamespace,
+			Labels:    map[string]string{"gardener.cloud/role": "helm-pull-secret"},
 		}
 
-		extension1 = &operatorv1alpha1.Extension{ObjectMeta: metav1.ObjectMeta{Name: "extension1"}}
+		extension1 = &operatorv1alpha1.Extension{Name: "extension1"}
 		extension2 = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{Name: "extension2"},
+			Name: "extension2",
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					AdmissionDeployment: &operatorv1alpha1.AdmissionDeploymentSpec{
@@ -85,16 +79,14 @@ var _ = Describe("Add", func() {
 			},
 		}
 		extension3 = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{Name: "extension3"},
+			Name: "extension3",
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &gardencorev1.OCIRepository{
-									PullSecretRef: &corev1.LocalObjectReference{
-										Name: secret1.Name,
-									},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &gardencorev1.OCIRepository{
+								PullSecretRef: &corev1.LocalObjectReference{
+									Name: secret1.Name,
 								},
 							},
 						},
@@ -111,9 +103,9 @@ var _ = Describe("Add", func() {
 	Describe("#MapToAllExtensions", func() {
 		It("should map to all extensions", func() {
 			Expect((&Reconciler{RuntimeClientSet: fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).Build()}).MapToAllExtensions(log)(ctx, nil)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "extension1"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "extension2"}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "extension3"}},
+				reconcile.Request{Name: "extension1"},
+				reconcile.Request{Name: "extension2"},
+				reconcile.Request{Name: "extension3"},
 			))
 		})
 	})
@@ -121,7 +113,7 @@ var _ = Describe("Add", func() {
 	Describe("#MapSecretToExtensions", func() {
 		It("should map to extension referencing pull secret for extension deployment", func() {
 			Expect((&Reconciler{RuntimeClientSet: fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).Build()}).MapSecretToExtensions(log)(ctx, secret1)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: "extension3"}},
+				reconcile.Request{Name: "extension3"},
 			))
 		})
 

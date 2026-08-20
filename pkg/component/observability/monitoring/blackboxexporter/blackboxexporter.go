@@ -188,22 +188,18 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 
 	var (
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "blackbox-exporter",
-				Namespace: b.runtimeNamespace(),
-				Labels:    getLabels(),
-			},
+			Name:                         "blackbox-exporter",
+			Namespace:                    b.runtimeNamespace(),
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "blackbox-exporter-config",
-				Namespace: b.runtimeNamespace(),
-				Labels: map[string]string{
-					v1beta1constants.LabelApp:  "prometheus",
-					v1beta1constants.LabelRole: v1beta1constants.GardenRoleMonitoring,
-				},
+			Name:      "blackbox-exporter-config",
+			Namespace: b.runtimeNamespace(),
+			Labels: map[string]string{
+				v1beta1constants.LabelApp:  "prometheus",
+				v1beta1constants.LabelRole: v1beta1constants.GardenRoleMonitoring,
 			},
 			Data: map[string]string{dataKeyConfig: string(configRaw)},
 		}
@@ -213,11 +209,9 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 
 	var (
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "blackbox-exporter",
-				Namespace: b.runtimeNamespace(),
-				Labels:    utils.MergeStringMaps(getLabels(), map[string]string{resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer}),
-			},
+			Name:      "blackbox-exporter",
+			Namespace: b.runtimeNamespace(),
+			Labels:    utils.MergeStringMaps(getLabels(), map[string]string{resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer}),
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             &b.values.Replicas,
 				RevisionHistoryLimit: new(int32(2)),
@@ -280,12 +274,8 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 						Volumes: []corev1.Volume{
 							{
 								Name: "blackbox-exporter-config",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMap.Name,
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: configMap.Name,
 								},
 							},
 						},
@@ -295,12 +285,10 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "blackbox-exporter",
-				Namespace: b.runtimeNamespace(),
-				Labels: map[string]string{
-					v1beta1constants.LabelApp: labelValue,
-				},
+			Name:      "blackbox-exporter",
+			Namespace: b.runtimeNamespace(),
+			Labels: map[string]string{
+				v1beta1constants.LabelApp: labelValue,
 			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
@@ -318,13 +306,11 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "blackbox-exporter",
-				Namespace: b.runtimeNamespace(),
-				Labels: map[string]string{
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleMonitoring,
-					v1beta1constants.LabelApp:   labelValue,
-				},
+			Name:      "blackbox-exporter",
+			Namespace: b.runtimeNamespace(),
+			Labels: map[string]string{
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleMonitoring,
+				v1beta1constants.LabelApp:   labelValue,
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable:             new(intstr.FromInt32(1)),
@@ -353,10 +339,8 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 
 	if b.values.VPAEnabled {
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "blackbox-exporter",
-				Namespace: b.runtimeNamespace(),
-			},
+			Name:      "blackbox-exporter",
+			Namespace: b.runtimeNamespace(),
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -410,29 +394,27 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameClusterAccess,
-			VolumeSource: corev1.VolumeSource{
-				Projected: &corev1.ProjectedVolumeSource{
-					DefaultMode: new(int32(420)),
-					Sources: []corev1.VolumeProjection{
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{Name: caSecret.Name},
-								Items: []corev1.KeyToPath{{
-									Key:  secrets.DataKeyCertificateBundle,
-									Path: secrets.DataKeyCertificateBundle,
-								}},
-								Optional: new(false),
-							},
+			Projected: &corev1.ProjectedVolumeSource{
+				DefaultMode: new(int32(420)),
+				Sources: []corev1.VolumeProjection{
+					{
+						Secret: &corev1.SecretProjection{
+							Name: caSecret.Name,
+							Items: []corev1.KeyToPath{{
+								Key:  secrets.DataKeyCertificateBundle,
+								Path: secrets.DataKeyCertificateBundle,
+							}},
+							Optional: new(false),
 						},
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{Name: accessSecretName},
-								Items: []corev1.KeyToPath{{
-									Key:  resourcesv1alpha1.DataKeyToken,
-									Path: resourcesv1alpha1.DataKeyToken,
-								}},
-								Optional: new(false),
-							},
+					},
+					{
+						Secret: &corev1.SecretProjection{
+							Name: accessSecretName,
+							Items: []corev1.KeyToPath{{
+								Key:  resourcesv1alpha1.DataKeyToken,
+								Path: resourcesv1alpha1.DataKeyToken,
+							}},
+							Optional: new(false),
 						},
 					},
 				},
@@ -451,10 +433,8 @@ func (b *blackboxExporter) computeResourcesData() (map[string][]byte, error) {
 
 			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 				Name: volumeNameGardenerCA,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: caGardenerSecret.Name,
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: caGardenerSecret.Name,
 				},
 			})
 			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{

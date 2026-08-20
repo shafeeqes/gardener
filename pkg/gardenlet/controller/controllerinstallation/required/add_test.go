@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -76,7 +75,7 @@ var _ = Describe("Add", func() {
 			reconciler.KindToRequiredTypes = make(map[string]sets.Set[string])
 
 			controllerRegistration1 = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "reg1"},
+				Name: "reg1",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: extensionsv1alpha1.InfrastructureResource, Type: type1},
@@ -84,7 +83,7 @@ var _ = Describe("Add", func() {
 				},
 			}
 			controllerRegistration2 = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "reg2"},
+				Name: "reg2",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: extensionsv1alpha1.InfrastructureResource, Type: type2},
@@ -92,7 +91,7 @@ var _ = Describe("Add", func() {
 				},
 			}
 			controllerRegistration3 = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "reg3"},
+				Name: "reg3",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: extensionsv1alpha1.ControlPlaneResource, Type: "foo"},
@@ -101,21 +100,21 @@ var _ = Describe("Add", func() {
 			}
 
 			controllerInstallation1 = &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{Name: "inst1"},
+				Name: "inst1",
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					RegistrationRef: corev1.ObjectReference{Name: controllerRegistration1.Name},
 					SeedRef:         &corev1.ObjectReference{Name: seedName},
 				},
 			}
 			controllerInstallation2 = &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{Name: "inst2"},
+				Name: "inst2",
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					RegistrationRef: corev1.ObjectReference{Name: controllerRegistration2.Name},
 					SeedRef:         &corev1.ObjectReference{Name: seedName},
 				},
 			}
 			controllerInstallation3 = &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{Name: "inst3"},
+				Name: "inst3",
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					RegistrationRef: corev1.ObjectReference{Name: controllerRegistration3.Name},
 					SeedRef:         &corev1.ObjectReference{Name: seedName},
@@ -169,8 +168,8 @@ var _ = Describe("Add", func() {
 			Expect(fakeSeedClient.Create(ctx, infrastructure2)).To(Succeed())
 
 			Expect(mapFn(ctx, nil)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation1.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation2.Name}},
+				reconcile.Request{Name: controllerInstallation1.Name},
+				reconcile.Request{Name: controllerInstallation2.Name},
 			))
 			Expect(reconciler.KindToRequiredTypes).To(HaveKeyWithValue(extensionsv1alpha1.InfrastructureResource, sets.New(type1, type2)))
 		})
@@ -182,7 +181,7 @@ var _ = Describe("Add", func() {
 			By("Invoke mapper the first time and expect requests")
 			Expect(fakeSeedClient.Create(ctx, infrastructure)).To(Succeed())
 
-			Expect(mapFn(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation1.Name}})))
+			Expect(mapFn(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{Name: controllerInstallation1.Name})))
 			Expect(reconciler.KindToRequiredTypes).To(HaveKeyWithValue(extensionsv1alpha1.InfrastructureResource, sets.New(type1)))
 
 			By("Invoke mapper again w/o changes and expect no requests")
@@ -191,7 +190,7 @@ var _ = Describe("Add", func() {
 
 			By("Delete infrastructure and expect the extension in the requests")
 			Expect(fakeSeedClient.Delete(ctx, infrastructure)).To(Succeed())
-			Expect(mapFn(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation1.Name}})))
+			Expect(mapFn(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{Name: controllerInstallation1.Name})))
 			Expect(reconciler.KindToRequiredTypes).To(HaveKeyWithValue(extensionsv1alpha1.InfrastructureResource, sets.New[string]()))
 
 			By("Create infrastructure with class garden and expect no requests")
@@ -208,7 +207,7 @@ var _ = Describe("Add", func() {
 			infrastructureSeed.Name = "infra-seed"
 			infrastructureSeed.Spec.Class = new(extensionsv1alpha1.ExtensionClassSeed)
 			Expect(fakeSeedClient.Create(ctx, infrastructureSeed)).To(Succeed())
-			Expect(mapFn(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation1.Name}})))
+			Expect(mapFn(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{Name: controllerInstallation1.Name})))
 			Expect(reconciler.KindToRequiredTypes).To(HaveKeyWithValue(extensionsv1alpha1.InfrastructureResource, sets.New(type1)))
 		})
 
@@ -249,8 +248,8 @@ var _ = Describe("Add", func() {
 				Expect(fakeSeedClient.Create(ctx, infrastructure2)).To(Succeed())
 
 				Expect(mapFn(ctx, nil)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation1.Name}},
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation2.Name}},
+					reconcile.Request{Name: controllerInstallation1.Name},
+					reconcile.Request{Name: controllerInstallation2.Name},
 				))
 				Expect(reconciler.KindToRequiredTypes).To(HaveKeyWithValue(extensionsv1alpha1.InfrastructureResource, sets.New(type1, type2)))
 			})
@@ -268,7 +267,7 @@ var _ = Describe("Add", func() {
 				Expect(fakeSeedClient.Create(ctx, infrastructure2)).To(Succeed())
 
 				Expect(mapFn(ctx, nil)).To(ConsistOf(
-					reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation1.Name}},
+					reconcile.Request{Name: controllerInstallation1.Name},
 				))
 			})
 		})

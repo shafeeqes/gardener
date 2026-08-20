@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -71,10 +70,8 @@ var _ = Describe("utils", func() {
 				obj.SetGroupVersionKind(deploymentGVK)
 
 				currentDeployment = &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-					},
+					Name:      name,
+					Namespace: namespace,
 					Spec: appsv1.DeploymentSpec{
 						Replicas: new(int32(1)),
 					},
@@ -191,10 +188,8 @@ var _ = Describe("utils", func() {
 				obj.SetGroupVersionKind(vpaGVK)
 
 				currentVPA = &vpaautoscalingv1.VerticalPodAutoscaler{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-					},
+					Name:      name,
+					Namespace: namespace,
 					Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 						TargetRef: &autoscalingv1.CrossVersionObjectReference{
 							APIVersion: "apps/v1",

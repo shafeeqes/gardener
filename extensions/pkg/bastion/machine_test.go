@@ -65,11 +65,9 @@ var _ = Describe("Bastion VM Details", func() {
 					Name: desired.ImageBaseName,
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version:        desired.ImageVersion,
-								Classification: new(gardencorev1beta1.ClassificationSupported),
-							},
-							Architectures: []string{desired.Architecture, v1beta1constants.ArchitectureARM64},
+							Version:        desired.ImageVersion,
+							Classification: new(gardencorev1beta1.ClassificationSupported),
+							Architectures:  []string{desired.Architecture, v1beta1constants.ArchitectureARM64},
 							CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 								{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{desired.Architecture}}},
 								{Capabilities: gardencorev1beta1.Capabilities{"architecture": []string{v1beta1constants.ArchitectureARM64}}},
@@ -86,10 +84,8 @@ var _ = Describe("Bastion VM Details", func() {
 		})
 
 		newVersion := gardencorev1beta1.MachineImageVersion{
-			ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-				Version:        version,
-				Classification: new(classification),
-			},
+			Version:           version,
+			Classification:    new(classification),
 			Architectures:     archs,
 			CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: capabilities}},
 		}

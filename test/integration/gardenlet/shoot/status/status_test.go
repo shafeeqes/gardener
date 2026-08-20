@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,16 +40,14 @@ var _ = Describe("Shoot Status controller tests", func() {
 		By("Create Shoot")
 		shootName := "shoot-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: projectNamespace.Name,
-				UID:       "foo",
-				Labels: map[string]string{
-					testID: testRunID,
-				},
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.ShootOperationForceInPlaceUpdate,
-				},
+			Name:      shootName,
+			Namespace: projectNamespace.Name,
+			UID:       "foo",
+			Labels: map[string]string{
+				testID: testRunID,
+			},
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.ShootOperationForceInPlaceUpdate,
 			},
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName:          &seedName,
@@ -196,9 +193,7 @@ var _ = Describe("Shoot Status controller tests", func() {
 
 		shootTechnicalID = fmt.Sprintf("shoot--%s--%s", projectName, shootName)
 		shootNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootTechnicalID,
-			},
+			Name: shootTechnicalID,
 		}
 		Expect(testClient.Create(ctx, shootNamespace)).To(Succeed())
 		log.Info("Created namespace for test", "namespaceName", shootNamespace.Name)
@@ -213,9 +208,7 @@ var _ = Describe("Shoot Status controller tests", func() {
 
 		By("Create Cluster resource")
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootTechnicalID,
-			},
+			Name: shootTechnicalID,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				Shoot: runtime.RawExtension{
 					Object: shoot,
@@ -244,10 +237,8 @@ var _ = Describe("Shoot Status controller tests", func() {
 
 		By("Create worker")
 		worker = &extensionsv1alpha1.Worker{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootTechnicalID,
-			},
+			Name:      shootName,
+			Namespace: shootTechnicalID,
 			Spec: extensionsv1alpha1.WorkerSpec{
 				Pools: []extensionsv1alpha1.WorkerPool{
 					{

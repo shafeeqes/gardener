@@ -276,11 +276,9 @@ func InjectEncryptionSettings(deployment *appsv1.Deployment, secretETCDEncryptio
 	})
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name: volumeNameEtcdEncryptionConfig,
-		VolumeSource: corev1.VolumeSource{
-			Secret: &corev1.SecretVolumeSource{
-				SecretName:  secretETCDEncryptionConfiguration.Name,
-				DefaultMode: new(int32(0640)),
-			},
+		Secret: &corev1.SecretVolumeSource{
+			SecretName:  secretETCDEncryptionConfiguration.Name,
+			DefaultMode: new(int32(0640)),
 		},
 	})
 }

@@ -82,7 +82,7 @@ func computeAPIServerAuthenticationConfig(
 
 	var out *string
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: objectMeta.Namespace, Name: structuredAuthentication.ConfigMapName}}
+	configMap := &corev1.ConfigMap{Namespace: objectMeta.Namespace, Name: structuredAuthentication.ConfigMapName}
 	if err := cl.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		// Ignore missing authentication configuration on cluster deletion to prevent failing redeployments of the
 		// API server in case the end-user deleted the configmap before/simultaneously to the deletion.
@@ -115,7 +115,7 @@ func computeAPIServerAuthorizationConfig(
 
 	var out []kubeapiserver.AuthorizationWebhook
 
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: objectMeta.Namespace, Name: structuredAuthorization.ConfigMapName}}
+	configMap := &corev1.ConfigMap{Namespace: objectMeta.Namespace, Name: structuredAuthorization.ConfigMapName}
 	if err := cl.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		// Ignore missing authorization configuration on cluster deletion to prevent failing redeployments of the
 		// API server in case the end-user deleted the configmap before/simultaneously to the deletion.
@@ -158,7 +158,7 @@ func translateRawAuthorizationConfigIntoWebhooks(ctx context.Context, cl client.
 			return nil, fmt.Errorf("missing kubeconfig secret reference for authorizer %s", authorizer.Name)
 		}
 
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: kubeconfigSecretReferences[i].SecretName, Namespace: namespace}}
+		secret := &corev1.Secret{Name: kubeconfigSecretReferences[i].SecretName, Namespace: namespace}
 		if err := cl.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 			return nil, fmt.Errorf("retrieving kubeconfig secret %s failed: %w", client.ObjectKeyFromObject(secret), err)
 		}

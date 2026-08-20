@@ -35,17 +35,17 @@ var _ = Describe("Bastions", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 		botanist = &Botanist{Operation: &operation.Operation{}}
 		k8sSeedClient := fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).Build()
-		namespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "test"}}
+		namespace = &corev1.Namespace{Name: "test"}
 		botanist.SeedClientSet = k8sSeedClient
 		botanist.Shoot = &shootpkg.Shoot{
 			ControlPlaneNamespace: namespace.Name,
 		}
 
 		bastion1 = &extensionsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{Name: "bastion1", Namespace: namespace.Name},
+			Name: "bastion1", Namespace: namespace.Name,
 		}
 		bastion2 = &extensionsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{Name: "bastion2", Namespace: namespace.Name},
+			Name: "bastion2", Namespace: namespace.Name,
 		}
 	})
 

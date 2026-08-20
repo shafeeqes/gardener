@@ -73,10 +73,8 @@ var _ = Describe("Bastion", func() {
 		b.WaitTimeout = 500 * time.Millisecond
 
 		bastion = &extensionsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 	})
 

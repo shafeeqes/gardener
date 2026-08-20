@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/util/keyutil"
 
@@ -34,13 +33,11 @@ func (g *gardenerDiscoveryServer) newVirtualGardenAccessSecret() *gardenerutils.
 
 func (g *gardenerDiscoveryServer) newServiceAccountIssuerConfigSecret() *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceAccountIssuerConfigSecretName,
-			Namespace: v1beta1constants.GardenNamespace,
-			Labels: utils.MergeStringMaps(labels(), map[string]string{
-				v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer,
-			}),
-		},
+		Name:      serviceAccountIssuerConfigSecretName,
+		Namespace: v1beta1constants.GardenNamespace,
+		Labels: utils.MergeStringMaps(labels(), map[string]string{
+			v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer,
+		}),
 		StringData: map[string]string{
 			"hostname": g.values.Domain,
 		},
@@ -74,12 +71,10 @@ func (g *gardenerDiscoveryServer) workloadIdentitySecret() (*corev1.Secret, erro
 	}
 
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName + "-garden-workload-identity",
-			Namespace: g.namespace,
-			Labels:    labels(),
-		},
-		Type: corev1.SecretTypeOpaque,
+		Name:      deploymentName + "-garden-workload-identity",
+		Namespace: g.namespace,
+		Labels:    labels(),
+		Type:      corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
 			openIDConfigDataKey: openIDConfig,
 			jwksDataKey:         jwks,

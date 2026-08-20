@@ -31,21 +31,17 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 	)
 
 	validatingWebhook := &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: DeploymentName,
-		},
+		Name: DeploymentName,
 		Webhooks: []admissionregistrationv1.ValidatingWebhook{
 			{
 				Name:                    "validate-namespace-deletion.gardener.cloud",
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{corev1.GroupName},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"namespaces"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
+					APIGroups:   []string{corev1.GroupName},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"namespaces"},
 				}},
 				FailurePolicy: &failurePolicyFail,
 				NamespaceSelector: &metav1.LabelSelector{
@@ -64,12 +60,10 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{corev1.GroupName},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"secrets"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+					APIGroups:   []string{corev1.GroupName},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"secrets"},
 				}},
 				FailurePolicy: &failurePolicyFail,
 				NamespaceSelector: &metav1.LabelSelector{
@@ -89,12 +83,10 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				AdmissionReviewVersions: []string{"v1", "v1beta1"},
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{corev1.GroupName},
-						APIVersions: []string{"v1"},
-						Resources:   []string{"secrets"},
-					},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
+					APIGroups:   []string{corev1.GroupName},
+					APIVersions: []string{"v1"},
+					Resources:   []string{"secrets"},
 				}},
 				FailurePolicy: &failurePolicyFail,
 				ObjectSelector: &metav1.LabelSelector{
@@ -114,20 +106,16 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"shoots"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -148,20 +136,16 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"shoots"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -182,20 +166,16 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"shoots"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -216,12 +196,10 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"secrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Update},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"secrets"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -247,11 +225,9 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 							admissionregistrationv1.Update,
 							admissionregistrationv1.Delete,
 						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"secrets", "configmaps"},
-						},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"secrets", "configmaps"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -298,68 +274,52 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps", "secrets", "serviceaccounts"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps", "secrets", "serviceaccounts"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{rbacv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"clusterrolebindings"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{rbacv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"clusterrolebindings"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{coordinationv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"leases"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{coordinationv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"leases"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{certificatesv1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"certificatesigningrequests"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{certificatesv1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"certificatesigningrequests"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"backupentries", "internalsecrets", "shootstates"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"backupentries", "internalsecrets", "shootstates"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Delete},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"backupbuckets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Delete},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"backupbuckets"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{"v1beta1"},
-							Resources:   []string{"seeds"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update, admissionregistrationv1.Delete},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{"v1beta1"},
+						Resources:   []string{"seeds"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{operationsv1alpha1.GroupName},
-							APIVersions: []string{"v1alpha1"},
-							Resources:   []string{"bastions"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{operationsv1alpha1.GroupName},
+						APIVersions: []string{"v1alpha1"},
+						Resources:   []string{"bastions"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -376,20 +336,16 @@ func (a *gardenerAdmissionController) validatingWebhookConfiguration(caSecret *c
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"configmaps", "secrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"configmaps", "secrets"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{gardencorev1beta1.SchemeGroupVersion.Version},
-							Resources:   []string{"backupbuckets", "backupentries", "internalsecrets", "projects", "shoots"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{gardencorev1beta1.SchemeGroupVersion.Version},
+						Resources:   []string{"backupbuckets", "backupentries", "internalsecrets", "projects", "shoots"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -415,9 +371,7 @@ func (a *gardenerAdmissionController) mutatingWebhookConfiguration(caSecret *cor
 	)
 
 	return &admissionregistrationv1.MutatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: DeploymentName,
-		},
+		Name: DeploymentName,
 		Webhooks: []admissionregistrationv1.MutatingWebhook{
 			{
 				Name:                    "sync-provider-secret-labels.gardener.cloud",
@@ -425,20 +379,16 @@ func (a *gardenerAdmissionController) mutatingWebhookConfiguration(caSecret *cor
 				TimeoutSeconds:          new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{corev1.GroupName},
-							APIVersions: []string{corev1.SchemeGroupVersion.Version},
-							Resources:   []string{"secrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{corev1.GroupName},
+						APIVersions: []string{corev1.SchemeGroupVersion.Version},
+						Resources:   []string{"secrets"},
 					},
 					{
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{gardencorev1beta1.GroupName},
-							APIVersions: []string{gardencorev1beta1.SchemeGroupVersion.Version},
-							Resources:   []string{"internalsecrets"},
-						},
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{gardencorev1beta1.GroupName},
+						APIVersions: []string{gardencorev1beta1.SchemeGroupVersion.Version},
+						Resources:   []string{"internalsecrets"},
 					},
 				},
 				FailurePolicy: &failurePolicyFail,
@@ -465,12 +415,10 @@ func buildWebhookConfigRulesForResourceSize(config *admissioncontrollerconfigv1a
 
 	for _, limit := range config.Limits {
 		rules = append(rules, admissionregistrationv1.RuleWithOperations{
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   limit.APIGroups,
-				APIVersions: limit.APIVersions,
-				Resources:   limit.Resources,
-			},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+			APIGroups:   limit.APIGroups,
+			APIVersions: limit.APIVersions,
+			Resources:   limit.Resources,
 		})
 	}
 

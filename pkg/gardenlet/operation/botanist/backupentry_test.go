@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	mockbackupentry "github.com/gardener/gardener/pkg/component/garden/backupentry/mock"
@@ -45,10 +44,8 @@ var _ = Describe("BackupEntry", func() {
 		}
 
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "bar",
-				Namespace: "foo",
-			},
+			Name:      "bar",
+			Namespace: "foo",
 			Status: gardencorev1beta1.ShootStatus{
 				LastOperation: &gardencorev1beta1.LastOperation{
 					Type: gardencorev1beta1.LastOperationTypeRestore,
@@ -57,10 +54,8 @@ var _ = Describe("BackupEntry", func() {
 		})
 		botanist.Seed = &seed.Seed{}
 		botanist.Seed.SetInfo(&gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "seed",
-				Namespace: "garden",
-			},
+			Name:      "seed",
+			Namespace: "garden",
 			Spec: gardencorev1beta1.SeedSpec{
 				Backup: &gardencorev1beta1.Backup{
 					Provider: "gcp",

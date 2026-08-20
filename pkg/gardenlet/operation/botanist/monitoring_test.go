@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -72,8 +71,8 @@ var _ = Describe("Monitoring", func() {
 			},
 		}
 
-		ingressAuthSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "observability-ingress-users", Namespace: controlPlaneNamespace}}
-		ingressWildcardSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "wildcard"}}
+		ingressAuthSecret = &corev1.Secret{Name: "observability-ingress-users", Namespace: controlPlaneNamespace}
+		ingressWildcardSecret = &corev1.Secret{Name: "wildcard"}
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
 		Expect(fakeSeedClient.Create(ctx, ingressAuthSecret)).To(Succeed())

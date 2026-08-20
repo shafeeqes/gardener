@@ -21,10 +21,8 @@ import (
 var _ = Describe("ConfigCodec", func() {
 	var (
 		kubeletConfig = &kubeletconfigv1beta1.KubeletConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "KubeletConfiguration",
-				APIVersion: "kubelet.config.k8s.io/v1beta1",
-			},
+			Kind:               "KubeletConfiguration",
+			APIVersion:         "kubelet.config.k8s.io/v1beta1",
 			SyncFrequency:      metav1.Duration{Duration: 1 * time.Minute},
 			FileCheckFrequency: metav1.Duration{Duration: 20 * time.Second},
 			HTTPCheckFrequency: metav1.Duration{Duration: 20 * time.Second},

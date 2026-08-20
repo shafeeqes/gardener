@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -74,8 +73,8 @@ var _ = Describe("operatingsystemconfig", func() {
 		sm = fakesecretsmanager.New(fakeClient, namespace)
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}, Data: map[string][]byte{"bundle.crt": []byte(caBundle)}})).To(Succeed())
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ssh-keypair", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace, Data: map[string][]byte{"bundle.crt": []byte(caBundle)}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ssh-keypair", Namespace: namespace})).To(Succeed())
 
 		botanist = &Botanist{
 			Operation: &operation.Operation{
@@ -238,9 +237,7 @@ var _ = Describe("operatingsystemconfig", func() {
 					Original: operatingsystemconfig.Data{
 						GardenerNodeAgentSecretName: worker1Key,
 						Object: &extensionsv1alpha1.OperatingSystemConfig{
-							ObjectMeta: metav1.ObjectMeta{
-								Name: worker1Name + "-original",
-							},
+							Name: worker1Name + "-original",
 							Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 								Units: []extensionsv1alpha1.Unit{{Name: "w1u1"}, {Name: "w1u2"}},
 								Files: []extensionsv1alpha1.File{{Path: "w1f1"}, {Path: "w1f2"}},
@@ -252,9 +249,7 @@ var _ = Describe("operatingsystemconfig", func() {
 					Original: operatingsystemconfig.Data{
 						GardenerNodeAgentSecretName: worker2Key,
 						Object: &extensionsv1alpha1.OperatingSystemConfig{
-							ObjectMeta: metav1.ObjectMeta{
-								Name: worker2Name + "-original",
-							},
+							Name: worker2Name + "-original",
 							Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 								Units: []extensionsv1alpha1.Unit{{Name: "w2u1"}, {Name: "w2u2"}},
 								Files: []extensionsv1alpha1.File{{Path: "w2f1"}, {Path: "w2f2"}},
@@ -331,8 +326,8 @@ var _ = Describe("operatingsystemconfig", func() {
 						versions = schema.GroupVersions([]schema.GroupVersion{corev1.SchemeGroupVersion})
 						codec    = kubernetes.ShootCodec.CodecForVersions(kubernetes.ShootSerializer, kubernetes.ShootSerializer, versions, versions)
 
-						oldSecret1 = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: oldSecret1Name, Namespace: namespace, Labels: map[string]string{"managed-resource": "shoot-gardener-node-agent"}}}
-						oldSecret2 = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: oldSecret2Name, Namespace: namespace, Labels: map[string]string{"managed-resource": "shoot-gardener-node-agent"}}}
+						oldSecret1 = &corev1.Secret{Name: oldSecret1Name, Namespace: namespace, Labels: map[string]string{"managed-resource": "shoot-gardener-node-agent"}}
+						oldSecret2 = &corev1.Secret{Name: oldSecret2Name, Namespace: namespace, Labels: map[string]string{"managed-resource": "shoot-gardener-node-agent"}}
 					)
 
 					By("Create old ManagedResource secrets")
@@ -350,14 +345,12 @@ var _ = Describe("operatingsystemconfig", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					expectedMRSecretWorker1 := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            "managedresource-shoot-gardener-node-agent-" + worker1Name,
-							Namespace:       namespace,
-							Labels:          map[string]string{"managed-resource": "shoot-gardener-node-agent"},
-							ResourceVersion: "1",
-						},
-						Type: corev1.SecretTypeOpaque,
-						Data: map[string][]byte{"data.yaml.br": compressedOSCSecretWorker1Raw},
+						Name:            "managedresource-shoot-gardener-node-agent-" + worker1Name,
+						Namespace:       namespace,
+						Labels:          map[string]string{"managed-resource": "shoot-gardener-node-agent"},
+						ResourceVersion: "1",
+						Type:            corev1.SecretTypeOpaque,
+						Data:            map[string][]byte{"data.yaml.br": compressedOSCSecretWorker1Raw},
 					}
 					utilruntime.Must(kubernetesutils.MakeUnique(expectedMRSecretWorker1))
 
@@ -369,38 +362,32 @@ var _ = Describe("operatingsystemconfig", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					expectedMRSecretWorker2 := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            "managedresource-shoot-gardener-node-agent-" + worker2Name,
-							Namespace:       namespace,
-							Labels:          map[string]string{"managed-resource": "shoot-gardener-node-agent"},
-							ResourceVersion: "1",
-						},
-						Type: corev1.SecretTypeOpaque,
-						Data: map[string][]byte{"data.yaml.br": compressedOSCSecretWorker2Raw},
+						Name:            "managedresource-shoot-gardener-node-agent-" + worker2Name,
+						Namespace:       namespace,
+						Labels:          map[string]string{"managed-resource": "shoot-gardener-node-agent"},
+						ResourceVersion: "1",
+						Type:            corev1.SecretTypeOpaque,
+						Data:            map[string][]byte{"data.yaml.br": compressedOSCSecretWorker2Raw},
 					}
 					utilruntime.Must(kubernetesutils.MakeUnique(expectedMRSecretWorker2))
 
 					nodeAgentRBACResourcesData, err := NodeAgentRBACResourcesDataFn()
 					Expect(err).NotTo(HaveOccurred())
 					expectedMRSecretRBAC := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            "managedresource-shoot-gardener-node-agent-rbac",
-							Namespace:       namespace,
-							Labels:          map[string]string{"managed-resource": "shoot-gardener-node-agent"},
-							ResourceVersion: "1",
-						},
-						Type: corev1.SecretTypeOpaque,
-						Data: nodeAgentRBACResourcesData,
+						Name:            "managedresource-shoot-gardener-node-agent-rbac",
+						Namespace:       namespace,
+						Labels:          map[string]string{"managed-resource": "shoot-gardener-node-agent"},
+						ResourceVersion: "1",
+						Type:            corev1.SecretTypeOpaque,
+						Data:            nodeAgentRBACResourcesData,
 					}
 					utilruntime.Must(kubernetesutils.MakeUnique(expectedMRSecretRBAC))
 
 					expectedManagedResource := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            "shoot-gardener-node-agent",
-							Namespace:       namespace,
-							Labels:          map[string]string{"origin": "gardener"},
-							ResourceVersion: "1",
-						},
+						Name:            "shoot-gardener-node-agent",
+						Namespace:       namespace,
+						Labels:          map[string]string{"origin": "gardener"},
+						ResourceVersion: "1",
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							SecretRefs: []corev1.LocalObjectReference{
 								{Name: expectedMRSecretWorker1.Name},
@@ -414,19 +401,19 @@ var _ = Describe("operatingsystemconfig", func() {
 					utilruntime.Must(references.InjectAnnotations(expectedManagedResource))
 
 					By("Assert expected creation of ManagedResource and related secrets")
-					mrSecretWorker1 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: expectedMRSecretWorker1.Name, Namespace: expectedMRSecretWorker1.Namespace}}
+					mrSecretWorker1 := &corev1.Secret{Name: expectedMRSecretWorker1.Name, Namespace: expectedMRSecretWorker1.Namespace}
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mrSecretWorker1), mrSecretWorker1)).To(Succeed())
 					Expect(mrSecretWorker1).To(Equal(expectedMRSecretWorker1))
 
-					mrSecretWorker2 := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: expectedMRSecretWorker2.Name, Namespace: expectedMRSecretWorker2.Namespace}}
+					mrSecretWorker2 := &corev1.Secret{Name: expectedMRSecretWorker2.Name, Namespace: expectedMRSecretWorker2.Namespace}
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mrSecretWorker2), mrSecretWorker2)).To(Succeed())
 					Expect(mrSecretWorker2).To(Equal(expectedMRSecretWorker2))
 
-					mrSecretRBAC := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: expectedMRSecretRBAC.Name, Namespace: expectedMRSecretRBAC.Namespace}}
+					mrSecretRBAC := &corev1.Secret{Name: expectedMRSecretRBAC.Name, Namespace: expectedMRSecretRBAC.Namespace}
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(mrSecretRBAC), mrSecretRBAC)).To(Succeed())
 					Expect(mrSecretRBAC).To(Equal(expectedMRSecretRBAC))
 
-					managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: expectedManagedResource.Name, Namespace: expectedManagedResource.Namespace}}
+					managedResource := &resourcesv1alpha1.ManagedResource{Name: expectedManagedResource.Name, Namespace: expectedManagedResource.Namespace}
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 					Expect(managedResource.ObjectMeta).To(Equal(expectedManagedResource.ObjectMeta))
 					Expect(managedResource.Spec.SecretRefs).To(ConsistOf(expectedManagedResource.Spec.SecretRefs))

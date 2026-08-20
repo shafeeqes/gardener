@@ -11,7 +11,6 @@ import (
 	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -55,25 +54,21 @@ func (a *alertManager) istioResources(ctx context.Context) ([]client.Object, err
 
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	tlsSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      tlsSecretName,
-			Namespace: a.namespace,
-		},
+		Name:      tlsSecretName,
+		Namespace: a.namespace,
 	}
 	if err := a.client.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret); err != nil {
 		return nil, fmt.Errorf("failed to get TLS secret %q: %w", tlsSecretName, err)
 	}
 
 	tlsSecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", a.namespace, a.name(), tlsSecretName),
-			Namespace: a.values.ExternalExposure.IstioIngressGatewayNamespace,
-			Labels:    a.getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      fmt.Sprintf("%s-%s-%s", a.namespace, a.name(), tlsSecretName),
+		Namespace: a.values.ExternalExposure.IstioIngressGatewayNamespace,
+		Labels:    a.getLabels(),
+		Data:      tlsSecret.Data,
 	}
 
-	gateway := &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: a.namespace}}
+	gateway := &istionetworkingv1beta1.Gateway{Name: gatewayName, Namespace: a.namespace}
 	if err := istio.GatewayWithTLSTermination(
 		gateway,
 		a.getLabels(),
@@ -85,7 +80,7 @@ func (a *alertManager) istioResources(ctx context.Context) ([]client.Object, err
 	}
 
 	destinationHost := kubernetesutils.FQDNForService(a.name(), a.namespace)
-	virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: a.namespace}}
+	virtualService := &istionetworkingv1beta1.VirtualService{Name: gatewayName, Namespace: a.namespace}
 	if err := istio.VirtualServiceForTLSTermination(
 		virtualService,
 		utils.MergeStringMaps(a.getLabels(), istiobasicauthserver.BasicAuthLabels(a.values.ExternalExposure.IsGardenCluster, a.values.ExternalExposure.AuthSecretName, a.values.ExternalExposure.AuthSecretManaged)),
@@ -113,7 +108,7 @@ func (a *alertManager) istioResources(ctx context.Context) ([]client.Object, err
 		},
 	}}, virtualService.Spec.Http...)
 
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: a.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: gatewayName, Namespace: a.namespace}
 	if err := istio.DestinationRuleWithLocalityPreference(destinationRule, a.getLabels(), []string{a.values.ExternalExposure.IstioIngressGatewayNamespace}, destinationHost)(); err != nil {
 		return nil, fmt.Errorf("failed to create destination rule resource: %w", err)
 	}

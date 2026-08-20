@@ -26,7 +26,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -64,11 +63,9 @@ var _ = ginkgo.Describe("RBAC testing", func() {
 
 	f.Release().CIt("service account should not have access to garden namespace", func(ctx context.Context) {
 		serviceAccount := &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    f.ProjectNamespace,
-				Labels:       labels,
-			},
+			GenerateName: "test-",
+			Namespace:    f.ProjectNamespace,
+			Labels:       labels,
 		}
 
 		err := f.GardenClient.Client().Create(ctx, serviceAccount)

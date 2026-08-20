@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsscheme "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/scheme"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -28,14 +27,10 @@ var _ = Describe("CRD", func() {
 			testClient        client.Client
 
 			unreadyCRD = &apiextensionsv1.CustomResourceDefinition{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "myresources.mygroup.example.com",
-				},
+				Name: "myresources.mygroup.example.com",
 			}
 			readyCRD = &apiextensionsv1.CustomResourceDefinition{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "myresources.mygroup.example.com",
-				},
+				Name: "myresources.mygroup.example.com",
 				Status: apiextensionsv1.CustomResourceDefinitionStatus{
 					Conditions: []apiextensionsv1.CustomResourceDefinitionCondition{
 						{Type: apiextensionsv1.Established, Status: apiextensionsv1.ConditionTrue},

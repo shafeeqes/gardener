@@ -86,10 +86,8 @@ var _ = Describe("PrepareForCreate", func() {
 
 	It("should remove operation annotation even on creates", func() {
 		bastion := operations.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationKeepalive,
-				},
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationKeepalive,
 			},
 		}
 
@@ -110,10 +108,8 @@ var _ = Describe("PrepareForUpdate", func() {
 
 	It("should perform the heartbeat when the annotation is set", func() {
 		bastion := operations.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationKeepalive,
-				},
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationKeepalive,
 			},
 		}
 
@@ -182,10 +178,8 @@ var _ = Describe("PrepareForUpdate", func() {
 var _ = Describe("heartbeat", func() {
 	It("should delete keepalive annotation", func() {
 		bastion := operations.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationKeepalive,
-				},
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationKeepalive,
 			},
 		}
 
@@ -211,11 +205,9 @@ var _ = Describe("heartbeat", func() {
 
 func newBastion(shootName string, seedName string) *operations.Bastion {
 	return &operations.Bastion{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
-			Labels:    map[string]string{"foo": "bar"},
-		},
+		Name:      "test",
+		Namespace: "test-namespace",
+		Labels:    map[string]string{"foo": "bar"},
 		Spec: operations.BastionSpec{
 			ShootRef: corev1.LocalObjectReference{
 				Name: shootName,

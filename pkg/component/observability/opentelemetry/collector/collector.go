@@ -228,10 +228,8 @@ func (o *otelCollector) Deploy(ctx context.Context) error {
 
 func (o *otelCollector) getKubeRBACProxyClusterRoleBinding(serviceAccountName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:logging:rbac-proxy",
-			Labels: map[string]string{v1beta1constants.LabelApp: kubeRBACProxyName},
-		},
+		Name:   "gardener.cloud:logging:rbac-proxy",
+		Labels: map[string]string{v1beta1constants.LabelApp: kubeRBACProxyName},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -276,11 +274,9 @@ func (o *otelCollector) WaitCleanup(ctx context.Context) error {
 
 func (o *otelCollector) vpa() *vpaautoscalingv1.VerticalPodAutoscaler {
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      vpaName,
-			Namespace: o.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      vpaName,
+		Namespace: o.namespace,
+		Labels:    getLabels(),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				APIVersion: otelv1beta1.GroupVersion.String(),
@@ -311,11 +307,9 @@ func (o *otelCollector) vpa() *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func (o *otelCollector) serviceAccount() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      collectorconstants.ServiceAccountName,
-			Namespace: o.namespace,
-			Labels:    getLabels(),
-		},
+		Name:                         collectorconstants.ServiceAccountName,
+		Namespace:                    o.namespace,
+		Labels:                       getLabels(),
 		AutomountServiceAccountToken: new(false),
 	}
 }
@@ -388,11 +382,9 @@ func (o *otelCollector) serviceMonitor() *monitoringv1.ServiceMonitor {
 
 func (o *otelCollector) openTelemetryCollector(namespace, lokiEndpoint, genericTokenKubeconfigSecretName string, ingressTLSSecret *corev1.Secret) *otelv1beta1.OpenTelemetryCollector {
 	obj := &otelv1beta1.OpenTelemetryCollector{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      collectorconstants.OpenTelemetryCollectorResourceName,
-			Namespace: namespace,
-			Labels:    getLabels(),
-		},
+		Name:      collectorconstants.OpenTelemetryCollectorResourceName,
+		Namespace: namespace,
+		Labels:    getLabels(),
 		Spec: otelv1beta1.OpenTelemetryCollectorSpec{
 			Mode:            "deployment",
 			UpgradeStrategy: "none",
@@ -603,16 +595,12 @@ func (o *otelCollector) openTelemetryCollector(namespace, lokiEndpoint, genericT
 
 	if o.values.WithRBACProxy {
 		obj.Spec.Ports = append(obj.Spec.Ports, otelv1beta1.PortsSpec{
-			ServicePort: corev1.ServicePort{
-				Name: kubeRBACProxyName + "-vali",
-				Port: collectorconstants.KubeRBACProxyValiPort,
-			},
+			Name: kubeRBACProxyName + "-vali",
+			Port: collectorconstants.KubeRBACProxyValiPort,
 		})
 		obj.Spec.Ports = append(obj.Spec.Ports, otelv1beta1.PortsSpec{
-			ServicePort: corev1.ServicePort{
-				Name: kubeRBACProxyName + "-otlp",
-				Port: collectorconstants.KubeRBACProxyOTLPReceiverPort,
-			},
+			Name: kubeRBACProxyName + "-otlp",
+			Port: collectorconstants.KubeRBACProxyOTLPReceiverPort,
 		})
 
 		if ingressTLSSecret != nil {
@@ -707,10 +695,8 @@ func (o *otelCollector) injectSecureRBACProxy(obj *otelv1beta1.OpenTelemetryColl
 		gardenerutils.GenerateGenericKubeconfigVolume(genericTokenKubeconfigSecretName, "shoot-access-"+kubeRBACProxyName, "kubeconfig"),
 		{
 			Name: tlsCertificateVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: ingressTLSSecret.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: ingressTLSSecret.Name,
 			},
 		},
 	}
@@ -780,27 +766,23 @@ func (o *otelCollector) getIstioResources(tlsSecret *corev1.Secret, caBundle *co
 
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	tlsSecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", o.namespace, name, tlsSecret.Name),
-			Namespace: o.values.IstioIngressGatewayNamespace,
-			Labels:    getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      fmt.Sprintf("%s-%s-%s", o.namespace, name, tlsSecret.Name),
+		Namespace: o.values.IstioIngressGatewayNamespace,
+		Labels:    getLabels(),
+		Data:      tlsSecret.Data,
 	}
 
 	// Istio expects the CA bundle in the istio ingress gateway namespace to verify the backend's server cert.
 	caBundleInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", o.namespace, name, caBundle.Name),
-			Namespace: o.values.IstioIngressGatewayNamespace,
-			Labels:    getLabels(),
-		},
+		Name:      fmt.Sprintf("%s-%s-%s", o.namespace, name, caBundle.Name),
+		Namespace: o.values.IstioIngressGatewayNamespace,
+		Labels:    getLabels(),
 		Data: map[string][]byte{
 			"cacert": caBundle.Data[secrets.DataKeyCertificateBundle],
 		},
 	}
 
-	gateway := &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: o.namespace}}
+	gateway := &istionetworkingv1beta1.Gateway{Name: name, Namespace: o.namespace}
 	if err := istio.GatewayWithTLSTermination(
 		gateway,
 		getLabels(),
@@ -812,7 +794,7 @@ func (o *otelCollector) getIstioResources(tlsSecret *corev1.Secret, caBundle *co
 	}
 
 	destinationHost := kubernetesutils.FQDNForService(collectorconstants.ServiceName, o.namespace)
-	virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: o.namespace}}
+	virtualService := &istionetworkingv1beta1.VirtualService{Name: name, Namespace: o.namespace}
 	if err := istio.VirtualServiceForTLSTermination(
 		virtualService,
 		getLabels(),
@@ -855,7 +837,7 @@ func (o *otelCollector) getIstioResources(tlsSecret *corev1.Secret, caBundle *co
 		},
 	})
 
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: o.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: name, Namespace: o.namespace}
 	if err := istio.DestinationRuleWithTLSTermination(destinationRule, getLabels(), []string{o.values.IstioIngressGatewayNamespace}, destinationHost, o.values.IngressHost, caBundleInIstioNamespace.Name, istioapinetworkingv1beta1.ClientTLSSettings_SIMPLE)(); err != nil {
 		return nil, fmt.Errorf("failed to create destination rule resource: %w", err)
 	}
@@ -865,10 +847,8 @@ func (o *otelCollector) getIstioResources(tlsSecret *corev1.Secret, caBundle *co
 
 func (o *otelCollector) getLoggingAgentClusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "gardener.cloud:logging:opentelemetry-collector",
-			Labels: map[string]string{v1beta1constants.LabelApp: openTelemetryCollectorName},
-		},
+		Name:   "gardener.cloud:logging:opentelemetry-collector",
+		Labels: map[string]string{v1beta1constants.LabelApp: openTelemetryCollectorName},
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"", "apps"},
@@ -896,10 +876,8 @@ func (o *otelCollector) getLoggingAgentClusterRole() *rbacv1.ClusterRole {
 
 func (o *otelCollector) getLoggingAgentClusterRoleBinding(serviceAccountName, clusterRoleName string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: map[string]string{v1beta1constants.LabelApp: openTelemetryCollectorName},
-		},
+		Name:   clusterRoleName,
+		Labels: map[string]string{v1beta1constants.LabelApp: openTelemetryCollectorName},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",

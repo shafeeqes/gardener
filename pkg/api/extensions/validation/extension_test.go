@@ -21,10 +21,8 @@ var _ = Describe("Extension validation tests", func() {
 
 	BeforeEach(func() {
 		ext = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-ext",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-ext",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           "provider",

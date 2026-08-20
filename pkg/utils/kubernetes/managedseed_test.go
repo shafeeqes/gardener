@@ -10,7 +10,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -38,10 +37,8 @@ var _ = Describe("managedseed", func() {
 		ctx = context.Background()
 
 		managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Shoot: &seedmanagementv1alpha1.Shoot{
 					Name: name,
@@ -133,10 +130,8 @@ var _ = Describe("managedseed", func() {
 
 		It("should return the ManagedSeed since reading it succeeded", func() {
 			expected := &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      seedName,
-					Namespace: "garden",
-				},
+				Name:      seedName,
+				Namespace: "garden",
 			}
 			Expect(fakeClient.Create(ctx, expected)).To(Succeed())
 

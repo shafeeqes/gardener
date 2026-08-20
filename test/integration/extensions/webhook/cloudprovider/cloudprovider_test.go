@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -26,11 +25,9 @@ var _ = Describe("CloudProvider tests", func() {
 
 	BeforeEach(func() {
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.SecretNameCloudProvider,
-				Namespace: testNamespace.Name,
-			},
-			Data: originalData,
+			Name:      v1beta1constants.SecretNameCloudProvider,
+			Namespace: testNamespace.Name,
+			Data:      originalData,
 		}
 
 		DeferCleanup(func() {

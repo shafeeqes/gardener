@@ -38,10 +38,8 @@ var _ = Describe("Reconciler", func() {
 
 	BeforeEach(func() {
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "seed",
-				UID:  "abcdef",
-			},
+			Name: "seed",
+			UID:  "abcdef",
 		}
 		namespaceName = gardenerutils.ComputeGardenNamespace(seed.Name)
 	})
@@ -79,9 +77,7 @@ var _ = Describe("Reconciler", func() {
 
 			It("should fail if namespace exists and has no ownerReference", func() {
 				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: namespaceName,
-					},
+					Name: namespaceName,
 				}
 				Expect(fakeClient.Create(ctx, ns)).To(Succeed())
 
@@ -91,14 +87,12 @@ var _ = Describe("Reconciler", func() {
 
 			It("should fail if namespace exists and is not controlled by seed", func() {
 				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: namespaceName,
-						OwnerReferences: []metav1.OwnerReference{
-							*metav1.NewControllerRef(
-								&corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "boss", UID: "12345"}},
-								corev1.SchemeGroupVersion.WithKind("ConfigMap"),
-							),
-						},
+					Name: namespaceName,
+					OwnerReferences: []metav1.OwnerReference{
+						*metav1.NewControllerRef(
+							&corev1.ConfigMap{Name: "boss", UID: "12345"},
+							corev1.SchemeGroupVersion.WithKind("ConfigMap"),
+						),
 					},
 				}
 				Expect(fakeClient.Create(ctx, ns)).To(Succeed())
@@ -110,11 +104,9 @@ var _ = Describe("Reconciler", func() {
 			It("should sync secrets and clean up stale secrets in seed namespace", func() {
 				// Create the seed namespace controlled by the seed
 				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            namespaceName,
-						OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(seed, gardencorev1beta1.SchemeGroupVersion.WithKind("Seed"))},
-						Labels:          map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed},
-					},
+					Name:            namespaceName,
+					OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(seed, gardencorev1beta1.SchemeGroupVersion.WithKind("Seed"))},
+					Labels:          map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed},
 				}
 				Expect(fakeClient.Create(ctx, ns)).To(Succeed())
 
@@ -139,10 +131,8 @@ var _ = Describe("Reconciler", func() {
 
 			It("should add garden role label to namespace if missing", func() {
 				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            namespaceName,
-						OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(seed, gardencorev1beta1.SchemeGroupVersion.WithKind("Seed"))},
-					},
+					Name:            namespaceName,
+					OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(seed, gardencorev1beta1.SchemeGroupVersion.WithKind("Seed"))},
 				}
 				Expect(fakeClient.Create(ctx, ns)).To(Succeed())
 
@@ -157,11 +147,9 @@ var _ = Describe("Reconciler", func() {
 
 			It("should not sync secrets with helm-pull-secret or oci-ca-bundle role", func() {
 				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            namespaceName,
-						OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(seed, gardencorev1beta1.SchemeGroupVersion.WithKind("Seed"))},
-						Labels:          map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed},
-					},
+					Name:            namespaceName,
+					OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(seed, gardencorev1beta1.SchemeGroupVersion.WithKind("Seed"))},
+					Labels:          map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed},
 				}
 				Expect(fakeClient.Create(ctx, ns)).To(Succeed())
 
@@ -224,13 +212,11 @@ var _ = Describe("Reconciler", func() {
 
 func createSecret(name, namespace string, key string, data []byte, role string) *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				v1beta1constants.GardenRole: role,
-			},
-			Name:      name,
-			Namespace: namespace,
+		Labels: map[string]string{
+			v1beta1constants.GardenRole: role,
 		},
+		Name:      name,
+		Namespace: namespace,
 		Data: map[string][]byte{
 			key: data,
 		},

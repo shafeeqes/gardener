@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -42,10 +41,8 @@ var _ = Describe("Identity", func() {
 			Config:       cfg,
 		}
 		identityConfigMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "cluster-identity",
-				Namespace: "kube-system",
-			},
+			Name:      "cluster-identity",
+			Namespace: "kube-system",
 		}
 	})
 

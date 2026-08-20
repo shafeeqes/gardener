@@ -91,10 +91,8 @@ var CheckConnection = func(ctx context.Context, client rest.Interface) error {
 
 func (r *Reconciler) renewLease(ctx context.Context, obj client.Object) error {
 	lease := &coordinationv1.Lease{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.LeaseNamePrefix + obj.GetName(),
-			Namespace: ptr.Deref(r.LeaseNamespace, obj.GetNamespace()),
-		},
+		Name:      r.LeaseNamePrefix + obj.GetName(),
+		Namespace: ptr.Deref(r.LeaseNamespace, obj.GetNamespace()),
 	}
 
 	gvk, err := apiutil.GVKForObject(obj, r.GardenClient.Scheme())

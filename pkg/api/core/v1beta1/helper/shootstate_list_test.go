@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/selection"
@@ -41,10 +40,8 @@ var _ = Describe("ShootStateList", func() {
 
 		BeforeEach(func() {
 			shootState = &gardencorev1beta1.ShootState{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "foo",
-				},
+				Name:      "foo",
+				Namespace: "foo",
 				Spec: gardencorev1beta1.ShootStateSpec{
 					Extensions: []gardencorev1beta1.ExtensionResourceState{
 						{
@@ -133,10 +130,8 @@ var _ = Describe("ShootStateList", func() {
 
 		BeforeEach(func() {
 			shootState = &gardencorev1beta1.ShootState{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "foo",
-				},
+				Name:      "foo",
+				Namespace: "foo",
 				Spec: gardencorev1beta1.ShootStateSpec{
 					Gardener: []gardencorev1beta1.GardenerResourceData{
 						{
@@ -303,10 +298,8 @@ var _ = Describe("ShootStateList", func() {
 
 		BeforeEach(func() {
 			shootState = &gardencorev1beta1.ShootState{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "foo",
-				},
+				Name:      "foo",
+				Namespace: "foo",
 				Spec: gardencorev1beta1.ShootStateSpec{
 					Resources: []gardencorev1beta1.ResourceData{
 						{
@@ -351,12 +344,10 @@ var _ = Describe("ShootStateList", func() {
 			It("should append new resource data to the list", func() {
 				list := ResourceDataList(shootState.Spec.Resources)
 				newResource := &gardencorev1beta1.ResourceData{
-					CrossVersionObjectReference: autoscalingv1.CrossVersionObjectReference{
-						Kind:       "Secret",
-						Name:       "test-secret2",
-						APIVersion: "v1",
-					},
-					Data: data,
+					Kind:       "Secret",
+					Name:       "test-secret2",
+					APIVersion: "v1",
+					Data:       data,
 				}
 				list.Upsert(newResource)
 				Expect(list).To(HaveLen(2))

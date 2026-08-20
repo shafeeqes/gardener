@@ -23,9 +23,7 @@ var _ = Describe("validation", func() {
 	BeforeEach(func() {
 		seed := "some-seed"
 		backupBucket = &core.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "example-backup-bucket",
-			},
+			Name: "example-backup-bucket",
 			Spec: core.BackupBucketSpec{
 				Provider: core.BackupBucketProvider{
 					Type:   "some-provider",

@@ -55,11 +55,9 @@ var _ = Describe("Fluent Bit", func() {
 		customResourcesManagedResourceSecret *corev1.Secret
 
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "aggregate-fluent-bit",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "aggregate"},
-			},
+			Name:      "aggregate-fluent-bit",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "aggregate"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":                              "fluent-bit",
@@ -91,11 +89,9 @@ var _ = Describe("Fluent Bit", func() {
 			},
 		}
 		serviceMonitorPlugin = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "aggregate-fluent-bit-output-plugin",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "aggregate"},
-			},
+			Name:      "aggregate-fluent-bit-output-plugin",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "aggregate"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					"app":                              "fluent-bit",
@@ -128,11 +124,9 @@ var _ = Describe("Fluent Bit", func() {
 			},
 		}
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "aggregate-fluent-bit",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "aggregate"},
-			},
+			Name:      "aggregate-fluent-bit",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "aggregate"},
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "fluent-bit.rules",
@@ -223,16 +217,12 @@ var _ = Describe("Fluent Bit", func() {
 
 	JustBeforeEach(func() {
 		customResourcesManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "fluent-bit",
-				Namespace: namespace,
-			},
+			Name:      "fluent-bit",
+			Namespace: namespace,
 		}
 		customResourcesManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + customResourcesManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + customResourcesManagedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -245,15 +235,13 @@ var _ = Describe("Fluent Bit", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(customResourcesManagedResource), customResourcesManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "fluent-bit",
-					Namespace: namespace,
-					Labels: map[string]string{
-						v1beta1constants.GardenRole:          "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
-					ResourceVersion: "1",
+				Name:      "fluent-bit",
+				Namespace: namespace,
+				Labels: map[string]string{
+					v1beta1constants.GardenRole:          "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -337,11 +325,9 @@ var _ = Describe("Fluent Bit", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -364,11 +350,9 @@ var _ = Describe("Fluent Bit", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       customResourcesManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       customResourcesManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -393,10 +377,8 @@ var _ = Describe("Fluent Bit", func() {
 				fakeOps.MaxAttempts = 2
 
 				customResourcesManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      customResourcesManagedResourceName,
-						Namespace: namespace,
-					},
+					Name:      customResourcesManagedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, customResourcesManagedResource)).To(Succeed())
 

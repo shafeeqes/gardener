@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/apis/security"
 	credentialsbindingregistry "github.com/gardener/gardener/pkg/apiserver/registry/security/credentialsbinding"
@@ -20,10 +19,8 @@ var _ = Describe("Strategy", func() {
 
 	BeforeEach(func() {
 		credentialsBinding = &security.CredentialsBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "profile",
-				Namespace: "garden",
-			},
+			Name:      "profile",
+			Namespace: "garden",
 		}
 	})
 

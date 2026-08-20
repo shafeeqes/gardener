@@ -60,9 +60,7 @@ var _ = Describe("CloudProfileConfig validation", func() {
 				Name: "ubuntu",
 				Versions: []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "18.04",
-						},
+						Version: "18.04",
 						CapabilityFlavors: []core.MachineImageFlavor{{
 							Capabilities: core.Capabilities{
 								"architecture": []string{v1beta1constants.ArchitectureAMD64},
@@ -232,7 +230,7 @@ var _ = Describe("CloudProfileConfig validation", func() {
 
 			It("should fail when machine image version exists in core but not in provider config", func() {
 				machineImages[0].Versions = append(machineImages[0].Versions, core.MachineImageVersion{
-					ExpirableVersion: core.ExpirableVersion{Version: "20.04"},
+					Version: "20.04",
 					CapabilityFlavors: []core.MachineImageFlavor{{
 						Capabilities: core.Capabilities{
 							"architecture": []string{v1beta1constants.ArchitectureAMD64},

@@ -55,10 +55,8 @@ var _ = Describe("NamespacedCloudProfile Mutator", func() {
 
 		namespacedCloudProfileMutator = mutator.NewNamespacedCloudProfileMutator(fakeManager)
 		namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "profile-1",
-				Namespace: namespace,
-			},
+			Name:      "profile-1",
+			Namespace: namespace,
 		}
 	})
 
@@ -73,10 +71,8 @@ var _ = Describe("NamespacedCloudProfile Mutator", func() {
 				Spec: gardencorev1beta1.CloudProfileSpec{},
 			}
 			cpConfig = &v1alpha1.CloudProfileConfig{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "CloudProfileConfig",
-					APIVersion: "local.provider.extensions.gardener.cloud/v1alpha1",
-				},
+				Kind:       "CloudProfileConfig",
+				APIVersion: "local.provider.extensions.gardener.cloud/v1alpha1",
 			}
 			capabilityMachineImage = v1alpha1.MachineImages{
 				Name: "image-1",

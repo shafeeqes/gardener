@@ -38,10 +38,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	lease := &coordinationv1.Lease{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.NodeAgentLeaseName(node.GetName()),
-			Namespace: r.Namespace,
-		},
+		Name:      gardenerutils.NodeAgentLeaseName(node.GetName()),
+		Namespace: r.Namespace,
 	}
 
 	op, err := controllerutil.CreateOrUpdate(ctx, r.Client, lease, func() error {

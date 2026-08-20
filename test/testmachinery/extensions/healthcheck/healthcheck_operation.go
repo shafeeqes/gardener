@@ -11,7 +11,6 @@ import (
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -161,7 +160,7 @@ func WorkerHealthCheckDeleteSeedDeployment(ctx context.Context, f *framework.Sho
 func deleteSeedDeploymentCheck(ctx context.Context, f *framework.ShootFramework, extensionKind schema.GroupVersionKind, controlPlaneName, deploymentName string, healthConditionType gardencorev1beta1.ConditionType) error {
 	var err error
 
-	cloudControllerDeployment := appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: deploymentName, Namespace: f.ShootSeedNamespace()}}
+	cloudControllerDeployment := appsv1.Deployment{Name: deploymentName, Namespace: f.ShootSeedNamespace()}
 	if err := f.SeedClient.Client().Delete(ctx, &cloudControllerDeployment); err != nil {
 		return err
 	}

@@ -26,11 +26,9 @@ var _ = Describe("Validation Tests", func() {
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &gardencorev1.OCIRepository{
-									Ref: new("example.com/chart:v1.0.0"),
-								},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &gardencorev1.OCIRepository{
+								Ref: new("example.com/chart:v1.0.0"),
 							},
 						},
 					},
@@ -67,10 +65,8 @@ var _ = Describe("Validation Tests", func() {
 		Context("Extension Deployment", func() {
 			It("should return an error when extension deployment helm has invalid OCI repository", func() {
 				extension.Spec.Deployment.ExtensionDeployment = &operatorv1alpha1.ExtensionDeploymentSpec{
-					DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-						Helm: &operatorv1alpha1.ExtensionHelm{
-							OCIRepository: &gardencorev1.OCIRepository{},
-						},
+					Helm: &operatorv1alpha1.ExtensionHelm{
+						OCIRepository: &gardencorev1.OCIRepository{},
 					},
 				}
 
@@ -96,11 +92,9 @@ var _ = Describe("Validation Tests", func() {
 				extension.Spec = operatorv1alpha1.ExtensionSpec{
 					Deployment: &operatorv1alpha1.Deployment{
 						ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-							DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-								Helm: &operatorv1alpha1.ExtensionHelm{
-									OCIRepository: &gardencorev1.OCIRepository{
-										Ref: new("example.com/chart:v1.0.0"),
-									},
+							Helm: &operatorv1alpha1.ExtensionHelm{
+								OCIRepository: &gardencorev1.OCIRepository{
+									Ref: new("example.com/chart:v1.0.0"),
 								},
 							},
 						},
@@ -216,10 +210,8 @@ func validateExtensionTests(test func() field.ErrorList, extension func() *opera
 
 		It("should return an error when extension deployment helm has invalid OCI repository", func() {
 			extension().Spec.Deployment.ExtensionDeployment = &operatorv1alpha1.ExtensionDeploymentSpec{
-				DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-					Helm: &operatorv1alpha1.ExtensionHelm{
-						OCIRepository: &gardencorev1.OCIRepository{},
-					},
+				Helm: &operatorv1alpha1.ExtensionHelm{
+					OCIRepository: &gardencorev1.OCIRepository{},
 				},
 			}
 
@@ -231,11 +223,9 @@ func validateExtensionTests(test func() field.ErrorList, extension func() *opera
 
 		It("should return no errors when extension deployment helm has valid OCI repository with ref", func() {
 			extension().Spec.Deployment.ExtensionDeployment = &operatorv1alpha1.ExtensionDeploymentSpec{
-				DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-					Helm: &operatorv1alpha1.ExtensionHelm{
-						OCIRepository: &gardencorev1.OCIRepository{
-							Ref: new("example.com/chart:v1.0.0"),
-						},
+				Helm: &operatorv1alpha1.ExtensionHelm{
+					OCIRepository: &gardencorev1.OCIRepository{
+						Ref: new("example.com/chart:v1.0.0"),
 					},
 				},
 			}
@@ -245,12 +235,10 @@ func validateExtensionTests(test func() field.ErrorList, extension func() *opera
 
 		It("should return no errors when extension deployment helm has valid OCI repository with repository and tag", func() {
 			extension().Spec.Deployment.ExtensionDeployment = &operatorv1alpha1.ExtensionDeploymentSpec{
-				DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-					Helm: &operatorv1alpha1.ExtensionHelm{
-						OCIRepository: &gardencorev1.OCIRepository{
-							Repository: new("example.com/chart"),
-							Tag:        new("v1.0.0"),
-						},
+				Helm: &operatorv1alpha1.ExtensionHelm{
+					OCIRepository: &gardencorev1.OCIRepository{
+						Repository: new("example.com/chart"),
+						Tag:        new("v1.0.0"),
 					},
 				},
 			}

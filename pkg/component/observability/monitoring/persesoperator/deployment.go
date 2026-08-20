@@ -26,11 +26,9 @@ const (
 
 func (p *persesOperator) deployment() *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: p.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      deploymentName,
+		Namespace: p.namespace,
+		Labels:    GetLabels(),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -69,21 +67,17 @@ func (p *persesOperator) deployment() *appsv1.Deployment {
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/healthz",
-										Port: intstr.FromInt32(8081),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/healthz",
+									Port: intstr.FromInt32(8081),
 								},
 								InitialDelaySeconds: 15,
 								PeriodSeconds:       20,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/readyz",
-										Port: intstr.FromInt32(8081),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/readyz",
+									Port: intstr.FromInt32(8081),
 								},
 								InitialDelaySeconds: 5,
 								PeriodSeconds:       10,

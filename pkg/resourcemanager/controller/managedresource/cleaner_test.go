@@ -38,10 +38,8 @@ var _ = Describe("cleaner", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(s).Build()
 
 			sts = &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "foo-ns",
-				},
+				Name:      "foo",
+				Namespace: "foo-ns",
 				Spec: appsv1.StatefulSetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: map[string]string{"foo": "bar"},
@@ -105,11 +103,9 @@ var _ = Describe("cleaner", func() {
 			}).Build()
 
 			pvc := &corev1.PersistentVolumeClaim{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo-pvc-foo-0",
-					Namespace: sts.Namespace,
-					Labels:    sts.Spec.Selector.MatchLabels,
-				},
+				Name:      "foo-pvc-foo-0",
+				Namespace: sts.Namespace,
+				Labels:    sts.Spec.Selector.MatchLabels,
 				Spec: corev1.PersistentVolumeClaimSpec{
 					AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
 					VolumeName:       "foo-pvc-foo-0",
@@ -124,11 +120,9 @@ var _ = Describe("cleaner", func() {
 
 		It("should delete all PVCs of the StatefulSet", func() {
 			pvc := &corev1.PersistentVolumeClaim{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo-pvc-foo-0",
-					Namespace: sts.Namespace,
-					Labels:    sts.Spec.Selector.MatchLabels,
-				},
+				Name:      "foo-pvc-foo-0",
+				Namespace: sts.Namespace,
+				Labels:    sts.Spec.Selector.MatchLabels,
 				Spec: corev1.PersistentVolumeClaimSpec{
 					AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
 					VolumeName:       "foo-pvc-foo-0",

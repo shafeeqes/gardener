@@ -191,10 +191,10 @@ var _ = Describe("Helper", func() {
 			&gardencorev1beta1.Shoot{},
 			BeFalse()),
 		Entry("force-delete annotation present but value is false",
-			&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "0"}}},
+			&gardencorev1beta1.Shoot{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "0"}},
 			BeFalse()),
 		Entry("force-delete annotation present and value is true",
-			&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "t"}}},
+			&gardencorev1beta1.Shoot{Annotations: map[string]string{v1beta1constants.AnnotationConfirmationForceDeletion: "t"}},
 			BeTrue()),
 	)
 
@@ -416,8 +416,8 @@ var _ = Describe("Helper", func() {
 		DescribeTable("#SSHKeypairRotationPassedRotationPeriod",
 			func(credentials *gardencorev1beta1.ShootCredentials, now time.Time, expectedResult bool) {
 				shoot := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{CreationTimestamp: creationTimestamp},
-					Status:     gardencorev1beta1.ShootStatus{Credentials: credentials},
+					CreationTimestamp: creationTimestamp,
+					Status:            gardencorev1beta1.ShootStatus{Credentials: credentials},
 				}
 				Expect(SSHKeypairRotationPassedRotationPeriod(shoot, now, metav1.Duration{Duration: rotationPeriod})).To(Equal(expectedResult))
 			},
@@ -437,8 +437,8 @@ var _ = Describe("Helper", func() {
 		DescribeTable("#ObservabilityRotationPassedRotationPeriod",
 			func(credentials *gardencorev1beta1.ShootCredentials, now time.Time, expectedResult bool) {
 				shoot := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{CreationTimestamp: creationTimestamp},
-					Status:     gardencorev1beta1.ShootStatus{Credentials: credentials},
+					CreationTimestamp: creationTimestamp,
+					Status:            gardencorev1beta1.ShootStatus{Credentials: credentials},
 				}
 				Expect(ObservabilityRotationPassedRotationPeriod(shoot, now, metav1.Duration{Duration: rotationPeriod})).To(Equal(expectedResult))
 			},
@@ -458,8 +458,8 @@ var _ = Describe("Helper", func() {
 		DescribeTable("#ETCDEncryptionKeyRotationPassedRotationPeriod",
 			func(credentials *gardencorev1beta1.ShootCredentials, now time.Time, expectedResult bool) {
 				shoot := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{CreationTimestamp: creationTimestamp},
-					Status:     gardencorev1beta1.ShootStatus{Credentials: credentials},
+					CreationTimestamp: creationTimestamp,
+					Status:            gardencorev1beta1.ShootStatus{Credentials: credentials},
 				}
 				Expect(ETCDEncryptionKeyRotationPassedRotationPeriod(shoot, now, metav1.Duration{Duration: rotationPeriod})).To(Equal(expectedResult))
 			},
@@ -825,21 +825,15 @@ var _ = Describe("Helper", func() {
 				shootList1 := gardencorev1beta1.ShootList{
 					Items: []gardencorev1beta1.Shoot{
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot1",
-								Namespace: "namespace1",
-							},
+							Name:      "shoot1",
+							Namespace: "namespace1",
 						},
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot2",
-								Namespace: "namespace1",
-							},
+							Name:      "shoot2",
+							Namespace: "namespace1",
 						}, {
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot3",
-								Namespace: "namespace2",
-							},
+							Name:      "shoot3",
+							Namespace: "namespace2",
 						},
 					},
 				}
@@ -847,21 +841,15 @@ var _ = Describe("Helper", func() {
 				shootList2 := gardencorev1beta1.ShootList{
 					Items: []gardencorev1beta1.Shoot{
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot2",
-								Namespace: "namespace2",
-							},
+							Name:      "shoot2",
+							Namespace: "namespace2",
 						},
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot1",
-								Namespace: "namespace1",
-							},
+							Name:      "shoot1",
+							Namespace: "namespace1",
 						}, {
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot3",
-								Namespace: "namespace3",
-							},
+							Name:      "shoot3",
+							Namespace: "namespace3",
 						},
 					},
 				}
@@ -881,21 +869,15 @@ var _ = Describe("Helper", func() {
 				shootList2 := gardencorev1beta1.ShootList{
 					Items: []gardencorev1beta1.Shoot{
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot2",
-								Namespace: "namespace2",
-							},
+							Name:      "shoot2",
+							Namespace: "namespace2",
 						},
 						{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot1",
-								Namespace: "namespace1",
-							},
+							Name:      "shoot1",
+							Namespace: "namespace1",
 						}, {
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "shoot3",
-								Namespace: "namespace3",
-							},
+							Name:      "shoot3",
+							Namespace: "namespace3",
 						},
 					},
 				}
@@ -1040,9 +1022,7 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: nil,
-							},
+							FeatureGates: nil,
 						},
 					},
 				},
@@ -1055,10 +1035,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBaz": true,
-								},
+							FeatureGates: map[string]bool{
+								"FooBaz": true,
 							},
 						},
 					},
@@ -1072,10 +1050,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBar": true,
-								},
+							FeatureGates: map[string]bool{
+								"FooBar": true,
 							},
 						},
 					},
@@ -1089,10 +1065,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBar": false,
-								},
+							FeatureGates: map[string]bool{
+								"FooBar": false,
 							},
 						},
 					},
@@ -1125,9 +1099,7 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeControllerManager: &gardencorev1beta1.KubeControllerManagerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: nil,
-							},
+							FeatureGates: nil,
 						},
 					},
 				},
@@ -1140,10 +1112,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeControllerManager: &gardencorev1beta1.KubeControllerManagerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBaz": true,
-								},
+							FeatureGates: map[string]bool{
+								"FooBaz": true,
 							},
 						},
 					},
@@ -1157,10 +1127,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeControllerManager: &gardencorev1beta1.KubeControllerManagerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBar": true,
-								},
+							FeatureGates: map[string]bool{
+								"FooBar": true,
 							},
 						},
 					},
@@ -1174,10 +1142,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeControllerManager: &gardencorev1beta1.KubeControllerManagerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBar": false,
-								},
+							FeatureGates: map[string]bool{
+								"FooBar": false,
 							},
 						},
 					},
@@ -1210,9 +1176,7 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeProxy: &gardencorev1beta1.KubeProxyConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: nil,
-							},
+							FeatureGates: nil,
 						},
 					},
 				},
@@ -1225,10 +1189,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeProxy: &gardencorev1beta1.KubeProxyConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBaz": true,
-								},
+							FeatureGates: map[string]bool{
+								"FooBaz": true,
 							},
 						},
 					},
@@ -1242,10 +1204,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeProxy: &gardencorev1beta1.KubeProxyConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBar": true,
-								},
+							FeatureGates: map[string]bool{
+								"FooBar": true,
 							},
 						},
 					},
@@ -1259,10 +1219,8 @@ var _ = Describe("Helper", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeProxy: &gardencorev1beta1.KubeProxyConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{
-									"FooBar": false,
-								},
+							FeatureGates: map[string]bool{
+								"FooBar": false,
 							},
 						},
 					},
@@ -1278,10 +1236,10 @@ var _ = Describe("Helper", func() {
 			shootList := &gardencorev1beta1.ShootList{
 				Items: []gardencorev1beta1.Shoot{
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "shoot1"},
+						Name: "shoot1",
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{Name: "shoot2"},
+						Name: "shoot2",
 					},
 				},
 			}
@@ -1300,9 +1258,7 @@ var _ = Describe("Helper", func() {
 
 		It("should return true when the shoot has managed issuer", func() {
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{"authentication.gardener.cloud/issuer": "managed"},
-				},
+				Annotations: map[string]string{"authentication.gardener.cloud/issuer": "managed"},
 			}
 			Expect(HasManagedIssuer(shoot)).To(BeTrue())
 		})
@@ -1374,8 +1330,8 @@ var _ = Describe("Helper", func() {
 
 		Entry("addons nil", nil, BeFalse()),
 		Entry("kubernetesDashboard nil", &gardencorev1beta1.Addons{}, BeFalse()),
-		Entry("kubernetesDashboard disabled", &gardencorev1beta1.Addons{KubernetesDashboard: &gardencorev1beta1.KubernetesDashboard{Addon: gardencorev1beta1.Addon{Enabled: false}}}, BeFalse()),
-		Entry("kubernetesDashboard enabled", &gardencorev1beta1.Addons{KubernetesDashboard: &gardencorev1beta1.KubernetesDashboard{Addon: gardencorev1beta1.Addon{Enabled: true}}}, BeTrue()),
+		Entry("kubernetesDashboard disabled", &gardencorev1beta1.Addons{KubernetesDashboard: &gardencorev1beta1.KubernetesDashboard{Enabled: false}}, BeFalse()),
+		Entry("kubernetesDashboard enabled", &gardencorev1beta1.Addons{KubernetesDashboard: &gardencorev1beta1.KubernetesDashboard{Enabled: true}}, BeTrue()),
 	)
 
 	DescribeTable("#NginxIngressEnabled",
@@ -1385,8 +1341,8 @@ var _ = Describe("Helper", func() {
 
 		Entry("addons nil", nil, BeFalse()),
 		Entry("nginxIngress nil", &gardencorev1beta1.Addons{}, BeFalse()),
-		Entry("nginxIngress disabled", &gardencorev1beta1.Addons{NginxIngress: &gardencorev1beta1.NginxIngress{Addon: gardencorev1beta1.Addon{Enabled: false}}}, BeFalse()),
-		Entry("nginxIngress enabled", &gardencorev1beta1.Addons{NginxIngress: &gardencorev1beta1.NginxIngress{Addon: gardencorev1beta1.Addon{Enabled: true}}}, BeTrue()),
+		Entry("nginxIngress disabled", &gardencorev1beta1.Addons{NginxIngress: &gardencorev1beta1.NginxIngress{Enabled: false}}, BeFalse()),
+		Entry("nginxIngress enabled", &gardencorev1beta1.Addons{NginxIngress: &gardencorev1beta1.NginxIngress{Enabled: true}}, BeTrue()),
 	)
 
 	DescribeTable("#KubeProxyEnabled",
@@ -1635,17 +1591,17 @@ var _ = Describe("Helper", func() {
 		),
 		Entry("seed has no access restrictions",
 			nil,
-			[]gardencorev1beta1.AccessRestrictionWithOptions{{AccessRestriction: gardencorev1beta1.AccessRestriction{Name: "foo"}}},
+			[]gardencorev1beta1.AccessRestrictionWithOptions{{Name: "foo"}},
 			false,
 		),
 		Entry("both have access restrictions and they match",
 			[]gardencorev1beta1.AccessRestriction{{Name: "foo"}},
-			[]gardencorev1beta1.AccessRestrictionWithOptions{{AccessRestriction: gardencorev1beta1.AccessRestriction{Name: "foo"}}},
+			[]gardencorev1beta1.AccessRestrictionWithOptions{{Name: "foo"}},
 			true,
 		),
 		Entry("both have access restrictions and they don't match",
 			[]gardencorev1beta1.AccessRestriction{{Name: "bar"}},
-			[]gardencorev1beta1.AccessRestrictionWithOptions{{AccessRestriction: gardencorev1beta1.AccessRestriction{Name: "foo"}}},
+			[]gardencorev1beta1.AccessRestrictionWithOptions{{Name: "foo"}},
 			false,
 		),
 	)

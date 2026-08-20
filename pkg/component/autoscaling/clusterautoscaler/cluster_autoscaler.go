@@ -196,15 +196,13 @@ func (c *clusterAutoscaler) Deploy(ctx context.Context) error {
 		deployment.Spec.RevisionHistoryLimit = new(int32(1))
 		deployment.Spec.Selector = &metav1.LabelSelector{MatchLabels: getLabels()}
 		deployment.Spec.Template = corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					v1beta1constants.GardenRole:                           v1beta1constants.GardenRoleControlPlane,
-					v1beta1constants.LabelPodMaintenanceRestart:           "true",
-					v1beta1constants.LabelNetworkPolicyToDNS:              v1beta1constants.LabelNetworkPolicyAllowed,
-					v1beta1constants.LabelNetworkPolicyToRuntimeAPIServer: v1beta1constants.LabelNetworkPolicyAllowed,
-					gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
-				}),
-			},
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				v1beta1constants.GardenRole:                           v1beta1constants.GardenRoleControlPlane,
+				v1beta1constants.LabelPodMaintenanceRestart:           "true",
+				v1beta1constants.LabelNetworkPolicyToDNS:              v1beta1constants.LabelNetworkPolicyAllowed,
+				v1beta1constants.LabelNetworkPolicyToRuntimeAPIServer: v1beta1constants.LabelNetworkPolicyAllowed,
+				gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
+			}),
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{
 					{
@@ -431,19 +429,19 @@ func (c *clusterAutoscaler) SetReplicas(replicas int32) {
 }
 
 func (c *clusterAutoscaler) emptyClusterRoleBinding() *rbacv1.ClusterRoleBinding {
-	return &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler-" + c.namespace}}
+	return &rbacv1.ClusterRoleBinding{Name: "cluster-autoscaler-" + c.namespace}
 }
 
 func (c *clusterAutoscaler) emptyServiceAccount() *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler", Namespace: c.namespace}}
+	return &corev1.ServiceAccount{Name: "cluster-autoscaler", Namespace: c.namespace}
 }
 
 func (c *clusterAutoscaler) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler-vpa", Namespace: c.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: "cluster-autoscaler-vpa", Namespace: c.namespace}
 }
 
 func (c *clusterAutoscaler) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: c.namespace}}
+	return &corev1.Service{Name: serviceName, Namespace: c.namespace}
 }
 
 func (c *clusterAutoscaler) newShootAccessSecret() *gardenerutils.AccessSecret {
@@ -451,11 +449,11 @@ func (c *clusterAutoscaler) newShootAccessSecret() *gardenerutils.AccessSecret {
 }
 
 func (c *clusterAutoscaler) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameClusterAutoscaler, Namespace: c.namespace}}
+	return &appsv1.Deployment{Name: v1beta1constants.DeploymentNameClusterAutoscaler, Namespace: c.namespace}
 }
 
 func (c *clusterAutoscaler) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameClusterAutoscaler, Namespace: c.namespace}}
+	return &policyv1.PodDisruptionBudget{Name: v1beta1constants.DeploymentNameClusterAutoscaler, Namespace: c.namespace}
 }
 
 func (c *clusterAutoscaler) emptyPrometheusRule() *monitoringv1.PrometheusRule {
@@ -467,7 +465,7 @@ func (c *clusterAutoscaler) emptyServiceMonitor() *monitoringv1.ServiceMonitor {
 }
 
 func (c *clusterAutoscaler) emptyManagedResource() *resourcesv1alpha1.ManagedResource {
-	return &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceTargetName, Namespace: c.namespace}}
+	return &resourcesv1alpha1.ManagedResource{Name: managedResourceTargetName, Namespace: c.namespace}
 }
 
 func (c *clusterAutoscaler) workersHavePriorityConfigured() bool {
@@ -564,9 +562,7 @@ func (c *clusterAutoscaler) computeShootResourcesData(serviceAccountName string,
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:cluster-autoscaler",
-			},
+			Name: "gardener.cloud:target:cluster-autoscaler",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -639,9 +635,7 @@ func (c *clusterAutoscaler) computeShootResourcesData(serviceAccountName string,
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:cluster-autoscaler",
-			},
+			Name: "gardener.cloud:target:cluster-autoscaler",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -655,11 +649,9 @@ func (c *clusterAutoscaler) computeShootResourcesData(serviceAccountName string,
 		}
 
 		role = &rbacv1.Role{
-			TypeMeta: metav1.TypeMeta{},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:cluster-autoscaler",
-				Namespace: metav1.NamespaceSystem,
-			},
+			TypeMeta:  metav1.TypeMeta{},
+			Name:      "gardener.cloud:target:cluster-autoscaler",
+			Namespace: metav1.NamespaceSystem,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -676,10 +668,8 @@ func (c *clusterAutoscaler) computeShootResourcesData(serviceAccountName string,
 		}
 
 		rolebinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:cluster-autoscaler",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "gardener.cloud:target:cluster-autoscaler",
+			Namespace: metav1.NamespaceSystem,
 			Subjects: []rbacv1.Subject{{
 				Kind: rbacv1.ServiceAccountKind,
 				Name: serviceAccountName,
@@ -754,10 +744,8 @@ func (c *clusterAutoscaler) generatePriorityExpanderConfigMap() (*corev1.ConfigM
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "cluster-autoscaler-priority-expander",
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      "cluster-autoscaler-priority-expander",
+		Namespace: metav1.NamespaceSystem,
 		Data: map[string]string{
 			"priorities": string(priorityConfig),
 		},

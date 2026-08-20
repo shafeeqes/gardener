@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -105,25 +104,23 @@ subjects:
 		sm = fakesecretsmanager.New(fakeClient, namespace)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 
 		access = NewAccess(fakeClient, namespace, sm, AccessValues{
 			ServerInCluster: serverInCluster,
 		})
 
 		expectedProbeSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            probeSecretName,
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "dependency-watchdog-probe",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
+			Name:            probeSecretName,
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "dependency-watchdog-probe",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
+			},
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{"kubeconfig": []byte(`apiVersion: v1
@@ -145,13 +142,11 @@ users:
 		}
 
 		expectedManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-core-dependency-watchdog",
-				Namespace:       namespace,
-				Labels:          map[string]string{"origin": "gardener"},
-				Annotations:     map[string]string{"reference.resources.gardener.cloud/secret-e3a35806": "managedresource-shoot-core-dependency-watchdog-3cb55785"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-core-dependency-watchdog",
+			Namespace:       namespace,
+			Labels:          map[string]string{"origin": "gardener"},
+			Annotations:     map[string]string{"reference.resources.gardener.cloud/secret-e3a35806": "managedresource-shoot-core-dependency-watchdog-3cb55785"},
+			ResourceVersion: "1",
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{
 					{
@@ -163,12 +158,10 @@ users:
 			},
 		}
 		expectedManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-shoot-core-dependency-watchdog-3cb55785",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/garbage-collectable-reference": "true",
-				},
+			Name:      "managedresource-shoot-core-dependency-watchdog-3cb55785",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/garbage-collectable-reference": "true",
 			},
 		}
 	})
@@ -183,15 +176,15 @@ users:
 		It("should successfully deploy all resources", func() {
 			Expect(access.Deploy(ctx)).To(Succeed())
 
-			reconciledInternalProbeSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: probeSecretName, Namespace: namespace}}
+			reconciledInternalProbeSecret := &corev1.Secret{Name: probeSecretName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledInternalProbeSecret), reconciledInternalProbeSecret)).To(Succeed())
 			Expect(reconciledInternalProbeSecret).To(DeepEqual(expectedProbeSecret))
 
-			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "shoot-core-dependency-watchdog", Namespace: namespace}}
+			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{Name: "shoot-core-dependency-watchdog", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledManagedResource), reconciledManagedResource)).To(Succeed())
 			Expect(reconciledManagedResource).To(DeepEqual(expectedManagedResource))
 
-			reconciledManagedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "managedresource-shoot-core-dependency-watchdog-3cb55785", Namespace: namespace}}
+			reconciledManagedResourceSecret := &corev1.Secret{Name: "managedresource-shoot-core-dependency-watchdog-3cb55785", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledManagedResourceSecret), reconciledManagedResourceSecret)).To(Succeed())
 			Expect(reconciledManagedResourceSecret.Type).To(Equal(corev1.SecretTypeOpaque))
 			Expect(reconciledManagedResourceSecret.Immutable).To(Equal(new(true)))
@@ -210,11 +203,11 @@ users:
 
 	Describe("#Destroy", func() {
 		It("should delete the secrets", func() {
-			reconciledInternalProbeSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: probeSecretName, Namespace: namespace}}
+			reconciledInternalProbeSecret := &corev1.Secret{Name: probeSecretName, Namespace: namespace}
 			Expect(fakeClient.Create(ctx, reconciledInternalProbeSecret)).To(Succeed())
-			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: "shoot-core-dependency-watchdog", Namespace: namespace}}
+			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{Name: "shoot-core-dependency-watchdog", Namespace: namespace}
 			Expect(fakeClient.Create(ctx, reconciledManagedResource)).To(Succeed())
-			reconciledManagedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "managedresource-shoot-core-dependency-watchdog-31b5e010", Namespace: namespace}}
+			reconciledManagedResourceSecret := &corev1.Secret{Name: "managedresource-shoot-core-dependency-watchdog-31b5e010", Namespace: namespace}
 			Expect(fakeClient.Create(ctx, reconciledManagedResourceSecret)).To(Succeed())
 
 			Expect(access.Destroy(ctx)).To(Succeed())

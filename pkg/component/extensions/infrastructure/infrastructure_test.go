@@ -95,20 +95,16 @@ var _ = Describe("#Interface", func() {
 		}
 
 		empty = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		}
 
 		expected = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-				},
+			Name:      name,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+				v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
 			},
 			Spec: extensionsv1alpha1.InfrastructureSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -179,10 +175,8 @@ var _ = Describe("#Interface", func() {
 
 			expected.ResourceVersion = "2"
 			expected.Status = extensionsv1alpha1.InfrastructureStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastOperation: &gardencorev1beta1.LastOperation{
-						State: gardencorev1beta1.LastOperationStateError,
-					},
+				LastOperation: &gardencorev1beta1.LastOperation{
+					State: gardencorev1beta1.LastOperationStateError,
 				},
 			}
 
@@ -192,10 +186,9 @@ var _ = Describe("#Interface", func() {
 			deployWaiter.SetSSHPublicKey(sshPublicKey)
 			Expect(deployWaiter.Deploy(ctx)).To(Succeed())
 
-			deployedInfra := &extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{
+			deployedInfra := &extensionsv1alpha1.Infrastructure{
 				Name:      existingInfra.Name,
-				Namespace: existingInfra.Namespace,
-			}}
+				Namespace: existingInfra.Namespace}
 			err := c.Get(ctx, client.ObjectKeyFromObject(deployedInfra), deployedInfra)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(deployedInfra).To(DeepEqual(expected))
@@ -213,11 +206,9 @@ var _ = Describe("#Interface", func() {
 
 			expected.ResourceVersion = "2"
 			expected.Status = extensionsv1alpha1.InfrastructureStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastOperation: &gardencorev1beta1.LastOperation{
-						State:          gardencorev1beta1.LastOperationStateSucceeded,
-						LastUpdateTime: metav1.NewTime(now.Truncate(time.Second)), // this is also truncated when read from the client later on in the test
-					},
+				LastOperation: &gardencorev1beta1.LastOperation{
+					State:          gardencorev1beta1.LastOperationStateSucceeded,
+					LastUpdateTime: metav1.NewTime(now.Truncate(time.Second)), // this is also truncated when read from the client later on in the test
 				},
 			}
 
@@ -227,10 +218,9 @@ var _ = Describe("#Interface", func() {
 			deployWaiter.SetSSHPublicKey(sshPublicKey)
 			Expect(deployWaiter.Deploy(ctx)).To(Succeed())
 
-			deployedInfra := &extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{
+			deployedInfra := &extensionsv1alpha1.Infrastructure{
 				Name:      existingInfra.Name,
-				Namespace: existingInfra.Namespace,
-			}}
+				Namespace: existingInfra.Namespace}
 			err := c.Get(ctx, client.ObjectKeyFromObject(deployedInfra), deployedInfra)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(deployedInfra).To(DeepEqual(expected))

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -61,25 +60,23 @@ var _ = Describe("AuditWebhook", func() {
 
 		It("should successfully deploy the audit webhook kubeconfig secret resource", func() {
 			expectedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "apiserver-audit-webhook-kubeconfig", Namespace: namespace},
-				Data:       map[string][]byte{"kubeconfig.yaml": kubeconfig},
+				Name: "apiserver-audit-webhook-kubeconfig", Namespace: namespace,
+				Data: map[string][]byte{"kubeconfig.yaml": kubeconfig},
 			}
 			Expect(kubernetesutils.MakeUnique(expectedSecret)).To(Succeed())
 
-			actualSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-audit-webhook-kubeconfig", Namespace: namespace}}
+			actualSecret := &corev1.Secret{Name: "apiserver-audit-webhook-kubeconfig", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecret), actualSecret)).To(BeNotFoundError())
 
 			Expect(ReconcileSecretAuditWebhookKubeconfig(ctx, fakeClient, actualSecret, &AuditConfig{Webhook: &AuditWebhook{Kubeconfig: kubeconfig}})).To(Succeed())
 
 			Expect(actualSecret).To(DeepEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            expectedSecret.Name,
-					Namespace:       expectedSecret.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
-				Data:      expectedSecret.Data,
+				Name:            expectedSecret.Name,
+				Namespace:       expectedSecret.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            expectedSecret.Data,
 			}))
 		})
 	})
@@ -87,25 +84,23 @@ var _ = Describe("AuditWebhook", func() {
 	Describe("#ReconcileSecretWebhookKubeconfig", func() {
 		It("should successfully deploy the kubeconfig secret and make it unique", func() {
 			expectedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "apiserver-kubeconfig", Namespace: namespace},
-				Data:       map[string][]byte{"kubeconfig.yaml": kubeconfig},
+				Name: "apiserver-kubeconfig", Namespace: namespace,
+				Data: map[string][]byte{"kubeconfig.yaml": kubeconfig},
 			}
 			Expect(kubernetesutils.MakeUnique(expectedSecret)).To(Succeed())
 
-			actualSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-kubeconfig", Namespace: namespace}}
+			actualSecret := &corev1.Secret{Name: "apiserver-kubeconfig", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(expectedSecret), actualSecret)).To(BeNotFoundError())
 
 			Expect(ReconcileSecretAuditWebhookKubeconfig(ctx, fakeClient, actualSecret, &AuditConfig{Webhook: &AuditWebhook{Kubeconfig: kubeconfig}})).To(Succeed())
 
 			Expect(actualSecret).To(DeepEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            expectedSecret.Name,
-					Namespace:       expectedSecret.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
-				Data:      expectedSecret.Data,
+				Name:            expectedSecret.Name,
+				Namespace:       expectedSecret.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            expectedSecret.Data,
 			}))
 		})
 	})
@@ -113,7 +108,7 @@ var _ = Describe("AuditWebhook", func() {
 	Describe("#ReconcileConfigMapAuditPolicy", func() {
 		It("should successfully deploy the configmap resource w/ default policy", func() {
 			configMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{Name: "audit-policy-config", Namespace: namespace},
+				Name: "audit-policy-config", Namespace: namespace,
 				Data: map[string]string{"audit-policy.yaml": `apiVersion: audit.k8s.io/v1
 kind: Policy
 metadata:
@@ -131,14 +126,12 @@ rules:
 			actualConfigMap := &corev1.ConfigMap{ObjectMeta: configMap.ObjectMeta}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualConfigMap), actualConfigMap)).To(Succeed())
 			Expect(actualConfigMap).To(DeepEqual(&corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMap.Name,
-					Namespace:       configMap.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
-				Data:      configMap.Data,
+				Name:            configMap.Name,
+				Namespace:       configMap.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            configMap.Data,
 			}))
 		})
 
@@ -146,8 +139,8 @@ rules:
 			policy := "some-audit-policy"
 
 			configMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{Name: "audit-policy-config", Namespace: namespace},
-				Data:       map[string]string{"audit-policy.yaml": policy},
+				Name: "audit-policy-config", Namespace: namespace,
+				Data: map[string]string{"audit-policy.yaml": policy},
 			}
 			Expect(kubernetesutils.MakeUnique(configMap)).To(Succeed())
 
@@ -158,14 +151,12 @@ rules:
 			actualConfigMap := &corev1.ConfigMap{ObjectMeta: configMap.ObjectMeta}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualConfigMap), actualConfigMap)).To(Succeed())
 			Expect(actualConfigMap).To(DeepEqual(&corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMap.Name,
-					Namespace:       configMap.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
-				Data:      configMap.Data,
+				Name:            configMap.Name,
+				Namespace:       configMap.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            configMap.Data,
 			}))
 		})
 	})
@@ -175,7 +166,7 @@ rules:
 			deployment := &appsv1.Deployment{}
 			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{})
 
-			configMapAuditPolicy := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "audit-policy"}}
+			configMapAuditPolicy := &corev1.ConfigMap{Name: "audit-policy"}
 
 			InjectAuditSettings(deployment, configMapAuditPolicy, nil, nil)
 
@@ -194,12 +185,8 @@ rules:
 							}},
 							Volumes: []corev1.Volume{{
 								Name: "audit-policy-config",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMapAuditPolicy.Name,
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: configMapAuditPolicy.Name,
 								},
 							}},
 						},
@@ -212,8 +199,8 @@ rules:
 			deployment := &appsv1.Deployment{}
 			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{})
 
-			configMapAuditPolicy := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "audit-policy"}}
-			secretWebhookKubeconfig := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "audit-webhook"}}
+			configMapAuditPolicy := &corev1.ConfigMap{Name: "audit-policy"}
+			secretWebhookKubeconfig := &corev1.Secret{Name: "audit-webhook"}
 
 			InjectAuditSettings(deployment, configMapAuditPolicy, secretWebhookKubeconfig, &AuditConfig{Webhook: &AuditWebhook{
 				Kubeconfig:   []byte("foo"),
@@ -247,20 +234,14 @@ rules:
 							Volumes: []corev1.Volume{
 								{
 									Name: "audit-policy-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: configMapAuditPolicy.Name,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: configMapAuditPolicy.Name,
 									},
 								},
 								{
 									Name: "audit-webhook-kubeconfig",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName: secretWebhookKubeconfig.Name,
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: secretWebhookKubeconfig.Name,
 									},
 								},
 							},

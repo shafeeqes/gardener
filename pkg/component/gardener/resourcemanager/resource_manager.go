@@ -435,7 +435,7 @@ func (r *resourceManager) Destroy(ctx context.Context) error {
 		}
 
 		objectsToDelete = append([]client.Object{
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: crd.Name}},
+			&apiextensionsv1.CustomResourceDefinition{Name: crd.Name},
 			r.emptyMutatingWebhookConfiguration(),
 			r.emptyValidatingWebhookConfiguration(),
 			r.emptyClusterRole(),
@@ -466,7 +466,7 @@ func (r *resourceManager) ensureCustomResourceDefinition(ctx context.Context) er
 		return err
 	}
 
-	crd := &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: desiredCRD.Name}}
+	crd := &apiextensionsv1.CustomResourceDefinition{Name: desiredCRD.Name}
 	_, err = controllerutils.GetAndCreateOrMergePatch(ctx, r.client, crd, func() error {
 		crd.Annotations = utils.MergeStringMaps(crd.Annotations, desiredCRD.Annotations)
 		crd.Labels = utils.MergeStringMaps(crd.Labels, desiredCRD.Labels)
@@ -515,7 +515,7 @@ func (r *resourceManager) ensureClusterRole(ctx context.Context, policies []rbac
 }
 
 func (r *resourceManager) emptyClusterRole() *rbacv1.ClusterRole {
-	return &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + clusterRoleName}}
+	return &rbacv1.ClusterRole{Name: r.values.NamePrefix + clusterRoleName}
 }
 
 func (r *resourceManager) ensureClusterRoleBinding(ctx context.Context) error {
@@ -542,7 +542,7 @@ func (r *resourceManager) emptyClusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	if r.namespace == metav1.NamespaceSystem {
 		name = strings.ReplaceAll(name, "seed", "shoot")
 	}
-	return &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	return &rbacv1.ClusterRoleBinding{Name: name}
 }
 
 func (r *resourceManager) ensureConfigMap(ctx context.Context, config *resourcemanagerconfigv1alpha1.ResourceManagerConfiguration, configMap *corev1.ConfigMap) error {
@@ -712,7 +712,7 @@ func (r *resourceManager) ensureConfigMap(ctx context.Context, config *resourcem
 }
 
 func (r *resourceManager) emptyConfigMap() *corev1.ConfigMap {
-	return &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + configMapNamePrefix, Namespace: r.namespace}}
+	return &corev1.ConfigMap{Name: r.values.NamePrefix + configMapNamePrefix, Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensureRoleInWatchedNamespace(ctx context.Context, policies ...rbacv1.PolicyRule) error {
@@ -726,7 +726,7 @@ func (r *resourceManager) ensureRoleInWatchedNamespace(ctx context.Context, poli
 }
 
 func (r *resourceManager) emptyRoleInWatchedNamespace() *rbacv1.Role {
-	return &rbacv1.Role{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + roleName, Namespace: *r.values.WatchedNamespace}}
+	return &rbacv1.Role{Name: r.values.NamePrefix + roleName, Namespace: *r.values.WatchedNamespace}
 }
 
 func (r *resourceManager) ensureRoleBinding(ctx context.Context) error {
@@ -749,7 +749,7 @@ func (r *resourceManager) ensureRoleBinding(ctx context.Context) error {
 }
 
 func (r *resourceManager) emptyRoleBindingInWatchedNamespace() *rbacv1.RoleBinding {
-	return &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + roleName, Namespace: *r.values.WatchedNamespace}}
+	return &rbacv1.RoleBinding{Name: r.values.NamePrefix + roleName, Namespace: *r.values.WatchedNamespace}
 }
 
 func (r *resourceManager) ensureService(ctx context.Context) error {
@@ -809,7 +809,7 @@ func (r *resourceManager) ensureService(ctx context.Context) error {
 }
 
 func (r *resourceManager) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + resourcemanagerconstants.ServiceName, Namespace: r.namespace}}
+	return &corev1.Service{Name: r.values.NamePrefix + resourcemanagerconstants.ServiceName, Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev1.ConfigMap) error {
@@ -895,12 +895,10 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 		}
 
 		deployment.Spec.Template = corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: utils.MergeStringMaps(r.getDeploymentTemplateLabels(), r.getNetworkPolicyLabels(), map[string]string{
-					resourcesv1alpha1.ProjectedTokenSkip:         "true",
-					resourcesv1alpha1.SystemComponentsConfigSkip: "true",
-				}),
-			},
+			Labels: utils.MergeStringMaps(r.getDeploymentTemplateLabels(), r.getNetworkPolicyLabels(), map[string]string{
+				resourcesv1alpha1.ProjectedTokenSkip:         "true",
+				resourcesv1alpha1.SystemComponentsConfigSkip: "true",
+			}),
 			Spec: corev1.PodSpec{
 				PriorityClassName: priorityClassName,
 				SecurityContext: &corev1.PodSecurityContext{
@@ -936,12 +934,10 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 							},
 						},
 						LivenessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/healthz",
-									Scheme: "HTTP",
-									Port:   intstr.FromInt32(r.healthPort()),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/healthz",
+								Scheme: "HTTP",
+								Port:   intstr.FromInt32(r.healthPort()),
 							},
 							InitialDelaySeconds: 30,
 							FailureThreshold:    5,
@@ -950,12 +946,10 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 							TimeoutSeconds:      5,
 						},
 						ReadinessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path:   "/readyz",
-									Scheme: "HTTP",
-									Port:   intstr.FromInt32(r.healthPort()),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path:   "/readyz",
+								Scheme: "HTTP",
+								Port:   intstr.FromInt32(r.healthPort()),
 							},
 							InitialDelaySeconds: 10,
 						},
@@ -986,37 +980,33 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 				Volumes: []corev1.Volume{
 					{
 						Name: volumeNameAPIServerAccess,
-						VolumeSource: corev1.VolumeSource{
-							Projected: &corev1.ProjectedVolumeSource{
-								DefaultMode: new(int32(420)),
-								Sources: []corev1.VolumeProjection{
-									{
-										ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
-											ExpirationSeconds: new(int64(60 * 60 * 12)),
-											Path:              "token",
-										},
+						Projected: &corev1.ProjectedVolumeSource{
+							DefaultMode: new(int32(420)),
+							Sources: []corev1.VolumeProjection{
+								{
+									ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+										ExpirationSeconds: new(int64(60 * 60 * 12)),
+										Path:              "token",
 									},
-									{
-										ConfigMap: &corev1.ConfigMapProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: "kube-root-ca.crt",
+								},
+								{
+									ConfigMap: &corev1.ConfigMapProjection{
+										Name: "kube-root-ca.crt",
+										Items: []corev1.KeyToPath{{
+											Key:  "ca.crt",
+											Path: "ca.crt",
+										}},
+									},
+								},
+								{
+									DownwardAPI: &corev1.DownwardAPIProjection{
+										Items: []corev1.DownwardAPIVolumeFile{{
+											FieldRef: &corev1.ObjectFieldSelector{
+												APIVersion: "v1",
+												FieldPath:  "metadata.namespace",
 											},
-											Items: []corev1.KeyToPath{{
-												Key:  "ca.crt",
-												Path: "ca.crt",
-											}},
-										},
-									},
-									{
-										DownwardAPI: &corev1.DownwardAPIProjection{
-											Items: []corev1.DownwardAPIVolumeFile{{
-												FieldRef: &corev1.ObjectFieldSelector{
-													APIVersion: "v1",
-													FieldPath:  "metadata.namespace",
-												},
-												Path: "namespace",
-											}},
-										},
+											Path: "namespace",
+										}},
 									},
 								},
 							},
@@ -1024,21 +1014,15 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 					},
 					{
 						Name: volumeNameCerts,
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName:  secretServer.Name,
-								DefaultMode: new(int32(420)),
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName:  secretServer.Name,
+							DefaultMode: new(int32(420)),
 						},
 					},
 					{
 						Name: volumeNameConfiguration,
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: configMap.Name,
-								},
-							},
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							Name: configMap.Name,
 						},
 					},
 				},
@@ -1049,11 +1033,9 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 			if r.secrets.BootstrapKubeconfig != nil {
 				deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 					Name: volumeNameBootstrapKubeconfig,
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  r.secrets.BootstrapKubeconfig.Name,
-							DefaultMode: new(int32(420)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  r.secrets.BootstrapKubeconfig.Name,
+						DefaultMode: new(int32(420)),
 					},
 				})
 				deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
@@ -1101,7 +1083,7 @@ func (r *resourceManager) ensureDeployment(ctx context.Context, configMap *corev
 }
 
 func (r *resourceManager) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: r.namespace}}
+	return &appsv1.Deployment{Name: r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensureServiceAccount(ctx context.Context) error {
@@ -1115,7 +1097,7 @@ func (r *resourceManager) ensureServiceAccount(ctx context.Context) error {
 }
 
 func (r *resourceManager) emptyServiceAccount() *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + serviceAccountName, Namespace: r.namespace}}
+	return &corev1.ServiceAccount{Name: r.values.NamePrefix + serviceAccountName, Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensureVPA(ctx context.Context) error {
@@ -1149,7 +1131,7 @@ func (r *resourceManager) ensureVPA(ctx context.Context) error {
 }
 
 func (r *resourceManager) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager-vpa", Namespace: r.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: "gardener-resource-manager-vpa", Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensurePodDisruptionBudget(ctx context.Context) error {
@@ -1173,10 +1155,8 @@ func (r *resourceManager) ensurePodDisruptionBudget(ctx context.Context) error {
 
 func (r *resourceManager) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
 	return &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager,
-			Namespace: r.namespace,
-		},
+		Name:      r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager,
+		Namespace: r.namespace,
 	}
 }
 
@@ -1251,7 +1231,7 @@ func (r *resourceManager) emptyMutatingWebhookConfiguration() *admissionregistra
 	if r.values.ResponsibilityMode == ForShootOrVirtualGarden {
 		suffix = "-shoot"
 	}
-	return &admissionregistrationv1.MutatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager + suffix, Namespace: r.namespace}}
+	return &admissionregistrationv1.MutatingWebhookConfiguration{Name: r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager + suffix, Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensureValidatingWebhookConfiguration(ctx context.Context) error {
@@ -1277,7 +1257,7 @@ func (r *resourceManager) ensureValidatingWebhookConfiguration(ctx context.Conte
 }
 
 func (r *resourceManager) emptyValidatingWebhookConfiguration() *admissionregistrationv1.ValidatingWebhookConfiguration {
-	return &admissionregistrationv1.ValidatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{Name: r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: r.namespace}}
+	return &admissionregistrationv1.ValidatingWebhookConfiguration{Name: r.values.NamePrefix + v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: r.namespace}
 }
 
 func (r *resourceManager) ensureShootResources(ctx context.Context, config *resourcemanagerconfigv1alpha1.ResourceManagerConfiguration) error {
@@ -1290,10 +1270,8 @@ func (r *resourceManager) ensureShootResources(ctx context.Context, config *reso
 
 	if r.namespace != metav1.NamespaceSystem {
 		if err := registry.Add(&rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "gardener.cloud:target:resource-manager",
-				Annotations: map[string]string{resourcesv1alpha1.KeepObject: "true"},
-			},
+			Name:        "gardener.cloud:target:resource-manager",
+			Annotations: map[string]string{resourcesv1alpha1.KeepObject: "true"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -1421,12 +1399,10 @@ func NewCRDDeletionProtectionValidatingWebhooks(secretServerCA *corev1.Secret, b
 		{
 			Name: "crd-deletion-protection.resources.gardener.cloud",
 			Rules: []admissionregistrationv1.RuleWithOperations{{
-				Rule: admissionregistrationv1.Rule{
-					APIGroups:   []string{apiextensionsv1.GroupName},
-					APIVersions: []string{apiextensionsv1beta1.SchemeGroupVersion.Version, apiextensionsv1.SchemeGroupVersion.Version},
-					Resources:   []string{"customresourcedefinitions"},
-				},
-				Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
+				APIGroups:   []string{apiextensionsv1.GroupName},
+				APIVersions: []string{apiextensionsv1beta1.SchemeGroupVersion.Version, apiextensionsv1.SchemeGroupVersion.Version},
+				Resources:   []string{"customresourcedefinitions"},
+				Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
 			}},
 			FailurePolicy:           &failurePolicy,
 			NamespaceSelector:       &metav1.LabelSelector{},
@@ -1441,33 +1417,29 @@ func NewCRDDeletionProtectionValidatingWebhooks(secretServerCA *corev1.Secret, b
 			Name: "cr-deletion-protection.resources.gardener.cloud",
 			Rules: []admissionregistrationv1.RuleWithOperations{
 				{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{druidcorev1alpha1.SchemeGroupVersion.Group},
-						APIVersions: []string{druidcorev1alpha1.SchemeGroupVersion.Version},
-						Resources: []string{
-							"etcds",
-						},
+					APIGroups:   []string{druidcorev1alpha1.SchemeGroupVersion.Group},
+					APIVersions: []string{druidcorev1alpha1.SchemeGroupVersion.Version},
+					Resources: []string{
+						"etcds",
 					},
 					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
 				},
 				{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{extensionsv1alpha1.SchemeGroupVersion.Group},
-						APIVersions: []string{extensionsv1alpha1.SchemeGroupVersion.Version},
-						Resources: []string{
-							"backupbuckets",
-							"backupentries",
-							"bastions",
-							"containerruntimes",
-							"controlplanes",
-							"dnsrecords",
-							"extensions",
-							"infrastructures",
-							"networks",
-							"operatingsystemconfigs",
-							"selfhostedshootexposures",
-							"workers",
-						},
+					APIGroups:   []string{extensionsv1alpha1.SchemeGroupVersion.Group},
+					APIVersions: []string{extensionsv1alpha1.SchemeGroupVersion.Version},
+					Resources: []string{
+						"backupbuckets",
+						"backupentries",
+						"bastions",
+						"containerruntimes",
+						"controlplanes",
+						"dnsrecords",
+						"extensions",
+						"infrastructures",
+						"networks",
+						"operatingsystemconfigs",
+						"selfhostedshootexposures",
+						"workers",
 					},
 					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Delete},
 				},
@@ -1636,12 +1608,10 @@ func (r *resourceManager) newProjectedTokenMountMutatingWebhook(namespaceSelecto
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "projected-token-mount.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 		}},
 		NamespaceSelector: namespaceSelector,
 		ObjectSelector: &metav1.LabelSelector{
@@ -1672,12 +1642,10 @@ func NewPodKubeAPIServerLoadBalancingMutatingWebhook(namespaceSelector, objectSe
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "pod-" + labelSelectorPrefix + "kube-apiserver-load-balancing.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 		}},
 		NamespaceSelector:       namespaceSelector,
 		ObjectSelector:          objectSelector,
@@ -1696,12 +1664,10 @@ func NewPodSchedulerNameMutatingWebhook(namespaceSelector *metav1.LabelSelector,
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "pod-scheduler-name.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 		}},
 		NamespaceSelector:       namespaceSelector,
 		ObjectSelector:          &metav1.LabelSelector{},
@@ -1744,12 +1710,10 @@ func NewPodTopologySpreadConstraintsMutatingWebhook(
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "pod-topology-spread-constraints.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 		}},
 		NamespaceSelector:       namespaceSelector,
 		ObjectSelector:          oSelector,
@@ -1773,12 +1737,10 @@ func NewSeccompProfileMutatingWebhook(
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "seccomp-profile.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 		}},
 		NamespaceSelector: namespaceSelector,
 		ObjectSelector: &metav1.LabelSelector{
@@ -1825,12 +1787,10 @@ func NewKubernetesServiceHostMutatingWebhook(
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "kubernetes-service-host.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
-			Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
+			Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 		}},
 		NamespaceSelector: nsSelector,
 		ObjectSelector: &metav1.LabelSelector{
@@ -1869,11 +1829,9 @@ func NewSystemComponentsConfigMutatingWebhook(namespaceSelector, objectSelector 
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "system-components-config.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{corev1.GroupName},
-				APIVersions: []string{corev1.SchemeGroupVersion.Version},
-				Resources:   []string{"pods"},
-			},
+			APIGroups:   []string{corev1.GroupName},
+			APIVersions: []string{corev1.SchemeGroupVersion.Version},
+			Resources:   []string{"pods"},
 			Operations: []admissionregistrationv1.OperationType{
 				admissionregistrationv1.Create,
 			},
@@ -1914,22 +1872,18 @@ func NewHighAvailabilityConfigMutatingWebhook(namespaceSelector, objectSelector 
 		Name: "high-availability-config.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{
 			{
-				Rule: admissionregistrationv1.Rule{
-					APIGroups:   []string{appsv1.GroupName},
-					APIVersions: []string{appsv1.SchemeGroupVersion.Version},
-					Resources:   []string{"deployments", "statefulsets"},
-				},
+				APIGroups:   []string{appsv1.GroupName},
+				APIVersions: []string{appsv1.SchemeGroupVersion.Version},
+				Resources:   []string{"deployments", "statefulsets"},
 				Operations: []admissionregistrationv1.OperationType{
 					admissionregistrationv1.Create,
 					admissionregistrationv1.Update,
 				},
 			},
 			{
-				Rule: admissionregistrationv1.Rule{
-					APIGroups:   []string{autoscalingv2.GroupName},
-					APIVersions: []string{autoscalingv2.SchemeGroupVersion.Version},
-					Resources:   []string{"horizontalpodautoscalers"},
-				},
+				APIGroups:   []string{autoscalingv2.GroupName},
+				APIVersions: []string{autoscalingv2.SchemeGroupVersion.Version},
+				Resources:   []string{"horizontalpodautoscalers"},
 				Operations: []admissionregistrationv1.OperationType{
 					admissionregistrationv1.Create,
 					admissionregistrationv1.Update,
@@ -1957,11 +1911,9 @@ func NewInPlaceUpdatesWebhook(
 	return admissionregistrationv1.MutatingWebhook{
 		Name: "vpa-in-place-updates.resources.gardener.cloud",
 		Rules: []admissionregistrationv1.RuleWithOperations{{
-			Rule: admissionregistrationv1.Rule{
-				APIGroups:   []string{vpaautoscalingv1.SchemeGroupVersion.Group},
-				APIVersions: []string{vpaautoscalingv1.SchemeGroupVersion.Version},
-				Resources:   []string{"verticalpodautoscalers"},
-			},
+			APIGroups:   []string{vpaautoscalingv1.SchemeGroupVersion.Group},
+			APIVersions: []string{vpaautoscalingv1.SchemeGroupVersion.Version},
+			Resources:   []string{"verticalpodautoscalers"},
 			Operations: []admissionregistrationv1.OperationType{
 				admissionregistrationv1.Create,
 				admissionregistrationv1.Update,

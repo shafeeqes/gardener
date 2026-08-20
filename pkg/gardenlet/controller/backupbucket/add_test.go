@@ -10,8 +10,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -34,9 +32,7 @@ var _ = Describe("Add", func() {
 		}
 
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: bucketName,
-			},
+			Name: bucketName,
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				SeedName: new("seed"),
 			},
@@ -89,15 +85,13 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			extensionBackupBucket = &extensionsv1alpha1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: bucketName,
-				},
+				Name: bucketName,
 			}
 		})
 
 		It("should return a request with the core.gardener.cloud/v1beta1.BackupBucket name", func() {
 			Expect(reconciler.MapExtensionBackupBucketToCoreBackupBucket(ctx, extensionBackupBucket)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: extensionBackupBucket.Name}},
+				reconcile.Request{Name: extensionBackupBucket.Name},
 			))
 		})
 	})

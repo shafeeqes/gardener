@@ -122,56 +122,40 @@ var _ = Describe("handler", func() {
 
 		shootv1beta1 = func() runtime.Object {
 			return &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Shoot",
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: "garden-my-project",
-					Name:      "my-shoot",
-				},
+				Kind:       "Shoot",
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Namespace:  "garden-my-project",
+				Name:       "my-shoot",
 			}
 		}
 
 		project = func() runtime.Object {
 			return &gardencorev1beta1.Project{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Project",
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "my-project",
-				},
+				Kind:       "Project",
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Name:       "my-project",
 			}
 		}
 
 		secret = func() runtime.Object {
 			return &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Secret",
-					APIVersion: corev1.SchemeGroupVersion.String(),
-				},
+				Kind:       "Secret",
+				APIVersion: corev1.SchemeGroupVersion.String(),
 			}
 		}
 
 		configMap = func() runtime.Object {
 			return &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: corev1.SchemeGroupVersion.String(),
-				},
+				Kind:       "ConfigMap",
+				APIVersion: corev1.SchemeGroupVersion.String(),
 			}
 		}
 
 		seed = func() runtime.Object {
 			return &gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Seed",
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "my-seed",
-				},
+				Kind:       "Seed",
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Name:       "my-seed",
 			}
 		}
 
@@ -290,14 +274,10 @@ var _ = Describe("handler", func() {
 	It("should pass because size is in range for v1beta1 shoot without considering status", func() {
 		largeShoot := func() runtime.Object {
 			shootWithLargeStatus := &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Shoot",
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: "garden-my-project",
-					Name:      "my-shoot",
-				},
+				Kind:       "Shoot",
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Namespace:  "garden-my-project",
+				Name:       "my-shoot",
 				Status: gardencorev1beta1.ShootStatus{
 					LastOperation: &gardencorev1beta1.LastOperation{
 						Description: "This is a very long description that can happen if e.g. each node's error message is appended and a lot of nodes exist.",
@@ -315,15 +295,11 @@ var _ = Describe("handler", func() {
 	It("should pass because size is in range for v1beta1 shoot without considering managed fields", func() {
 		largeShoot := func() runtime.Object {
 			shootWithLargeStatus := &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Shoot",
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:     "garden-my-project",
-					Name:          "my-shoot",
-					ManagedFields: []metav1.ManagedFieldsEntry{{Manager: "manager", Operation: "Update", FieldsV1: &metav1.FieldsV1{Raw: []byte("{\"testPayload\": \"This is some random large payload to mock some managed fields entries that are to be filtered out for size comparison\"}")}}},
-				},
+				Kind:          "Shoot",
+				APIVersion:    gardencorev1beta1.SchemeGroupVersion.String(),
+				Namespace:     "garden-my-project",
+				Name:          "my-shoot",
+				ManagedFields: []metav1.ManagedFieldsEntry{{Manager: "manager", Operation: "Update", FieldsV1: &metav1.FieldsV1{Raw: []byte("{\"testPayload\": \"This is some random large payload to mock some managed fields entries that are to be filtered out for size comparison\"}")}}},
 			}
 			objData, err := runtime.Encode(testEncoder, shootWithLargeStatus)
 			Expect(err).NotTo(HaveOccurred())

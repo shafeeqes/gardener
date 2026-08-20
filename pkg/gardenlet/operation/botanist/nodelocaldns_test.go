@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -135,16 +134,12 @@ var _ = Describe("NodeLocalDNS", func() {
 
 		It("should include worker pool names of stale nodes (e.g. after a pool rename)", func() {
 			oldNode := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "old-node",
-					Labels: map[string]string{v1beta1constants.LabelWorkerPool: "worker-old"},
-				},
+				Name:   "old-node",
+				Labels: map[string]string{v1beta1constants.LabelWorkerPool: "worker-old"},
 			}
 			newNode := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "new-node",
-					Labels: map[string]string{v1beta1constants.LabelWorkerPool: "worker-aaaa"},
-				},
+				Name:   "new-node",
+				Labels: map[string]string{v1beta1constants.LabelWorkerPool: "worker-aaaa"},
 			}
 			Expect(shootClient.Create(ctx, oldNode)).To(Succeed())
 			Expect(shootClient.Create(ctx, newNode)).To(Succeed())
@@ -187,10 +182,8 @@ var _ = Describe("NodeLocalDNS", func() {
 			Context("but still node with label existing", func() {
 				It("label enabled", func() {
 					node := corev1.Node{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "node",
-							Labels: map[string]string{v1beta1constants.LabelNodeLocalDNS: strconv.FormatBool(true)},
-						},
+						Name:   "node",
+						Labels: map[string]string{v1beta1constants.LabelNodeLocalDNS: strconv.FormatBool(true)},
 					}
 					Expect(seedClient.Create(ctx, &node)).To(Succeed())
 					nodelocaldns.EXPECT().Destroy(ctx).Return(nil)
@@ -200,10 +193,8 @@ var _ = Describe("NodeLocalDNS", func() {
 
 				It("label disabled", func() {
 					node := corev1.Node{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   "node",
-							Labels: map[string]string{v1beta1constants.LabelNodeLocalDNS: strconv.FormatBool(false)},
-						},
+						Name:   "node",
+						Labels: map[string]string{v1beta1constants.LabelNodeLocalDNS: strconv.FormatBool(false)},
 					}
 					Expect(seedClient.Create(ctx, &node)).To(Succeed())
 					nodelocaldns.EXPECT().Destroy(ctx)

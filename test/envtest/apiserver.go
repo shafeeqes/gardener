@@ -314,10 +314,8 @@ func (g *GardenerAPIServer) registerGardenerAPIs(ctx context.Context) error {
 
 	// create ExternalName service pointing to localhost
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "gardener-apiserver",
-			Namespace: metav1.NamespaceSystem,
-		},
+		Name:      "gardener-apiserver",
+		Namespace: metav1.NamespaceSystem,
 		Spec: corev1.ServiceSpec{
 			Type:         corev1.ServiceTypeExternalName,
 			ExternalName: "localhost",
@@ -413,9 +411,7 @@ func (g *GardenerAPIServer) registerGardenerAPIs(ctx context.Context) error {
 func (g *GardenerAPIServer) apiServiceForSchemeGroupVersion(svc *corev1.Service, gv schema.GroupVersion) *apiregistrationv1.APIService {
 	port := int32(g.SecurePort) // #nosec G115 -- Test code.
 	return &apiregistrationv1.APIService{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: apiServiceNameForSchemeGroupVersion(gv),
-		},
+		Name: apiServiceNameForSchemeGroupVersion(gv),
 		Spec: apiregistrationv1.APIServiceSpec{
 			Service: &apiregistrationv1.ServiceReference{
 				Name:      svc.Name,

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -38,8 +37,8 @@ var _ = Describe("Observability", func() {
 			gardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 
 			seeds = []gardencorev1beta1.Seed{
-				{ObjectMeta: metav1.ObjectMeta{Name: "seed1"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "seed2"}},
+				{Name: "seed1"},
+				{Name: "seed2"},
 			}
 			for _, seed := range seeds {
 				Expect(gardenClient.Create(ctx, &seed)).To(Succeed())
@@ -47,14 +46,13 @@ var _ = Describe("Observability", func() {
 		})
 
 		createGlobalMonitoringSecretWithRawTimestamp := func(seedName, timestamp string) {
-			Expect(gardenClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			Expect(gardenClient.Create(ctx, &corev1.Secret{
 				Name:      "observability-ingress",
 				Namespace: gardenerutils.ComputeGardenNamespace(seedName),
 				Labels: map[string]string{
 					v1beta1constants.GardenRole:                       v1beta1constants.GardenRoleGlobalMonitoring,
 					secretsmanager.LabelKeyLastRotationInitiationTime: timestamp,
-				},
-			}})).To(Succeed())
+				}})).To(Succeed())
 		}
 
 		createGlobalMonitoringSecret := func(seedName string, timestamp int) {
@@ -62,11 +60,10 @@ var _ = Describe("Observability", func() {
 		}
 
 		createGlobalMonitoringSecretWithoutTimestamp := func(seedName string) {
-			Expect(gardenClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			Expect(gardenClient.Create(ctx, &corev1.Secret{
 				Name:      "observability-ingress",
 				Namespace: gardenerutils.ComputeGardenNamespace(seedName),
-				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleGlobalMonitoring},
-			}})).To(Succeed())
+				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleGlobalMonitoring}})).To(Succeed())
 		}
 
 		It("should succeed when the secret propagated to all seeds with the expected timestamp", func() {

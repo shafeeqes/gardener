@@ -67,7 +67,7 @@ var _ = Describe("Cleaner", func() {
 			It("should delete the target object", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
-				cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+				cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 				Expect(fakeClient.Create(ctx, cm1)).To(Succeed())
 
 				Expect(cleaner.Clean(ctx, fakeClient, cm1)).To(Succeed())
@@ -78,7 +78,7 @@ var _ = Describe("Cleaner", func() {
 			It("should succeed if not found error occurs for target object", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
-				cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+				cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 				Expect(cleaner.Clean(ctx, fakeClient, cm1)).To(Succeed())
 			})
 
@@ -92,15 +92,15 @@ var _ = Describe("Cleaner", func() {
 						},
 					}).Build()
 
-				cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+				cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 				Expect(cleaner.Clean(ctx, c, cm1)).To(Succeed())
 			})
 
 			It("should delete all objects matching the selector", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
-				cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
-				cm2 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar"}}
+				cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
+				cm2 := &corev1.ConfigMap{Namespace: "n", Name: "bar"}
 				Expect(fakeClient.Create(ctx, cm1)).To(Succeed())
 				Expect(fakeClient.Create(ctx, cm2)).To(Succeed())
 
@@ -141,7 +141,7 @@ var _ = Describe("Cleaner", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
 				cm := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"}},
+					Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"},
 				}
 				Expect(fakeClient.Create(ctx, cm)).To(Succeed())
 				Expect(fakeClient.Delete(ctx, cm)).To(Succeed())
@@ -175,8 +175,8 @@ var _ = Describe("Cleaner", func() {
 
 				fakeClock.SetTime(now)
 				ns := &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{Name: "baz", Finalizers: []string{"some-finalizer"}},
-					Spec:       corev1.NamespaceSpec{Finalizers: []corev1.FinalizerName{"kubernetes"}},
+					Name: "baz", Finalizers: []string{"some-finalizer"},
+					Spec: corev1.NamespaceSpec{Finalizers: []corev1.FinalizerName{"kubernetes"}},
 				}
 				Expect(c.Create(ctx, ns)).To(Succeed())
 				Expect(c.Delete(ctx, ns)).To(Succeed())
@@ -193,7 +193,7 @@ var _ = Describe("Cleaner", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
 				cm := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"}},
+					Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"},
 				}
 				Expect(fakeClient.Create(ctx, cm)).To(Succeed())
 				Expect(fakeClient.Delete(ctx, cm)).To(Succeed())
@@ -215,7 +215,7 @@ var _ = Describe("Cleaner", func() {
 					cleaner           = NewCleaner(fakeClock, NewFinalizer())
 				)
 
-				cm2 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar", DeletionTimestamp: &deletionTimestamp}}
+				cm2 := &corev1.ConfigMap{Namespace: "n", Name: "bar", DeletionTimestamp: &deletionTimestamp}
 				c := fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).
 					WithInterceptorFuncs(interceptor.Funcs{
 						Get: func(_ context.Context, _ client.WithWatch, key client.ObjectKey, obj client.Object, _ ...client.GetOption) error {
@@ -237,7 +237,7 @@ var _ = Describe("Cleaner", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
 				cmTemplate := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"}},
+					Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"},
 				}
 				for i := range 3 {
 					cm1 := cmTemplate.DeepCopy()
@@ -271,7 +271,7 @@ var _ = Describe("Cleaner", func() {
 
 				fakeClock.SetTime(now)
 				cm := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"}},
+					Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"},
 				}
 				Expect(c.Create(ctx, cm)).To(Succeed())
 				Expect(c.Delete(ctx, cm)).To(Succeed())
@@ -288,7 +288,7 @@ var _ = Describe("Cleaner", func() {
 				cleaner := NewCleaner(fakeClock, NewFinalizer())
 
 				cmTemplate := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"}},
+					Namespace: "n", Name: "bar", Finalizers: []string{"finalize.me"},
 				}
 
 				for i := range 3 {
@@ -317,8 +317,8 @@ var _ = Describe("Cleaner", func() {
 					cleaner           = NewCleaner(fakeClock, NewFinalizer())
 				)
 
-				cm1 := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar-1", DeletionTimestamp: &deletionTimestamp}}
-				cm2 := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar-2", DeletionTimestamp: &deletionTimestamp}}
+				cm1 := corev1.ConfigMap{Namespace: "n", Name: "bar-1", DeletionTimestamp: &deletionTimestamp}
+				cm2 := corev1.ConfigMap{Namespace: "n", Name: "bar-2", DeletionTimestamp: &deletionTimestamp}
 				c := fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).
 					WithInterceptorFuncs(interceptor.Funcs{
 						List: func(_ context.Context, _ client.WithWatch, list client.ObjectList, _ ...client.ListOption) error {
@@ -444,7 +444,7 @@ var _ = Describe("Cleaner", func() {
 
 			// Delete cleanup content objects so they get deletion timestamps
 			for name := range cleanupContent {
-				Expect(fakeClient.Delete(ctx, &volumesnapshotv1.VolumeSnapshotContent{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: name}})).To(Succeed())
+				Expect(fakeClient.Delete(ctx, &volumesnapshotv1.VolumeSnapshotContent{Namespace: "default", Name: name})).To(Succeed())
 			}
 
 			// Create remaining objects
@@ -454,7 +454,7 @@ var _ = Describe("Cleaner", func() {
 
 			// Delete content5 and content6 so they get deletion timestamps too
 			for _, name := range []string{"content5", "content6"} {
-				Expect(fakeClient.Delete(ctx, &volumesnapshotv1.VolumeSnapshotContent{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: name}})).To(Succeed())
+				Expect(fakeClient.Delete(ctx, &volumesnapshotv1.VolumeSnapshotContent{Namespace: "default", Name: name})).To(Succeed())
 			}
 
 			// Read back an actual deletion timestamp from one of the cleanup objects to determine "now"
@@ -517,7 +517,7 @@ var _ = Describe("Cleaner", func() {
 		})
 
 		It("should ensure that the object is gone when not found error occurs", func() {
-			cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+			cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 			Expect(EnsureGone(ctx, logr.Discard(), fakeClient, cm1)).To(Succeed())
 		})
 
@@ -529,7 +529,7 @@ var _ = Describe("Cleaner", func() {
 					},
 				}).Build()
 
-			cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+			cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 			Expect(EnsureGone(ctx, logr.Discard(), c, cm1)).To(Succeed())
 		})
 
@@ -563,14 +563,14 @@ var _ = Describe("Cleaner", func() {
 		})
 
 		It("should error that the object is still present", func() {
-			cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+			cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 			Expect(fakeClient.Create(ctx, cm1)).To(Succeed())
 
 			Expect(EnsureGone(ctx, logr.Discard(), fakeClient, cm1)).To(Equal(NewObjectsRemaining(cm1, kubernetesscheme.Scheme)))
 		})
 
 		It("should ensure that the object is ignored", func() {
-			cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+			cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 			Expect(fakeClient.Create(ctx, cm1)).To(Succeed())
 
 			Expect(EnsureGone(ctx, logr.Discard(), fakeClient, cm1, &CleanOptions{
@@ -584,8 +584,8 @@ var _ = Describe("Cleaner", func() {
 		})
 
 		It("should error that the list is non-empty", func() {
-			cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
-			cm2 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar"}}
+			cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
+			cm2 := &corev1.ConfigMap{Namespace: "n", Name: "bar"}
 			Expect(fakeClient.Create(ctx, cm1)).To(Succeed())
 			Expect(fakeClient.Create(ctx, cm2)).To(Succeed())
 
@@ -596,8 +596,8 @@ var _ = Describe("Cleaner", func() {
 		})
 
 		It("should ensure objects in list are ignored", func() {
-			cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
-			cm2 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "bar"}}
+			cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
+			cm2 := &corev1.ConfigMap{Namespace: "n", Name: "bar"}
 			Expect(fakeClient.Create(ctx, cm1)).To(Succeed())
 			Expect(fakeClient.Create(ctx, cm2)).To(Succeed())
 
@@ -629,7 +629,7 @@ var _ = Describe("Cleaner", func() {
 
 		Describe("CleanAndEnsureGone", func() {
 			It("should clean and ensure that the object is gone", func() {
-				cm1 := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: "n", Name: "foo"}}
+				cm1 := &corev1.ConfigMap{Namespace: "n", Name: "foo"}
 
 				gomock.InOrder(
 					cleaner.EXPECT().Clean(ctx, fakeClient, cm1),
@@ -658,7 +658,7 @@ var _ = Describe("Cleaner", func() {
 
 		It("should apply the function to all the objects in the list", func() {
 			for i := 1; i <= 5; i++ {
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("secret-%d", i), Namespace: "default"}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: fmt.Sprintf("secret-%d", i), Namespace: "default"})).To(Succeed())
 			}
 
 			fn := func(ctx context.Context, object client.Object) error {
@@ -696,8 +696,8 @@ var _ = Describe("Cleaner", func() {
 
 		It("should apply the function to all the object kinds passed", func() {
 			for i := 1; i <= 5; i++ {
-				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("secret-%d", i), Namespace: "default"}})).To(Succeed())
-				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("comfigmap-%d", i), Namespace: "default"}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.Secret{Name: fmt.Sprintf("secret-%d", i), Namespace: "default"})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{Name: fmt.Sprintf("comfigmap-%d", i), Namespace: "default"})).To(Succeed())
 			}
 
 			annotateResources := func(ctx context.Context, object client.Object) error {
@@ -754,21 +754,17 @@ var _ = Describe("Cleaner", func() {
 		It("should finalize and delete all the objects in the list", func() {
 			for i := 1; i <= 5; i++ {
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       fmt.Sprintf("secret-%d", i),
-						Namespace:  "default",
-						Finalizers: []string{"finalizer"},
-						Labels:     map[string]string{"key": "value"},
-					},
+					Name:       fmt.Sprintf("secret-%d", i),
+					Namespace:  "default",
+					Finalizers: []string{"finalizer"},
+					Labels:     map[string]string{"key": "value"},
 				})).To(Succeed())
 			}
 
 			Expect(fakeClient.Create(ctx, &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       fmt.Sprintf("secret-%d", 6),
-					Namespace:  "default",
-					Finalizers: []string{"finalizer"},
-				},
+				Name:       fmt.Sprintf("secret-%d", 6),
+				Namespace:  "default",
+				Finalizers: []string{"finalizer"},
 			})).To(Succeed())
 
 			secretList := &corev1.SecretList{}
@@ -793,14 +789,10 @@ var _ = Describe("Cleaner", func() {
 
 		It("should return GVK string when object has GVK set", func() {
 			pod := &corev1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "Pod",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pod",
-					Namespace: "default",
-				},
+				APIVersion: "v1",
+				Kind:       "Pod",
+				Name:       "test-pod",
+				Namespace:  "default",
 			}
 
 			result := GVKStringForObject(pod, scheme)
@@ -809,10 +801,8 @@ var _ = Describe("Cleaner", func() {
 
 		It("should return GVK string when object is registered in scheme but GVK not explicitly set", func() {
 			pod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pod",
-					Namespace: "default",
-				},
+				Name:      "test-pod",
+				Namespace: "default",
 			}
 
 			result := GVKStringForObject(pod, scheme)
@@ -821,10 +811,8 @@ var _ = Describe("Cleaner", func() {
 
 		It("should fall back to type name when object is not registered in scheme", func() {
 			pod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pod",
-					Namespace: "default",
-				},
+				Name:      "test-pod",
+				Namespace: "default",
 			}
 
 			// Use empty scheme where Pod is not registered
@@ -836,14 +824,10 @@ var _ = Describe("Cleaner", func() {
 
 		It("should fall back to type name when GVK is empty even if type is set", func() {
 			pod := &corev1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "",
-					Kind:       "",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-pod",
-					Namespace: "default",
-				},
+				APIVersion: "",
+				Kind:       "",
+				Name:       "test-pod",
+				Namespace:  "default",
 			}
 
 			// Use a scheme that doesn't have corev1 registered
@@ -855,10 +839,8 @@ var _ = Describe("Cleaner", func() {
 
 		It("should return GVK string for ConfigMap", func() {
 			cm := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-cm",
-					Namespace: "default",
-				},
+				Name:      "test-cm",
+				Namespace: "default",
 			}
 
 			result := GVKStringForObject(cm, scheme)

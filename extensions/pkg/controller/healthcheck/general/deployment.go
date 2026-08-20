@@ -47,18 +47,14 @@ var (
 // NewSeedDeploymentHealthChecker is a healthCheck function to check Deployments in the Seed cluster
 func NewSeedDeploymentHealthChecker(deploymentName string) *SeedDeploymentHealthChecker {
 	return &SeedDeploymentHealthChecker{
-		deploymentHealthChecker: deploymentHealthChecker{
-			name: deploymentName,
-		},
+		name: deploymentName,
 	}
 }
 
 // NewShootDeploymentHealthChecker is a healthCheck function to check Deployments in the Shoot cluster
 func NewShootDeploymentHealthChecker(deploymentName string) *ShootDeploymentHealthChecker {
 	return &ShootDeploymentHealthChecker{
-		deploymentHealthChecker: deploymentHealthChecker{
-			name: deploymentName,
-		},
+		name: deploymentName,
 	}
 }
 

@@ -13,7 +13,6 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/cert"
 	csrutil "k8s.io/client-go/util/certificate/csr"
@@ -71,7 +70,7 @@ func CreateTargetClientFromCSR(ctx context.Context, targetClient kubernetes.Inte
 		return nil, err
 	}
 
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: commonName}}
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{Name: commonName}
 	if _, err = controllerutils.GetAndCreateOrMergePatch(ctx, targetClient.Client(), clusterRoleBinding, func() error {
 		clusterRoleBinding.Labels = utils.MergeStringMaps(clusterRoleBinding.Labels, labelsE2ETestCSRAccess)
 		clusterRoleBinding.RoleRef = rbacv1.RoleRef{
@@ -115,12 +114,10 @@ func CreateTargetClientFromCSR(ctx context.Context, targetClient kubernetes.Inte
 
 	r := targetClient.RESTConfig()
 	restConfig := &rest.Config{
-		Host: r.Host,
-		TLSClientConfig: rest.TLSClientConfig{
-			CAData:   r.CAData,
-			CertData: certData,
-			KeyData:  utils.EncodePrivateKey(privateKey),
-		},
+		Host:     r.Host,
+		CAData:   r.CAData,
+		CertData: certData,
+		KeyData:  utils.EncodePrivateKey(privateKey),
 	}
 
 	return kubernetes.NewWithConfig(kubernetes.WithRESTConfig(restConfig), kubernetes.WithDisabledCachedClient())

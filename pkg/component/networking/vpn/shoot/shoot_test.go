@@ -84,12 +84,10 @@ var _ = Describe("VPNShoot", func() {
 		}
 
 		scrapeConfig = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-tunnel-probe-apiserver-proxy",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-tunnel-probe-apiserver-proxy",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				MetricsPath: new("/probe"),
@@ -99,8 +97,8 @@ var _ = Describe("VPNShoot", func() {
 					APIServer:  new("https://kube-apiserver"),
 					Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-						Key:                  "token",
+						Name: "shoot-access-prometheus-shoot",
+						Key:  "token",
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				}},
@@ -146,12 +144,10 @@ var _ = Describe("VPNShoot", func() {
 		}
 
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "shoot-tunnel-probe-apiserver-proxy",
-				Namespace:       namespace,
-				Labels:          map[string]string{"prometheus": "shoot"},
-				ResourceVersion: "1",
-			},
+			Name:            "shoot-tunnel-probe-apiserver-proxy",
+			Namespace:       namespace,
+			Labels:          map[string]string{"prometheus": "shoot"},
+			ResourceVersion: "1",
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{
 					Name: "vpn.rules",
@@ -212,34 +208,28 @@ var _ = Describe("VPNShoot", func() {
 		sm = fakesecretsmanager.New(c, namespace)
 		contain = NewManagedResourceContainsObjectsMatcher(c)
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-client", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-vpn", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-tlsauth", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "vpn-seed-server-tlsauth", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-client", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-vpn", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "vpn-seed-tlsauth", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "vpn-seed-server-tlsauth", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#Deploy", func() {
 		var (
 			networkPolicy = &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud--allow-vpn",
-					Namespace: "kube-system",
-					Annotations: map[string]string{
-						"gardener.cloud/description": "Allows the VPN to communicate with shoot components and makes the VPN reachable from the seed.",
-					},
+				Name:      "gardener.cloud--allow-vpn",
+				Namespace: "kube-system",
+				Annotations: map[string]string{
+					"gardener.cloud/description": "Allows the VPN to communicate with shoot components and makes the VPN reachable from the seed.",
 				},
 				Spec: networkingv1.NetworkPolicySpec{
 					Ingress: []networkingv1.NetworkPolicyIngressRule{{}},
@@ -257,12 +247,10 @@ var _ = Describe("VPNShoot", func() {
 			}
 
 			networkPolicyFromSeed = &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud--allow-from-seed",
-					Namespace: "kube-system",
-					Annotations: map[string]string{
-						"gardener.cloud/description": "Allows Ingress from the control plane to pods labeled with 'networking.gardener.cloud/from-seed=allowed'.",
-					},
+				Name:      "gardener.cloud--allow-from-seed",
+				Namespace: "kube-system",
+				Annotations: map[string]string{
+					"gardener.cloud/description": "Allows Ingress from the control plane to pods labeled with 'networking.gardener.cloud/from-seed=allowed'.",
 				},
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{
@@ -293,21 +281,17 @@ var _ = Describe("VPNShoot", func() {
 			}
 
 			serviceAccount = &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-shoot",
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						"app": "vpn-shoot",
-					},
+				Name:      "vpn-shoot",
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					"app": "vpn-shoot",
 				},
 				AutomountServiceAccountToken: new(false),
 			}
 
 			vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-shoot",
-					Namespace: "kube-system",
-				},
+				Name:      "vpn-shoot",
+				Namespace: "kube-system",
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: "apps/v1",
@@ -336,10 +320,8 @@ var _ = Describe("VPNShoot", func() {
 			}
 
 			vpaHA = &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-shoot",
-					Namespace: "kube-system",
-				},
+				Name:      "vpn-shoot",
+				Namespace: "kube-system",
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: "apps/v1",
@@ -392,12 +374,10 @@ var _ = Describe("VPNShoot", func() {
 			}
 
 			pdb = &policyv1.PodDisruptionBudget{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpn-shoot",
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						"app": "vpn-shoot",
-					},
+				Name:      "vpn-shoot",
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					"app": "vpn-shoot",
 				},
 				Spec: policyv1.PodDisruptionBudgetSpec{
 					MaxUnavailable: &intstr.IntOrString{IntVal: 1},
@@ -550,35 +530,29 @@ var _ = Describe("VPNShoot", func() {
 					}
 					volumes = append(volumes, corev1.Volume{
 						Name: name,
-						VolumeSource: corev1.VolumeSource{
-							Projected: &corev1.ProjectedVolumeSource{
-								DefaultMode: new(int32(0400)),
-								Sources: []corev1.VolumeProjection{
-									{
-										Secret: &corev1.SecretProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: secretNameCA,
-											},
-											Items: []corev1.KeyToPath{{
-												Key:  "bundle.crt",
-												Path: "ca.crt",
-											}},
-										},
+						Projected: &corev1.ProjectedVolumeSource{
+							DefaultMode: new(int32(0400)),
+							Sources: []corev1.VolumeProjection{
+								{
+									Secret: &corev1.SecretProjection{
+										Name: secretNameCA,
+										Items: []corev1.KeyToPath{{
+											Key:  "bundle.crt",
+											Path: "ca.crt",
+										}},
 									},
-									{
-										Secret: &corev1.SecretProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: secretName,
+								},
+								{
+									Secret: &corev1.SecretProjection{
+										Name: secretName,
+										Items: []corev1.KeyToPath{
+											{
+												Key:  "tls.crt",
+												Path: "tls.crt",
 											},
-											Items: []corev1.KeyToPath{
-												{
-													Key:  "tls.crt",
-													Path: "tls.crt",
-												},
-												{
-													Key:  "tls.key",
-													Path: "tls.key",
-												},
+											{
+												Key:  "tls.key",
+												Path: "tls.key",
 											},
 										},
 									},
@@ -589,11 +563,9 @@ var _ = Describe("VPNShoot", func() {
 				}
 				volumes = append(volumes, corev1.Volume{
 					Name: "vpn-shoot-tlsauth",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  secretNameTLSAuth,
-							DefaultMode: new(int32(0400)),
-						},
+					Secret: &corev1.SecretVolumeSource{
+						SecretName:  secretNameTLSAuth,
+						DefaultMode: new(int32(0400)),
 					},
 				})
 				return volumes
@@ -652,24 +624,20 @@ var _ = Describe("VPNShoot", func() {
 				volumes = append(volumes,
 					corev1.Volume{
 						Name: "dev-net-tun",
-						VolumeSource: corev1.VolumeSource{
-							HostPath: &corev1.HostPathVolumeSource{
-								Path: "/dev/net/tun",
-								Type: &hostPathCharDev,
-							},
+						HostPath: &corev1.HostPathVolumeSource{
+							Path: "/dev/net/tun",
+							Type: &hostPathCharDev,
 						},
 					},
 				)
 
 				obj := &corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: annotations,
-						Labels: map[string]string{
-							"app":                 "vpn-shoot",
-							"gardener.cloud/role": "system-component",
-							"origin":              "gardener",
-							"type":                "tunnel",
-						},
+					Annotations: annotations,
+					Labels: map[string]string{
+						"app":                 "vpn-shoot",
+						"gardener.cloud/role": "system-component",
+						"origin":              "gardener",
+						"type":                "tunnel",
 					},
 					Spec: corev1.PodSpec{
 						AutomountServiceAccountToken: new(false),
@@ -728,11 +696,9 @@ var _ = Describe("VPNShoot", func() {
 						},
 						ImagePullPolicy: corev1.PullIfNotPresent,
 						ReadinessProbe: &corev1.Probe{
-							ProbeHandler: corev1.ProbeHandler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path: "/readyz",
-									Port: intstr.FromInt32(8080),
-								},
+							HTTPGet: &corev1.HTTPGetAction{
+								Path: "/readyz",
+								Port: intstr.FromInt32(8080),
 							},
 							SuccessThreshold:    2,
 							FailureThreshold:    1,
@@ -808,10 +774,8 @@ var _ = Describe("VPNShoot", func() {
 				)
 
 				return &appsv1.Deployment{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apps/v1",
-						Kind:       "Deployment",
-					},
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
 					ObjectMeta: *objectMetaFor(secretNameCA, secretNameClient, secretNameTLSAuth),
 					Spec: appsv1.DeploymentSpec{
 						RevisionHistoryLimit: new(int32(2)),
@@ -862,12 +826,10 @@ var _ = Describe("VPNShoot", func() {
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs:   []corev1.LocalObjectReference{{Name: managedResource.Spec.SecretRefs[0].Name}},
@@ -1123,11 +1085,9 @@ var _ = Describe("VPNShoot", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1149,11 +1109,9 @@ var _ = Describe("VPNShoot", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

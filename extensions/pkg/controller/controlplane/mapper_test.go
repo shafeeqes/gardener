@@ -10,8 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -38,9 +36,7 @@ var _ = Describe("Mapper", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
+			Name: namespace,
 		}
 	})
 
@@ -53,16 +49,12 @@ var _ = Describe("Mapper", func() {
 
 		It("should find all ControlPlanes for the passed cluster", func() {
 			cp1 := &extensionsv1alpha1.ControlPlane{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cp1",
-					Namespace: namespace,
-				},
+				Name:      "cp1",
+				Namespace: namespace,
 			}
 			cp2 := &extensionsv1alpha1.ControlPlane{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cp2",
-					Namespace: namespace,
-				},
+				Name:      "cp2",
+				Namespace: namespace,
 			}
 
 			Expect(fakeClient.Create(ctx, cp1)).To(Succeed())
@@ -70,16 +62,12 @@ var _ = Describe("Mapper", func() {
 
 			Expect(mapper(ctx, cluster)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      cp1.Name,
-						Namespace: namespace,
-					},
+					Name:      cp1.Name,
+					Namespace: namespace,
 				},
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      cp2.Name,
-						Namespace: namespace,
-					},
+					Name:      cp2.Name,
+					Namespace: namespace,
 				},
 			))
 		})
@@ -94,10 +82,8 @@ var _ = Describe("Mapper", func() {
 
 		It("should not return ControlPlanes in a different namespace", func() {
 			cpOtherNamespace := &extensionsv1alpha1.ControlPlane{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cp-other",
-					Namespace: "other-namespace",
-				},
+				Name:      "cp-other",
+				Namespace: "other-namespace",
 			}
 			Expect(fakeClient.Create(ctx, cpOtherNamespace)).To(Succeed())
 
@@ -106,10 +92,8 @@ var _ = Describe("Mapper", func() {
 
 		It("should only return ControlPlanes that match the given predicates", func() {
 			cp := &extensionsv1alpha1.ControlPlane{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cp-filtered",
-					Namespace: namespace,
-				},
+				Name:      "cp-filtered",
+				Namespace: namespace,
 			}
 			Expect(fakeClient.Create(ctx, cp)).To(Succeed())
 
@@ -125,10 +109,8 @@ var _ = Describe("Mapper", func() {
 
 		It("should return ControlPlanes when predicate accepts them", func() {
 			cp := &extensionsv1alpha1.ControlPlane{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cp-accepted",
-					Namespace: namespace,
-				},
+				Name:      "cp-accepted",
+				Namespace: namespace,
 			}
 			Expect(fakeClient.Create(ctx, cp)).To(Succeed())
 
@@ -141,10 +123,8 @@ var _ = Describe("Mapper", func() {
 
 			Expect(acceptAllMapper(ctx, cluster)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      cp.Name,
-						Namespace: namespace,
-					},
+					Name:      cp.Name,
+					Namespace: namespace,
 				},
 			))
 		})

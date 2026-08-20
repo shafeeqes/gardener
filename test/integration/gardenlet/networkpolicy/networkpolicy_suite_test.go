@@ -115,11 +115,9 @@ var _ = BeforeSuite(func() {
 
 	By("Create garden namespace")
 	gardenNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "garden",
-			Labels: map[string]string{
-				testID: testRunID,
-			},
+		Name: "garden",
+		Labels: map[string]string{
+			testID: testRunID,
 		},
 	}
 

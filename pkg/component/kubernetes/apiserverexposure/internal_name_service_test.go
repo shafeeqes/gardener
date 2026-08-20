@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -46,33 +45,25 @@ var _ = Describe("#InternalNameService", func() {
 		serviceObjKey = client.ObjectKey{Name: "kubernetes", Namespace: "default"}
 		oldServiceObjKey = client.ObjectKey{Name: "kube-apiserver", Namespace: namespace}
 		expected = &corev1.Service{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: corev1.SchemeGroupVersion.String(),
-				Kind:       "Service",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kubernetes",
-				Namespace: "default",
-				Annotations: map[string]string{
-					"networking.istio.io/exportTo": "istio-foo",
-				},
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Service",
+			Name:       "kubernetes",
+			Namespace:  "default",
+			Annotations: map[string]string{
+				"networking.istio.io/exportTo": "istio-foo",
 			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
 			},
 		}
 		old = &corev1.Service{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: corev1.SchemeGroupVersion.String(),
-				Kind:       "Service",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Service",
+			Name:       "kube-apiserver",
+			Namespace:  namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
 			Spec: corev1.ServiceSpec{
 				Type:         corev1.ServiceTypeExternalName,

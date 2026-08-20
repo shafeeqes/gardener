@@ -10,8 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -43,25 +41,19 @@ var _ = Describe("Controller Mapper", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-namespace",
-				Annotations: map[string]string{
-					v1beta1constants.ShootUID: "xyz",
-				},
+			Name: "test-namespace",
+			Annotations: map[string]string{
+				v1beta1constants.ShootUID: "xyz",
 			},
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test",
-				Namespace: namespace.Name,
-			},
+			Name:      "test",
+			Namespace: namespace.Name,
 		}
 
 		backupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-namespace--xyz",
-			},
+			Name: "test-namespace--xyz",
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				SecretRef: corev1.SecretReference{
 					Name:      secret.Name,
@@ -70,9 +62,7 @@ var _ = Describe("Controller Mapper", func() {
 			},
 		}
 		backupEntry2 = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "backupEntry-2",
-			},
+			Name: "backupEntry-2",
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				SecretRef: corev1.SecretReference{
 					Name:      secret.Name,
@@ -95,14 +85,10 @@ var _ = Describe("Controller Mapper", func() {
 
 			Expect(mapper(ctx, secret)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name: backupEntry.Name,
-					},
+					Name: backupEntry.Name,
 				},
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name: backupEntry2.Name,
-					},
+					Name: backupEntry2.Name,
 				}))
 		})
 
@@ -147,9 +133,7 @@ var _ = Describe("Controller Mapper", func() {
 
 			Expect(mapper(ctx, namespace)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name: backupEntry.Name,
-					},
+					Name: backupEntry.Name,
 				}))
 		})
 

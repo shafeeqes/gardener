@@ -15,7 +15,6 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -38,36 +37,36 @@ var _ = Describe("Extension CRDs Webhook Handler", func() {
 
 	BeforeEach(func() {
 		crdObjects = []client.Object{
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "backupbuckets.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "backupentries.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "bastions.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "clusters.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "containerruntimes.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "controlplanes.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "dnsrecords.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "etcds.druid.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "etcdcopybackupstasks.druid.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "etcdopstasks.druid.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "extensions.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "infrastructures.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "managedresources.resources.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "networks.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "operatingsystemconfigs.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "selfhostedshootexposures.extensions.gardener.cloud"}},
-			&apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: "workers.extensions.gardener.cloud"}},
+			&apiextensionsv1.CustomResourceDefinition{Name: "backupbuckets.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "backupentries.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "bastions.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "clusters.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "containerruntimes.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "controlplanes.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "dnsrecords.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "etcds.druid.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "etcdcopybackupstasks.druid.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "etcdopstasks.druid.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "extensions.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "infrastructures.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "managedresources.resources.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "networks.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "operatingsystemconfigs.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "selfhostedshootexposures.extensions.gardener.cloud"},
+			&apiextensionsv1.CustomResourceDefinition{Name: "workers.extensions.gardener.cloud"},
 		}
 		objects = []client.Object{
-			&extensionsv1alpha1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: "foo"}},
-			&extensionsv1alpha1.BackupEntry{ObjectMeta: metav1.ObjectMeta{Name: "shoot--foo--bar"}},
-			&extensionsv1alpha1.ContainerRuntime{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.ControlPlane{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.DNSRecord{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.Extension{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.Network{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.OperatingSystemConfig{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
-			&extensionsv1alpha1.Worker{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "foo"}},
+			&extensionsv1alpha1.BackupBucket{Name: "foo"},
+			&extensionsv1alpha1.BackupEntry{Name: "shoot--foo--bar"},
+			&extensionsv1alpha1.ContainerRuntime{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.ControlPlane{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.DNSRecord{Namespace: testNamespace.Name, Name: "foo"},
+			&druidcorev1alpha1.Etcd{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.Extension{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.Infrastructure{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.Network{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.OperatingSystemConfig{Namespace: testNamespace.Name, Name: "foo"},
+			&extensionsv1alpha1.Worker{Namespace: testNamespace.Name, Name: "foo"},
 		}
 		objects = append(objects, crdObjects...)
 
@@ -196,10 +195,8 @@ var _ = Describe("Extension CRDs Webhook Handler", func() {
 	Context("other resources", func() {
 		It("should not block deletion of other resources", func() {
 			pod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
 						Name:  "foo",

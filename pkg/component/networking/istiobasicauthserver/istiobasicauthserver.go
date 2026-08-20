@@ -191,10 +191,8 @@ func (i *istioBasicAuthServer) calculateConfiguration(
 	var (
 		volumes = []corev1.Volume{{
 			Name: tlsServerCertificateName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: tlsSecret.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: tlsSecret.Name,
 			},
 		}}
 		volumeMounts = []corev1.VolumeMount{{
@@ -238,14 +236,12 @@ func (i *istioBasicAuthServer) calculateConfiguration(
 
 			volumes = append(volumes, corev1.Volume{
 				Name: subdomain,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: secretName,
-						Items: []corev1.KeyToPath{
-							{
-								Key:  secretsutils.DataKeyAuth,
-								Path: subdomain,
-							},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: secretName,
+					Items: []corev1.KeyToPath{
+						{
+							Key:  secretsutils.DataKeyAuth,
+							Path: subdomain,
 						},
 					},
 				},
@@ -306,10 +302,8 @@ func (i *istioBasicAuthServer) calculateConfiguration(
 	if len(virtualServiceList.Items) == 0 {
 		dummyVolume := "empty-secrets-folder"
 		volumes = append(volumes, corev1.Volume{
-			Name: dummyVolume,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
+			Name:     dummyVolume,
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
 		})
 
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{

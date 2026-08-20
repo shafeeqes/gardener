@@ -123,11 +123,9 @@ func getShootResources() (map[string][]byte, error) {
 	}
 	return shootRegistry.AddAllAndSerialize(
 		&appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      applicationName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    labels,
-			},
+			Name:      applicationName,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    labels,
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
 				Selector: &metav1.LabelSelector{

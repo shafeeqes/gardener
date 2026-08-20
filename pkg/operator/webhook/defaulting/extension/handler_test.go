@@ -55,51 +55,43 @@ var _ = Describe("Handler", func() {
 				extension.Spec.Resources = nil
 				extension.Spec.Deployment.ExtensionDeployment.InjectGardenKubeconfig = nil
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: true,
-					},
+					Allowed: true,
 				}))
 			})
 
 			It("should not default if the deployment section is not set", func() {
 				extension.Spec.Deployment = nil
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: true,
-					},
+					Allowed: true,
 				}))
 			})
 
 			It("should not default if the extension deployment section is not set", func() {
 				extension.Spec.Deployment.ExtensionDeployment = nil
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: true,
-					},
+					Allowed: true,
 				}))
 			})
 
 			It("should not default if injectGardenKubeconfig is already set", func() {
 				extension.Spec.Deployment.ExtensionDeployment.InjectGardenKubeconfig = new(false)
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: true,
-					},
+					Allowed: true,
 				}))
 			})
 
 			It("should default the injectGardenKubeconfig to true", func() {
 				extension.Spec.Deployment.ExtensionDeployment.InjectGardenKubeconfig = nil
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{
 						{
 							Operation: "add",
@@ -107,10 +99,8 @@ var _ = Describe("Handler", func() {
 							Value:     true,
 						},
 					},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed:   true,
-						PatchType: new(admissionv1.PatchTypeJSONPatch),
-					},
+					Allowed:   true,
+					PatchType: new(admissionv1.PatchTypeJSONPatch),
 				}))
 			})
 		})
@@ -119,7 +109,7 @@ var _ = Describe("Handler", func() {
 			It("should default the primary field to true", func() {
 				extension.Spec.Resources[0].Primary = nil
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{
 						{
 							Operation: "add",
@@ -127,21 +117,17 @@ var _ = Describe("Handler", func() {
 							Value:     true,
 						},
 					},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed:   true,
-						PatchType: new(admissionv1.PatchTypeJSONPatch),
-					},
+					Allowed:   true,
+					PatchType: new(admissionv1.PatchTypeJSONPatch),
 				}))
 			})
 
 			It("should not overwrite the primary field", func() {
 				extension.Spec.Resources[0].Primary = new(false)
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: true,
-					},
+					Allowed: true,
 				}))
 			})
 		})
@@ -153,33 +139,27 @@ var _ = Describe("Handler", func() {
 				})
 
 				It("should not default the autoEnable field", func() {
-					Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+					Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 						Patches: []jsonpatch.JsonPatchOperation{},
-						AdmissionResponse: admissionv1.AdmissionResponse{
-							Allowed: true,
-						},
+						Allowed: true,
 					}))
 				})
 
 				It("should not default autoEnable field if configured for seed", func() {
 					extension.Spec.Resources[0].AutoEnable = []gardencorev1beta1.ClusterType{"seed"}
 
-					Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+					Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 						Patches: []jsonpatch.JsonPatchOperation{},
-						AdmissionResponse: admissionv1.AdmissionResponse{
-							Allowed: true,
-						},
+						Allowed: true,
 					}))
 				})
 			})
 
 			When("kind != Extension", func() {
 				It("should not default the autoEnable field", func() {
-					Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+					Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 						Patches: []jsonpatch.JsonPatchOperation{},
-						AdmissionResponse: admissionv1.AdmissionResponse{
-							Allowed: true,
-						},
+						Allowed: true,
 					}))
 				})
 			})
@@ -193,18 +173,16 @@ var _ = Describe("Handler", func() {
 			It("should not default the clusterCompatibility field", func() {
 				extension.Spec.Resources[0].AutoEnable = []gardencorev1beta1.ClusterType{"seed"}
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed: true,
-					},
+					Allowed: true,
 				}))
 			})
 
 			It("should default the clusterCompatibility field to shoot", func() {
 				extension.Spec.Resources[0].AutoEnable = []gardencorev1beta1.ClusterType{"shoot"}
 
-				Expect(handler.Handle(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}}})).To(Equal(admission.Response{
+				Expect(handler.Handle(ctx, admission.Request{Object: runtime.RawExtension{Raw: mustEncodeObject(encoder, extension)}})).To(Equal(admission.Response{
 					Patches: []jsonpatch.JsonPatchOperation{
 						{
 							Operation: "add",
@@ -212,10 +190,8 @@ var _ = Describe("Handler", func() {
 							Value:     []any{"shoot"},
 						},
 					},
-					AdmissionResponse: admissionv1.AdmissionResponse{
-						Allowed:   true,
-						PatchType: new(admissionv1.PatchTypeJSONPatch),
-					},
+					Allowed:   true,
+					PatchType: new(admissionv1.PatchTypeJSONPatch),
 				}))
 			})
 

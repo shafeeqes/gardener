@@ -100,10 +100,8 @@ var _ = Describe("LeaderElection", func() {
 
 			It("should fail if the object has no leader election annotation", func() {
 				endpoints := &corev1.Endpoints{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-					},
+					Name:      name,
+					Namespace: namespace,
 				}
 
 				Expect(fakeClient.Create(ctx, endpoints)).To(Succeed())
@@ -158,10 +156,8 @@ var _ = Describe("LeaderElection", func() {
 
 			It("should fail if the object has no leader election annotation", func() {
 				configMap := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-					},
+					Name:      name,
+					Namespace: namespace,
 				}
 
 				Expect(fakeClient.Create(ctx, configMap)).To(Succeed())
@@ -216,11 +212,9 @@ var _ = Describe("LeaderElection", func() {
 
 			It("should successfully return the leader election record", func() {
 				lease := &coordinationv1.Lease{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: namespace,
-					},
-					Spec: leaseSpecValid,
+					Name:      name,
+					Namespace: namespace,
+					Spec:      leaseSpecValid,
 				}
 
 				Expect(fakeClient.Create(ctx, lease)).To(Succeed())

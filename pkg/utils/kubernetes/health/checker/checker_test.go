@@ -478,9 +478,7 @@ var _ = Describe("HealthChecker", func() {
 				var checker = NewHealthChecker(log, fakeClient, fakeClock)
 
 				controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "foo",
-					},
+					Name: "foo",
 				}
 				Expect(fakeGardenClient.Create(ctx, controllerRegistration)).To(Succeed())
 
@@ -771,10 +769,8 @@ var _ = Describe("HealthChecker", func() {
 
 				prometheuses = &monitoringv1.PrometheusList{
 					Items: []monitoringv1.Prometheus{{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "testprom",
-							Namespace: namespace,
-						},
+						Name:      "testprom",
+						Namespace: namespace,
 						Spec: monitoringv1.PrometheusSpec{
 							CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 								Replicas: new(int32(3)),
@@ -894,10 +890,8 @@ var _ = Describe("HealthChecker", func() {
 			Context("multiple Prometheus", func() {
 				BeforeEach(func() {
 					prometheuses.Items = append(prometheuses.Items, monitoringv1.Prometheus{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "testprom2",
-							Namespace: namespace,
-						},
+						Name:      "testprom2",
+						Namespace: namespace,
 						Spec: monitoringv1.PrometheusSpec{
 							CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 								Replicas: new(int32(3)),
@@ -987,7 +981,7 @@ var _ = Describe("HealthChecker", func() {
 
 		unhealthyNode := func(name string) corev1.Node {
 			return corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
+				Name: name,
 				Status: corev1.NodeStatus{
 					NodeInfo: corev1.NodeSystemInfo{KubeletVersion: "v1.33.0"},
 					Conditions: []corev1.NodeCondition{
@@ -999,7 +993,7 @@ var _ = Describe("HealthChecker", func() {
 
 		healthyNode := func(name string) corev1.Node {
 			return corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
+				Name: name,
 				Status: corev1.NodeStatus{
 					NodeInfo: corev1.NodeSystemInfo{KubeletVersion: "v1.33.0"},
 					Conditions: []corev1.NodeCondition{
@@ -1086,11 +1080,9 @@ func roleLabels(role string) map[string]string {
 
 func newDeployment(namespace, name, role string, healthy bool) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels:    roleLabels(role),
-		},
+		Namespace: namespace,
+		Name:      name,
+		Labels:    roleLabels(role),
 	}
 	if healthy {
 		deployment.Status = appsv1.DeploymentStatus{Conditions: []appsv1.DeploymentCondition{{

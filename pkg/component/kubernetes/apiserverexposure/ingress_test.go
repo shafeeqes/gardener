@@ -15,7 +15,6 @@ import (
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -68,17 +67,13 @@ var _ = Describe("#Ingress", func() {
 		tlsSecret = "wildcard-tls-secret"
 
 		expectedGateway := &istionetworkingv1beta1.Gateway{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: istionetworkingv1beta1.SchemeGroupVersion.String(),
-				Kind:       "Gateway",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver-ingress",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
+			APIVersion: istionetworkingv1beta1.SchemeGroupVersion.String(),
+			Kind:       "Gateway",
+			Name:       "kube-apiserver-ingress",
+			Namespace:  namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
 			Spec: istioapinetworkingv1beta1.Gateway{
 				Selector: istioLabels,
@@ -104,17 +99,13 @@ var _ = Describe("#Ingress", func() {
 		expectedHTTPSBackendGateway.Spec.Servers[0].Tls.CredentialName = tlsSecret
 
 		expectedVirtualService := &istionetworkingv1beta1.VirtualService{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: istionetworkingv1beta1.SchemeGroupVersion.String(),
-				Kind:       "VirtualService",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver-ingress",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
+			APIVersion: istionetworkingv1beta1.SchemeGroupVersion.String(),
+			Kind:       "VirtualService",
+			Name:       "kube-apiserver-ingress",
+			Namespace:  namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
 			Spec: istioapinetworkingv1beta1.VirtualService{
 				ExportTo: []string{"istio-foo"},
@@ -154,17 +145,13 @@ var _ = Describe("#Ingress", func() {
 		}}
 
 		expectedDestinationRule := &istionetworkingv1beta1.DestinationRule{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: istionetworkingv1beta1.SchemeGroupVersion.String(),
-				Kind:       "DestinationRule",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-apiserver-ingress",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "kubernetes",
-					"role": "apiserver",
-				},
+			APIVersion: istionetworkingv1beta1.SchemeGroupVersion.String(),
+			Kind:       "DestinationRule",
+			Name:       "kube-apiserver-ingress",
+			Namespace:  namespace,
+			Labels: map[string]string{
+				"app":  "kubernetes",
+				"role": "apiserver",
 			},
 			Spec: istioapinetworkingv1beta1.DestinationRule{
 				ExportTo: []string{"istio-foo"},
@@ -239,15 +226,11 @@ var _ = Describe("#Ingress", func() {
 
 		It("should create the expected resources for backend protocol HTTPS", func() {
 			Expect(c.Create(ctx, &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      tlsSecret,
-					Namespace: "garden",
-					Labels:    map[string]string{"gardener.cloud/role": "controlplane-cert"},
-				}})).To(Succeed())
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "Secret",
+				Name:       tlsSecret,
+				Namespace:  "garden",
+				Labels:     map[string]string{"gardener.cloud/role": "controlplane-cert"}})).To(Succeed())
 
 			Expect(getDeployer(serviceNamespace, &tlsSecret).Deploy(ctx)).To(Succeed())
 
@@ -294,14 +277,10 @@ var _ = Describe("#Ingress", func() {
 			Expect(c.Create(ctx, expectedHTTPSBackendDestinationRule)).To(Succeed())
 			Expect(c.Get(ctx, httpsDRKey, &istionetworkingv1beta1.DestinationRule{})).To(Succeed())
 			Expect(c.Create(ctx, &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      tlsSecret,
-					Namespace: istioNamespace,
-				},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "Secret",
+				Name:       tlsSecret,
+				Namespace:  istioNamespace,
 			})).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKey{Name: tlsSecret, Namespace: istioNamespace}, &corev1.Secret{})).To(Succeed())
 

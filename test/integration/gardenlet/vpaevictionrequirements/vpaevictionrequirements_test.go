@@ -45,10 +45,8 @@ var _ = Describe("VPA EvictionRequirements controller tests", func() {
 		}
 
 		targetDeployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-deployment",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "test-deployment",
+			Namespace: testNamespace.Name,
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},
 				Template: corev1.PodTemplateSpec{
@@ -63,13 +61,11 @@ var _ = Describe("VPA EvictionRequirements controller tests", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-vpa",
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID: testRunID,
-					v1beta1constants.LabelVPAEvictionRequirementsController: v1beta1constants.EvictionRequirementManagedByController,
-				},
+			Name:      "test-vpa",
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID: testRunID,
+				v1beta1constants.LabelVPAEvictionRequirementsController: v1beta1constants.EvictionRequirementManagedByController,
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef:    &autoscalingv1.CrossVersionObjectReference{Name: targetDeployment.Name, APIVersion: "apps/v1", Kind: "Deployment"},

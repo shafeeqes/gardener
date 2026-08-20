@@ -9,7 +9,6 @@ import (
 	"github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/custom"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/component/observability/logging/fluentcustomresources"
 )
@@ -25,10 +24,8 @@ var _ = Describe("Logging", func() {
 
 			Expect(fluentBitClusterOutputs).To(Equal(
 				&fluentbitv1alpha2.ClusterOutput{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "systemd",
-						Labels: labels,
-					},
+					Name:   "systemd",
+					Labels: labels,
 					Spec: fluentbitv1alpha2.OutputSpec{
 						CustomPlugin: &custom.CustomPlugin{
 							Config: `Name gardener
@@ -59,10 +56,8 @@ FallbackToTagWhenMetadataIsMissing false`,
 
 			Expect(fluentBitClusterOutputs).To(Equal(
 				&fluentbitv1alpha2.ClusterOutput{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "opentelemetry",
-						Labels: labels,
-					},
+					Name:   "opentelemetry",
+					Labels: labels,
 					Spec: fluentbitv1alpha2.OutputSpec{
 						CustomPlugin: &custom.CustomPlugin{
 							Config: `Name gardener
@@ -116,10 +111,8 @@ TagKey                    tag`,
 
 			Expect(fluentBitClusterOutputs).To(Equal(
 				&fluentbitv1alpha2.ClusterOutput{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "opentelemetry-static",
-						Labels: labels,
-					},
+					Name:   "opentelemetry-static",
+					Labels: labels,
 					Spec: fluentbitv1alpha2.OutputSpec{
 						CustomPlugin: &custom.CustomPlugin{
 							Config: `Name gardener

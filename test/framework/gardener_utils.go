@@ -51,10 +51,8 @@ func (f *GardenerFramework) GetSeed(ctx context.Context, seedName string) (*gard
 
 			// For tests, we expect the seed kubeconfig secret to be present in the garden namespace
 			seedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "seed-" + seedName,
-					Namespace: "garden",
-				},
+				Name:      "seed-" + seedName,
+				Namespace: "garden",
 			}
 
 			if err := f.GardenClient.Client().Get(ctx, client.ObjectKeyFromObject(seedSecret), seedSecret); err != nil {

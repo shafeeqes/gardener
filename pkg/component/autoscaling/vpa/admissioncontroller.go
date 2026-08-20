@@ -209,12 +209,10 @@ func (v *vpa) reconcileAdmissionControllerDeployment(deployment *appsv1.Deployme
 					Args:            v.computeAdmissionControllerArgs(),
 					LivenessProbe:   newDefaultLivenessProbe(),
 					ReadinessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							HTTPGet: &corev1.HTTPGetAction{
-								Path:   "/health-check",
-								Port:   intstr.FromString(metricsPortName),
-								Scheme: corev1.URISchemeHTTP,
-							},
+						HTTPGet: &corev1.HTTPGetAction{
+							Path:   "/health-check",
+							Port:   intstr.FromString(metricsPortName),
+							Scheme: corev1.URISchemeHTTP,
 						},
 						PeriodSeconds:    10,
 						FailureThreshold: 3,
@@ -246,35 +244,29 @@ func (v *vpa) reconcileAdmissionControllerDeployment(deployment *appsv1.Deployme
 				}},
 				Volumes: []corev1.Volume{{
 					Name: volumeNameCertificates,
-					VolumeSource: corev1.VolumeSource{
-						Projected: &corev1.ProjectedVolumeSource{
-							DefaultMode: new(int32(420)),
-							Sources: []corev1.VolumeProjection{
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: v.caSecretName,
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  secretsutils.DataKeyCertificateBundle,
-											Path: secretsutils.DataKeyCertificateBundle,
-										}},
-									},
+					Projected: &corev1.ProjectedVolumeSource{
+						DefaultMode: new(int32(420)),
+						Sources: []corev1.VolumeProjection{
+							{
+								Secret: &corev1.SecretProjection{
+									Name: v.caSecretName,
+									Items: []corev1.KeyToPath{{
+										Key:  secretsutils.DataKeyCertificateBundle,
+										Path: secretsutils.DataKeyCertificateBundle,
+									}},
 								},
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: v.serverSecretName,
+							},
+							{
+								Secret: &corev1.SecretProjection{
+									Name: v.serverSecretName,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  secretsutils.DataKeyCertificate,
+											Path: secretsutils.DataKeyCertificate,
 										},
-										Items: []corev1.KeyToPath{
-											{
-												Key:  secretsutils.DataKeyCertificate,
-												Path: secretsutils.DataKeyCertificate,
-											},
-											{
-												Key:  secretsutils.DataKeyPrivateKey,
-												Path: secretsutils.DataKeyPrivateKey,
-											},
+										{
+											Key:  secretsutils.DataKeyPrivateKey,
+											Path: secretsutils.DataKeyPrivateKey,
 										},
 									},
 								},

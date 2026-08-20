@@ -31,11 +31,9 @@ const (
 
 func (p *prometheus) prometheus(cortexConfigMap *corev1.ConfigMap) *monitoringv1.Prometheus {
 	obj := &monitoringv1.Prometheus{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.values.Name,
-			Namespace: p.namespace,
-			Labels:    p.getLabels(),
-		},
+		Name:      p.values.Name,
+		Namespace: p.namespace,
+		Labels:    p.getLabels(),
 		Spec: monitoringv1.PrometheusSpec{
 			RetentionSize:      p.values.RetentionSize,
 			EvaluationInterval: "1m",
@@ -45,8 +43,8 @@ func (p *prometheus) prometheus(cortexConfigMap *corev1.ConfigMap) *monitoringv1
 				ReloadStrategy: new(monitoringv1.HTTPReloadStrategyType),
 				ExternalLabels: p.values.ExternalLabels,
 				AdditionalScrapeConfigs: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: p.name() + secretNameSuffixAdditionalScrapeConfigs},
-					Key:                  dataKeyAdditionalScrapeConfigs,
+					Name: p.name() + secretNameSuffixAdditionalScrapeConfigs,
+					Key:  dataKeyAdditionalScrapeConfigs,
 				},
 
 				PodMetadata: &monitoringv1.EmbeddedObjectMetadata{
@@ -140,8 +138,8 @@ func (p *prometheus) prometheus(cortexConfigMap *corev1.ConfigMap) *monitoringv1
 
 		if p.values.Alerting.AdditionalAlertmanager != nil {
 			obj.Spec.AdditionalAlertManagerConfigs = &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{Name: p.name() + secretNameSuffixAdditionalAlertmanagerConfigs},
-				Key:                  dataKeyAdditionalAlertmanagerConfigs,
+				Name: p.name() + secretNameSuffixAdditionalAlertmanagerConfigs,
+				Key:  dataKeyAdditionalAlertmanagerConfigs,
 			}
 		}
 	}

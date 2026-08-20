@@ -17,7 +17,7 @@ var _ = Describe("ServiceMonitors", func() {
 	Describe("#CentralServiceMonitors", func() {
 		It("should return the expected objects", func() {
 			Expect(garden.CentralServiceMonitors()).To(HaveExactElements(&monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{Name: "alertmanager-garden"},
+				Name: "alertmanager-garden",
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 						"component":    "alertmanager",

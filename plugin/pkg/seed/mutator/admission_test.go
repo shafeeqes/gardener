@@ -47,14 +47,14 @@ var _ = Describe("mutator", func() {
 		)
 
 		BeforeEach(func() {
-			seed = &core.Seed{ObjectMeta: metav1.ObjectMeta{Name: "the-seed"}}
+			seed = &core.Seed{Name: "the-seed"}
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "the-shoot", Namespace: "garden"},
-				Spec:       gardencorev1beta1.ShootSpec{SeedName: new("parent-seed")},
+				Name: "the-shoot", Namespace: "garden",
+				Spec: gardencorev1beta1.ShootSpec{SeedName: new("parent-seed")},
 			}
 			managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{Name: "the-seed", Namespace: "garden"},
-				Spec:       seedmanagementv1alpha1.ManagedSeedSpec{Shoot: &seedmanagementv1alpha1.Shoot{Name: shoot.Name}},
+				Name: "the-seed", Namespace: "garden",
+				Spec: seedmanagementv1alpha1.ManagedSeedSpec{Shoot: &seedmanagementv1alpha1.Shoot{Name: shoot.Name}},
 			}
 
 			handler.AssignReadyFunc(func() bool { return true })

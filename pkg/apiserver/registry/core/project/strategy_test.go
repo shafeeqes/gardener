@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -220,10 +219,8 @@ var _ = Describe("Canonicalize", func() {
 
 func newProject(namespace string) *core.Project {
 	return &core.Project{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "test",
-			Labels: map[string]string{"foo": "bar"},
-		},
+		Name:   "test",
+		Labels: map[string]string{"foo": "bar"},
 		Spec: core.ProjectSpec{
 			Namespace: &namespace,
 		},

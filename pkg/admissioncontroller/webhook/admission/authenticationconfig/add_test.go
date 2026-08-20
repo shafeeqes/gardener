@@ -216,14 +216,10 @@ anonymous:
 		request = admission.Request{}
 
 		shootv1beta1 = &gardencorev1beta1.Shoot{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				Kind:       "Shoot",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+			Kind:       "Shoot",
+			Name:       shootName,
+			Namespace:  shootNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				Kubernetes: gardencorev1beta1.Kubernetes{
 					Version: "1.34.0",
@@ -294,16 +290,16 @@ anonymous:
 
 			It("references a valid authenticationConfiguration (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, true, statusCodeAllowed, "referenced authentication configuration is valid", "")
 			})
 
 			It("authenticationConfiguration name was added (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 				apiServerConfig := shootv1beta1.Spec.Kubernetes.KubeAPIServer.DeepCopy()
 				shootv1beta1.Spec.Kubernetes.KubeAPIServer = nil
@@ -314,8 +310,8 @@ anonymous:
 
 			It("serviceAccountConfig is nil (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 				newShoot := shootv1beta1.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.ServiceAccountConfig = nil
@@ -324,8 +320,8 @@ anonymous:
 
 			It("referenced authenticationConfiguration name was changed (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmNameOther, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmNameOther, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 				newShoot := shootv1beta1.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.StructuredAuthentication.ConfigMapName = cmNameOther
@@ -358,8 +354,8 @@ anonymous:
 
 			It("should allow enabling the legacy anonymous authentication on the kube-apiserver when not using (structured) anonymous authentication configuration", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration}, // does not set `anonymous.enabled: true`
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration}, // does not set `anonymous.enabled: true`
 				})).To(Succeed())
 				newShoot := shootv1beta1.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.EnableAnonymousAuthentication = new(true)
@@ -368,8 +364,8 @@ anonymous:
 
 			It("references a valid authenticationConfiguration when the service account issuer advertised address uses a different URL (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 				shootv1beta1.Status = gardencorev1beta1.ShootStatus{
 					AdvertisedAddresses: []gardencorev1beta1.ShootAdvertisedAddress{
@@ -384,22 +380,18 @@ anonymous:
 
 			It("allows auth config with managed issuer URL when shoot has no UID yet (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   shootNamespace,
-						Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
-					},
+					Name:   shootNamespace,
+					Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
 				})).To(Succeed())
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-service-account-issuer",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
-					},
-					Data: map[string][]byte{"hostname": []byte("issuer.example.com")},
+					Name:      "shoot-service-account-issuer",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
+					Data:      map[string][]byte{"hostname": []byte("issuer.example.com")},
 				})).To(Succeed())
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": computedManagedIssuerAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": computedManagedIssuerAuthenticationConfiguration},
 				})).To(Succeed())
 
 				shootv1beta1.Annotations = map[string]string{v1beta1constants.AnnotationAuthenticationIssuer: v1beta1constants.AnnotationAuthenticationIssuerManaged}
@@ -409,22 +401,18 @@ anonymous:
 
 			It("allows auth config with different URL when shoot has managed issuer (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   shootNamespace,
-						Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
-					},
+					Name:   shootNamespace,
+					Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
 				})).To(Succeed())
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-service-account-issuer",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
-					},
-					Data: map[string][]byte{"hostname": []byte("issuer.example.com")},
+					Name:      "shoot-service-account-issuer",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
+					Data:      map[string][]byte{"hostname": []byte("issuer.example.com")},
 				})).To(Succeed())
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 
 				shootv1beta1.UID = types.UID("test-shoot-uid")
@@ -434,8 +422,8 @@ anonymous:
 
 			It("allows auth config when the default issuer URL is not used (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthenticationConfiguration},
 				})).To(Succeed())
 				shootv1beta1.Status = gardencorev1beta1.ShootStatus{
 					AdvertisedAddresses: []gardencorev1beta1.ShootAdvertisedAddress{
@@ -470,40 +458,40 @@ anonymous:
 
 			It("references configmap without a config.yaml key", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       nil,
+					Name: cmName, Namespace: shootNamespace,
+					Data: nil,
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "error getting authentication configuration from ConfigMap fake-cm-namespace/fake-cm-name: missing authentication configuration key in config.yaml ConfigMap data", "")
 			})
 
 			It("references authentication configuration which breaks validation rules", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": invalidAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": invalidAuthenticationConfiguration},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "provided invalid authentication configuration: [jwt[0].issuer.audiences: Required value: at least one jwt[0].issuer.audiences is required]", "")
 			})
 
 			It("references authentication configuration with invalid structure", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": missingKeyConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": missingKeyConfiguration},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "did not find expected key", "")
 			})
 
 			It("contains disallowed issuers in the service account config", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": invalidIssuerUrl},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": invalidIssuerUrl},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shootv1beta1, false, statusCodeInvalid, "provided invalid authentication configuration: [jwt[0].issuer.url: Invalid value: \"https://abc.com\": URL must not overlap with disallowed issuers:", "")
 			})
 
 			It("contains service account issuer from status advertised addresses in the authentication configuration", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": managedIssuerAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": managedIssuerAuthenticationConfiguration},
 				})).To(Succeed())
 				shootv1beta1.Status = gardencorev1beta1.ShootStatus{
 					AdvertisedAddresses: []gardencorev1beta1.ShootAdvertisedAddress{
@@ -518,22 +506,18 @@ anonymous:
 
 			It("denies authentication configuration containing the computed managed issuer URL (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   shootNamespace,
-						Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
-					},
+					Name:   shootNamespace,
+					Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
 				})).To(Succeed())
 				Expect(fakeClient.Create(ctx, &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-service-account-issuer",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
-					},
-					Data: map[string][]byte{"hostname": []byte("issuer.example.com")},
+					Name:      "shoot-service-account-issuer",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
+					Data:      map[string][]byte{"hostname": []byte("issuer.example.com")},
 				})).To(Succeed())
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": computedManagedIssuerAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": computedManagedIssuerAuthenticationConfiguration},
 				})).To(Succeed())
 
 				shootv1beta1.UID = types.UID("test-shoot-uid")
@@ -543,8 +527,8 @@ anonymous:
 
 			It("denies authentication configuration containing the default issuer URL from internal advertised address (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": defaultIssuerAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": defaultIssuerAuthenticationConfiguration},
 				})).To(Succeed())
 				shootv1beta1.Status = gardencorev1beta1.ShootStatus{
 					AdvertisedAddresses: []gardencorev1beta1.ShootAdvertisedAddress{
@@ -559,8 +543,8 @@ anonymous:
 
 			It("denies authentication configuration containing the default issuer URL from external advertised address (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": externalIssuerAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": externalIssuerAuthenticationConfiguration},
 				})).To(Succeed())
 				shootv1beta1.Status = gardencorev1beta1.ShootStatus{
 					AdvertisedAddresses: []gardencorev1beta1.ShootAdvertisedAddress{
@@ -575,8 +559,8 @@ anonymous:
 
 			It("enables legacy anonymous authentication on the kube-apiserver when anonymous authentication configuration is already present", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: cmName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": anonymousAuthenticationConfiguration},
+					Name: cmName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": anonymousAuthenticationConfiguration},
 				})).To(Succeed())
 				newShoot := shootv1beta1.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.EnableAnonymousAuthentication = new(false)
@@ -590,14 +574,10 @@ anonymous:
 			request.Kind = metav1.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"}
 
 			cm = &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      cmName,
-					Namespace: cmNamespace,
-				},
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+				Name:       cmName,
+				Namespace:  cmNamespace,
 				Data: map[string]string{
 					"config.yaml": validAuthenticationConfiguration,
 				},
@@ -694,18 +674,14 @@ anonymous:
 
 				It("denies ConfigMap update with computed managed issuer URL", func() {
 					Expect(fakeClient.Create(ctx, &corev1.Namespace{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:   shootNamespace,
-							Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
-						},
+						Name:   shootNamespace,
+						Labels: map[string]string{v1beta1constants.ProjectName: "test-project"},
 					})).To(Succeed())
 					Expect(fakeClient.Create(ctx, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "shoot-service-account-issuer",
-							Namespace: v1beta1constants.GardenNamespace,
-							Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
-						},
-						Data: map[string][]byte{"hostname": []byte("issuer.example.com")},
+						Name:      "shoot-service-account-issuer",
+						Namespace: v1beta1constants.GardenNamespace,
+						Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShootServiceAccountIssuer},
+						Data:      map[string][]byte{"hostname": []byte("issuer.example.com")},
 					})).To(Succeed())
 
 					shootv1beta1.UID = types.UID("test-shoot-uid")

@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -80,9 +79,7 @@ var _ = Describe("istioconfig", func() {
 				},
 			}
 			exposureClass = &gardencorev1beta1.ExposureClass{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: exposureClassName,
-				},
+				Name:    exposureClassName,
 				Handler: exposureClassHandlerName,
 			}
 			shoot = &gardencorev1beta1.Shoot{}
@@ -91,9 +88,7 @@ var _ = Describe("istioconfig", func() {
 				Seed:   &seedpkg.Seed{},
 				Shoot:  &shootpkg.Shoot{},
 				SeedNamespaceObject: &corev1.Namespace{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{},
-					},
+					Annotations: map[string]string{},
 				},
 			}
 

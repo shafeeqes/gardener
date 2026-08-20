@@ -18,10 +18,8 @@ var _ = Describe("ServiceMonitors", func() {
 	Describe("#CentralServiceMonitors", func() {
 		It("should return the service monitors for ManagedSeeds", func() {
 			Expect(cache.CentralServiceMonitors(true)).To(HaveExactElements(&monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-exporter",
-					Namespace: "kube-system",
-				},
+				Name:      "node-exporter",
+				Namespace: "kube-system",
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{"component": "node-exporter"}},
 					Endpoints: []monitoringv1.Endpoint{{

@@ -185,23 +185,21 @@ func (b *Botanist) DeployKubeAPIServer(ctx context.Context) error {
 		kubeapiserver.AuthorizationWebhook{
 			Name:       "node-agent-authorizer",
 			Kubeconfig: kubeconfig,
-			WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{
-				// Set TTL to a very low value since it cannot be set to 0 because of defaulting.
-				// See https://github.com/kubernetes/apiserver/blob/3658357fea9fa8b36173d072f2d548f135049e05/pkg/apis/apiserver/v1beta1/defaults.go#L29-L36
-				// TODO(rfranzke): Use `Cache{Una,A}uthorizedRequests` instead of `AuthorizedTTL` and
-				//  `UnauthorizedTTL` once Kubernetes 1.34 is the lowest supported version.
-				//  More info: https://github.com/kubernetes/kubernetes/pull/129237
-				AuthorizedTTL:                            metav1.Duration{Duration: 1 * time.Nanosecond},
-				UnauthorizedTTL:                          metav1.Duration{Duration: 1 * time.Nanosecond},
-				Timeout:                                  metav1.Duration{Duration: 10 * time.Second},
-				FailurePolicy:                            apiserverv1beta1.FailurePolicyDeny,
-				SubjectAccessReviewVersion:               "v1",
-				MatchConditionSubjectAccessReviewVersion: "v1",
-				MatchConditions: []apiserverv1beta1.WebhookMatchCondition{{
-					// Only intercept request node-agents
-					Expression: fmt.Sprintf("'%s' in request.groups", v1beta1constants.NodeAgentsGroup),
-				}},
-			},
+			// Set TTL to a very low value since it cannot be set to 0 because of defaulting.
+			// See https://github.com/kubernetes/apiserver/blob/3658357fea9fa8b36173d072f2d548f135049e05/pkg/apis/apiserver/v1beta1/defaults.go#L29-L36
+			// TODO(rfranzke): Use `Cache{Una,A}uthorizedRequests` instead of `AuthorizedTTL` and
+			//  `UnauthorizedTTL` once Kubernetes 1.34 is the lowest supported version.
+			//  More info: https://github.com/kubernetes/kubernetes/pull/129237
+			AuthorizedTTL:                            metav1.Duration{Duration: 1 * time.Nanosecond},
+			UnauthorizedTTL:                          metav1.Duration{Duration: 1 * time.Nanosecond},
+			Timeout:                                  metav1.Duration{Duration: 10 * time.Second},
+			FailurePolicy:                            apiserverv1beta1.FailurePolicyDeny,
+			SubjectAccessReviewVersion:               "v1",
+			MatchConditionSubjectAccessReviewVersion: "v1",
+			MatchConditions: []apiserverv1beta1.WebhookMatchCondition{{
+				// Only intercept request node-agents
+				Expression: fmt.Sprintf("'%s' in request.groups", v1beta1constants.NodeAgentsGroup),
+			}},
 		}, b.Logger)
 
 	var seedPods *net.IPNet

@@ -18,7 +18,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -44,7 +43,7 @@ var _ = Describe("Shoot deletion testing", func() {
 	framework.CIt("Testing if Shoot can be deleted", func(ctx context.Context) {
 		validateFlags()
 
-		shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Namespace: f.ProjectNamespace, Name: *shootName}}
+		shoot := &gardencorev1beta1.Shoot{Namespace: f.ProjectNamespace, Name: *shootName}
 		if err := f.GardenClient.Client().Get(ctx, client.ObjectKey{Namespace: f.ProjectNamespace, Name: *shootName}, shoot); err != nil {
 			if apierrors.IsNotFound(err) {
 				Skip("shoot is already deleted")

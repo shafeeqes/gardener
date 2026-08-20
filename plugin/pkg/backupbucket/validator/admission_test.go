@@ -33,9 +33,7 @@ var _ = Describe("validator", func() {
 			providerType         = "provider"
 
 			backupBucketBase = gardencore.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: backupBucketName,
-				},
+				Name: backupBucketName,
 			}
 		)
 
@@ -70,10 +68,8 @@ var _ = Describe("validator", func() {
 				newBackupBucket = oldBackupBucket.DeepCopy()
 
 				workloadIdentity := &securityv1alpha1.WorkloadIdentity{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      workloadIdentityName,
-						Namespace: namespaceName,
-					},
+					Name:      workloadIdentityName,
+					Namespace: namespaceName,
 					Spec: securityv1alpha1.WorkloadIdentitySpec{
 						TargetSystem: securityv1alpha1.TargetSystem{
 							Type: providerType,
@@ -115,10 +111,8 @@ var _ = Describe("validator", func() {
 				}
 
 				workloadIdentity := &securityv1alpha1.WorkloadIdentity{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      workloadIdentityName,
-						Namespace: namespaceName,
-					},
+					Name:      workloadIdentityName,
+					Namespace: namespaceName,
 					Spec: securityv1alpha1.WorkloadIdentitySpec{
 						TargetSystem: securityv1alpha1.TargetSystem{
 							Type: providerType,

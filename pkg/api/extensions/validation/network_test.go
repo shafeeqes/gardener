@@ -21,10 +21,8 @@ var _ = Describe("Network validation tests", func() {
 
 	BeforeEach(func() {
 		network = &extensionsv1alpha1.Network{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-network",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-network",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.NetworkSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           "provider",

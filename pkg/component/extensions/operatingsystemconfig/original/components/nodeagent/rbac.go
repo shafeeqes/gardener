@@ -6,7 +6,6 @@ package nodeagent
 
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/authentication/user"
 	bootstraptokenapi "k8s.io/cluster-bootstrap/token/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,13 +27,9 @@ func RBACResourcesData() (map[string][]byte, error) {
 func GetCertificateSigningRequestClusterRoleBindings() []client.Object {
 	return []client.Object{
 		&rbacv1.ClusterRoleBinding{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: rbacv1.SchemeGroupVersion.String(),
-				Kind:       "ClusterRoleBinding",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:node-bootstrapper",
-			},
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+			Kind:       "ClusterRoleBinding",
+			Name:       "system:node-bootstrapper",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.SchemeGroupVersion.Group,
 				Kind:     "ClusterRole",
@@ -47,13 +42,9 @@ func GetCertificateSigningRequestClusterRoleBindings() []client.Object {
 			}},
 		},
 		&rbacv1.ClusterRoleBinding{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: rbacv1.SchemeGroupVersion.String(),
-				Kind:       "ClusterRoleBinding",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:certificates.k8s.io:certificatesigningrequests:nodeclient",
-			},
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+			Kind:       "ClusterRoleBinding",
+			Name:       "system:certificates.k8s.io:certificatesigningrequests:nodeclient",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.SchemeGroupVersion.Group,
 				Kind:     "ClusterRole",
@@ -66,13 +57,9 @@ func GetCertificateSigningRequestClusterRoleBindings() []client.Object {
 			}},
 		},
 		&rbacv1.ClusterRoleBinding{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: rbacv1.SchemeGroupVersion.String(),
-				Kind:       "ClusterRoleBinding",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:certificates.k8s.io:certificatesigningrequests:selfnodeclient",
-			},
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+			Kind:       "ClusterRoleBinding",
+			Name:       "system:certificates.k8s.io:certificatesigningrequests:selfnodeclient",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.SchemeGroupVersion.Group,
 				Kind:     "ClusterRole",

@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
@@ -94,10 +93,8 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: testID + "-",
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: testID + "-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -165,10 +162,8 @@ var _ = BeforeSuite(func() {
 	})
 
 	seedControllerRegistration = &gardencorev1beta1.ControllerRegistration{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "ctrlreg-seed-",
-			Labels:       map[string]string{testID: testRunID},
-		},
+		GenerateName: "ctrlreg-seed-",
+		Labels:       map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.ControllerRegistrationSpec{
 			Resources: []gardencorev1beta1.ControllerResource{
 				{Kind: extensionsv1alpha1.DNSRecordResource, Type: providerType},
@@ -195,24 +190,18 @@ var _ = BeforeSuite(func() {
 
 	seedName = "seed-ctrl-reg-test-" + utils.ComputeSHA256Hex([]byte(testID + uuid.NewUUID()))[:8]
 	seedNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: gardenerutils.ComputeGardenNamespace(seedName),
-		},
+		Name: gardenerutils.ComputeGardenNamespace(seedName),
 	}
 
 	seedSecret = &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "seed-secret",
-			Namespace: seedNamespace.Name,
-			Labels:    map[string]string{"gardener.cloud/role": "global-monitoring"},
-		},
+		Name:      "seed-secret",
+		Namespace: seedNamespace.Name,
+		Labels:    map[string]string{"gardener.cloud/role": "global-monitoring"},
 	}
 
 	internalDomainSecret = &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "internal-domain-secret",
-			Namespace: seedNamespace.Name,
-		},
+		Name:      "internal-domain-secret",
+		Namespace: seedNamespace.Name,
 	}
 
 	By("Create Seed Namespace")
@@ -239,10 +228,8 @@ var _ = BeforeSuite(func() {
 	})
 
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   seedName,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   seedName,
+		Labels: map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",

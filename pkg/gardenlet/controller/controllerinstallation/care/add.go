@@ -8,7 +8,6 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -110,6 +109,6 @@ func (r *Reconciler) MapManagedResourceToControllerInstallation(log logr.Logger)
 			return mapper.ObjectListToRequests(controllerInstallationList)
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: controllerInstallationName}}}
+		return []reconcile.Request{{Name: controllerInstallationName}}
 	}
 }

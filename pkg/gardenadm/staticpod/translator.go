@@ -31,16 +31,14 @@ func Translate(ctx context.Context, c client.Client, o client.Object, mutate fun
 		for _, volumeClaimTemplate := range obj.Spec.VolumeClaimTemplates {
 			obj.Spec.Template.Spec.Volumes = append(obj.Spec.Template.Spec.Volumes, corev1.Volume{
 				Name: volumeClaimTemplate.Name,
-				VolumeSource: corev1.VolumeSource{
-					HostPath: &corev1.HostPathVolumeSource{
-						Path: StatefulSetVolumeClaimTemplateHostPath(volumeClaimTemplate.Name),
-					},
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: StatefulSetVolumeClaimTemplateHostPath(volumeClaimTemplate.Name),
 				},
 			})
 		}
 		return translatePodTemplate(ctx, c, obj.ObjectMeta, obj.Spec.Template, mutate)
 	case *corev1.Pod:
-		return translatePodTemplate(ctx, c, obj.ObjectMeta, corev1.PodTemplateSpec{ObjectMeta: metav1.ObjectMeta{Labels: obj.Labels, Annotations: obj.Annotations}, Spec: obj.Spec}, mutate)
+		return translatePodTemplate(ctx, c, obj.ObjectMeta, corev1.PodTemplateSpec{Labels: obj.Labels, Annotations: obj.Annotations, Spec: obj.Spec}, mutate)
 	default:
 		return nil, "", fmt.Errorf("unsupported object type %T", o)
 	}
@@ -143,7 +141,7 @@ func translateVolumes(ctx context.Context, c client.Client, pod *corev1.Pod, sou
 
 		switch {
 		case volume.ConfigMap != nil:
-			configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: volume.ConfigMap.Name, Namespace: sourceNamespace}}
+			configMap := &corev1.ConfigMap{Name: volume.ConfigMap.Name, Namespace: sourceNamespace}
 			if err := c.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 				return nil, fmt.Errorf("failed reading ConfigMap %s of volume %s for static pod %s: %w", client.ObjectKeyFromObject(configMap), volume.Name, client.ObjectKeyFromObject(pod), err)
 			}
@@ -153,7 +151,7 @@ func translateVolumes(ctx context.Context, c client.Client, pod *corev1.Pod, sou
 			pod.Spec.Volumes[i].VolumeSource = corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: hostPath}}
 
 		case volume.Secret != nil:
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: volume.Secret.SecretName, Namespace: sourceNamespace}}
+			secret := &corev1.Secret{Name: volume.Secret.SecretName, Namespace: sourceNamespace}
 			if err := c.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 				return nil, fmt.Errorf("failed reading Secret %s of volume %s for static pod %s: %w", client.ObjectKeyFromObject(secret), volume.Name, client.ObjectKeyFromObject(pod), err)
 			}
@@ -166,7 +164,7 @@ func translateVolumes(ctx context.Context, c client.Client, pod *corev1.Pod, sou
 			for _, source := range volume.Projected.Sources {
 				switch {
 				case source.ConfigMap != nil:
-					configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: source.ConfigMap.Name, Namespace: sourceNamespace}}
+					configMap := &corev1.ConfigMap{Name: source.ConfigMap.Name, Namespace: sourceNamespace}
 					if err := c.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 						return nil, fmt.Errorf("failed reading ConfigMap %s of volume %s for static pod %s: %w", client.ObjectKeyFromObject(configMap), volume.Name, client.ObjectKeyFromObject(pod), err)
 					}
@@ -175,7 +173,7 @@ func translateVolumes(ctx context.Context, c client.Client, pod *corev1.Pod, sou
 					}
 
 				case source.Secret != nil:
-					secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: source.Secret.Name, Namespace: sourceNamespace}}
+					secret := &corev1.Secret{Name: source.Secret.Name, Namespace: sourceNamespace}
 					if err := c.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 						return nil, fmt.Errorf("failed reading Secret %s of volume %s for static pod %s: %w", client.ObjectKeyFromObject(secret), volume.Name, client.ObjectKeyFromObject(pod), err)
 					}

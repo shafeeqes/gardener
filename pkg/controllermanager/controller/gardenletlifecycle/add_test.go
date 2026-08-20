@@ -9,12 +9,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	. "github.com/gardener/gardener/pkg/controllermanager/controller/gardenletlifecycle"
@@ -41,23 +38,23 @@ var _ = Describe("Add", func() {
 		})
 
 		It("should correctly enqueue Seeds", func() {
-			obj := &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: "seed"}}
+			obj := &gardencorev1beta1.Seed{Name: "seed"}
 
 			hdlr.Create(ctx, event.CreateEvent{Object: obj}, queue)
 
 			Expect(queue.Added).To(ConsistOf(Request{
-				Request:           reconcile.Request{NamespacedName: types.NamespacedName{Name: "seed"}},
+				Name:              "seed",
 				IsSelfHostedShoot: false,
 			}))
 		})
 
 		It("should correctly enqueue Shoots", func() {
-			obj := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "shoot-namespace"}}
+			obj := &gardencorev1beta1.Shoot{Name: "shoot", Namespace: "shoot-namespace"}
 
 			hdlr.Create(ctx, event.CreateEvent{Object: obj}, queue)
 
 			Expect(queue.Added).To(ConsistOf(Request{
-				Request:           reconcile.Request{NamespacedName: types.NamespacedName{Name: "shoot", Namespace: "shoot-namespace"}},
+				Name: "shoot", Namespace: "shoot-namespace",
 				IsSelfHostedShoot: true,
 			}))
 		})

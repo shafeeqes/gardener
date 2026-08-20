@@ -37,10 +37,8 @@ var _ = Describe("Shoot mutator", func() {
 			shootMutator = mutator.NewShootMutator(test.FakeManager{Scheme: scheme})
 
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: namespace,
-				},
+				Name:      "foo",
+				Namespace: namespace,
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						Version: "1.33.0",

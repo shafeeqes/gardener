@@ -12,7 +12,6 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	kubeapiserverconstants "github.com/gardener/gardener/pkg/component/kubernetes/apiserver/constants"
@@ -30,9 +29,7 @@ var _ = Describe("ScrapeConfigs", func() {
 
 			workerlessScrapeConfigs = []*monitoringv1alpha1.ScrapeConfig{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "kube-kubelet-seed",
-					},
+					Name: "kube-kubelet-seed",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorTimestamps: new(false),
 						MetricsPath:     new("/federate"),
@@ -70,9 +67,7 @@ var _ = Describe("ScrapeConfigs", func() {
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "annotated-seed-service-endpoints",
-					},
+					Name: "annotated-seed-service-endpoints",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels: new(false),
 						KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
@@ -138,9 +133,7 @@ var _ = Describe("ScrapeConfigs", func() {
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "prometheus-shoot",
-					},
+					Name: "prometheus-shoot",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels: new(false),
 						StaticConfigs: []monitoringv1alpha1.StaticConfig{{
@@ -168,20 +161,18 @@ var _ = Describe("ScrapeConfigs", func() {
 			nonWorkerlessScrapeConfigs = append(
 				workerlessScrapeConfigs,
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "cadvisor",
-					},
+					Name: "cadvisor",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels:     new(false),
 						HonorTimestamps: new(false),
 						Scheme:          new(monitoringv1.SchemeHTTPS),
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-							Key:                  "token",
+							Name: "shoot-access-prometheus-shoot",
+							Key:  "token",
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-							Key:                  "bundle.crt",
+							Name: clusterCASecretName,
+							Key:  "bundle.crt",
 						}}},
 						KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 							Role:            "Node",
@@ -189,12 +180,12 @@ var _ = Describe("ScrapeConfigs", func() {
 							Namespaces:      &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 							FollowRedirects: new(false),
 							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-								Key:                  "token",
+								Name: "shoot-access-prometheus-shoot",
+								Key:  "token",
 							}},
 							TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-								Key:                  "bundle.crt",
+								Name: clusterCASecretName,
+								Key:  "bundle.crt",
 							}}},
 						}},
 						RelabelConfigs: []monitoringv1.RelabelConfig{
@@ -275,19 +266,17 @@ var _ = Describe("ScrapeConfigs", func() {
 					},
 				},
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "kube-kubelet",
-					},
+					Name: "kube-kubelet",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels: new(false),
 						Scheme:      new(monitoringv1.SchemeHTTPS),
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-							Key:                  "token",
+							Name: "shoot-access-prometheus-shoot",
+							Key:  "token",
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-							Key:                  "bundle.crt",
+							Name: clusterCASecretName,
+							Key:  "bundle.crt",
 						}}},
 						KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 							Role:            "Node",
@@ -295,12 +284,12 @@ var _ = Describe("ScrapeConfigs", func() {
 							FollowRedirects: new(true),
 							Namespaces:      &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-								Key:                  "token",
+								Name: "shoot-access-prometheus-shoot",
+								Key:  "token",
 							}},
 							TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-								Key:                  "bundle.crt",
+								Name: clusterCASecretName,
+								Key:  "bundle.crt",
 							}}},
 						}},
 						RelabelConfigs: []monitoringv1.RelabelConfig{
@@ -372,19 +361,17 @@ var _ = Describe("ScrapeConfigs", func() {
 				items := append(
 					nonWorkerlessScrapeConfigs,
 					&monitoringv1alpha1.ScrapeConfig{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "opentelemetry-collector-nodes",
-						},
+						Name: "opentelemetry-collector-nodes",
 						Spec: monitoringv1alpha1.ScrapeConfigSpec{
 							HonorLabels: new(false),
 							Scheme:      new(monitoringv1.SchemeHTTPS),
 							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-								Key:                  "token",
+								Name: "shoot-access-prometheus-shoot",
+								Key:  "token",
 							}},
 							TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-								Key:                  "bundle.crt",
+								Name: clusterCASecretName,
+								Key:  "bundle.crt",
 							}}},
 							KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 								Role:            "Node",
@@ -392,12 +379,12 @@ var _ = Describe("ScrapeConfigs", func() {
 								FollowRedirects: new(true),
 								Namespaces:      &monitoringv1alpha1.NamespaceDiscovery{Names: []string{"kube-system"}},
 								Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-shoot"},
-									Key:                  "token",
+									Name: "shoot-access-prometheus-shoot",
+									Key:  "token",
 								}},
 								TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-									Key:                  "bundle.crt",
+									Name: clusterCASecretName,
+									Key:  "bundle.crt",
 								}}},
 							}},
 							RelabelConfigs: []monitoringv1.RelabelConfig{

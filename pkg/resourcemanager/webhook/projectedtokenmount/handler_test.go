@@ -10,9 +10,7 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -39,7 +37,7 @@ var _ = Describe("Handler", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = admission.NewContextWithRequest(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Namespace: namespace}})
+		ctx = admission.NewContextWithRequest(ctx, admission.Request{Namespace: namespace})
 		log = logger.MustNewZapLogger(logger.DebugLevel, logger.FormatJSON, logzap.WriteTo(GinkgoWriter))
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).Build()
 		handler = &Handler{Logger: log, TargetReader: fakeClient, ExpirationSeconds: expirationSeconds}
@@ -52,10 +50,8 @@ var _ = Describe("Handler", func() {
 			},
 		}
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceAccountName,
-				Namespace: namespace,
-			},
+			Name:                         serviceAccountName,
+			Namespace:                    namespace,
 			AutomountServiceAccountToken: new(false),
 		}
 
@@ -141,37 +137,33 @@ var _ = Describe("Handler", func() {
 					Expect(handler.Default(ctx, pod)).To(Succeed())
 					Expect(pod.Spec.Volumes).To(ConsistOf(corev1.Volume{
 						Name: "kube-api-access-gardener",
-						VolumeSource: corev1.VolumeSource{
-							Projected: &corev1.ProjectedVolumeSource{
-								DefaultMode: new(int32(420)),
-								Sources: []corev1.VolumeProjection{
-									{
-										ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
-											ExpirationSeconds: &expirationSeconds,
-											Path:              "token",
-										},
+						Projected: &corev1.ProjectedVolumeSource{
+							DefaultMode: new(int32(420)),
+							Sources: []corev1.VolumeProjection{
+								{
+									ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+										ExpirationSeconds: &expirationSeconds,
+										Path:              "token",
 									},
-									{
-										ConfigMap: &corev1.ConfigMapProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: "kube-root-ca.crt",
+								},
+								{
+									ConfigMap: &corev1.ConfigMapProjection{
+										Name: "kube-root-ca.crt",
+										Items: []corev1.KeyToPath{{
+											Key:  "ca.crt",
+											Path: "ca.crt",
+										}},
+									},
+								},
+								{
+									DownwardAPI: &corev1.DownwardAPIProjection{
+										Items: []corev1.DownwardAPIVolumeFile{{
+											FieldRef: &corev1.ObjectFieldSelector{
+												APIVersion: "v1",
+												FieldPath:  "metadata.namespace",
 											},
-											Items: []corev1.KeyToPath{{
-												Key:  "ca.crt",
-												Path: "ca.crt",
-											}},
-										},
-									},
-									{
-										DownwardAPI: &corev1.DownwardAPIProjection{
-											Items: []corev1.DownwardAPIVolumeFile{{
-												FieldRef: &corev1.ObjectFieldSelector{
-													APIVersion: "v1",
-													FieldPath:  "metadata.namespace",
-												},
-												Path: "namespace",
-											}},
-										},
+											Path: "namespace",
+										}},
 									},
 								},
 							},

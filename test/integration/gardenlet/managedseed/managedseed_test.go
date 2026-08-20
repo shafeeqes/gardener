@@ -11,7 +11,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -61,7 +60,7 @@ var _ = Describe("ManagedSeed controller test", func() {
 				g.Expect(testClient.Get(ctx, client.ObjectKey{Name: "gardenlet", Namespace: gardenNamespaceShoot}, &corev1.Service{})).To(Succeed())
 				g.Expect(testClient.Get(ctx, client.ObjectKey{Name: "gardenlet", Namespace: gardenNamespaceShoot}, &corev1.ServiceAccount{})).To(Succeed())
 
-				gardenletDeployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardenlet", Namespace: gardenNamespaceShoot}}
+				gardenletDeployment := &appsv1.Deployment{Name: "gardenlet", Namespace: gardenNamespaceShoot}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(gardenletDeployment), gardenletDeployment)).To(Succeed())
 				g.Expect(gardenletDeployment.Spec.Template.Annotations).To(HaveKeyWithValue(
 					"checksum/seed-backup-secret", backupSecret.Name+"-"+utils.ComputeSecretChecksum(backupSecret.Data)[:8],
@@ -78,21 +77,17 @@ var _ = Describe("ManagedSeed controller test", func() {
 		backupSecretName = "backup-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 
 		backupSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      backupSecretName,
-				Namespace: gardenNamespaceGarden.Name,
-			},
+			Name:      backupSecretName,
+			Namespace: gardenNamespaceGarden.Name,
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
 		}
 
 		managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "managedseed-",
-				Namespace:    gardenNamespaceGarden.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "managedseed-",
+			Namespace:    gardenNamespaceGarden.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Gardenlet: seedmanagementv1alpha1.GardenletConfig{
 					Deployment: &seedmanagementv1alpha1.GardenletDeployment{
@@ -108,11 +103,9 @@ var _ = Describe("ManagedSeed controller test", func() {
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: gardenNamespaceGarden.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      shootName,
+			Namespace: gardenNamespaceGarden.Name,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				SeedName:         &seed.Name,
 				CloudProfileName: new("foo"),
@@ -151,11 +144,9 @@ var _ = Describe("ManagedSeed controller test", func() {
 	JustBeforeEach(func() {
 		By("Create cloud provider Secret for shoot")
 		shootCloudProviderSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    gardenNamespaceGarden.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    gardenNamespaceGarden.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
@@ -187,11 +178,9 @@ var _ = Describe("ManagedSeed controller test", func() {
 
 		By("Create SecretBinding for shoot")
 		shootSecretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    gardenNamespaceGarden.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    gardenNamespaceGarden.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Provider: &gardencorev1beta1.SecretBindingProvider{
 				Type: "providerType",
 			},
@@ -215,11 +204,9 @@ var _ = Describe("ManagedSeed controller test", func() {
 
 		By("Create kubeconfig Secret for shoot")
 		shootKubeconfigSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shoot.Name + ".kubeconfig",
-				Namespace: shoot.Namespace,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Name:      shoot.Name + ".kubeconfig",
+			Namespace: shoot.Namespace,
+			Labels:    map[string]string{testID: testRunID},
 			Data: map[string][]byte{
 				"kubeconfig": []byte("kubeconfig"),
 			},
@@ -259,10 +246,8 @@ var _ = Describe("ManagedSeed controller test", func() {
 
 		By("Create ManagedSeed")
 		gardenletConfig, err := encoding.EncodeGardenletConfiguration(&gardenletconfigv1alpha1.GardenletConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "GardenletConfiguration",
-			},
+			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "GardenletConfiguration",
 			GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
 				KubeconfigSecret: &corev1.SecretReference{
 					Name:      "gardenlet-kubeconfig",
@@ -270,33 +255,29 @@ var _ = Describe("ManagedSeed controller test", func() {
 				},
 			},
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"bar": "baz",
+				Annotations: map[string]string{
+					"bar": "baz",
+				},
+				Spec: gardencorev1beta1.SeedSpec{
+					Backup: &gardencorev1beta1.Backup{
+						Provider: "test",
+						Region:   new("bar"),
+						CredentialsRef: &corev1.ObjectReference{
+							APIVersion: "v1",
+							Kind:       "Secret",
+							Name:       backupSecret.Name,
+							Namespace:  backupSecret.Namespace,
 						},
 					},
-					Spec: gardencorev1beta1.SeedSpec{
-						Backup: &gardencorev1beta1.Backup{
-							Provider: "test",
-							Region:   new("bar"),
-							CredentialsRef: &corev1.ObjectReference{
+					DNS: gardencorev1beta1.SeedDNS{
+						Internal: &gardencorev1beta1.SeedDNSProviderConfig{
+							Type:   "provider",
+							Domain: "internal.example.com",
+							CredentialsRef: corev1.ObjectReference{
 								APIVersion: "v1",
 								Kind:       "Secret",
-								Name:       backupSecret.Name,
-								Namespace:  backupSecret.Namespace,
-							},
-						},
-						DNS: gardencorev1beta1.SeedDNS{
-							Internal: &gardencorev1beta1.SeedDNSProviderConfig{
-								Type:   "provider",
-								Domain: "internal.example.com",
-								CredentialsRef: corev1.ObjectReference{
-									APIVersion: "v1",
-									Kind:       "Secret",
-									Name:       "some-secret",
-									Namespace:  "some-namespace",
-								},
+								Name:       "some-secret",
+								Namespace:  "some-namespace",
 							},
 						},
 					},

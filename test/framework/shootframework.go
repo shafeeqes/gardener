@@ -15,7 +15,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -99,7 +98,7 @@ func (f *ShootFramework) AfterEach(ctx context.Context) {
 	}
 	if !f.Config.DisableTestNamespaceCleanup && f.Namespace != "" {
 		ns := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: f.Namespace},
+			Name: f.Namespace,
 		}
 		f.Namespace = ""
 		err := f.ShootClient.Client().Delete(ctx, ns)
@@ -127,9 +126,7 @@ func (f *ShootFramework) AfterEach(ctx context.Context) {
 // The created namespace is automatically cleaned up when the test is finished.
 func (f *ShootFramework) CreateNewNamespace(ctx context.Context) (string, error) {
 	ns := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "gardener-e2e-",
-		},
+		GenerateName: "gardener-e2e-",
 	}
 	if err := f.ShootClient.Client().Create(ctx, ns); err != nil {
 		return "", err

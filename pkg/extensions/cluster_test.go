@@ -69,41 +69,27 @@ var _ = Describe("Cluster", func() {
 	Describe("#SyncClusterResourceToSeed", func() {
 		BeforeEach(func() {
 			expectedCloudProfile = &gardencorev1beta1.CloudProfile{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "CloudProfile",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "CloudProfile",
+				Name:       "foo",
 			}
 
 			expectedSeed = &gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Seed",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Seed",
+				Name:       "foo",
 			}
 
 			expectedShoot = &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "garden-bar",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       "foo",
+				Namespace:  "garden-bar",
 			}
 
 			clusterName = "shoot--" + expectedShoot.Namespace + "--" + expectedShoot.Name
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: clusterName,
-				},
+				Name: clusterName,
 			}
 		})
 
@@ -130,41 +116,27 @@ var _ = Describe("Cluster", func() {
 	Describe("#GetCluster", func() {
 		BeforeEach(func() {
 			expectedCloudProfile = &gardencorev1beta1.CloudProfile{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "CloudProfile",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "CloudProfile",
+				Name:       "foo",
 			}
 
 			expectedSeed = &gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Seed",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Seed",
+				Name:       "foo",
 			}
 
 			expectedShoot = &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "garden-bar",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       "foo",
+				Namespace:  "garden-bar",
 			}
 
 			clusterName = "shoot--" + expectedShoot.Namespace + "--" + expectedShoot.Name
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: clusterName,
-				},
+				Name: clusterName,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					CloudProfile: runtime.RawExtension{
 						Object: expectedCloudProfile,
@@ -205,19 +177,13 @@ var _ = Describe("Cluster", func() {
 	Describe("#CloudProfileFromCluster", func() {
 		BeforeEach(func() {
 			expectedCloudProfile = &gardencorev1beta1.CloudProfile{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "CloudProfile",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "CloudProfile",
+				Name:       "foo",
 			}
 
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				Name: "foo",
 				Spec: extensionsv1alpha1.ClusterSpec{
 					CloudProfile: runtime.RawExtension{
 						Raw: encode(expectedCloudProfile),
@@ -253,19 +219,13 @@ var _ = Describe("Cluster", func() {
 	Describe("#SeedFromCluster", func() {
 		BeforeEach(func() {
 			expectedSeed = &gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Seed",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Seed",
+				Name:       "foo",
 			}
 
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				Name: "foo",
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Seed: &runtime.RawExtension{
 						Raw: encode(expectedSeed),
@@ -309,19 +269,13 @@ var _ = Describe("Cluster", func() {
 	Describe("#ShootFromCluster", func() {
 		BeforeEach(func() {
 			expectedShoot = &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       "foo",
 			}
 
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				Name: "foo",
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Raw: encode(expectedShoot),
@@ -357,31 +311,21 @@ var _ = Describe("Cluster", func() {
 	Describe("#GetShootStateForCluster", func() {
 		BeforeEach(func() {
 			expectedShoot = &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "garden-bar",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       "foo",
+				Namespace:  "garden-bar",
 			}
 			expectedShootState = &gardencorev1beta1.ShootState{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "ShootState",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      expectedShoot.Name,
-					Namespace: expectedShoot.Namespace,
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "ShootState",
+				Name:       expectedShoot.Name,
+				Namespace:  expectedShoot.Namespace,
 			}
 
 			clusterName = "shoot--" + expectedShoot.Namespace + "--" + expectedShoot.Name
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: clusterName,
-				},
+				Name: clusterName,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Object: expectedShoot,

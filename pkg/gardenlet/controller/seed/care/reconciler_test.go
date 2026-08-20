@@ -50,9 +50,7 @@ var _ = Describe("Seed Care Control", func() {
 		logf.IntoContext(ctx, logr.Discard())
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: seedName,
-			},
+			Name: seedName,
 		}
 
 		gardenClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).WithStatusSubresource(&gardencorev1beta1.Seed{}).Build()
@@ -65,7 +63,7 @@ var _ = Describe("Seed Care Control", func() {
 		var req reconcile.Request
 
 		BeforeEach(func() {
-			req = reconcile.Request{NamespacedName: client.ObjectKey{Name: seedName}}
+			req = reconcile.Request{Name: seedName}
 
 			controllerConfig = gardenletconfigv1alpha1.SeedCareControllerConfiguration{
 				SyncPeriod: &metav1.Duration{Duration: careSyncPeriod},
@@ -80,7 +78,7 @@ var _ = Describe("Seed Care Control", func() {
 			It("should stop reconciling and not requeue", func() {
 				reconciler = &Reconciler{GardenClient: gardenClient, SeedClient: seedClient, Config: controllerConfig, Clock: fakeClock}
 
-				req = reconcile.Request{NamespacedName: client.ObjectKey{Name: "some-other-seed"}}
+				req = reconcile.Request{Name: "some-other-seed"}
 				Expect(reconciler.Reconcile(ctx, req)).To(Equal(reconcile.Result{}))
 			})
 		})
@@ -194,7 +192,7 @@ var _ = Describe("Seed Care Control", func() {
 			var req reconcile.Request
 
 			BeforeEach(func() {
-				req = reconcile.Request{NamespacedName: client.ObjectKey{Name: seedName}}
+				req = reconcile.Request{Name: seedName}
 
 				controllerConfig = gardenletconfigv1alpha1.SeedCareControllerConfiguration{
 					SyncPeriod: &metav1.Duration{Duration: careSyncPeriod},

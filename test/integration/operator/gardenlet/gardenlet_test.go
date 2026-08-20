@@ -12,7 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
@@ -32,10 +31,8 @@ var _ = Describe("Gardenlet controller test", func() {
 
 	BeforeEach(func() {
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					"bar": "baz",
-				},
+			Annotations: map[string]string{
+				"bar": "baz",
 			},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
@@ -77,25 +74,19 @@ var _ = Describe("Gardenlet controller test", func() {
 			},
 		}
 		gardenletConfig, err := encoding.EncodeGardenletConfiguration(&gardenletconfigv1alpha1.GardenletConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "GardenletConfiguration",
-			},
+			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "GardenletConfiguration",
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: seed.ObjectMeta,
-					Spec:       seed.Spec,
-				},
+				ObjectMeta: seed.ObjectMeta,
+				Spec:       seed.Spec,
 			},
 		})
 		Expect(err).NotTo(HaveOccurred())
 
 		gardenlet = &seedmanagementv1alpha1.Gardenlet{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "seed-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "seed-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: seedmanagementv1alpha1.GardenletSpec{
 				Deployment: seedmanagementv1alpha1.GardenletSelfDeployment{
 					Helm: seedmanagementv1alpha1.GardenletHelm{OCIRepository: ociRepository},
@@ -111,7 +102,7 @@ var _ = Describe("Gardenlet controller test", func() {
 			},
 		}
 
-		gardenletDeployment = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardenlet", Namespace: testNamespace.Name}}
+		gardenletDeployment = &appsv1.Deployment{Name: "gardenlet", Namespace: testNamespace.Name}
 	})
 
 	JustBeforeEach(func() {

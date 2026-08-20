@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -298,16 +297,12 @@ status:
 
 		serverSecretFor = func(data map[string][]byte) (string, string) {
 			serverSecret := &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Secret",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "metrics-server",
-					Namespace: "kube-system",
-				},
-				Data: make(map[string][]byte),
-				Type: corev1.SecretTypeTLS,
+				Kind:       "Secret",
+				APIVersion: "v1",
+				Name:       "metrics-server",
+				Namespace:  "kube-system",
+				Data:       make(map[string][]byte),
+				Type:       corev1.SecretTypeTLS,
 			}
 
 			serverSecret.Data["tls.crt"] = data["tls.crt"]
@@ -332,7 +327,7 @@ status:
 		sm = fakesecretsmanager.New(fakeClient, namespace)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-metrics-server", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-metrics-server", Namespace: namespace})).To(Succeed())
 
 		values = Values{
 			Image:             image,
@@ -343,16 +338,12 @@ status:
 		metricsServer = New(fakeClient, namespace, sm, values)
 
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceSecretName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceSecretName,
+			Namespace: namespace,
 		}
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 	})
 
@@ -372,12 +363,10 @@ status:
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{

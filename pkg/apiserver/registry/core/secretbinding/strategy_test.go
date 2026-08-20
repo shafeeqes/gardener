@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/gardener/gardener/pkg/apis/core"
@@ -23,10 +22,8 @@ var _ = Describe("Strategy", func() {
 
 	BeforeEach(func() {
 		secretBinding = &core.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "profile",
-				Namespace: "garden",
-			},
+			Name:      "profile",
+			Namespace: "garden",
 			SecretRef: corev1.SecretReference{
 				Name:      "my-secret",
 				Namespace: "my-namespace",

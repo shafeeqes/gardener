@@ -125,11 +125,9 @@ var _ = BeforeSuite(func() {
 
 	By("Create project Namespace")
 	projectNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "garden-" + testRunID,
-			Labels: map[string]string{
-				testID: testRunID,
-			},
+		Name: "garden-" + testRunID,
+		Labels: map[string]string{
+			testID: testRunID,
 		},
 	}
 	Expect(testClient.Create(ctx, projectNamespace)).To(Succeed())
@@ -142,11 +140,9 @@ var _ = BeforeSuite(func() {
 
 	By("Create Namespace for shoot in seed")
 	seedNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "shoot--namespace-" + testRunID,
-			Labels: map[string]string{
-				testID: testRunID,
-			},
+		Name: "shoot--namespace-" + testRunID,
+		Labels: map[string]string{
+			testID: testRunID,
 		},
 	}
 	Expect(testClient.Create(ctx, seedNamespace)).To(Succeed())

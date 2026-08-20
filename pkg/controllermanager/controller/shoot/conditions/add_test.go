@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -122,21 +120,15 @@ var _ = Describe("Add", func() {
 			reconciler.Client = fakeClient
 
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "shoot-registered-as-seed",
-				},
+				Name: "shoot-registered-as-seed",
 			}
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "some-shoot",
-					Namespace: "garden",
-				},
+				Name:      "some-shoot",
+				Namespace: "garden",
 			}
 			managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      seed.Name,
-					Namespace: "garden",
-				},
+				Name:      seed.Name,
+				Namespace: "garden",
 				Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 					Shoot: &seedmanagementv1alpha1.Shoot{
 						Name: shoot.Name,
@@ -169,7 +161,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
 			Expect(reconciler.MapSeedToShoot(log)(ctx, seed)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}},
+				reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace},
 			))
 		})
 	})

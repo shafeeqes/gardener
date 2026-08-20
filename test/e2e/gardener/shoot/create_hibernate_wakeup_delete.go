@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
@@ -79,11 +78,9 @@ func itShouldVerifyShootPrometheusHealthCheck(s *ShootContext) {
 	}
 
 	rule := &monitoringv1.PrometheusRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "shoot-test-job-down",
-			Namespace: "shoot--local--" + s.Shoot.Name,
-			Labels:    map[string]string{"prometheus": "shoot"},
-		},
+		Name:      "shoot-test-job-down",
+		Namespace: "shoot--local--" + s.Shoot.Name,
+		Labels:    map[string]string{"prometheus": "shoot"},
 		Spec: monitoringv1.PrometheusRuleSpec{
 			Groups: []monitoringv1.RuleGroup{
 				{

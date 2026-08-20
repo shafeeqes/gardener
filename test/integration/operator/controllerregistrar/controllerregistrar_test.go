@@ -36,10 +36,8 @@ var _ = Describe("Controller Registrar controller tests", func() {
 
 	BeforeEach(OncePerOrdered, func() {
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   gardenName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   gardenName,
+			Labels: map[string]string{testID: testRunID},
 			Spec: operatorv1alpha1.GardenSpec{
 				RuntimeCluster: operatorv1alpha1.RuntimeCluster{
 					Networking: operatorv1alpha1.RuntimeNetworking{

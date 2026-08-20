@@ -49,9 +49,7 @@ var _ = Describe("Helper Functions", func() {
 			Name: "CoreOS",
 			Versions: []gardencorev1beta1.MachineImageVersion{
 				{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-						Version: "1.0.0",
-					},
+					Version:       "1.0.0",
 					CRI:           []gardencorev1beta1.CRI{{Name: gardencorev1beta1.CRINameContainerD}},
 					Architectures: []string{"amd64"},
 					CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{
@@ -60,12 +58,10 @@ var _ = Describe("Helper Functions", func() {
 					KubeletVersionConstraint: new("< 1.27"),
 				},
 				{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-						Version:        "1.1.0",
-						ExpirationDate: &expirationDateInTheFuture,
-					},
-					CRI:           []gardencorev1beta1.CRI{{Name: gardencorev1beta1.CRINameContainerD}},
-					Architectures: []string{"amd64"},
+					Version:        "1.1.0",
+					ExpirationDate: &expirationDateInTheFuture,
+					CRI:            []gardencorev1beta1.CRI{{Name: gardencorev1beta1.CRINameContainerD}},
+					Architectures:  []string{"amd64"},
 					CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{
 						Capabilities: gardencorev1beta1.Capabilities{"someCapability": []string{"supported"}},
 					}},
@@ -110,12 +106,10 @@ var _ = Describe("Helper Functions", func() {
 			filteredMachineImages := FilterMachineImageVersions(machineImage, worker, kubeletVersion, machineType, capabilityDefinitions)
 
 			Expect(filteredMachineImages.Versions).Should(ContainElements(gardencorev1beta1.MachineImageVersion{
-				ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-					Version:        "1.1.0",
-					ExpirationDate: &expirationDateInTheFuture,
-				},
-				CRI:           []gardencorev1beta1.CRI{{Name: gardencorev1beta1.CRINameContainerD}},
-				Architectures: []string{"amd64"},
+				Version:        "1.1.0",
+				ExpirationDate: &expirationDateInTheFuture,
+				CRI:            []gardencorev1beta1.CRI{{Name: gardencorev1beta1.CRINameContainerD}},
+				Architectures:  []string{"amd64"},
 				CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{
 					Capabilities: gardencorev1beta1.Capabilities{"someCapability": []string{"supported"}},
 				}},
@@ -125,9 +119,7 @@ var _ = Describe("Helper Functions", func() {
 				},
 			},
 				gardencorev1beta1.MachineImageVersion{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-						Version: "1.0.0",
-					},
+					Version:       "1.0.0",
 					CRI:           []gardencorev1beta1.CRI{{Name: gardencorev1beta1.CRINameContainerD}},
 					Architectures: []string{"amd64"},
 					CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{
@@ -188,14 +180,10 @@ var _ = Describe("Helper Functions", func() {
 							Name: "CoreOS",
 							Versions: []gardencorev1beta1.MachineImageVersion{
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.0.0",
-									},
+									Version: "1.0.0",
 								},
 								{
-									ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-										Version: "1.1.0",
-									},
+									Version: "1.1.0",
 								},
 							},
 						},
@@ -249,10 +237,8 @@ var _ = Describe("Helper Functions", func() {
 			machineImage.UpdateStrategy = new(gardencorev1beta1.UpdateStrategyMajor)
 			machineImage.Versions = []gardencorev1beta1.MachineImageVersion{
 				{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-						Version:        "1.0.0",
-						ExpirationDate: &expirationDateInThePast,
-					},
+					Version:        "1.0.0",
+					ExpirationDate: &expirationDateInThePast,
 				},
 			}
 

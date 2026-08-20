@@ -88,7 +88,7 @@ var _ = Describe("Reconciler", func() {
 		DeferCleanup(func() { Actuator = nil })
 
 		ctx = context.TODO()
-		request = reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: name}}
+		request = reconcile.Request{Namespace: namespace, Name: name}
 
 		gardenletConfig := &gardenletconfigv1alpha1.GardenletConfiguration{
 			GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
@@ -99,11 +99,9 @@ var _ = Describe("Reconciler", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       name,
-				Namespace:  namespace,
-				Generation: 1,
-			},
+			Name:       name,
+			Namespace:  namespace,
+			Generation: 1,
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Shoot: &seedmanagementv1alpha1.Shoot{
 					Name: name,
@@ -138,11 +136,9 @@ var _ = Describe("Reconciler", func() {
 
 				// Create a Shoot that the reconciler reads
 				Expect(fakeClient.Create(ctx, &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       name,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: gardencorev1beta1.ShootStatus{
 						LastOperation: &gardencorev1beta1.LastOperation{
 							State: gardencorev1beta1.LastOperationStateSucceeded,
@@ -186,11 +182,9 @@ var _ = Describe("Reconciler", func() {
 
 				// Create a Shoot
 				Expect(fakeClient.Create(ctx, &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       name,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       name,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: gardencorev1beta1.ShootStatus{
 						LastOperation: &gardencorev1beta1.LastOperation{
 							State: gardencorev1beta1.LastOperationStateSucceeded,

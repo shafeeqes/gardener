@@ -22,12 +22,10 @@ var _ = Describe("SystemComponentsConfig tests", func() {
 
 	BeforeEach(func() {
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-				Labels: map[string]string{
-					"resources.gardener.cloud/managed-by": "gardener",
-				},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
+			Labels: map[string]string{
+				"resources.gardener.cloud/managed-by": "gardener",
 			},
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{
@@ -253,10 +251,8 @@ var _ = Describe("SystemComponentsConfig tests", func() {
 		Context("when nodes don't match selector", func() {
 			BeforeEach(func() {
 				nonRelevantNode := corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"test-non-system-components-pool": testID,
-						},
+					Labels: map[string]string{
+						"test-non-system-components-pool": testID,
 					},
 					Spec: corev1.NodeSpec{
 						Taints: []corev1.Taint{{Key: "foo", Effect: corev1.TaintEffectNoExecute}, {Key: "bar", Effect: corev1.TaintEffectNoExecute}},

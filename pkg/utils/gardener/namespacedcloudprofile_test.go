@@ -34,9 +34,7 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 						Name: "ubuntu",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "20.04",
-								},
+								Version:       "20.04",
 								Architectures: []string{"amd64", "arm64"},
 							},
 						},
@@ -75,9 +73,7 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 						Name: "ubuntu",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "20.04",
-								},
+								Version: "20.04",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{
 										Capabilities: gardencorev1beta1.Capabilities{
@@ -133,9 +129,7 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 						Name: "ubuntu",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "20.04",
-								},
+								Version: "20.04",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 									{
 										Capabilities: gardencorev1beta1.Capabilities{
@@ -179,9 +173,7 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 						Name: "ubuntu",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version: "20.04",
-								},
+								Version:           "20.04",
 								CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{},
 							},
 						},
@@ -202,15 +194,11 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 					Name: "ubuntu",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version: "20.04",
-							},
+							Version:       "20.04",
 							Architectures: []string{"amd64"},
 						},
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version: "22.04",
-							},
+							Version:       "22.04",
 							Architectures: []string{"arm64"},
 						},
 					},
@@ -219,9 +207,7 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 					Name: "debian",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version: "11",
-							},
+							Version:       "11",
 							Architectures: []string{"amd64", "arm64"},
 						},
 					},
@@ -257,8 +243,8 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 			Name: "ubuntu",
 			Versions: []gardencorev1beta1.MachineImageVersion{
 				{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
-					Architectures:    []string{"amd64"},
+					Version:       "20.04",
+					Architectures: []string{"amd64"},
 					CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 						{
 							Capabilities: gardencorev1beta1.Capabilities{
@@ -268,8 +254,8 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 					},
 				},
 				{
-					ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "22.04"},
-					Architectures:    []string{"arm64"},
+					Version:       "22.04",
+					Architectures: []string{"arm64"},
 					CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 						{
 							Capabilities: gardencorev1beta1.Capabilities{
@@ -284,8 +270,8 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 				Name: "debian",
 				Versions: []gardencorev1beta1.MachineImageVersion{
 					{
-						ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "11"},
-						Architectures:    []string{"amd64", "arm64"},
+						Version:       "11",
+						Architectures: []string{"amd64", "arm64"},
 						CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 							{
 								Capabilities: gardencorev1beta1.Capabilities{
@@ -345,9 +331,7 @@ var _ = Describe("TransformSpecToParentFormat", func() {
 					Name: "ubuntu",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version: "20.04",
-							},
+							Version:       "20.04",
 							Architectures: []string{"amd64"},
 						},
 					},

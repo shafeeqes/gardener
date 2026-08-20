@@ -55,25 +55,21 @@ var _ = Describe("LeaseReconciler", func() {
 		clock = testclock.NewFakeClock(time.Now().Round(time.Second))
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "apple-seed",
-				UID:  "abcdef-foo",
-			},
+			Name: "apple-seed",
+			UID:  "abcdef-foo",
 		}
 		request = reconcile.Request{NamespacedName: client.ObjectKeyFromObject(seed)}
 
 		renewTime := metav1.NewMicroTime(clock.Now())
 		expectedLease = &coordinationv1.Lease{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "gardener-system-seed-lease",
-				Name:      seed.Name,
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Seed",
-					Name:       seed.Name,
-					UID:        seed.UID,
-				}},
-			},
+			Namespace: "gardener-system-seed-lease",
+			Name:      seed.Name,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Seed",
+				Name:       seed.Name,
+				UID:        seed.UID,
+			}},
 			Spec: coordinationv1.LeaseSpec{
 				HolderIdentity:       new(seed.Name),
 				LeaseDurationSeconds: new(int32(2)),
@@ -187,10 +183,8 @@ var _ = Describe("LeaseReconciler", func() {
 		BeforeEach(func() {
 			// create pre-existing lease
 			lease := &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: "gardener-system-seed-lease",
-					Name:      seed.Name,
-				},
+				Namespace: "gardener-system-seed-lease",
+				Name:      seed.Name,
 			}
 			Expect(gardenClient.Create(ctx, lease)).To(Succeed())
 

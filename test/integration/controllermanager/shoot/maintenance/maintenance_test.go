@@ -110,9 +110,7 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 		}
 
 		cloudProfile = &gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-			},
+			GenerateName: testID + "-",
 			Spec: gardencorev1beta1.CloudProfileSpec{
 				MachineCapabilities: capabilityDefinitions,
 				Kubernetes: gardencorev1beta1.KubernetesSettings{
@@ -146,11 +144,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 						Name: machineImageName,
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// ARM overall latest version: 3.0.0
-									Version:        overallLatestVersionARM,
-									Classification: &deprecatedClassification,
-								},
+								// ARM overall latest version: 3.0.0
+								Version:        overallLatestVersionARM,
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -160,11 +156,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsArm,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// AMD64 overall latest version: 3.0.1
-									Version:        overallLatestVersionAMD64,
-									Classification: &supportedClassification,
-								},
+								// AMD64 overall latest version: 3.0.1
+								Version:        overallLatestVersionAMD64,
+								Classification: &supportedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -174,11 +168,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsAmd,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// latest ARM {patch, minor} of next major: 2.1.1
-									Version:        highestVersionNextMajorARM,
-									Classification: &deprecatedClassification,
-								},
+								// latest ARM {patch, minor} of next major: 2.1.1
+								Version:        highestVersionNextMajorARM,
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -188,11 +180,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsArm,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// latest AMD64 {patch, minor} of next major: 2.1.3
-									Version:        highestVersionNextMajorAMD64,
-									Classification: &supportedClassification,
-								},
+								// latest AMD64 {patch, minor} of next major: 2.1.3
+								Version:        highestVersionNextMajorAMD64,
+								Classification: &supportedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -202,11 +192,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsAmd,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// patch update should never be forcefully updated to the next major version
-									Version:        highestSupportedARMVersion,
-									Classification: &supportedClassification,
-								},
+								// patch update should never be forcefully updated to the next major version
+								Version:        highestSupportedARMVersion,
+								Classification: &supportedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -216,11 +204,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavors,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// latest patch for minor: 0.4.1
-									Version:        highestVersionForCurrentMajorARM,
-									Classification: &supportedClassification,
-								},
+								// latest patch for minor: 0.4.1
+								Version:        highestVersionForCurrentMajorARM,
+								Classification: &supportedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -230,11 +216,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsArm,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// latest patch for minor: 0.3.0
-									Version:        highestVersionForCurrentMajorAMD64,
-									Classification: &supportedClassification,
-								},
+								// latest patch for minor: 0.3.0
+								Version:        highestVersionForCurrentMajorAMD64,
+								Classification: &supportedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -244,12 +228,10 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsAmd,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// ARM: highest patch version for next higher minor version
-									// should be force-updated to this version: 0.2.4
-									Version:        highestPatchNextMinorARM,
-									Classification: &deprecatedClassification,
-								},
+								// ARM: highest patch version for next higher minor version
+								// should be force-updated to this version: 0.2.4
+								Version:        highestPatchNextMinorARM,
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -259,12 +241,10 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsArm,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// AMD64: highest patch version for next higher minor version
-									// should be force-updated to this version: 0.2.3
-									Version:        highestPatchNextMinorAMD64,
-									Classification: &deprecatedClassification,
-								},
+								// AMD64: highest patch version for next higher minor version
+								// should be force-updated to this version: 0.2.3
+								Version:        highestPatchNextMinorAMD64,
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -274,10 +254,8 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsAmd,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "0.2.0",
-									Classification: &deprecatedClassification,
-								},
+								Version:        "0.2.0",
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -287,11 +265,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavors,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// ARM highest patch version for Shoot's minor: 0.0.4
-									Version:        highestPatchSameMinorARM,
-									Classification: &supportedClassification,
-								},
+								// ARM highest patch version for Shoot's minor: 0.0.4
+								Version:        highestPatchSameMinorARM,
+								Classification: &supportedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -301,11 +277,9 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsArm,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									// AMD64 highest patch version for Shoot's minor: 0.0.3
-									Version:        highestPatchSameMinorAMD64,
-									Classification: &deprecatedClassification,
-								},
+								// AMD64 highest patch version for Shoot's minor: 0.0.3
+								Version:        highestPatchSameMinorAMD64,
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -315,10 +289,8 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavorsAmd,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        "0.0.2",
-									Classification: &deprecatedClassification,
-								},
+								Version:        "0.0.2",
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -328,10 +300,8 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 								CapabilityFlavors: imageFlavors,
 							},
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-									Version:        testMachineImageVersion,
-									Classification: &deprecatedClassification,
-								},
+								Version:        testMachineImageVersion,
+								Classification: &deprecatedClassification,
 								CRI: []gardencorev1beta1.CRI{
 									{
 										Name: gardencorev1beta1.CRINameContainerD,
@@ -373,7 +343,7 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 		})
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{GenerateName: "test-", Namespace: testNamespace.Name},
+			GenerateName: "test-", Namespace: testNamespace.Name,
 			Spec: gardencorev1beta1.ShootSpec{
 				CredentialsBindingName: new("my-provider-account"),
 				CloudProfile:           &gardencorev1beta1.CloudProfileReference{Name: cloudProfile.Name},
@@ -1122,12 +1092,10 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				shoot130.Spec.Kubernetes = gardencorev1beta1.Kubernetes{
 					Version: testKubernetesVersionHighestPatchLowMinor.Version,
 					KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								unsupportedfeatureGate1: true,
-								supportedfeatureGate2:   false,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							unsupportedfeatureGate1: true,
+							supportedfeatureGate2:   false,
 						},
 						AdmissionPlugins: []gardencorev1beta1.AdmissionPlugin{
 							{Name: supportedAdmissionPlugin1},
@@ -1136,38 +1104,30 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 						},
 					},
 					KubeControllerManager: &gardencorev1beta1.KubeControllerManagerConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								unsupportedfeatureGate1: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							unsupportedfeatureGate1: true,
 						},
 					},
 					KubeScheduler: &gardencorev1beta1.KubeSchedulerConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate2:   true,
-								unsupportedfeatureGate1: true,
-								unsupportedfeatureGate2: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate2:   true,
+							unsupportedfeatureGate1: true,
+							unsupportedfeatureGate2: true,
 						},
 					},
 					KubeProxy: &gardencorev1beta1.KubeProxyConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								supportedfeatureGate2:   false,
-								unsupportedfeatureGate2: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							supportedfeatureGate2:   false,
+							unsupportedfeatureGate2: true,
 						},
 					},
 					Kubelet: &gardencorev1beta1.KubeletConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								unsupportedfeatureGate1: true,
-								unsupportedfeatureGate2: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							unsupportedfeatureGate1: true,
+							unsupportedfeatureGate2: true,
 						},
 					},
 				}
@@ -1429,23 +1389,19 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				shoot130.Spec.Provider.Workers[0].Kubernetes = &gardencorev1beta1.WorkerKubernetes{
 					Version: new(testKubernetesVersionHighestPatchLowMinor.Version),
 					Kubelet: &gardencorev1beta1.KubeletConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								supportedfeatureGate2:   false,
-								unsupportedfeatureGate1: true,
-								unsupportedfeatureGate2: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							supportedfeatureGate2:   false,
+							unsupportedfeatureGate1: true,
+							unsupportedfeatureGate2: true,
 						},
 					},
 				}
 				shoot130.Spec.Provider.Workers[1].Kubernetes = &gardencorev1beta1.WorkerKubernetes{
 					Kubelet: &gardencorev1beta1.KubeletConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								unsupportedfeatureGate1: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							unsupportedfeatureGate1: true,
 						},
 					},
 				}
@@ -1554,24 +1510,20 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				shoot130.Spec.Provider.Workers[0].Kubernetes = &gardencorev1beta1.WorkerKubernetes{
 					Version: new(testKubernetesVersionHighestPatchLowMinor.Version),
 					Kubelet: &gardencorev1beta1.KubeletConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								supportedfeatureGate2:   false,
-								unsupportedfeatureGate1: true,
-								unsupportedfeatureGate2: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							supportedfeatureGate2:   false,
+							unsupportedfeatureGate1: true,
+							unsupportedfeatureGate2: true,
 						},
 					},
 				}
 				shoot130.Spec.Provider.Workers[1].Kubernetes = &gardencorev1beta1.WorkerKubernetes{
 					Version: new(testKubernetesVersionHighestPatchLowMinor.Version),
 					Kubelet: &gardencorev1beta1.KubeletConfig{
-						KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-							FeatureGates: map[string]bool{
-								supportedfeatureGate1:   true,
-								unsupportedfeatureGate1: true,
-							},
+						FeatureGates: map[string]bool{
+							supportedfeatureGate1:   true,
+							unsupportedfeatureGate1: true,
 						},
 					},
 				}
@@ -1630,10 +1582,8 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				shoot133.Spec.CredentialsBindingName = nil
 
 				secret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: testID + "-secret-",
-						Namespace:    testNamespace.Name,
-					},
+					GenerateName: testID + "-secret-",
+					Namespace:    testNamespace.Name,
 					Data: map[string][]byte{
 						"serviceaccount.json": []byte(`{"type": "service_account"}`),
 					},
@@ -1646,10 +1596,8 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				})
 
 				secretBinding = &gardencorev1beta1.SecretBinding{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      secretBindingName,
-						Namespace: testNamespace.Name,
-					},
+					Name:      secretBindingName,
+					Namespace: testNamespace.Name,
 					SecretRef: corev1.SecretReference{
 						Name:      secret.Name,
 						Namespace: secret.Namespace,
@@ -1713,10 +1661,8 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				By("Verify CredentialsBinding was created with correct properties")
 				credentialsBindingName := *shoot133.Spec.CredentialsBindingName
 				credentialsBinding = &securityv1alpha1.CredentialsBinding{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialsBindingName,
-						Namespace: testNamespace.Name,
-					},
+					Name:      credentialsBindingName,
+					Namespace: testNamespace.Name,
 				}
 				Expect(testClient.Get(ctx, client.ObjectKeyFromObject(credentialsBinding), credentialsBinding)).To(Succeed())
 
@@ -1737,9 +1683,7 @@ var _ = DescribeTableSubtree("Shoot Maintenance controller tests", func(isCapabi
 				shoot134.Spec.Kubernetes.Version = "1.34.0"
 				shoot134.Spec.Addons = &gardencorev1beta1.Addons{
 					KubernetesDashboard: &gardencorev1beta1.KubernetesDashboard{
-						Addon: gardencorev1beta1.Addon{
-							Enabled: true,
-						},
+						Enabled: true,
 					},
 				}
 				shoot134.Spec.Kubernetes.KubeScheduler = &gardencorev1beta1.KubeSchedulerConfig{

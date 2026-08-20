@@ -32,18 +32,14 @@ var _ = Describe("ClassFilter", func() {
 		}
 
 		mrDifferentFinalizerDifferentClass = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Finalizers: []string{differentFinalizer},
-			},
+			Finalizers: []string{differentFinalizer},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class: &differentClass,
 			},
 		}
 
 		mrSameFinalizerDifferentClass = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Finalizers: []string{FinalizerName},
-			},
+			Finalizers: []string{FinalizerName},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class: &differentClass,
 			},
@@ -57,18 +53,14 @@ var _ = Describe("ClassFilter", func() {
 		}
 
 		mrDifferentFinalizerSameClass = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Finalizers: []string{differentFinalizer},
-			},
+			Finalizers: []string{differentFinalizer},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class: new(""),
 			},
 		}
 
 		mrSameFinalizerSameClass = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Finalizers: []string{FinalizerName},
-			},
+			Finalizers: []string{FinalizerName},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				Class: new(""),
 			},

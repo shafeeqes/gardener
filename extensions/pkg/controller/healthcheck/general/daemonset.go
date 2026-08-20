@@ -47,18 +47,14 @@ var (
 // NewSeedDaemonSetHealthChecker is a healthCheck function to check DaemonSets in the Seed cluster
 func NewSeedDaemonSetHealthChecker(name string) *SeedDaemonSetHealthChecker {
 	return &SeedDaemonSetHealthChecker{
-		daemonSetHealthChecker: daemonSetHealthChecker{
-			name: name,
-		},
+		name: name,
 	}
 }
 
 // NewShootDaemonSetHealthChecker is a healthCheck function to check DaemonSets in the Shoot cluster
 func NewShootDaemonSetHealthChecker(name string) *ShootDaemonSetHealthChecker {
 	return &ShootDaemonSetHealthChecker{
-		daemonSetHealthChecker: daemonSetHealthChecker{
-			name: name,
-		},
+		name: name,
 	}
 }
 

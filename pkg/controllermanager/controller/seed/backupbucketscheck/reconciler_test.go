@@ -54,9 +54,7 @@ var _ = Describe("Reconciler", func() {
 
 		BeforeEach(func() {
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "seed",
-				},
+				Name: "seed",
 			}
 
 			request = reconcile.Request{NamespacedName: client.ObjectKeyFromObject(seed)}
@@ -276,9 +274,7 @@ var _ = Describe("Reconciler", func() {
 
 func createBackupBucket(name, seedName string, lastErr *gardencorev1beta1.LastError) gardencorev1beta1.BackupBucket {
 	return gardencorev1beta1.BackupBucket{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 		Spec: gardencorev1beta1.BackupBucketSpec{
 			SeedName: new(seedName),
 		},

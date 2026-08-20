@@ -70,15 +70,13 @@ var _ = Describe("BackupEntry", func() {
 		}
 
 		expected = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-					v1beta1constants.ShootPurpose:      string(shootPurpose),
-				},
-				OwnerReferences: []metav1.OwnerReference{*ownerRef},
+			Name:      name,
+			Namespace: namespace,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+				v1beta1constants.ShootPurpose:      string(shootPurpose),
 			},
+			OwnerReferences: []metav1.OwnerReference{*ownerRef},
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				BucketName: bucketName,
 				SeedName:   &seedName,
@@ -132,7 +130,7 @@ var _ = Describe("BackupEntry", func() {
 		When("Shoot is present", func() {
 			BeforeEach(func() {
 				values.SeedName = nil
-				values.Shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot-name", Namespace: "shoot-namespace"}}
+				values.Shoot = &gardencorev1beta1.Shoot{Name: "shoot-name", Namespace: "shoot-namespace"}
 
 				expected.Spec.SeedName = nil
 				expected.Spec.ShootRef = &corev1.ObjectReference{

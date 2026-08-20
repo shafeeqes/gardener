@@ -9,7 +9,6 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpaautoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	"k8s.io/utils/ptr"
 
@@ -19,13 +18,11 @@ import (
 
 func (p *prometheus) vpa() *vpaautoscalingv1.VerticalPodAutoscaler {
 	obj := &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.name(),
-			Namespace: p.namespace,
-			Labels: utils.MergeStringMaps(p.getLabels(), map[string]string{
-				v1beta1constants.LabelObservabilityApplication: p.name(),
-			}),
-		},
+		Name:      p.name(),
+		Namespace: p.namespace,
+		Labels: utils.MergeStringMaps(p.getLabels(), map[string]string{
+			v1beta1constants.LabelObservabilityApplication: p.name(),
+		}),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				APIVersion: monitoringv1.SchemeGroupVersion.String(),

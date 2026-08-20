@@ -79,9 +79,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-node",
-			},
+			Name: "test-node",
 		}
 
 		Expect(c.Create(ctx, node)).To(Succeed())
@@ -205,25 +203,19 @@ PRETTY_NAME="Garden Linux 1592Foo"
 		It("should delete all pods running on this node", func() {
 			pods := []*corev1.Pod{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-1",
-					},
+					Name: "pod-1",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-2",
-					},
+					Name: "pod-2",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-3",
-					},
+					Name: "pod-3",
 					Spec: corev1.PodSpec{
 						NodeName: "another-node",
 					},
@@ -416,17 +408,13 @@ PRETTY_NAME="Garden Linux 1592Foo"
 		It("should not patch the node as update successful or delete the pods if the node does not have InPlaceUpdate condition with reason ReadyForUpdate", func() {
 			pods := []*corev1.Pod{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-1",
-					},
+					Name: "pod-1",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-2",
-					},
+					Name: "pod-2",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
@@ -456,17 +444,13 @@ PRETTY_NAME="Garden Linux 1592Foo"
 
 			pods := []*corev1.Pod{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-1",
-					},
+					Name: "pod-1",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-2",
-					},
+					Name: "pod-2",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
@@ -499,17 +483,13 @@ PRETTY_NAME="Garden Linux 1592Foo"
 
 			pods := []*corev1.Pod{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-1",
-					},
+					Name: "pod-1",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-2",
-					},
+					Name: "pod-2",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
@@ -540,17 +520,13 @@ PRETTY_NAME="Garden Linux 1592Foo"
 
 			pods := []*corev1.Pod{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-1",
-					},
+					Name: "pod-1",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-2",
-					},
+					Name: "pod-2",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
@@ -592,17 +568,13 @@ PRETTY_NAME="Garden Linux 1592Foo"
 
 			pods := []*corev1.Pod{
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-1",
-					},
+					Name: "pod-1",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},
 				},
 				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "pod-2",
-					},
+					Name: "pod-2",
 					Spec: corev1.PodSpec{
 						NodeName: "test-node",
 					},

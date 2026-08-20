@@ -11,7 +11,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -163,7 +162,7 @@ func GetIPStackForSeed(seed *gardencorev1beta1.Seed) string {
 // errors as NotFound because the SeedAuthorizer only grants access to ManagedSeeds related to this seed via the
 // resource graph — for unmanaged seeds, no graph edge is present and the authorizer returns Forbidden.
 func ClusterIsManagedByManagedSeed(ctx context.Context, gardenReader client.Reader, seedName string) (bool, error) {
-	managedSeed := &seedmanagementv1alpha1.ManagedSeed{ObjectMeta: metav1.ObjectMeta{Name: seedName, Namespace: v1beta1constants.GardenNamespace}}
+	managedSeed := &seedmanagementv1alpha1.ManagedSeed{Name: seedName, Namespace: v1beta1constants.GardenNamespace}
 	if err := gardenReader.Get(ctx, client.ObjectKeyFromObject(managedSeed), managedSeed); err != nil {
 		if apierrors.IsNotFound(err) || apierrors.IsForbidden(err) {
 			return false, nil

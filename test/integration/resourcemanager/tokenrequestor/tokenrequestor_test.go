@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
@@ -35,24 +34,20 @@ var _ = Describe("TokenRequestor tests", func() {
 		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      resourceName,
-					"serviceaccount.resources.gardener.cloud/namespace": testNamespace.Name,
-					"serviceaccount.resources.gardener.cloud/labels":    `{"foo":"bar"}`,
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-				},
+			Name:      resourceName,
+			Namespace: testNamespace.Name,
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      resourceName,
+				"serviceaccount.resources.gardener.cloud/namespace": testNamespace.Name,
+				"serviceaccount.resources.gardener.cloud/labels":    `{"foo":"bar"}`,
+			},
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
 			},
 		}
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-			},
+			Name:      resourceName,
+			Namespace: testNamespace.Name,
 		}
 
 		fakeClock.SetTime(time.Now().Round(time.Second))
@@ -127,9 +122,9 @@ var _ = Describe("TokenRequestor tests", func() {
 			}).Should(Succeed())
 
 			newRestConfig = &rest.Config{
-				Host:            restConfig.Host,
-				BearerToken:     string(secret.Data["token"]),
-				TLSClientConfig: rest.TLSClientConfig{CAData: restConfig.CAData},
+				Host:        restConfig.Host,
+				BearerToken: string(secret.Data["token"]),
+				CAData:      restConfig.CAData,
 			}
 		})
 
@@ -145,9 +140,9 @@ var _ = Describe("TokenRequestor tests", func() {
 			}).Should(Succeed())
 
 			newRestConfig = &rest.Config{
-				Host:            restConfig.Host,
-				BearerToken:     string(secret.Data["token"]),
-				TLSClientConfig: rest.TLSClientConfig{CAData: secret.Data["bundle.crt"]},
+				Host:        restConfig.Host,
+				BearerToken: string(secret.Data["token"]),
+				CAData:      secret.Data["bundle.crt"],
 			}
 		})
 

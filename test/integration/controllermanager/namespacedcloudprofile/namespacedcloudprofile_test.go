@@ -53,9 +53,7 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 		updateStrategy := gardencorev1beta1.MachineImageUpdateStrategy("major")
 
 		parentCloudProfile = &gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-			},
+			GenerateName: testID + "-",
 			Spec: gardencorev1beta1.CloudProfileSpec{
 				MachineCapabilities: capabilityDefinitions,
 				Type:                "some-type",
@@ -66,7 +64,7 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 					{
 						Name: "some-image",
 						Versions: []gardencorev1beta1.MachineImageVersion{
-							{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.5.6"}},
+							{Version: "4.5.6"},
 						},
 					},
 				},
@@ -83,11 +81,9 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 		}
 
 		namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 				Kubernetes: &gardencorev1beta1.KubernetesSettings{
 					Versions: []gardencorev1beta1.ExpirableVersion{{Version: "1.2.3", ExpirationDate: &expirationDateFuture}},
@@ -96,17 +92,17 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 					{
 						Name: "some-image",
 						Versions: []gardencorev1beta1.MachineImageVersion{
-							{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.5.6", ExpirationDate: &expirationDateFuture}},
-							{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "7.8.9"}, CRI: []gardencorev1beta1.CRI{{Name: "containerd"}}}, // no capabilities defined, as spec.MachineCapabilities will be used
+							{Version: "4.5.6", ExpirationDate: &expirationDateFuture},
+							{Version: "7.8.9", CRI: []gardencorev1beta1.CRI{{Name: "containerd"}}}, // no capabilities defined, as spec.MachineCapabilities will be used
 						},
 					},
 					{
 						Name: "custom-image",
 						Versions: []gardencorev1beta1.MachineImageVersion{
 							{
-								ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.2"},
-								CRI:              []gardencorev1beta1.CRI{{Name: "containerd"}},
-								Architectures:    []string{"amd64"},
+								Version:       "1.1.2",
+								CRI:           []gardencorev1beta1.CRI{{Name: "containerd"}},
+								Architectures: []string{"amd64"},
 								// explicitly define capabilities 1.1.2 is not in parent cloudprofile
 								CapabilityFlavors: imageFlavors,
 							},
@@ -142,14 +138,14 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 					Name: "some-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "7.8.9"},
-							CRI:              []gardencorev1beta1.CRI{{Name: "containerd"}},
-							Architectures:    []string{"amd64"},
+							Version:       "7.8.9",
+							CRI:           []gardencorev1beta1.CRI{{Name: "containerd"}},
+							Architectures: []string{"amd64"},
 						},
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.5.6", ExpirationDate: &expirationDateFuture},
-							CRI:              []gardencorev1beta1.CRI{{Name: "containerd"}},
-							Architectures:    []string{"amd64"},
+							Version: "4.5.6", ExpirationDate: &expirationDateFuture,
+							CRI:           []gardencorev1beta1.CRI{{Name: "containerd"}},
+							Architectures: []string{"amd64"},
 						},
 					},
 					UpdateStrategy: &updateStrategy,
@@ -158,7 +154,7 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 					Name: "custom-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion:  gardencorev1beta1.ExpirableVersion{Version: "1.1.2"},
+							Version:           "1.1.2",
 							CRI:               []gardencorev1beta1.CRI{{Name: "containerd"}},
 							Architectures:     []string{"amd64"},
 							CapabilityFlavors: imageFlavors},
@@ -198,10 +194,8 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 
 		BeforeEach(func() {
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Namespace:    testNamespace.Name,
-				},
+				GenerateName: testID + "-",
+				Namespace:    testNamespace.Name,
 				Spec: gardencorev1beta1.ShootSpec{
 					SecretBindingName: new("my-provider-account"),
 					Region:            "foo-region",
@@ -542,7 +536,7 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 					Name: "some-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion:  gardencorev1beta1.ExpirableVersion{Version: "4.5.6", ExpirationDate: &expirationDatePast},
+							Version: "4.5.6", ExpirationDate: &expirationDatePast,
 							Architectures:     []string{"amd64"},
 							CapabilityFlavors: imageFlavors,
 						},
@@ -560,9 +554,9 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 					Name: "some-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.5.6"},
-							CRI:              []gardencorev1beta1.CRI{{Name: "containerd"}},
-							Architectures:    []string{"amd64"},
+							Version:       "4.5.6",
+							CRI:           []gardencorev1beta1.CRI{{Name: "containerd"}},
+							Architectures: []string{"amd64"},
 						},
 					},
 					UpdateStrategy: new(gardencorev1beta1.UpdateStrategyMajor),
@@ -596,7 +590,7 @@ var _ = DescribeTableSubtree("NamespacedCloudProfile controller tests", func(isC
 				{
 					Name: "some-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.5.6", ExpirationDate: &expirationDatePast}},
+						{Version: "4.5.6", ExpirationDate: &expirationDatePast},
 					},
 				},
 			}

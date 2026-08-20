@@ -109,28 +109,22 @@ func InjectDefaultSettings(
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes,
 		corev1.Volume{
 			Name: volumeNameCAEtcd,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretCAETCD.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretCAETCD.Name,
 			},
 		},
 		corev1.Volume{
 			Name: volumeNameEtcdClient,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  secretETCDClient.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  secretETCDClient.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		},
 		corev1.Volume{
 			Name: volumeNameServer,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName:  secretServer.Name,
-					DefaultMode: new(int32(0640)),
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  secretServer.Name,
+				DefaultMode: new(int32(0640)),
 			},
 		},
 	)

@@ -10,8 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -46,21 +44,15 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		BeforeEach(func() {
 			secret = &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Secret",
-					APIVersion: corev1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-				},
+				Kind:       "Secret",
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Name:       "secret",
+				Namespace:  "namespace",
 			}
 
 			credentialsBinding = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialsBindingName,
-					Namespace: credentialsBindingNamespace,
-				},
+				Name:      credentialsBindingName,
+				Namespace: credentialsBindingNamespace,
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "Secret",
 					APIVersion: corev1.SchemeGroupVersion.String(),
@@ -76,7 +68,7 @@ var _ = Describe("CredentialsBindingControl", func() {
 			Expect(fakeClient.Create(ctx, credentialsBinding)).To(Succeed())
 
 			reconciler = &credentialsbinding.Reconciler{Client: fakeClient}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: credentialsBindingNamespace, Name: credentialsBindingName}}
+			request = reconcile.Request{Namespace: credentialsBindingNamespace, Name: credentialsBindingName}
 		})
 
 		It("should add the credentialsbinding referred label to the secret referred by the credentialsbinding", func() {
@@ -113,10 +105,8 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		It("should not remove any of the label from the secret when there are other credentialsbindings referring it", func() {
 			credentialsBinding2 := &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "credentialsbinding-2",
-					Namespace: "some-namespace",
-				},
+				Name:      "credentialsbinding-2",
+				Namespace: "some-namespace",
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "Secret",
 					APIVersion: corev1.SchemeGroupVersion.String(),
@@ -144,11 +134,9 @@ var _ = Describe("CredentialsBindingControl", func() {
 		It("should persist the secretbinding reference label", func() {
 			Expect(fakeClient.Delete(ctx, secret)).To(Succeed())
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-					Labels:    map[string]string{"reference.gardener.cloud/secretbinding": "true"},
-				},
+				Name:      "secret",
+				Namespace: "namespace",
+				Labels:    map[string]string{"reference.gardener.cloud/secretbinding": "true"},
 			}
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -169,10 +157,8 @@ var _ = Describe("CredentialsBindingControl", func() {
 		It("should remove the finalizer", func() {
 			Expect(fakeClient.Delete(ctx, secret)).To(Succeed())
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-				},
+				Name:      "secret",
+				Namespace: "namespace",
 			}
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -206,21 +192,15 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		BeforeEach(func() {
 			internalSecret = &gardencorev1beta1.InternalSecret{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "InternalSecret",
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "internal-secret",
-					Namespace: "namespace",
-				},
+				Kind:       "InternalSecret",
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Name:       "internal-secret",
+				Namespace:  "namespace",
 			}
 
 			credentialsBinding = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialsBindingName,
-					Namespace: credentialsBindingNamespace,
-				},
+				Name:      credentialsBindingName,
+				Namespace: credentialsBindingNamespace,
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "InternalSecret",
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
@@ -236,7 +216,7 @@ var _ = Describe("CredentialsBindingControl", func() {
 			Expect(fakeClient.Create(ctx, credentialsBinding)).To(Succeed())
 
 			reconciler = &credentialsbinding.Reconciler{Client: fakeClient}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: credentialsBindingNamespace, Name: credentialsBindingName}}
+			request = reconcile.Request{Namespace: credentialsBindingNamespace, Name: credentialsBindingName}
 		})
 
 		It("should add the CredentialsBinding referred label to the InternalSecret referred by the CredentialsBinding", func() {
@@ -273,10 +253,8 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		It("should not remove any of the label from the secret when there are other CredentialsBinding referring it", func() {
 			credentialsBinding2 := &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "credentialsbinding-2",
-					Namespace: "some-namespace",
-				},
+				Name:      "credentialsbinding-2",
+				Namespace: "some-namespace",
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "InternalSecret",
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
@@ -304,10 +282,8 @@ var _ = Describe("CredentialsBindingControl", func() {
 		It("should remove the finalizer", func() {
 			Expect(fakeClient.Delete(ctx, internalSecret)).To(Succeed())
 			internalSecret = &gardencorev1beta1.InternalSecret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "internal-secret",
-					Namespace: "namespace",
-				},
+				Name:      "internal-secret",
+				Namespace: "namespace",
 			}
 			Expect(fakeClient.Create(ctx, internalSecret)).To(Succeed())
 
@@ -341,21 +317,15 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		BeforeEach(func() {
 			workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "WorkloadIdentity",
-					APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "wi",
-					Namespace: "namespace",
-				},
+				Kind:       "WorkloadIdentity",
+				APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
+				Name:       "wi",
+				Namespace:  "namespace",
 			}
 
 			credentialsBinding = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialsBindingName,
-					Namespace: credentialsBindingNamespace,
-				},
+				Name:      credentialsBindingName,
+				Namespace: credentialsBindingNamespace,
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "WorkloadIdentity",
 					APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
@@ -371,7 +341,7 @@ var _ = Describe("CredentialsBindingControl", func() {
 			Expect(fakeClient.Create(ctx, credentialsBinding)).To(Succeed())
 
 			reconciler = &credentialsbinding.Reconciler{Client: fakeClient}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: credentialsBindingNamespace, Name: credentialsBindingName}}
+			request = reconcile.Request{Namespace: credentialsBindingNamespace, Name: credentialsBindingName}
 		})
 
 		It("should add the credentialsbinding referred label to the WorkloadIdentity referred by the CredentialsBinding", func() {
@@ -438,10 +408,8 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		It("should not remove any of the label from the WorkloadIdentity when there are other CredentialsBindings referring it", func() {
 			credentialsBinding2 := &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "credentialsbinding-2",
-					Namespace: "some-namespace",
-				},
+				Name:      "credentialsbinding-2",
+				Namespace: "some-namespace",
 				CredentialsRef: corev1.ObjectReference{
 					Kind:       "WorkloadIdentity",
 					APIVersion: securityv1alpha1.SchemeGroupVersion.String(),
@@ -487,34 +455,24 @@ var _ = Describe("CredentialsBindingControl", func() {
 
 		BeforeEach(func() {
 			secret = &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Secret",
-					APIVersion: corev1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "namespace",
-				},
+				Kind:       "Secret",
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Name:       "secret",
+				Namespace:  "namespace",
 			}
 
 			quota1 = &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      quotaName1,
-					Namespace: quotaNamespace1,
-				},
+				Name:      quotaName1,
+				Namespace: quotaNamespace1,
 			}
 			quota2 = &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      quotaName2,
-					Namespace: quotaNamespace2,
-				},
+				Name:      quotaName2,
+				Namespace: quotaNamespace2,
 			}
 
 			credentialsBinding1 = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialsBindingName1,
-					Namespace: credentialsBindingNamespace1,
-				},
+				Name:      credentialsBindingName1,
+				Namespace: credentialsBindingNamespace1,
 				Quotas: []corev1.ObjectReference{
 					{
 						Name:      quotaName1,
@@ -534,11 +492,9 @@ var _ = Describe("CredentialsBindingControl", func() {
 			}
 
 			credentialsBinding2 = &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       credentialsBindingName2,
-					Namespace:  credentialsBindingNamespace2,
-					Finalizers: []string{"gardener"},
-				},
+				Name:       credentialsBindingName2,
+				Namespace:  credentialsBindingNamespace2,
+				Finalizers: []string{"gardener"},
 				Quotas: []corev1.ObjectReference{
 					{
 						Name:      quotaName2,
@@ -554,7 +510,7 @@ var _ = Describe("CredentialsBindingControl", func() {
 			}
 
 			reconciler = &credentialsbinding.Reconciler{Client: fakeClient}
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: credentialsBindingNamespace1, Name: credentialsBindingName1}}
+			request = reconcile.Request{Namespace: credentialsBindingNamespace1, Name: credentialsBindingName1}
 
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 			Expect(fakeClient.Create(ctx, quota1)).To(Succeed())
@@ -595,7 +551,7 @@ var _ = Describe("CredentialsBindingControl", func() {
 				"reference.gardener.cloud/credentialsbinding", "true",
 			))
 
-			request = reconcile.Request{NamespacedName: types.NamespacedName{Namespace: credentialsBindingNamespace2, Name: credentialsBindingName2}}
+			request = reconcile.Request{Namespace: credentialsBindingNamespace2, Name: credentialsBindingName2}
 			_, err = reconciler.Reconcile(ctx, request)
 			Expect(err).NotTo(HaveOccurred())
 

@@ -94,13 +94,11 @@ var _ = Describe("NodeAgent", func() {
 			HostName: hostName,
 		}
 		b.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: namespace,
-			},
+			Name:      "foo",
+			Namespace: namespace,
 		})
 
-		Expect(fakeSeedClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+		Expect(fakeSeedClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#WriteBootstrapToken", func() {
@@ -145,7 +143,7 @@ var _ = Describe("NodeAgent", func() {
 		It("should create the temporary cluster-admin binding for bootstrapping the node-agent", func() {
 			Expect(b.ActivateGardenerNodeAgent(ctx)).To(Succeed())
 
-			clusterRoleBinding := &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "zzz-temporary-cluster-admin-access-for-bootstrapping"}}
+			clusterRoleBinding := &rbacv1.ClusterRoleBinding{Name: "zzz-temporary-cluster-admin-access-for-bootstrapping"}
 			Expect(fakeSeedClient.Get(ctx, client.ObjectKeyFromObject(clusterRoleBinding), clusterRoleBinding)).To(Succeed())
 
 			Expect(clusterRoleBinding.RoleRef).To(Equal(rbacv1.RoleRef{
@@ -210,7 +208,7 @@ var _ = Describe("NodeAgent", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			csr := &certificatesv1.CertificateSigningRequest{
-				ObjectMeta: metav1.ObjectMeta{Name: "csr"},
+				Name: "csr",
 				Spec: certificatesv1.CertificateSigningRequestSpec{
 					Username:   fooUsername,
 					Request:    csrData,
@@ -242,7 +240,7 @@ var _ = Describe("NodeAgent", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			csr := &certificatesv1.CertificateSigningRequest{
-				ObjectMeta: metav1.ObjectMeta{Name: "csr"},
+				Name: "csr",
 				Spec: certificatesv1.CertificateSigningRequestSpec{
 					Username:   fooUsername,
 					Request:    csrData,
@@ -260,7 +258,7 @@ var _ = Describe("NodeAgent", func() {
 
 	Describe("#FinalizeGardenerNodeAgentBootstrapping", func() {
 		It("should delete the temporary cluster-admin ClusterRoleBinding", func() {
-			clusterRoleBinding := &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "zzz-temporary-cluster-admin-access-for-bootstrapping"}}
+			clusterRoleBinding := &rbacv1.ClusterRoleBinding{Name: "zzz-temporary-cluster-admin-access-for-bootstrapping"}
 			Expect(fakeSeedClient.Create(ctx, clusterRoleBinding)).To(Succeed())
 
 			Expect(b.FinalizeGardenerNodeAgentBootstrapping(ctx)).To(Succeed())
@@ -279,17 +277,13 @@ var _ = Describe("NodeAgent", func() {
 
 			BeforeEach(func() {
 				Expect(fakeSeedClient.Create(ctx, &corev1.Node{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "node",
-						Labels: map[string]string{"kubernetes.io/hostname": hostName},
-					},
+					Name:   "node",
+					Labels: map[string]string{"kubernetes.io/hostname": hostName},
 				})).To(Succeed())
 
 				lease = &coordinationv1.Lease{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener-node-agent-node",
-						Namespace: "kube-system",
-					},
+					Name:      "gardener-node-agent-node",
+					Namespace: "kube-system",
 				}
 
 				DeferCleanup(test.WithVars(

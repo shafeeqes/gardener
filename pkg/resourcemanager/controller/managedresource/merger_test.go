@@ -34,18 +34,16 @@ var _ = Describe("merger", func() {
 
 		BeforeEach(func() {
 			oldPod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					ResourceVersion:            "123",
-					Finalizers:                 []string{"finalizer"},
-					Name:                       "foo-abcdef",
-					Namespace:                  "bar",
-					Generation:                 42,
-					CreationTimestamp:          metav1.Time{Time: time.Now().Add(-1 * time.Hour)},
-					DeletionTimestamp:          &metav1.Time{Time: time.Now().Add(1 * time.Hour)},
-					UID:                        "8c3d49f6-e177-4938-8547-c61283a84876",
-					GenerateName:               "foo",
-					DeletionGracePeriodSeconds: new(int64(30)),
-				},
+				ResourceVersion:            "123",
+				Finalizers:                 []string{"finalizer"},
+				Name:                       "foo-abcdef",
+				Namespace:                  "bar",
+				Generation:                 42,
+				CreationTimestamp:          metav1.Time{Time: time.Now().Add(-1 * time.Hour)},
+				DeletionTimestamp:          &metav1.Time{Time: time.Now().Add(1 * time.Hour)},
+				UID:                        "8c3d49f6-e177-4938-8547-c61283a84876",
+				GenerateName:               "foo",
+				DeletionGracePeriodSeconds: new(int64(30)),
 			}
 
 			oldJSON, err := runtime.DefaultUnstructuredConverter.ToUnstructured(oldPod)
@@ -397,9 +395,7 @@ var _ = Describe("merger", func() {
 			Expect(appsv1.AddToScheme(s)).ToNot(HaveOccurred(), "schema add should succeed")
 
 			old = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{},
-				},
+				Annotations: map[string]string{},
 				Spec: appsv1.DeploymentSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: map[string]string{"controller-uid": "1a2b3c"},
@@ -853,10 +849,8 @@ var _ = Describe("merger", func() {
 
 		It("should return error if group and version are not batch v1 nor batch v1beta1", func() {
 			old := &batchv1beta1.CronJob{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "CronJob",
-					APIVersion: "batch/v2",
-				},
+				Kind:       "CronJob",
+				APIVersion: "batch/v2",
 			}
 			newCronJob := old.DeepCopy()
 			Expect(mergeCronJob(s, old, newCronJob, true)).To(MatchError(ContainSubstring("cannot merge objects with gvk")), "merge should fail")
@@ -874,10 +868,8 @@ var _ = Describe("merger", func() {
 			Expect(corev1.AddToScheme(s)).ToNot(HaveOccurred(), "schema add should succeed")
 
 			old = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						"loadbalancer.openstack.org/load-balancer-id": "09199d61-4cca-4c7d-8d9c-405ba7680dbe",
-					},
+				Annotations: map[string]string{
+					"loadbalancer.openstack.org/load-balancer-id": "09199d61-4cca-4c7d-8d9c-405ba7680dbe",
 				},
 				Spec: corev1.ServiceSpec{
 					ClusterIP: "1.2.3.4",
@@ -1166,10 +1158,8 @@ func addAnnotations(origin string, obj *unstructured.Unstructured) {
 
 func createV1beta1CronJob(podTemplateSpec corev1.PodTemplateSpec) *batchv1beta1.CronJob {
 	cronJob := &batchv1beta1.CronJob{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "CronJob",
-			APIVersion: batchv1beta1.SchemeGroupVersion.String(),
-		},
+		Kind:       "CronJob",
+		APIVersion: batchv1beta1.SchemeGroupVersion.String(),
 		ObjectMeta: metav1.ObjectMeta{},
 		Spec: batchv1beta1.CronJobSpec{
 			JobTemplate: batchv1beta1.JobTemplateSpec{
@@ -1187,10 +1177,8 @@ func createV1beta1CronJob(podTemplateSpec corev1.PodTemplateSpec) *batchv1beta1.
 
 func createV1CronJob(podTemplateSpec corev1.PodTemplateSpec) *batchv1.CronJob {
 	cronJob := &batchv1.CronJob{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "CronJob",
-			APIVersion: batchv1.SchemeGroupVersion.String(),
-		},
+		Kind:       "CronJob",
+		APIVersion: batchv1.SchemeGroupVersion.String(),
 		ObjectMeta: metav1.ObjectMeta{},
 		Spec: batchv1.CronJobSpec{
 			JobTemplate: batchv1.JobTemplateSpec{

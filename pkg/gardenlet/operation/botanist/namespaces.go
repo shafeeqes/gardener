@@ -38,9 +38,7 @@ import (
 // stored as ConfigMaps/Secrets.
 func (b *Botanist) DeployControlPlaneNamespace(ctx context.Context) error {
 	namespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: b.Shoot.ControlPlaneNamespace,
-		},
+		Name: b.Shoot.ControlPlaneNamespace,
 	}
 
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), namespace, func() error {
@@ -260,9 +258,7 @@ func ExtractZonesFromNodeSelectorTerm(term corev1.NodeSelectorTerm) []string {
 // comprises volumes and load balancers as well.
 func (b *Botanist) DeleteSeedNamespace(ctx context.Context) error {
 	namespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: b.Shoot.ControlPlaneNamespace,
-		},
+		Name: b.Shoot.ControlPlaneNamespace,
 	}
 
 	err := b.SeedClientSet.Client().Delete(ctx, namespace, kubernetes.DefaultDeleteOptions...)

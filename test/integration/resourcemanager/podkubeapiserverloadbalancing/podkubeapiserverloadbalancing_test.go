@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -22,10 +21,8 @@ var _ = Describe("PodKubeAPIServerLoadBalancing tests", func() {
 
 	BeforeEach(func() {
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{
 					{
@@ -55,10 +52,8 @@ var _ = Describe("PodKubeAPIServerLoadBalancing tests", func() {
 	When("the istio-internal-load-balancing configmap is found", func() {
 		BeforeEach(func() {
 			configMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: testNamespace.Name,
-					Name:      "istio-internal-load-balancing",
-				},
+				Namespace: testNamespace.Name,
+				Name:      "istio-internal-load-balancing",
 				Data: map[string]string{
 					resourcemanagerconfigv1alpha1.HostsConfigMapKey:          "api.example.com,api2.example.com",
 					resourcemanagerconfigv1alpha1.IstioNamespaceConfigMapKey: testNamespace.Name,
@@ -84,11 +79,9 @@ var _ = Describe("PodKubeAPIServerLoadBalancing tests", func() {
 				pod.Spec.Volumes = []corev1.Volume{
 					{
 						Name: "foobar",
-						VolumeSource: corev1.VolumeSource{
-							Projected: &corev1.ProjectedVolumeSource{
-								Sources: []corev1.VolumeProjection{
-									{Secret: &corev1.SecretProjection{LocalObjectReference: corev1.LocalObjectReference{Name: "generic-token-kubeconfig-foobar"}}},
-								},
+						Projected: &corev1.ProjectedVolumeSource{
+							Sources: []corev1.VolumeProjection{
+								{Secret: &corev1.SecretProjection{Name: "generic-token-kubeconfig-foobar"}},
 							},
 						},
 					},
@@ -97,10 +90,8 @@ var _ = Describe("PodKubeAPIServerLoadBalancing tests", func() {
 
 			It("should add host aliases and network policy label to the pod", func() {
 				istioService := &corev1.Service{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: testNamespace.Name,
-						Name:      "istio-ingressgateway-internal",
-					},
+					Namespace: testNamespace.Name,
+					Name:      "istio-ingressgateway-internal",
 					Spec: corev1.ServiceSpec{
 						ClusterIP:  "10.0.0.10",
 						ClusterIPs: []string{"10.0.0.10"},

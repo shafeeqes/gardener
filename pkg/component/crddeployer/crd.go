@@ -56,9 +56,7 @@ func (c *crdDeployer) Deploy(ctx context.Context) error {
 	for _, desiredCRD := range c.crdNameToCRD {
 		fns = append(fns, func(ctx context.Context) error {
 			crd := &apiextensionsv1.CustomResourceDefinition{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: desiredCRD.Name,
-				},
+				Name: desiredCRD.Name,
 			}
 
 			_, err := controllerutils.GetAndCreateOrMergePatch(ctx, c.client, crd,
@@ -97,9 +95,7 @@ func (c *crdDeployer) Destroy(ctx context.Context) error {
 	for resourceName := range c.crdNameToCRD {
 		fns = append(fns, func(ctx context.Context) error {
 			crd := &apiextensionsv1.CustomResourceDefinition{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: resourceName,
-				},
+				Name: resourceName,
 			}
 
 			if c.deletionProtection {

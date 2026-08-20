@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus/seed"
 )
@@ -18,9 +17,7 @@ var _ = Describe("PodMonitors", func() {
 		It("should return the expected objects", func() {
 			Expect(seed.CentralPodMonitors()).To(HaveExactElements(
 				&monitoringv1.PodMonitor{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "extensions",
-					},
+					Name: "extensions",
 					Spec: monitoringv1.PodMonitorSpec{
 						NamespaceSelector: monitoringv1.NamespaceSelector{Any: true},
 						PodMetricsEndpoints: []monitoringv1.PodMetricsEndpoint{{
@@ -74,15 +71,11 @@ var _ = Describe("PodMonitors", func() {
 					},
 				},
 				&monitoringv1.PodMonitor{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "garden",
-					},
+					Name: "garden",
 					Spec: monitoringv1.PodMonitorSpec{
 						PodMetricsEndpoints: []monitoringv1.PodMetricsEndpoint{{
-							Scheme: new(monitoringv1.SchemeHTTPS),
-							HTTPConfigWithProxy: monitoringv1.HTTPConfigWithProxy{
-								HTTPConfig: monitoringv1.HTTPConfig{TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-							},
+							Scheme:    new(monitoringv1.SchemeHTTPS),
+							TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 							RelabelConfigs: []monitoringv1.RelabelConfig{
 								{
 									SourceLabels: []monitoringv1.LabelName{

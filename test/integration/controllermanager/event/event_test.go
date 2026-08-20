@@ -28,18 +28,14 @@ var _ = Describe("Event controller tests", func() {
 
 		BeforeEach(func() {
 			shootEvent = &corev1.Event{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Namespace:    testNamespace.Name,
-				},
+				GenerateName:   testID + "-",
+				Namespace:      testNamespace.Name,
 				InvolvedObject: corev1.ObjectReference{Kind: "Shoot", APIVersion: "core.gardener.cloud/v1beta1", Namespace: testNamespace.Name},
 			}
 
 			nonShootEvent = &corev1.Event{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Namespace:    testNamespace.Name,
-				},
+				GenerateName:   testID + "-",
+				Namespace:      testNamespace.Name,
 				InvolvedObject: corev1.ObjectReference{Kind: "Secret", APIVersion: "v1", Namespace: testNamespace.Name},
 			}
 		})
@@ -124,10 +120,8 @@ var _ = Describe("Event controller tests", func() {
 
 		BeforeEach(func() {
 			shootEvent = &eventsv1.Event{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Namespace:    testNamespace.Name,
-				},
+				GenerateName:        testID + "-",
+				Namespace:           testNamespace.Name,
 				EventTime:           metav1.MicroTime{Time: time.Now()},
 				Type:                "Normal",
 				Reason:              "TestReason",
@@ -139,10 +133,8 @@ var _ = Describe("Event controller tests", func() {
 			}
 
 			nonShootEvent = &eventsv1.Event{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Namespace:    testNamespace.Name,
-				},
+				GenerateName:        testID + "-",
+				Namespace:           testNamespace.Name,
 				EventTime:           metav1.MicroTime{Time: time.Now()},
 				Type:                "Normal",
 				Reason:              "TestReason",

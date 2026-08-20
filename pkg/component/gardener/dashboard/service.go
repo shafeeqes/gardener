@@ -8,7 +8,6 @@ import (
 	istioapiannotation "istio.io/api/annotation"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
@@ -19,12 +18,10 @@ const serviceName = deploymentName
 
 func (g *gardenerDashboard) service() *corev1.Service {
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        serviceName,
-			Namespace:   g.namespace,
-			Labels:      GetLabels(),
-			Annotations: map[string]string{istioapiannotation.NetworkingExportTo.Name: istioIngressGatewayNamespace},
-		},
+		Name:        serviceName,
+		Namespace:   g.namespace,
+		Labels:      GetLabels(),
+		Annotations: map[string]string{istioapiannotation.NetworkingExportTo.Name: istioIngressGatewayNamespace},
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: GetLabels(),

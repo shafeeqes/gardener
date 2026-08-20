@@ -37,10 +37,8 @@ var _ = Describe("Strategy", func() {
 
 		BeforeEach(func() {
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot",
-					Namespace: "my-namespace",
-				},
+				Name:      "shoot",
+				Namespace: "my-namespace",
 				Spec: core.ShootSpec{
 					CloudProfileName: new("aws-profile"),
 					Region:           "eu-west-1",
@@ -664,9 +662,7 @@ var _ = Describe("Strategy", func() {
 			// TODO(vpnachev): Remove this context once support for Kubernetes 1.34 is dropped.
 			It("should sync Secret credentialsRef to secretName and increase generation", func() {
 				oldShoot := &core.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Generation: 1,
-					},
+					Generation: 1,
 					Spec: core.ShootSpec{
 						DNS: &core.DNS{
 							Providers: []core.DNSProvider{{
@@ -689,9 +685,7 @@ var _ = Describe("Strategy", func() {
 
 			It("should not sync WorkloadIdentity credentialsRef to secretName and generation should stay the same", func() {
 				oldShoot := &core.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Generation: 1,
-					},
+					Generation: 1,
 					Spec: core.ShootSpec{
 						DNS: &core.DNS{
 							Providers: []core.DNSProvider{{
@@ -775,9 +769,7 @@ var _ = Describe("Strategy", func() {
 			It("should set spec.addons to nil when no addons are configured", func() {
 				shoot.Spec.Addons = &core.Addons{
 					KubernetesDashboard: &core.KubernetesDashboard{
-						Addon: core.Addon{
-							Enabled: false,
-						},
+						Enabled:            false,
 						AuthenticationMode: new("foo"),
 					},
 				}
@@ -789,15 +781,11 @@ var _ = Describe("Strategy", func() {
 			It("should not set spec.addons to nil because Nginx is configured", func() {
 				shoot.Spec.Addons = &core.Addons{
 					KubernetesDashboard: &core.KubernetesDashboard{
-						Addon: core.Addon{
-							Enabled: false,
-						},
+						Enabled:            false,
 						AuthenticationMode: new("foo"),
 					},
 					NginxIngress: &core.NginxIngress{
-						Addon: core.Addon{
-							Enabled: true,
-						},
+						Enabled: true,
 					},
 				}
 
@@ -808,9 +796,7 @@ var _ = Describe("Strategy", func() {
 			It("should not set spec.addons to nil because the Kubernetes dashboard is configured", func() {
 				shoot.Spec.Addons = &core.Addons{
 					KubernetesDashboard: &core.KubernetesDashboard{
-						Addon: core.Addon{
-							Enabled: true,
-						},
+						Enabled:            true,
 						AuthenticationMode: new("foo"),
 					},
 				}
@@ -1257,11 +1243,9 @@ var _ = Describe("SyncDNSProviderCredentials", func() {
 
 func createNewShootObject(seedName string) *core.Shoot {
 	return &core.Shoot{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
-			Labels:    map[string]string{"foo": "bar"},
-		},
+		Name:      "test",
+		Namespace: "test-namespace",
+		Labels:    map[string]string{"foo": "bar"},
 		Spec: core.ShootSpec{
 			CloudProfileName: new("baz"),
 			SeedName:         &seedName,

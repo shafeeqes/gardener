@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -48,15 +47,11 @@ var _ = Describe("Utils", func() {
 			annotations["test-no-delete-annotation-key"] = "test-no-delete-annotation-value"
 
 			worker := &extensionsv1alpha1.Worker{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Worker",
-					APIVersion: "extensions.gardener.cloud/v1alpha1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "test-worker",
-					Namespace:   "test-namespace",
-					Annotations: annotations,
-				},
+				Kind:        "Worker",
+				APIVersion:  "extensions.gardener.cloud/v1alpha1",
+				Name:        "test-worker",
+				Namespace:   "test-namespace",
+				Annotations: annotations,
 			}
 			Expect(fakeClient.Create(ctx, worker.DeepCopy())).To(Succeed())
 
@@ -81,14 +76,10 @@ var _ = Describe("Utils", func() {
 
 		BeforeEach(func() {
 			worker = &extensionsv1alpha1.Worker{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Worker",
-					APIVersion: "TestApi",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-worker",
-					Namespace: "test-namespace",
-				},
+				Kind:       "Worker",
+				APIVersion: "TestApi",
+				Name:       "test-worker",
+				Namespace:  "test-namespace",
 			}
 		})
 
@@ -203,14 +194,10 @@ var _ = Describe("Utils", func() {
 
 		JustBeforeEach(func() {
 			worker = &extensionsv1alpha1.Worker{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Worker",
-					APIVersion: "TestApi",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-worker",
-					Namespace: "test-namespace",
-				},
+				Kind:       "Worker",
+				APIVersion: "TestApi",
+				Name:       "test-worker",
+				Namespace:  "test-namespace",
 			}
 		})
 		It("should return false when lastOperation is missing", func() {
@@ -252,19 +239,15 @@ var _ = Describe("Utils", func() {
 			}
 			namespace = "shoot--test--foo"
 			refSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.ReferencedResourcesPrefix + "foo",
-					Namespace: namespace,
-				},
+				Name:      v1beta1constants.ReferencedResourcesPrefix + "foo",
+				Namespace: namespace,
 				Data: map[string][]byte{
 					"foo": []byte("bar"),
 				},
 			}
 			refWorkloadIdentity = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "workload-identity-ref-bar",
-					Namespace: namespace,
-				},
+				Name:      "workload-identity-ref-bar",
+				Namespace: namespace,
 			}
 		)
 

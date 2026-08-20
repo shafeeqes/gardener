@@ -18,10 +18,8 @@ func CentralServiceMonitors(seedIsShoot bool) []*monitoringv1.ServiceMonitor {
 	if seedIsShoot {
 		// add cache-node-exporter ServiceMonitor only to ManagedSeeds.
 		serviceMonitors = append(serviceMonitors, &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "node-exporter",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "node-exporter",
+			Namespace: metav1.NamespaceSystem,
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{"component": "node-exporter"}},
 				Endpoints: []monitoringv1.Endpoint{{

@@ -40,17 +40,15 @@ var _ = Describe("FakeManager", func() {
 		Context("secret is found", func() {
 			DescribeTable("secret is found",
 				func(expectedSecretName string, opts ...secretsmanager.GetOption) {
-					Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: expectedSecretName, Namespace: namespace}})).To(Succeed())
+					Expect(fakeClient.Create(ctx, &corev1.Secret{Name: expectedSecretName, Namespace: namespace})).To(Succeed())
 
 					secret, found := m.Get(name, opts...)
 					Expect(found).To(BeTrue())
 					Expect(secret).To(Equal(&corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            expectedSecretName,
-							Namespace:       namespace,
-							ResourceVersion: "1",
-						},
-						Data: map[string][]byte{"data-for": []byte(name)},
+						Name:            expectedSecretName,
+						Namespace:       namespace,
+						ResourceVersion: "1",
+						Data:            map[string][]byte{"data-for": []byte(name)},
 					}))
 				},
 
@@ -103,30 +101,26 @@ var _ = Describe("FakeManager", func() {
 
 		It("should reconcile an existing secret for the config", func() {
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"existing": []byte("data")},
+				Name:      secretName,
+				Namespace: namespace,
+				Data:      map[string][]byte{"existing": []byte("data")},
 			}
 			Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
 
 			secret, err := m.Generate(ctx, config, secretsmanager.Persist(), secretsmanager.Rotate(secretsmanager.KeepOld))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            existingSecret.Name,
-					Namespace:       existingSecret.Namespace,
-					ResourceVersion: "2",
-					Labels: map[string]string{
-						"name":                          name,
-						"managed-by":                    "secrets-manager",
-						"manager-identity":              "fake",
-						"checksum-of-config":            configChecksum,
-						"last-rotation-initiation-time": "",
-						"rotation-strategy":             "keepold",
-						"persist":                       "true",
-					},
+				Name:            existingSecret.Name,
+				Namespace:       existingSecret.Namespace,
+				ResourceVersion: "2",
+				Labels: map[string]string{
+					"name":                          name,
+					"managed-by":                    "secrets-manager",
+					"manager-identity":              "fake",
+					"checksum-of-config":            configChecksum,
+					"last-rotation-initiation-time": "",
+					"rotation-strategy":             "keepold",
+					"persist":                       "true",
 				},
 				Immutable: new(true),
 				Type:      existingSecret.Type,

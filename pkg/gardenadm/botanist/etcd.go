@@ -11,8 +11,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -44,7 +42,7 @@ func (b *GardenadmBotanist) ReconcileBackupBucket(ctx context.Context) error {
 	}
 
 	return runReconcilerUntilCondition(ctx, b.Logger, backupbucketcontroller.ControllerName, reconciler, backupBucket, func(ctx context.Context) error {
-		extensionsBackupBucket := &extensionsv1alpha1.BackupBucket{ObjectMeta: metav1.ObjectMeta{Name: backupBucket.Name}}
+		extensionsBackupBucket := &extensionsv1alpha1.BackupBucket{Name: backupBucket.Name}
 		if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(extensionsBackupBucket), extensionsBackupBucket); err != nil {
 			return fmt.Errorf("failed getting extensions.gardener.cloud/v1beta1.BackupBucket resource: %w", err)
 		}
@@ -76,7 +74,7 @@ func (b *GardenadmBotanist) ReconcileBackupEntry(ctx context.Context) error {
 	}
 
 	return runReconcilerUntilCondition(ctx, b.Logger, backupentrycontroller.ControllerName, reconciler, backupEntry, func(ctx context.Context) error {
-		extensionsBackupEntry := &extensionsv1alpha1.BackupEntry{ObjectMeta: metav1.ObjectMeta{Name: backupEntry.Name}}
+		extensionsBackupEntry := &extensionsv1alpha1.BackupEntry{Name: backupEntry.Name}
 		if err := b.SeedClientSet.Client().Get(ctx, client.ObjectKeyFromObject(extensionsBackupEntry), extensionsBackupEntry); err != nil {
 			return fmt.Errorf("failed getting extensions.gardener.cloud/v1beta1.BackupEntry resource: %w", err)
 		}
@@ -102,7 +100,7 @@ func runReconcilerUntilCondition(ctx context.Context, logger logr.Logger, contro
 	defer cancel()
 
 	return retry.Until(timeoutCtx, time.Second, func(ctx context.Context) (bool, error) {
-		if _, err := reconciler.Reconcile(logf.IntoContext(ctx, log), reconcile.Request{NamespacedName: types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}}); err != nil {
+		if _, err := reconciler.Reconcile(logf.IntoContext(ctx, log), reconcile.Request{Name: obj.GetName(), Namespace: obj.GetNamespace()}); err != nil {
 			return retry.MinorError(fmt.Errorf("failed running %s controller for %q: %w", controllerName, client.ObjectKeyFromObject(obj), err))
 		}
 

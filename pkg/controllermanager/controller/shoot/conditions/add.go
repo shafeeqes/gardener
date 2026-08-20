@@ -10,7 +10,6 @@ import (
 	"github.com/go-logr/logr"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -105,6 +104,6 @@ func (r *Reconciler) MapSeedToShoot(log logr.Logger) handler.MapFunc {
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Namespace: shoot.Namespace, Name: shoot.Name}}}
+		return []reconcile.Request{{Namespace: shoot.Namespace, Name: shoot.Name}}
 	}
 }

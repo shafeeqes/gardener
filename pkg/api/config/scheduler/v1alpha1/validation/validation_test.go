@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	componentbaseconfigv1alpha1 "k8s.io/component-base/config/v1alpha1"
 
@@ -20,10 +19,8 @@ var _ = Describe("#ValidateConfiguration", func() {
 
 	BeforeEach(func() {
 		conf = &schedulerconfigv1alpha1.SchedulerConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "scheduler.config.gardener.cloud/v1alpha1",
-				Kind:       "SchedulerConfiguration",
-			},
+			APIVersion: "scheduler.config.gardener.cloud/v1alpha1",
+			Kind:       "SchedulerConfiguration",
 			Schedulers: schedulerconfigv1alpha1.SchedulerControllerConfiguration{
 				BackupBucket: &schedulerconfigv1alpha1.BackupBucketSchedulerConfiguration{
 					ConcurrentSyncs: 2,

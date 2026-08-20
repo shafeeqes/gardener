@@ -28,11 +28,9 @@ var _ = Describe("Shoot Quota controller tests", func() {
 		fakeClock.SetTime(time.Now().UTC())
 
 		quota = &gardencorev1beta1.Quota{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.QuotaSpec{
 				Scope: corev1.ObjectReference{
 					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
@@ -52,11 +50,9 @@ var _ = Describe("Shoot Quota controller tests", func() {
 		})
 
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Provider: &gardencorev1beta1.SecretBindingProvider{
 				Type: "foo",
 			},
@@ -77,11 +73,9 @@ var _ = Describe("Shoot Quota controller tests", func() {
 		})
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new(secretBinding.Name),
 				CloudProfileName:  new("cloudprofile1"),

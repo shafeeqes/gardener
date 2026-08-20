@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -135,13 +134,9 @@ var _ = BeforeSuite(func() {
 func getMutatingWebhookConfigurations() []*admissionregistrationv1.MutatingWebhookConfiguration {
 	return []*admissionregistrationv1.MutatingWebhookConfiguration{
 		{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
-				Kind:       "MutatingWebhookConfiguration",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener-resource-manager",
-			},
+			APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
+			Kind:       "MutatingWebhookConfiguration",
+			Name:       "gardener-resource-manager",
 			Webhooks: []admissionregistrationv1.MutatingWebhook{
 				resourcemanager.NewHighAvailabilityConfigMutatingWebhook(nil, nil, nil, func(_ *corev1.Secret, path string) admissionregistrationv1.WebhookClientConfig {
 					return admissionregistrationv1.WebhookClientConfig{

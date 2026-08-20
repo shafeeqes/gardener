@@ -42,11 +42,9 @@ func newLeaderElectorForSecret(log logr.Logger, c client.Client, clock clock.Clo
 	if serialReconciliation(secret) {
 		ownerRef := metav1.NewControllerRef(secret, corev1.SchemeGroupVersion.WithKind("Secret"))
 		lease = &coordinationv1.Lease{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            secret.Name,
-				Namespace:       secret.Namespace,
-				OwnerReferences: []metav1.OwnerReference{*ownerRef},
-			},
+			Name:            secret.Name,
+			Namespace:       secret.Namespace,
+			OwnerReferences: []metav1.OwnerReference{*ownerRef},
 		}
 		logger = logger.WithValues("lease", client.ObjectKeyFromObject(lease))
 	}

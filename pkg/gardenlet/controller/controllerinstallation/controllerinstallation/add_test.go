@@ -31,10 +31,8 @@ var _ = Describe("Add", func() {
 	BeforeEach(func() {
 		reconciler = &Reconciler{}
 		controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				ResourceVersion: "1",
-				Name:            "installation",
-			},
+			ResourceVersion: "1",
+			Name:            "installation",
 		}
 	})
 
@@ -141,9 +139,7 @@ var _ = Describe("Add", func() {
 			p = reconciler.HelmTypePredicate(ctx, fakeClient)
 
 			controllerDeployment = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "deployment",
-				},
+				Name: "deployment",
 				Helm: &gardencorev1.HelmControllerDeployment{},
 			}
 			controllerInstallation.Spec.DeploymentRef = &corev1.ObjectReference{Name: controllerDeployment.Name}

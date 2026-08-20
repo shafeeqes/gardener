@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	admissionv1 "k8s.io/api/admission/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
@@ -102,7 +101,7 @@ func (h *Handler) Handle(ctx context.Context, req admission.Request) admission.R
 		var apiStatus apierrors.APIStatus
 		if errors.As(err, &apiStatus) {
 			result := apiStatus.Status()
-			return admission.Response{AdmissionResponse: admissionv1.AdmissionResponse{Allowed: false, Result: &result}}
+			return admission.Response{Allowed: false, Result: &result}
 		}
 		return admission.Denied(err.Error())
 	}

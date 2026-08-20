@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -58,12 +57,10 @@ var _ = Describe("Resources", func() {
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "test-secret",
-				Namespace:   sourceNamespace,
-				Annotations: annotations,
-				Labels:      labels,
-			},
+			Name:        "test-secret",
+			Namespace:   sourceNamespace,
+			Annotations: annotations,
+			Labels:      labels,
 			Data: map[string][]byte{
 				"key": []byte("value"),
 			},
@@ -71,13 +68,11 @@ var _ = Describe("Resources", func() {
 		Expect(fakeGardenClient.Create(ctx, secret)).To(Succeed())
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "test-configmap",
-				Namespace:   sourceNamespace,
-				Finalizers:  []string{"finalizer"},
-				Annotations: annotations,
-				Labels:      labels,
-			},
+			Name:        "test-configmap",
+			Namespace:   sourceNamespace,
+			Finalizers:  []string{"finalizer"},
+			Annotations: annotations,
+			Labels:      labels,
 			Data: map[string]string{
 				"key": "value",
 			},
@@ -85,13 +80,11 @@ var _ = Describe("Resources", func() {
 		Expect(fakeGardenClient.Create(ctx, configMap)).To(Succeed())
 
 		workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "test-workload-identity",
-				Namespace:   sourceNamespace,
-				Finalizers:  []string{"finalizer"},
-				Annotations: annotations,
-				Labels:      labels,
-			},
+			Name:        "test-workload-identity",
+			Namespace:   sourceNamespace,
+			Finalizers:  []string{"finalizer"},
+			Annotations: annotations,
+			Labels:      labels,
 			Spec: securityv1alpha1.WorkloadIdentitySpec{
 				TargetSystem: securityv1alpha1.TargetSystem{
 					Type:           "test",
@@ -189,15 +182,11 @@ var _ = Describe("Resources", func() {
 		BeforeEach(func() {
 			fakeSeedClient = fake.NewClientBuilder().Build()
 			shoot = &gardencorev1beta1.Shoot{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-shoot",
-					Namespace: sourceNamespace,
-					UID:       "9b60abb0-62c9-43b9-9a63-63907e696466",
-				},
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       "test-shoot",
+				Namespace:  sourceNamespace,
+				UID:        "9b60abb0-62c9-43b9-9a63-63907e696466",
 			}
 		})
 
@@ -237,17 +226,13 @@ var _ = Describe("Resources", func() {
 		Describe("#DestroyWorkloadIdentityReferencedResources", func() {
 			It("should destroy workload identity secrets correctly", func() {
 				workloadIdentitySecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "workload-identity-ref-foo",
-						Namespace: targetNamespace,
-						Labels:    map[string]string{"workloadidentity.security.gardener.cloud/referenced": "true"},
-					},
+					Name:      "workload-identity-ref-foo",
+					Namespace: targetNamespace,
+					Labels:    map[string]string{"workloadidentity.security.gardener.cloud/referenced": "true"},
 				}
 				unrelatedSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "unrelated-secret",
-						Namespace: targetNamespace,
-					},
+					Name:      "unrelated-secret",
+					Namespace: targetNamespace,
 				}
 
 				Expect(fakeSeedClient.Create(ctx, workloadIdentitySecret)).To(Succeed())

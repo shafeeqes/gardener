@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -32,10 +31,8 @@ var _ = Describe("NodeName", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).Build()
 
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "node-",
-					Labels:       map[string]string{"kubernetes.io/hostname": hostName},
-				},
+				GenerateName: "node-",
+				Labels:       map[string]string{"kubernetes.io/hostname": hostName},
 			}
 		})
 

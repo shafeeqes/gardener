@@ -11,7 +11,6 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/utils/ptr"
@@ -61,7 +60,7 @@ func ComputeExtensions(resources gardenadm.Resources, runsControlPlane, managedI
 		var (
 			controllerDeployment   = resources.ControllerDeployments[idx].DeepCopy()
 			controllerInstallation = &gardencorev1beta1.ControllerInstallation{
-				ObjectMeta: metav1.ObjectMeta{Name: controllerRegistration.Name},
+				Name: controllerRegistration.Name,
 				Spec: gardencorev1beta1.ControllerInstallationSpec{
 					RegistrationRef: corev1.ObjectReference{Name: controllerRegistration.Name},
 					DeploymentRef:   &corev1.ObjectReference{Name: controllerDeployment.Name},
@@ -184,7 +183,7 @@ func (b *GardenadmBotanist) ReconcileExtensionControllerInstallations(ctx contex
 		b.Logger.Info("Reconciling ControllerInstallation using gardenlet's reconciliation logic", "controllerInstallationName", extension.ControllerInstallation.Name)
 
 		reconcilerCtx := log.IntoContext(ctx, b.Logger.WithName("controllerinstallation-reconciler").WithValues("controllerInstallationName", extension.ControllerInstallation.Name))
-		if _, err := reconciler.Reconcile(reconcilerCtx, reconcile.Request{NamespacedName: types.NamespacedName{Name: extension.ControllerInstallation.Name}}); err != nil {
+		if _, err := reconciler.Reconcile(reconcilerCtx, reconcile.Request{Name: extension.ControllerInstallation.Name}); err != nil {
 			return fmt.Errorf("failed running ControllerInstallation controller for %q: %w", extension.ControllerInstallation.Name, err)
 		}
 	}

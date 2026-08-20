@@ -100,11 +100,9 @@ var _ = Describe("Deployment", func() {
 		Context("when the deployment is missing the Available condition", func() {
 			BeforeEach(func() {
 				deployment := &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       deploymentName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       deploymentName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: appsv1.DeploymentStatus{
 						ObservedGeneration: 1,
 						Conditions:         []appsv1.DeploymentCondition{},
@@ -126,11 +124,9 @@ var _ = Describe("Deployment", func() {
 		Context("when the deployment has Available=False", func() {
 			BeforeEach(func() {
 				deployment := &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       deploymentName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       deploymentName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: appsv1.DeploymentStatus{
 						ObservedGeneration: 1,
 						Conditions: []appsv1.DeploymentCondition{
@@ -159,11 +155,9 @@ var _ = Describe("Deployment", func() {
 		Context("when the deployment has Progressing=False", func() {
 			BeforeEach(func() {
 				deployment := &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       deploymentName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       deploymentName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: appsv1.DeploymentStatus{
 						ObservedGeneration: 1,
 						Conditions: []appsv1.DeploymentCondition{
@@ -196,11 +190,9 @@ var _ = Describe("Deployment", func() {
 		Context("when the deployment has ReplicaFailure=True", func() {
 			BeforeEach(func() {
 				deployment := &appsv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       deploymentName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       deploymentName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: appsv1.DeploymentStatus{
 						ObservedGeneration: 1,
 						Conditions: []appsv1.DeploymentCondition{
@@ -331,11 +323,9 @@ var _ = Describe("Deployment", func() {
 
 func newHealthyDeployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:       "test-deployment",
-			Namespace:  "test-namespace",
-			Generation: 1,
-		},
+		Name:       "test-deployment",
+		Namespace:  "test-namespace",
+		Generation: 1,
 		Spec: appsv1.DeploymentSpec{
 			Replicas: new(int32(1)),
 			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},

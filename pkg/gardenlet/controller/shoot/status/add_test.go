@@ -15,7 +15,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -57,30 +56,22 @@ var _ = Describe("Add", func() {
 			shootTechnicalID = fmt.Sprintf("shoot--%s--%s", projectName, shootName)
 
 			cluster = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: shootTechnicalID,
-				},
+				Name: shootTechnicalID,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Object: &gardencorev1beta1.Shoot{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: "core.gardener.cloud/v1beta1",
-								Kind:       "Shoot",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      shootName,
-								Namespace: projectNamespace,
-							},
+							APIVersion: "core.gardener.cloud/v1beta1",
+							Kind:       "Shoot",
+							Name:       shootName,
+							Namespace:  projectNamespace,
 						},
 					},
 				},
 			}
 
 			worker = &extensionsv1alpha1.Worker{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "worker-",
-					Namespace:    shootTechnicalID,
-				},
+				GenerateName: "worker-",
+				Namespace:    shootTechnicalID,
 			}
 
 		})
@@ -109,7 +100,7 @@ var _ = Describe("Add", func() {
 			})
 
 			Expect(reconciler.MapWorkerToShoot(log)(ctx, worker)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: shootName, Namespace: projectNamespace}},
+				reconcile.Request{Name: shootName, Namespace: projectNamespace},
 			))
 		})
 	})

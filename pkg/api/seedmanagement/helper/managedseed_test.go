@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/api/seedmanagement/helper"
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
@@ -28,10 +27,8 @@ var _ = Describe("Helper", func() {
 
 		BeforeEach(func() {
 			managedSeed = &seedmanagement.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      seedName,
-					Namespace: namespace,
-				},
+				Name:      seedName,
+				Namespace: namespace,
 				Spec: seedmanagement.ManagedSeedSpec{
 					Shoot: &seedmanagement.Shoot{Name: seedName},
 				},
@@ -42,15 +39,11 @@ var _ = Describe("Helper", func() {
 			It("should extract the seed spec when gardenlet is defined", func() {
 				managedSeed.Spec.Gardenlet = seedmanagement.GardenletConfig{
 					Config: &gardenletconfigv1alpha1.GardenletConfiguration{
-						TypeMeta: metav1.TypeMeta{
-							APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-							Kind:       "GardenletConfiguration",
-						},
+						APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+						Kind:       "GardenletConfiguration",
 						SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-							SeedTemplate: gardencorev1beta1.SeedTemplate{
-								Spec: gardencorev1beta1.SeedSpec{
-									Backup: &gardencorev1beta1.Backup{},
-								},
+							Spec: gardencorev1beta1.SeedSpec{
+								Backup: &gardencorev1beta1.Backup{},
 							},
 						},
 					},
@@ -85,10 +78,8 @@ var _ = Describe("Helper", func() {
 			It("should fail when seedConfig is not defined in gardenlet config", func() {
 				managedSeed.Spec.Gardenlet = seedmanagement.GardenletConfig{
 					Config: &gardenletconfigv1alpha1.GardenletConfiguration{
-						TypeMeta: metav1.TypeMeta{
-							APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-							Kind:       "GardenletConfiguration",
-						},
+						APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+						Kind:       "GardenletConfiguration",
 					},
 				}
 

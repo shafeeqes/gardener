@@ -17,10 +17,8 @@ var _ = Describe("KubernetesServiceHost tests", func() {
 
 	BeforeEach(func() {
 		pod = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: corev1.PodSpec{
 				InitContainers: []corev1.Container{
 					{

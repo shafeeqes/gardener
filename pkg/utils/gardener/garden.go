@@ -364,10 +364,8 @@ func NewGardenAccessSecret(name, namespace string) *AccessSecret {
 
 	return &AccessSecret{
 		Secret: &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 		},
 		ServiceAccountName: strings.TrimPrefix(name, SecretNamePrefixGardenAccess),
 		Class:              resourcesv1alpha1.ResourceManagerClassGarden,
@@ -486,7 +484,7 @@ func GetRequiredGardenWildcardCertificate(ctx context.Context, c client.Client, 
 
 // ReconcileGardenNamespace ensures that the Garden namespace exists with the appropriate labels and annotations.
 func ReconcileGardenNamespace(ctx context.Context, client client.Client, namespaceName string, zones []string, manageMetadata bool, mutateFn func(namespace *corev1.Namespace)) error {
-	namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespaceName}}
+	namespace := &corev1.Namespace{Name: namespaceName}
 	_, err := controllerutils.CreateOrGetAndMergePatch(ctx, client, namespace, func() error {
 		if manageMetadata {
 			metav1.SetMetaDataLabel(&namespace.ObjectMeta, api.EnforceLevelLabel, string(api.LevelPrivileged))
@@ -505,7 +503,7 @@ func ReconcileGardenNamespace(ctx context.Context, client client.Client, namespa
 
 // ClusterIsSelfHostedShoot returns 'true' if the cluster is a self-hosted shoot cluster.
 func ClusterIsSelfHostedShoot(ctx context.Context, c client.Reader) (bool, error) {
-	namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: metav1.NamespaceSystem}}
+	namespace := &corev1.Namespace{Name: metav1.NamespaceSystem}
 	if err := c.Get(ctx, client.ObjectKeyFromObject(namespace), namespace); err != nil {
 		return false, fmt.Errorf("failed reading %q namespace: %w", namespace.Name, err)
 	}

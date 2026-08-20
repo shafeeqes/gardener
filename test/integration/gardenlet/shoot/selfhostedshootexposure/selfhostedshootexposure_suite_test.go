@@ -109,10 +109,10 @@ var _ = BeforeSuite(func() {
 	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 
 	By("Ensure garden Namespace exists (self-hosted shoots must live in the garden namespace)")
-	Expect(testClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.GardenNamespace}})).To(Or(Succeed(), MatchError(apierrors.IsAlreadyExists, "already exists")))
+	Expect(testClient.Create(ctx, &corev1.Namespace{Name: v1beta1constants.GardenNamespace})).To(Or(Succeed(), MatchError(apierrors.IsAlreadyExists, "already exists")))
 
 	By("Ensure kube-system Namespace exists (control-plane namespace of a self-hosted shoot)")
-	Expect(testClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: metav1.NamespaceSystem}})).To(Or(Succeed(), MatchError(apierrors.IsAlreadyExists, "already exists")))
+	Expect(testClient.Create(ctx, &corev1.Namespace{Name: metav1.NamespaceSystem})).To(Or(Succeed(), MatchError(apierrors.IsAlreadyExists, "already exists")))
 
 	By("Setup manager")
 	mgr, err := manager.New(restConfig, manager.Options{

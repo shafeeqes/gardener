@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -36,25 +35,17 @@ var _ = Describe("reconcileSeedWebhookConfig", func() {
 
 	It("should reconcile both mutating and validating webhook configs", func() {
 		mutatingConfig := &admissionregistrationv1.MutatingWebhookConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "admissionregistration.k8s.io/v1",
-				Kind:       "MutatingWebhookConfiguration",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener-extension-admission-test",
-			},
-			Webhooks: []admissionregistrationv1.MutatingWebhook{{}},
+			APIVersion: "admissionregistration.k8s.io/v1",
+			Kind:       "MutatingWebhookConfiguration",
+			Name:       "gardener-extension-admission-test",
+			Webhooks:   []admissionregistrationv1.MutatingWebhook{{}},
 		}
 
 		validatingConfig := &admissionregistrationv1.ValidatingWebhookConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "admissionregistration.k8s.io/v1",
-				Kind:       "ValidatingWebhookConfiguration",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener-extension-admission-test",
-			},
-			Webhooks: []admissionregistrationv1.ValidatingWebhook{{}},
+			APIVersion: "admissionregistration.k8s.io/v1",
+			Kind:       "ValidatingWebhookConfiguration",
+			Name:       "gardener-extension-admission-test",
+			Webhooks:   []admissionregistrationv1.ValidatingWebhook{{}},
 		}
 
 		webhookConfigs := extensionswebhook.Configs{

@@ -69,7 +69,7 @@ var labelsE2ETestStaticServiceAccountToken = map[string]string{"e2e-test": "serv
 // You should call CleanupObjectsFromStaticServiceAccountTokenAccess to clean up the objects created by this function.
 func CreateShootClientFromStaticServiceAccountToken(ctx context.Context, shootClient kubernetes.Interface, name string) (kubernetes.Interface, error) {
 	return createTargetClientFromServiceAccount(ctx, shootClient, name, labelsE2ETestStaticServiceAccountToken, func(serviceAccount *corev1.ServiceAccount) (string, error) {
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: serviceAccount.Namespace}}
+		secret := &corev1.Secret{Name: name, Namespace: serviceAccount.Namespace}
 		if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, shootClient.Client(), secret, func() error {
 			secret.Labels = utils.MergeStringMaps(secret.Labels, labelsE2ETestStaticServiceAccountToken)
 			secret.Annotations = utils.MergeStringMaps(secret.Annotations, map[string]string{corev1.ServiceAccountNameKey: serviceAccount.Name})
@@ -122,7 +122,7 @@ func createTargetClientFromServiceAccount(
 	kubernetes.Interface,
 	error,
 ) {
-	serviceAccount := &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespaceE2ETestServiceAccountTokenAccess}}
+	serviceAccount := &corev1.ServiceAccount{Name: name, Namespace: namespaceE2ETestServiceAccountTokenAccess}
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, targetClient.Client(), serviceAccount, func() error {
 		serviceAccount.Labels = utils.MergeStringMaps(serviceAccount.Labels, labels)
 		return nil
@@ -130,7 +130,7 @@ func createTargetClientFromServiceAccount(
 		return nil, err
 	}
 
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{Name: name}
 	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, targetClient.Client(), clusterRoleBinding, func() error {
 		clusterRoleBinding.Labels = utils.MergeStringMaps(serviceAccount.Labels, labels)
 		clusterRoleBinding.RoleRef = rbacv1.RoleRef{
@@ -155,9 +155,9 @@ func createTargetClientFromServiceAccount(
 
 	r := targetClient.RESTConfig()
 	restConfig := &rest.Config{
-		Host:            r.Host,
-		TLSClientConfig: rest.TLSClientConfig{CAData: r.CAData},
-		BearerToken:     token,
+		Host:        r.Host,
+		CAData:      r.CAData,
+		BearerToken: token,
 	}
 
 	return kubernetes.NewWithConfig(kubernetes.WithRESTConfig(restConfig), kubernetes.WithDisabledCachedClient())

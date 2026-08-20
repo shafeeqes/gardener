@@ -73,11 +73,9 @@ var _ = Describe("GardenerAPIServer", func() {
 			auditWebhookConfig = nil
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-1",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"kubeconfig": []byte("kubeconfig-data")},
+				Name:      "secret-1",
+				Namespace: namespace,
+				Data:      map[string][]byte{"kubeconfig": []byte("kubeconfig-data")},
 			}
 
 			sm = fakesecretsmanager.New(runtimeClient, namespace)
@@ -109,9 +107,9 @@ var _ = Describe("GardenerAPIServer", func() {
 						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}},
 					},
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Bar"}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}}},
+						{Name: "Foo"},
+						{Name: "Bar"},
+						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}},
 					},
 				),
 				Entry("default plugins and skipping configured plugins if disabled",
@@ -121,7 +119,7 @@ var _ = Describe("GardenerAPIServer", func() {
 						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}, Disabled: new(true)},
 					},
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
+						{Name: "Foo"},
 					},
 				),
 			)
@@ -183,11 +181,9 @@ var _ = Describe("GardenerAPIServer", func() {
 
 			BeforeEach(func() {
 				auditPolicyConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "my-audit-policy",
-						Namespace: objectMeta.Namespace,
-					},
-					Data: map[string]string{"policy": policy},
+					Name:      "my-audit-policy",
+					Namespace: objectMeta.Namespace,
+					Data:      map[string]string{"policy": policy},
 				}
 			})
 
@@ -339,9 +335,7 @@ var _ = Describe("GardenerAPIServer", func() {
 				featureGates := map[string]bool{"foo": true, "bar": false}
 
 				apiServerConfig = &operatorv1alpha1.GardenerAPIServerConfig{
-					KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-						FeatureGates: featureGates,
-					},
+					FeatureGates: featureGates,
 				}
 
 				gardenerAPIServer, err := NewGardenerAPIServer(ctx, runtimeClient, namespace, objectMeta, runtimeVersion, sm, apiServerConfig, autoscalingConfig, auditWebhookConfig, topologyAwareRoutingEnabled, clusterIdentity, workloadIdentityTokenIssuer, &goAwayChance, targetVersion)
@@ -471,12 +465,10 @@ var _ = Describe("GardenerAPIServer", func() {
 				gardencorev1beta1.RotationPreparing,
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "gardener-apiserver",
-							Namespace:   namespace,
-							Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
-						},
+						APIVersion: "apps/v1", Kind: "Deployment",
+						Name:        "gardener-apiserver",
+						Namespace:   namespace,
+						Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
 					})).To(Succeed())
 				},
 				apiserver.ETCDEncryptionConfig{
@@ -492,11 +484,9 @@ var _ = Describe("GardenerAPIServer", func() {
 				gardencorev1beta1.RotationPreparing,
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "gardener-apiserver",
-							Namespace: namespace,
-						},
+						APIVersion: "apps/v1", Kind: "Deployment",
+						Name:      "gardener-apiserver",
+						Namespace: namespace,
 					})).To(Succeed())
 
 					gardenerAPIServer.EXPECT().Wait(ctx)
@@ -518,7 +508,7 @@ var _ = Describe("GardenerAPIServer", func() {
 					EncryptionProvider:    encryptionProviderType,
 				},
 				func() {
-					deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver", Namespace: namespace}}
+					deployment := &appsv1.Deployment{Name: "gardener-apiserver", Namespace: namespace}
 					Expect(runtimeClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 					Expect(deployment.Annotations).To(HaveKeyWithValue("credentials.gardener.cloud/new-encryption-key-populated", "true"))
 				},
@@ -539,12 +529,10 @@ var _ = Describe("GardenerAPIServer", func() {
 				gardencorev1beta1.RotationCompleting,
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "gardener-apiserver",
-							Namespace:   namespace,
-							Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
-						},
+						APIVersion: "apps/v1", Kind: "Deployment",
+						Name:        "gardener-apiserver",
+						Namespace:   namespace,
+						Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
 					})).To(Succeed())
 				},
 				apiserver.ETCDEncryptionConfig{
@@ -555,7 +543,7 @@ var _ = Describe("GardenerAPIServer", func() {
 					EncryptionProvider:    encryptionProviderType,
 				},
 				func() {
-					deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-apiserver", Namespace: namespace}}
+					deployment := &appsv1.Deployment{Name: "gardener-apiserver", Namespace: namespace}
 					Expect(runtimeClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 					Expect(deployment.Annotations).NotTo(HaveKey("credentials.gardener.cloud/new-encryption-key-populated"))
 				},

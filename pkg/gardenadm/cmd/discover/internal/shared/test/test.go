@@ -9,7 +9,6 @@ package test
 import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1 "github.com/gardener/gardener/pkg/apis/core/v1"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -44,54 +43,38 @@ func NewResources() *Resources {
 	)
 
 	namespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespaceName,
-		},
+		Name: namespaceName,
 	}
 	project := &gardencorev1beta1.Project{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-project",
-		},
+		Name: "test-project",
 		Spec: gardencorev1beta1.ProjectSpec{
 			Namespace: &namespaceName,
 		},
 	}
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-secret",
-			Namespace: namespaceName,
-		},
+		Name:      "test-secret",
+		Namespace: namespaceName,
 	}
 	secretDNS := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-secret-dns",
-			Namespace: namespaceName,
-		},
+		Name:      "test-secret-dns",
+		Namespace: namespaceName,
 	}
 	secretBinding := &gardencorev1beta1.SecretBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-secret-binding",
-			Namespace: namespaceName,
-		},
+		Name:      "test-secret-binding",
+		Namespace: namespaceName,
 		SecretRef: corev1.SecretReference{
 			Name:      secret.Name,
 			Namespace: secret.Namespace,
 		},
 	}
 	cloudProfile := &gardencorev1beta1.CloudProfile{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-cloud-profile",
-		},
+		Name: "test-cloud-profile",
 	}
 	controllerDeploymentProvider := &gardencorev1.ControllerDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-controller-deployment-provider",
-		},
+		Name: "test-controller-deployment-provider",
 	}
 	controllerRegistrationProvider := &gardencorev1beta1.ControllerRegistration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-controller-registration-provider",
-		},
+		Name: "test-controller-registration-provider",
 		Spec: gardencorev1beta1.ControllerRegistrationSpec{
 			Resources: []gardencorev1beta1.ControllerResource{
 				{Kind: "ControlPlane", Type: extensionTypeProvider},
@@ -104,14 +87,10 @@ func NewResources() *Resources {
 		},
 	}
 	controllerDeploymentNetwork := &gardencorev1.ControllerDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-controller-deployment-network",
-		},
+		Name: "test-controller-deployment-network",
 	}
 	controllerRegistrationNetwork := &gardencorev1beta1.ControllerRegistration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-controller-registration-network",
-		},
+		Name: "test-controller-registration-network",
 		Spec: gardencorev1beta1.ControllerRegistrationSpec{
 			Resources: []gardencorev1beta1.ControllerResource{
 				{Kind: "Network", Type: extensionTypeNetwork},
@@ -122,14 +101,10 @@ func NewResources() *Resources {
 		},
 	}
 	controllerDeploymentDNS := &gardencorev1.ControllerDeployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-controller-deployment-dns",
-		},
+		Name: "test-controller-deployment-dns",
 	}
 	controllerRegistrationDNS := &gardencorev1beta1.ControllerRegistration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-controller-registration-dns",
-		},
+		Name: "test-controller-registration-dns",
 		Spec: gardencorev1beta1.ControllerRegistrationSpec{
 			Resources: []gardencorev1beta1.ControllerResource{
 				{Kind: "DNSRecord", Type: extensionTypeDNS},
@@ -141,10 +116,8 @@ func NewResources() *Resources {
 	}
 
 	shoot := &gardencorev1beta1.Shoot{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-shoot",
-			Namespace: namespaceName,
-		},
+		Name:      "test-shoot",
+		Namespace: namespaceName,
 		Spec: gardencorev1beta1.ShootSpec{
 			SecretBindingName: &secretBinding.Name,
 			CloudProfile: &gardencorev1beta1.CloudProfileReference{

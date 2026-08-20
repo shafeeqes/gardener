@@ -84,7 +84,7 @@ func add(mgr manager.Manager, args AddArgs, predicates []predicate.Predicate) er
 	if args.IgnoreOperationAnnotation {
 		if err := c.Watch(source.Kind[client.Object](
 			mgr.GetCache(),
-			&metav1.PartialObjectMetadata{TypeMeta: metav1.TypeMeta{Kind: "Secret", APIVersion: "v1"}},
+			&metav1.PartialObjectMetadata{Kind: "Secret", APIVersion: "v1"},
 			handler.EnqueueRequestsFromMapFunc(SecretToBackupBucketMapper(mgr.GetClient(), predicates)),
 		)); err != nil {
 			return err

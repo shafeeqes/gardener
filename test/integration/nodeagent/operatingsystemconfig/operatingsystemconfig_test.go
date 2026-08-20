@@ -110,12 +110,10 @@ var _ = Describe("OperatingSystemConfig controller tests", func() {
 		mgrClient = mgr.GetClient()
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testRunID,
-				Labels: map[string]string{
-					testID:                   testRunID,
-					"kubernetes.io/hostname": hostName,
-				},
+			Name: testRunID,
+			Labels: map[string]string{
+				testID:                   testRunID,
+				"kubernetes.io/hostname": hostName,
 			},
 		}
 
@@ -251,12 +249,10 @@ var _ = Describe("OperatingSystemConfig controller tests", func() {
 
 		By("Create Secret referenced by file9")
 		file9Secret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      file9.Content.SecretRef.Name,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    map[string]string{testID: testRunID},
-			},
-			Data: map[string][]byte{"content": []byte("file9")},
+			Name:      file9.Content.SecretRef.Name,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    map[string]string{testID: testRunID},
+			Data:      map[string][]byte{"content": []byte("file9")},
 		}
 		Expect(testClient.Create(ctx, file9Secret)).To(Succeed())
 		DeferCleanup(func() {
@@ -437,13 +433,11 @@ var _ = Describe("OperatingSystemConfig controller tests", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		oscSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        oscSecretName,
-				Namespace:   metav1.NamespaceSystem,
-				Labels:      map[string]string{testID: testRunID},
-				Annotations: map[string]string{"checksum/data-script": utils.ComputeSHA256Hex(oscRaw)},
-			},
-			Data: map[string][]byte{"osc.yaml": oscRaw},
+			Name:        oscSecretName,
+			Namespace:   metav1.NamespaceSystem,
+			Labels:      map[string]string{testID: testRunID},
+			Annotations: map[string]string{"checksum/data-script": utils.ComputeSHA256Hex(oscRaw)},
+			Data:        map[string][]byte{"osc.yaml": oscRaw},
 		}
 
 		By("Create Secret containing the operating system config")
@@ -1116,12 +1110,10 @@ metadata:
 				})
 
 				staticPod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        "foo-" + node.Name,
-						Namespace:   "default",
-						Annotations: map[string]string{"gardener.cloud/config.mirror": "abc"},
-						Labels:      map[string]string{"static-pod": "true", testID: testRunID},
-					},
+					Name:        "foo-" + node.Name,
+					Namespace:   "default",
+					Annotations: map[string]string{"gardener.cloud/config.mirror": "abc"},
+					Labels:      map[string]string{"static-pod": "true", testID: testRunID},
 					Spec: corev1.PodSpec{
 						Containers: []corev1.Container{{Name: "foo-container", Image: "foo"}},
 						NodeName:   node.Name,

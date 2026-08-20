@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -40,10 +39,8 @@ var _ = Describe("Checksums", func() {
 	Describe("#EnsureSecretChecksumAnnotation", func() {
 		It("should add the correct checksum annotation for the secret", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      secretName,
-				},
+				Namespace: namespace,
+				Name:      secretName,
 				Data: map[string][]byte{
 					"key1": []byte("value1"),
 					"key2": []byte("value2"),
@@ -61,10 +58,8 @@ var _ = Describe("Checksums", func() {
 
 		It("should add the annotation even if the template already has other annotations", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      secretName,
-				},
+				Namespace: namespace,
+				Name:      secretName,
 				Data: map[string][]byte{
 					"foo": []byte("bar"),
 				},
@@ -88,10 +83,8 @@ var _ = Describe("Checksums", func() {
 	Describe("#EnsureConfigMapChecksumAnnotation", func() {
 		It("should add the correct checksum annotation for the configmap", func() {
 			cm := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      cmName,
-				},
+				Namespace: namespace,
+				Name:      cmName,
 				Data: map[string]string{
 					"config.yaml": "foo: bar",
 				},
@@ -108,10 +101,8 @@ var _ = Describe("Checksums", func() {
 
 		It("should add the annotation even if the template already has other annotations", func() {
 			cm := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      cmName,
-				},
+				Namespace: namespace,
+				Name:      cmName,
 				Data: map[string]string{
 					"key": "value",
 				},
@@ -133,18 +124,14 @@ var _ = Describe("Checksums", func() {
 
 		It("should compute different checksums for different configmap data", func() {
 			cm1 := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      "cm-one",
-				},
-				Data: map[string]string{"key": "value1"},
+				Namespace: namespace,
+				Name:      "cm-one",
+				Data:      map[string]string{"key": "value1"},
 			}
 			cm2 := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      "cm-two",
-				},
-				Data: map[string]string{"key": "value2"},
+				Namespace: namespace,
+				Name:      "cm-two",
+				Data:      map[string]string{"key": "value2"},
 			}
 
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).WithObjects(cm1, cm2).Build()

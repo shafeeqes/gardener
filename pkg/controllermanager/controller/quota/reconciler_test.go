@@ -10,8 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -43,13 +41,11 @@ var _ = Describe("Reconciler", func() {
 		quotaName = "test-quota"
 		reconciler = &Reconciler{Client: fakeClient, Recorder: &events.FakeRecorder{}}
 		quota = &gardencorev1beta1.Quota{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: quotaName,
-			},
+			Name: quotaName,
 		}
 
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{Name: "test-secretbinding", Namespace: "test-namespace"},
+			Name: "test-secretbinding", Namespace: "test-namespace",
 			Quotas: []corev1.ObjectReference{
 				{
 					Name: quotaName,
@@ -58,7 +54,7 @@ var _ = Describe("Reconciler", func() {
 		}
 
 		credentialsBinding = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta: metav1.ObjectMeta{Name: "test-credentialsbinding", Namespace: "test-namespace"},
+			Name: "test-credentialsbinding", Namespace: "test-namespace",
 			Quotas: []corev1.ObjectReference{
 				{
 					Name: quotaName,
@@ -70,7 +66,7 @@ var _ = Describe("Reconciler", func() {
 	It("should return nil because object not found", func() {
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(quota), &gardencorev1beta1.Quota{})).To(BeNotFoundError())
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: quotaName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: quotaName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -81,7 +77,7 @@ var _ = Describe("Reconciler", func() {
 		})
 
 		It("should ensure the finalizer", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: quotaName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: quotaName})
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(quota), quota)).To(Succeed())
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
@@ -104,7 +100,7 @@ var _ = Describe("Reconciler", func() {
 			quota.Finalizers = nil
 			Expect(fakeClient.Patch(ctx, quota, patch)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: quotaName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: quotaName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -112,7 +108,7 @@ var _ = Describe("Reconciler", func() {
 		It("should return an error because SecretBinding referencing Quota exists", func() {
 			Expect(fakeClient.Create(ctx, secretBinding)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: quotaName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: quotaName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("cannot delete Quota")))
 		})
@@ -120,13 +116,13 @@ var _ = Describe("Reconciler", func() {
 		It("should return an error because CredentialsBinding referencing Quota exists", func() {
 			Expect(fakeClient.Create(ctx, credentialsBinding)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: quotaName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: quotaName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).To(MatchError(ContainSubstring("cannot delete Quota")))
 		})
 
 		It("should remove the finalizer because no SecretBinding or CredentialsBinding are referencing the Quota", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: quotaName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: quotaName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(quota), quota)).To(BeNotFoundError())

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -20,10 +19,8 @@ import (
 // ScaleStatefulSet scales a StatefulSet.
 func ScaleStatefulSet(ctx context.Context, c client.Client, key client.ObjectKey, replicas int32) error {
 	statefulset := &appsv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      key.Name,
-			Namespace: key.Namespace,
-		},
+		Name:      key.Name,
+		Namespace: key.Namespace,
 	}
 
 	return scaleResource(ctx, c, statefulset, replicas)
@@ -32,10 +29,8 @@ func ScaleStatefulSet(ctx context.Context, c client.Client, key client.ObjectKey
 // ScaleDeployment scales a Deployment.
 func ScaleDeployment(ctx context.Context, c client.Client, key client.ObjectKey, replicas int32) error {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      key.Name,
-			Namespace: key.Namespace,
-		},
+		Name:      key.Name,
+		Namespace: key.Namespace,
 	}
 
 	return scaleResource(ctx, c, deployment, replicas)

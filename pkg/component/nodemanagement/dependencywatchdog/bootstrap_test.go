@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -421,16 +420,12 @@ status:
 				dwd = NewBootstrapper(c, namespace, values)
 
 				managedResource = &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      dwdName,
-						Namespace: namespace,
-					},
+					Name:      dwdName,
+					Namespace: namespace,
 				}
 				managedResourceSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "managedresource-" + managedResource.Name,
-						Namespace: namespace,
-					},
+					Name:      "managedresource-" + managedResource.Name,
+					Namespace: namespace,
 				}
 			})
 
@@ -441,12 +436,10 @@ status:
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-						ResourceVersion: "1",
-					},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -519,10 +512,8 @@ status:
 		BeforeEach(func() {
 			dwd = NewBootstrapper(c, namespace, BootstrapperValues{Role: role})
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: namespace,
-				},
+				Name:      managedResourceName,
+				Namespace: namespace,
 			}
 
 			fakeOps = &retryfake.Ops{MaxAttempts: 1}
@@ -545,11 +536,9 @@ status:
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -572,11 +561,9 @@ status:
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

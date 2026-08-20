@@ -340,11 +340,9 @@ func buildRule(c client.Client, t Type) (*admissionregistrationv1.RuleWithOperat
 			admissionregistrationv1.Create,
 			admissionregistrationv1.Update,
 		},
-		Rule: admissionregistrationv1.Rule{
-			APIGroups:   []string{gvk.Group},
-			APIVersions: []string{apiVersions},
-			Resources:   []string{resource},
-		},
+		APIGroups:   []string{gvk.Group},
+		APIVersions: []string{apiVersions},
+		Resources:   []string{resource},
 	}, nil
 }
 

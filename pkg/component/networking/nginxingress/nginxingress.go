@@ -174,20 +174,16 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("ConfigMap", false),
-				Labels:    n.getLabels(LabelValueController, false),
-				Namespace: n.values.TargetNamespace,
-			},
-			Data: n.values.ConfigData,
+			Name:      n.getName("ConfigMap", false),
+			Labels:    n.getLabels(LabelValueController, false),
+			Namespace: n.values.TargetNamespace,
+			Data:      n.values.ConfigData,
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("ServiceAccount", false),
-				Namespace: n.values.TargetNamespace,
-				Labels:    map[string]string{v1beta1constants.LabelApp: LabelAppValue},
-			},
+			Name:                         n.getName("ServiceAccount", false),
+			Namespace:                    n.values.TargetNamespace,
+			Labels:                       map[string]string{v1beta1constants.LabelApp: LabelAppValue},
 			AutomountServiceAccountToken: new(false),
 		}
 
@@ -242,12 +238,10 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 
 	var (
 		serviceController = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        n.getName("Service", false),
-				Namespace:   n.values.TargetNamespace,
-				Labels:      n.getLabels(LabelValueController, false),
-				Annotations: serviceAnnotations,
-			},
+			Name:        n.getName("Service", false),
+			Namespace:   n.values.TargetNamespace,
+			Labels:      n.getLabels(LabelValueController, false),
+			Annotations: serviceAnnotations,
 			Spec: corev1.ServiceSpec{
 				Type:                     corev1.ServiceTypeLoadBalancer,
 				LoadBalancerSourceRanges: n.values.LoadBalancerSourceRanges,
@@ -270,11 +264,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		serviceBackend = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("Service", true),
-				Labels:    n.getLabels(labelValueBackend, false),
-				Namespace: n.values.TargetNamespace,
-			},
+			Name:      n.getName("Service", true),
+			Labels:    n.getLabels(labelValueBackend, false),
+			Namespace: n.values.TargetNamespace,
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
 				Ports: []corev1.ServicePort{{
@@ -286,11 +278,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("Role", false),
-				Namespace: n.values.TargetNamespace,
-				Labels:    n.getLabels("", false),
-			},
+			Name:      n.getName("Role", false),
+			Namespace: n.values.TargetNamespace,
+			Labels:    n.getLabels("", false),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -322,12 +312,10 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        n.getName("RoleBinding", false),
-				Namespace:   n.values.TargetNamespace,
-				Labels:      n.getLabels("", false),
-				Annotations: roleBindingAnnotations,
-			},
+			Name:        n.getName("RoleBinding", false),
+			Namespace:   n.values.TargetNamespace,
+			Labels:      n.getLabels("", false),
+			Annotations: roleBindingAnnotations,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "Role",
@@ -341,10 +329,8 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   n.getName("ClusterRole", false),
-				Labels: n.getLabels("", false),
-			},
+			Name:   n.getName("ClusterRole", false),
+			Labels: n.getLabels("", false),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -395,11 +381,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        n.getName("ClusterRoleBinding", false),
-				Labels:      n.getLabels("", false),
-				Annotations: roleBindingAnnotations,
-			},
+			Name:        n.getName("ClusterRoleBinding", false),
+			Labels:      n.getLabels("", false),
+			Annotations: roleBindingAnnotations,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -413,11 +397,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		deploymentBackend = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("Deployment", true),
-				Namespace: n.values.TargetNamespace,
-				Labels:    n.getLabels(labelValueBackend, true),
-			},
+			Name:      n.getName("Deployment", true),
+			Namespace: n.values.TargetNamespace,
+			Labels:    n.getLabels(labelValueBackend, true),
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(1)),
 				RevisionHistoryLimit: new(int32(2)),
@@ -445,12 +427,10 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 							Image:           n.values.ImageDefaultBackend,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthy",
-										Port:   intstr.FromInt32(containerPortBackend),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthy",
+									Port:   intstr.FromInt32(containerPortBackend),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 30,
 								TimeoutSeconds:      5,
@@ -479,11 +459,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		deploymentController = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("Deployment", false),
-				Namespace: n.values.TargetNamespace,
-				Labels:    n.getLabels(LabelValueController, true),
-			},
+			Name:      n.getName("Deployment", false),
+			Namespace: n.values.TargetNamespace,
+			Labels:    n.getLabels(LabelValueController, true),
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(2)),
 				RevisionHistoryLimit: new(int32(2)),
@@ -537,12 +515,10 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 							},
 							LivenessProbe: &corev1.Probe{
 								FailureThreshold: 3,
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   healthProbePort,
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   healthProbePort,
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: initialDelaySecondsLivenessProbe,
 								PeriodSeconds:       10,
@@ -564,12 +540,10 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 							ReadinessProbe: &corev1.Probe{
 								FailureThreshold:    3,
 								InitialDelaySeconds: initialDelaySecondsReadinessProbe,
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   healthProbePort,
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   healthProbePort,
+									Scheme: corev1.URISchemeHTTP,
 								},
 								PeriodSeconds:    10,
 								SuccessThreshold: 1,
@@ -585,23 +559,19 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		ingressClass = &networkingv1.IngressClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   n.values.IngressClass,
-				Labels: n.getLabels(LabelValueController, true),
-			},
+			Name:   n.values.IngressClass,
+			Labels: n.getLabels(LabelValueController, true),
 			Spec: networkingv1.IngressClassSpec{
 				Controller: "k8s.io/" + n.values.IngressClass,
 			},
 		}
 
 		lease = &coordinationv1.Lease{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("Lease", false),
-				Namespace: n.values.TargetNamespace,
-				Annotations: map[string]string{
-					// We don't want to overwrite the lease, but still want to delete it when the component is destroyed.
-					resourcesv1alpha1.Ignore: "true",
-				},
+			Name:      n.getName("Lease", false),
+			Namespace: n.values.TargetNamespace,
+			Annotations: map[string]string{
+				// We don't want to overwrite the lease, but still want to delete it when the component is destroyed.
+				resourcesv1alpha1.Ignore: "true",
 			},
 		}
 
@@ -633,11 +603,9 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		})
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      controllerName,
-				Namespace: n.values.TargetNamespace,
-				Labels:    n.getLabels(LabelValueController, false),
-			},
+			Name:      controllerName,
+			Namespace: n.values.TargetNamespace,
+			Labels:    n.getLabels(LabelValueController, false),
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MinAvailable: new(intstr.FromInt32(1)),
 				Selector: &metav1.LabelSelector{
@@ -648,19 +616,19 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		}
 
 		destinationHost := kubernetesutils.FQDNForService(serviceController.Name, serviceController.Namespace)
-		destinationRule = &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: controllerName, Namespace: n.values.TargetNamespace}}
+		destinationRule = &istionetworkingv1beta1.DestinationRule{Name: controllerName, Namespace: n.values.TargetNamespace}
 		if err := istio.DestinationRuleWithLocalityPreference(destinationRule, n.getLabels(LabelValueController, false), []string{n.values.IstioIngressGatewayNamespace}, destinationHost)(); err != nil {
 			return nil, err
 		}
 
-		gateway = &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: controllerName + n.nameSuffix(), Namespace: n.values.TargetNamespace}}
+		gateway = &istionetworkingv1beta1.Gateway{Name: controllerName + n.nameSuffix(), Namespace: n.values.TargetNamespace}
 		if err := istio.GatewayWithTLSPassthrough(gateway, n.getLabels(LabelValueController, false), n.values.IstioIngressGatewayLabels, n.values.Domains)(); err != nil {
 			return nil, err
 		}
 
 		// If multiple domains overlap istio validation may complain => separate virtual services per domain solve this reliably
 		for i, domain := range n.values.Domains {
-			virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("%s-%d", controllerName+n.nameSuffix(), i), Namespace: n.values.TargetNamespace}}
+			virtualService := &istionetworkingv1beta1.VirtualService{Name: fmt.Sprintf("%s-%d", controllerName+n.nameSuffix(), i), Namespace: n.values.TargetNamespace}
 			if err := istio.VirtualServiceWithSNIMatch(virtualService, n.getLabels(LabelValueController, false), []string{n.values.IstioIngressGatewayNamespace}, []string{domain}, gateway.Name, uint32(ServicePortControllerHttps), destinationHost)(); err != nil {
 				return nil, err
 			}
@@ -690,15 +658,13 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 		deploymentController.Spec.Template.Spec.Containers[0].TerminationMessagePolicy = corev1.TerminationMessageReadFile
 
 		networkPolicy = &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud--allow-to-from-nginx",
-				Namespace: n.values.TargetNamespace,
-				Annotations: map[string]string{v1beta1constants.GardenerDescription: "Allows all egress and ingress " +
-					"traffic for the nginx-ingress controller.",
-				},
-				Labels: map[string]string{
-					managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
-				},
+			Name:      "gardener.cloud--allow-to-from-nginx",
+			Namespace: n.values.TargetNamespace,
+			Annotations: map[string]string{v1beta1constants.GardenerDescription: "Allows all egress and ingress " +
+				"traffic for the nginx-ingress controller.",
+			},
+			Labels: map[string]string{
+				managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
 			},
 			Spec: networkingv1.NetworkPolicySpec{
 				PodSelector: *deploymentController.Spec.Selector,
@@ -711,10 +677,8 @@ func (n *nginxIngress) computeResourcesData() (map[string][]byte, error) {
 
 	if n.values.VPAEnabled {
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      n.getName("VPA", false),
-				Namespace: n.values.TargetNamespace,
-			},
+			Name:      n.getName("VPA", false),
+			Namespace: n.values.TargetNamespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),

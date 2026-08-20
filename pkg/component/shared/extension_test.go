@@ -71,9 +71,7 @@ var _ = Describe("Extension", func() {
 			fooExtensionType = "foo"
 			fooReconciliationTimeout = metav1.Duration{Duration: 5 * time.Minute}
 			fooRegistration = gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "foo",
-				},
+				Name: "foo",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -91,9 +89,7 @@ var _ = Describe("Extension", func() {
 
 			barExtensionType = "bar"
 			barRegistration = gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "bar",
-				},
+				Name: "bar",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -105,9 +101,7 @@ var _ = Describe("Extension", func() {
 				},
 			}
 			barRegistrationSupportedForWorkerless = gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "bar-wl",
-				},
+				Name: "bar-wl",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{
@@ -196,9 +190,7 @@ var _ = Describe("Extension", func() {
 					fooRegistration,
 					barRegistration,
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "another-extension",
-						},
+						Name: "another-extension",
 						Spec: gardencorev1beta1.ControllerRegistrationSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{

@@ -68,20 +68,16 @@ var _ = Describe("ControllerRegistration", func() {
 		controllerRegistration = New(c, &events.FakeRecorder{}, gardenNamespace)
 
 		extension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionName,
-			},
+			Name: extensionName,
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{Kind: extensionKind},
 				},
 				Deployment: &operatorv1alpha1.Deployment{
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &gardencorev1.OCIRepository{
-									Ref: new(ociRef),
-								},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &gardencorev1.OCIRepository{
+								Ref: new(ociRef),
 							},
 						},
 						InjectGardenKubeconfig: new(true),
@@ -102,9 +98,7 @@ var _ = Describe("ControllerRegistration", func() {
 
 			Expect(managedResource).To(consistOf(
 				&gardencorev1.ControllerDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 					Helm: &gardencorev1.HelmControllerDeployment{
 						OCIRepository: &gardencorev1.OCIRepository{
 							Ref: new(ociRef),
@@ -113,9 +107,7 @@ var _ = Describe("ControllerRegistration", func() {
 					InjectGardenKubeconfig: new(true),
 				},
 				&gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Resources: []gardencorev1beta1.ControllerResource{
 							{Kind: extensionKind},
@@ -132,11 +124,9 @@ var _ = Describe("ControllerRegistration", func() {
 
 		It("should create the expected ControllerRegistration and ControllerInstallation and Secret resources", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-secret",
-					Namespace: gardenNamespace,
-					Labels:    map[string]string{"gardener.cloud/role": "helm-pull-secret"},
-				},
+				Name:      "test-secret",
+				Namespace: gardenNamespace,
+				Labels:    map[string]string{"gardener.cloud/role": "helm-pull-secret"},
 				Data: map[string][]byte{
 					".dockerconfigjson": []byte("foo"),
 				},
@@ -156,9 +146,7 @@ var _ = Describe("ControllerRegistration", func() {
 			expectedSecret.Namespace = v1beta1constants.GardenNamespace // Garden namespace in virtual cluster
 			Expect(managedResource).To(consistOf(
 				&gardencorev1.ControllerDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 					Helm: &gardencorev1.HelmControllerDeployment{
 						OCIRepository: &gardencorev1.OCIRepository{
 							Ref: new(ociRef),
@@ -170,9 +158,7 @@ var _ = Describe("ControllerRegistration", func() {
 					InjectGardenKubeconfig: new(true),
 				},
 				&gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Resources: []gardencorev1beta1.ControllerResource{
 							{Kind: extensionKind},
@@ -190,29 +176,23 @@ var _ = Describe("ControllerRegistration", func() {
 
 		It("should copy only resource references that appear in extension Helm values and prefix their names", func() {
 			referencedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "creds-secret",
-					Namespace: gardenNamespace,
-				},
-				Data: map[string][]byte{"token": []byte("super-secret")},
+				Name:      "creds-secret",
+				Namespace: gardenNamespace,
+				Data:      map[string][]byte{"token": []byte("super-secret")},
 			}
 			Expect(c.Create(ctx, referencedSecret)).To(Succeed())
 
 			referencedConfigMap := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cfg-cm",
-					Namespace: gardenNamespace,
-				},
-				Data: map[string]string{"key": "value"},
+				Name:      "cfg-cm",
+				Namespace: gardenNamespace,
+				Data:      map[string]string{"key": "value"},
 			}
 			Expect(c.Create(ctx, referencedConfigMap)).To(Succeed())
 
 			unreferencedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "unused-secret",
-					Namespace: gardenNamespace,
-				},
-				Data: map[string][]byte{"key": []byte("ignored")},
+				Name:      "unused-secret",
+				Namespace: gardenNamespace,
+				Data:      map[string][]byte{"key": []byte("ignored")},
 			}
 			Expect(c.Create(ctx, unreferencedSecret)).To(Succeed())
 
@@ -243,9 +223,7 @@ var _ = Describe("ControllerRegistration", func() {
 
 			Expect(managedResource).To(consistOf(
 				&gardencorev1.ControllerDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 					Helm: &gardencorev1.HelmControllerDeployment{
 						OCIRepository: &gardencorev1.OCIRepository{
 							Ref: new(ociRef),
@@ -259,9 +237,7 @@ var _ = Describe("ControllerRegistration", func() {
 					InjectGardenKubeconfig: new(true),
 				},
 				&gardencorev1beta1.ControllerRegistration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: extensionName,
-					},
+					Name: extensionName,
 					Spec: gardencorev1beta1.ControllerRegistrationSpec{
 						Resources: []gardencorev1beta1.ControllerResource{
 							{Kind: extensionKind},

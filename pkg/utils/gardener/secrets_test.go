@@ -38,10 +38,8 @@ var _ = Describe("Secrets", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).Build()
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-1",
-					Namespace: "test-namespace",
-				},
+				Name:      "secret-1",
+				Namespace: "test-namespace",
 			}
 		})
 
@@ -84,15 +82,13 @@ var _ = Describe("Secrets", func() {
 
 			namespace              = "namespace"
 			globalMonitoringSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "global-monitoring-secret",
-					Namespace:   "foo",
-					Labels:      map[string]string{"bar": "baz", "last-rotation-initiation-time": "1700000000"},
-					Annotations: map[string]string{"baz": "foo"},
-				},
-				Type:      corev1.SecretTypeOpaque,
-				Immutable: new(false),
-				Data:      map[string][]byte{"username": []byte("bar"), "password": []byte("baz")},
+				Name:        "global-monitoring-secret",
+				Namespace:   "foo",
+				Labels:      map[string]string{"bar": "baz", "last-rotation-initiation-time": "1700000000"},
+				Annotations: map[string]string{"baz": "foo"},
+				Type:        corev1.SecretTypeOpaque,
+				Immutable:   new(false),
+				Data:        map[string][]byte{"username": []byte("bar"), "password": []byte("baz")},
 			}
 		)
 
@@ -127,12 +123,10 @@ var _ = Describe("Secrets", func() {
 
 		It("should delete stale replicas after replicating a new secret", func() {
 			stale := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      globalMonitoringSecret.Name + "-stale",
-					Namespace: namespace,
-					Labels:    map[string]string{"gardener.cloud/purpose": "global-monitoring-secret-replica"},
-				},
-				Data: map[string][]byte{"username": []byte("old"), "password": []byte("old")},
+				Name:      globalMonitoringSecret.Name + "-stale",
+				Namespace: namespace,
+				Labels:    map[string]string{"gardener.cloud/purpose": "global-monitoring-secret-replica"},
+				Data:      map[string][]byte{"username": []byte("old"), "password": []byte("old")},
 			}
 			Expect(fakeClient.Create(ctx, stale)).To(Succeed())
 
@@ -150,12 +144,10 @@ var _ = Describe("Secrets", func() {
 
 		It("should not delete current replica after replicating it", func() {
 			stale := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "prefix-" + globalMonitoringSecret.Name,
-					Namespace: namespace,
-					Labels:    map[string]string{"gardener.cloud/purpose": "global-monitoring-secret-replica"},
-				},
-				Data: map[string][]byte{"username": []byte("old"), "password": []byte("old")},
+				Name:      "prefix-" + globalMonitoringSecret.Name,
+				Namespace: namespace,
+				Labels:    map[string]string{"gardener.cloud/purpose": "global-monitoring-secret-replica"},
+				Data:      map[string][]byte{"username": []byte("old"), "password": []byte("old")},
 			}
 			Expect(fakeClient.Create(ctx, stale)).To(Succeed())
 
@@ -183,42 +175,30 @@ var _ = Describe("Secrets", func() {
 
 		BeforeEach(func() {
 			configMap = &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "ConfigMap",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "res1",
-					Namespace: "garden",
-				},
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Name:       "res1",
+				Namespace:  "garden",
 				Data: map[string]string{
 					"key1": "key2",
 				},
 			}
 
 			secret = &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "res2",
-					Namespace: "kube-system",
-				},
+				APIVersion: "v1",
+				Kind:       "Secret",
+				Name:       "res2",
+				Namespace:  "kube-system",
 				Data: map[string][]byte{
 					"key": []byte("secret"),
 				},
 			}
 
 			deployment = &appsv1.Deployment{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "apps/v1",
-					Kind:       "Deployment",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "res3",
-					Namespace: "garden",
-				},
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Name:       "res3",
+				Namespace:  "garden",
 				Spec: appsv1.DeploymentSpec{
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
@@ -339,28 +319,20 @@ metadata:
 
 		BeforeEach(func() {
 			configMap = &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "ConfigMap",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "configmap",
-					Namespace: "garden",
-				},
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Name:       "configmap",
+				Namespace:  "garden",
 				Data: map[string]string{
 					"key1": "key2",
 				},
 			}
 
 			secret = &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "v1",
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret",
-					Namespace: "kube-system",
-				},
+				APIVersion: "v1",
+				Kind:       "Secret",
+				Name:       "secret",
+				Namespace:  "kube-system",
 				Data: map[string][]byte{
 					"key": []byte("secret"),
 				},

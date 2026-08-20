@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/utils/test/matchers"
 )
@@ -18,18 +17,12 @@ var _ = Describe("Deep", func() {
 
 	BeforeEach(func() {
 		actual = &corev1.Pod{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "Pod",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			APIVersion: "v1",
+			Kind:       "Pod",
+			Name:       "foo",
 		}
 		expected = &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			Name: "foo",
 		}
 	})
 

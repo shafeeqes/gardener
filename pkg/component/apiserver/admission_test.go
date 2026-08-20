@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -37,7 +36,7 @@ var _ = Describe("Admission", func() {
 
 	Describe("#ReconcileSecretAdmissionKubeconfigs", func() {
 		It("should successfully deploy the secret resource w/o admission plugin kubeconfigs", func() {
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-kubeconfigs", Namespace: namespace}}
+			secret := &corev1.Secret{Name: "apiserver-admission-kubeconfigs", Namespace: namespace}
 			Expect(kubernetesutils.MakeUnique(secret)).To(Succeed())
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(BeNotFoundError())
@@ -47,24 +46,22 @@ var _ = Describe("Admission", func() {
 			actualSecret := &corev1.Secret{ObjectMeta: secret.ObjectMeta}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualSecret), actualSecret)).To(Succeed())
 			Expect(actualSecret).To(DeepEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secret.Name,
-					Namespace:       secret.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
-				Data:      map[string][]byte{},
+				Name:            secret.Name,
+				Namespace:       secret.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
+				Data:            map[string][]byte{},
 			}))
 		})
 
 		It("should successfully deploy the configmap resource w/ admission plugins", func() {
 			admissionPlugins := []AdmissionPluginConfig{
-				{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-				{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz"}, Kubeconfig: []byte("foo")},
+				{Name: "Foo"},
+				{Name: "Baz", Kubeconfig: []byte("foo")},
 			}
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-kubeconfigs", Namespace: namespace}}
+			secret := &corev1.Secret{Name: "apiserver-admission-kubeconfigs", Namespace: namespace}
 			Expect(kubernetesutils.MakeUnique(secret)).To(Succeed())
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(BeNotFoundError())
@@ -74,13 +71,11 @@ var _ = Describe("Admission", func() {
 			actualSecret := &corev1.Secret{ObjectMeta: secret.ObjectMeta}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(actualSecret), actualSecret)).To(Succeed())
 			Expect(actualSecret).To(DeepEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            secret.Name,
-					Namespace:       secret.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
+				Name:            secret.Name,
+				Namespace:       secret.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
 				Data: map[string][]byte{
 					"baz-kubeconfig.yaml": []byte("foo"),
 				},
@@ -90,20 +85,18 @@ var _ = Describe("Admission", func() {
 
 	Describe("#ReconcileConfigMapAdmission", func() {
 		It("should successfully deploy the configmap resource w/o admission plugins", func() {
-			configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-config", Namespace: namespace}}
+			configMap := &corev1.ConfigMap{Name: "apiserver-admission-config", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(BeNotFoundError())
 
 			Expect(ReconcileConfigMapAdmission(ctx, fakeClient, configMap, Values{})).To(Succeed())
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(Succeed())
 			Expect(configMap).To(DeepEqual(&corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMap.Name,
-					Namespace:       configMap.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
+				Name:            configMap.Name,
+				Namespace:       configMap.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
 				Data: map[string]string{"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
 plugins: null
@@ -113,54 +106,46 @@ plugins: null
 
 		It("should successfully deploy the configmap resource w/ admission plugins", func() {
 			admissionPlugins := []AdmissionPluginConfig{
-				{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-				{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("some-config-for-baz")}}},
+				{Name: "Foo"},
+				{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("some-config-for-baz")}},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "MutatingAdmissionWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+					Name: "MutatingAdmissionWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 					Kubeconfig: []byte("foo"),
 				},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ValidatingAdmissionWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+					Name: "ValidatingAdmissionWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 					Kubeconfig: []byte("foo"),
 				},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ImagePolicyWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`imagePolicy:
+					Name: "ImagePolicyWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`imagePolicy:
   foo: bar
   kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 					Kubeconfig: []byte("foo"),
 				},
 			}
 
-			configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-config", Namespace: namespace}}
+			configMap := &corev1.ConfigMap{Name: "apiserver-admission-config", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(BeNotFoundError())
 
 			Expect(ReconcileConfigMapAdmission(ctx, fakeClient, configMap, Values{EnabledAdmissionPlugins: admissionPlugins})).To(Succeed())
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(Succeed())
 			Expect(configMap).To(DeepEqual(&corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMap.Name,
-					Namespace:       configMap.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
+				Name:            configMap.Name,
+				Namespace:       configMap.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
 				Data: map[string]string{
 					"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
@@ -198,48 +183,40 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 		It("should successfully deploy the configmap resource w/ admission plugins w/ config but w/o kubeconfigs", func() {
 			admissionPlugins := []AdmissionPluginConfig{
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "MutatingAdmissionWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+					Name: "MutatingAdmissionWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 				},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ValidatingAdmissionWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
+					Name: "ValidatingAdmissionWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1
 kind: WebhookAdmissionConfiguration
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 				},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ImagePolicyWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`imagePolicy:
+					Name: "ImagePolicyWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`imagePolicy:
   foo: bar
   kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 				},
 			}
 
-			configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-config", Namespace: namespace}}
+			configMap := &corev1.ConfigMap{Name: "apiserver-admission-config", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(BeNotFoundError())
 
 			Expect(ReconcileConfigMapAdmission(ctx, fakeClient, configMap, Values{EnabledAdmissionPlugins: admissionPlugins})).To(Succeed())
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(Succeed())
 			Expect(configMap).To(DeepEqual(&corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMap.Name,
-					Namespace:       configMap.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
+				Name:            configMap.Name,
+				Namespace:       configMap.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
 				Data: map[string]string{
 					"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
@@ -273,39 +250,31 @@ kubeConfigFile: ""
 		It("should successfully deploy the configmap resource w/ admission plugins w/o configs but w/ kubeconfig", func() {
 			admissionPlugins := []AdmissionPluginConfig{
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "MutatingAdmissionWebhook",
-					},
+					Name:       "MutatingAdmissionWebhook",
 					Kubeconfig: []byte("foo"),
 				},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ValidatingAdmissionWebhook",
-					},
+					Name:       "ValidatingAdmissionWebhook",
 					Kubeconfig: []byte("foo"),
 				},
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ImagePolicyWebhook",
-					},
+					Name:       "ImagePolicyWebhook",
 					Kubeconfig: []byte("foo"),
 				},
 			}
 
-			configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-config", Namespace: namespace}}
+			configMap := &corev1.ConfigMap{Name: "apiserver-admission-config", Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(BeNotFoundError())
 
 			Expect(ReconcileConfigMapAdmission(ctx, fakeClient, configMap, Values{EnabledAdmissionPlugins: admissionPlugins})).To(Succeed())
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap)).To(Succeed())
 			Expect(configMap).To(DeepEqual(&corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            configMap.Name,
-					Namespace:       configMap.Namespace,
-					Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
-					ResourceVersion: "1",
-				},
-				Immutable: new(true),
+				Name:            configMap.Name,
+				Namespace:       configMap.Namespace,
+				Labels:          map[string]string{"resources.gardener.cloud/garbage-collectable-reference": "true"},
+				ResourceVersion: "1",
+				Immutable:       new(true),
 				Data: map[string]string{
 					"admission-configuration.yaml": `apiVersion: apiserver.config.k8s.io/v1
 kind: AdmissionConfiguration
@@ -338,18 +307,16 @@ kubeConfigFile: /etc/kubernetes/admission-kubeconfigs/validatingadmissionwebhook
 		It("should fail when webhook admission plugin config uses the removed apiserver.config.k8s.io/v1alpha1 version", func() {
 			admissionPlugins := []AdmissionPluginConfig{
 				{
-					AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{
-						Name: "ValidatingAdmissionWebhook",
-						Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1alpha1
+					Name: "ValidatingAdmissionWebhook",
+					Config: &runtime.RawExtension{Raw: []byte(`apiVersion: apiserver.config.k8s.io/v1alpha1
 kind: WebhookAdmission
 kubeConfigFile: /etc/kubernetes/foobar.yaml
 `)},
-					},
 					Kubeconfig: []byte("foo"),
 				},
 			}
 
-			configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "apiserver-admission-config", Namespace: namespace}}
+			configMap := &corev1.ConfigMap{Name: "apiserver-admission-config", Namespace: namespace}
 			Expect(ReconcileConfigMapAdmission(ctx, fakeClient, configMap, Values{EnabledAdmissionPlugins: admissionPlugins})).To(MatchError(ContainSubstring("cannot decode config for admission plugin ValidatingAdmissionWebhook")))
 		})
 	})
@@ -359,17 +326,17 @@ kubeConfigFile: /etc/kubernetes/foobar.yaml
 			deployment := &appsv1.Deployment{}
 			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{})
 
-			configMapAdmissionConfigs := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "admission-configs"}}
-			secretAdmissionKubeconfigs := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "admission-kubeconfigs"}}
+			configMapAdmissionConfigs := &corev1.ConfigMap{Name: "admission-configs"}
+			secretAdmissionKubeconfigs := &corev1.Secret{Name: "admission-kubeconfigs"}
 
 			InjectAdmissionSettings(deployment, configMapAdmissionConfigs, secretAdmissionKubeconfigs, Values{
 				EnabledAdmissionPlugins: []AdmissionPluginConfig{
 					{
-						AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"},
-						Kubeconfig:      []byte("foo"),
+						Name:       "Foo",
+						Kubeconfig: []byte("foo"),
 					},
 					{
-						AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Bar"},
+						Name: "Bar",
 					},
 				},
 				DisabledAdmissionPlugins: []gardencorev1beta1.AdmissionPlugin{
@@ -401,20 +368,14 @@ kubeConfigFile: /etc/kubernetes/foobar.yaml
 							Volumes: []corev1.Volume{
 								{
 									Name: "admission-config",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: configMapAdmissionConfigs.Name,
-											},
-										},
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										Name: configMapAdmissionConfigs.Name,
 									},
 								},
 								{
 									Name: "admission-kubeconfigs",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName: secretAdmissionKubeconfigs.Name,
-										},
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: secretAdmissionKubeconfigs.Name,
 									},
 								},
 							},

@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -99,14 +98,10 @@ var _ = Describe("ResourceManager", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{"MatchLabelKeysInPodTopologySpread": false},
-							},
+							FeatureGates: map[string]bool{"MatchLabelKeysInPodTopologySpread": false},
 						},
 						KubeScheduler: &gardencorev1beta1.KubeSchedulerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{"MatchLabelKeysInPodTopologySpread": false},
-							},
+							FeatureGates: map[string]bool{"MatchLabelKeysInPodTopologySpread": false},
 						},
 					},
 				},
@@ -123,9 +118,7 @@ var _ = Describe("ResourceManager", func() {
 				Spec: gardencorev1beta1.ShootSpec{
 					Kubernetes: gardencorev1beta1.Kubernetes{
 						KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
-							KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-								FeatureGates: map[string]bool{"AuthorizeWithSelectors": true},
-							},
+							FeatureGates: map[string]bool{"AuthorizeWithSelectors": true},
 						},
 					},
 				},
@@ -217,25 +210,19 @@ var _ = Describe("ResourceManager", func() {
 			kubeAPIServer = &fakeKubeAPIServer{autoscalingReplicas: new(int32(1))}
 
 			bootstrapKubeconfigSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-access-gardener-resource-manager-bootstrap-905aeb60",
-					Namespace: controlPlaneNamespace,
-				},
+				Name:      "shoot-access-gardener-resource-manager-bootstrap-905aeb60",
+				Namespace: controlPlaneNamespace,
 			}
 			shootAccessSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-access-gardener-resource-manager",
-					Namespace: controlPlaneNamespace,
-					Annotations: map[string]string{
-						resourcesv1alpha1.ServiceAccountTokenRenewTimestamp: fakeClock.Now().Add(time.Hour).Format(time.RFC3339),
-					},
+				Name:      "shoot-access-gardener-resource-manager",
+				Namespace: controlPlaneNamespace,
+				Annotations: map[string]string{
+					resourcesv1alpha1.ServiceAccountTokenRenewTimestamp: fakeClock.Now().Add(time.Hour).Format(time.RFC3339),
 				},
 			}
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-core-gardener-resource-manager",
-					Namespace: controlPlaneNamespace,
-				},
+				Name:      "shoot-core-gardener-resource-manager",
+				Namespace: controlPlaneNamespace,
 			}
 
 			botanist.Shoot = &shootpkg.Shoot{
@@ -258,7 +245,7 @@ var _ = Describe("ResourceManager", func() {
 
 		JustBeforeEach(func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: controlPlaneNamespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: controlPlaneNamespace})).To(Succeed())
 
 			botanist.SeedClientSet = fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).Build()
 			botanist.SecretsManager = fakesecretsmanager.New(fakeClient, controlPlaneNamespace)
@@ -469,7 +456,7 @@ var _ = Describe("ResourceManager", func() {
 			Context("with failure", func() {
 				It("fails because the bootstrap kubeconfig secret cannot be created", func() {
 					fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).
-						WithObjects(&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: controlPlaneNamespace}}).
+						WithObjects(&corev1.Secret{Name: "ca", Namespace: controlPlaneNamespace}).
 						WithInterceptorFuncs(interceptor.Funcs{
 							Create: func(_ context.Context, _ client.WithWatch, _ client.Object, _ ...client.CreateOption) error {
 								return fakeErr

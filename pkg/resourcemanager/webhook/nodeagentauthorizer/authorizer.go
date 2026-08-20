@@ -267,10 +267,8 @@ func (a *authorizer) authorizePod(ctx context.Context, log logr.Logger, machineN
 
 func (a *authorizer) authorizeSinglePod(ctx context.Context, log logr.Logger, nodeName string, attrs auth.Attributes) (auth.Decision, string, error) {
 	pod := &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      attrs.GetName(),
-			Namespace: attrs.GetNamespace(),
-		},
+		Name:      attrs.GetName(),
+		Namespace: attrs.GetNamespace(),
 	}
 	if err := a.targetClient.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
 		return auth.DecisionDeny, "", fmt.Errorf("error getting pod %q: %w", client.ObjectKeyFromObject(pod), err)
@@ -311,7 +309,7 @@ func (a *authorizer) authorizeSecret(ctx context.Context, log logr.Logger, machi
 		oscSecretName := machine.Spec.NodeTemplateSpec.Labels[v1beta1constants.LabelWorkerPoolGardenerNodeAgentSecretName]
 		validSecrets = append(validSecrets, oscSecretName)
 
-		oscSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: oscSecretName, Namespace: metav1.NamespaceSystem}}
+		oscSecret := &corev1.Secret{Name: oscSecretName, Namespace: metav1.NamespaceSystem}
 		if err := a.targetClient.Get(ctx, client.ObjectKeyFromObject(oscSecret), oscSecret); err != nil {
 			if !apierrors.IsNotFound(err) {
 				return auth.DecisionDeny, "", fmt.Errorf("error getting OSC secret %q: %w", oscSecretName, err)
@@ -319,7 +317,7 @@ func (a *authorizer) authorizeSecret(ctx context.Context, log logr.Logger, machi
 		} else {
 			var hostname string
 
-			node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: machine.Labels[machinev1alpha1.NodeLabelKey]}}
+			node := &corev1.Node{Name: machine.Labels[machinev1alpha1.NodeLabelKey]}
 			if err := a.targetClient.Get(ctx, client.ObjectKeyFromObject(node), node); err != nil {
 				if !apierrors.IsNotFound(err) {
 					return auth.DecisionDeny, "", fmt.Errorf("error getting node %q: %w", node.Name, err)
@@ -429,7 +427,7 @@ func (a *authorizer) checkSubresource(log logr.Logger, attrs auth.Attributes, al
 	return true, ""
 }
 func (a *authorizer) getNode(ctx context.Context, log logr.Logger, machineName string) (*corev1.Node, string, error) {
-	node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: machineName}}
+	node := &corev1.Node{Name: machineName}
 
 	if a.machineNamespace != nil {
 		machine := &machinev1alpha1.Machine{}

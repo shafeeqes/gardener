@@ -73,54 +73,54 @@ var _ = Describe("ETCD", func() {
 		)
 
 		BeforeEach(func() {
-			namespace1 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "ns1"}}
-			namespace2 = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "ns2"}}
+			namespace1 = &corev1.Namespace{Name: "ns1"}
+			namespace2 = &corev1.Namespace{Name: "ns2"}
 
 			Expect(targetClient.Create(ctx, namespace1)).To(Succeed())
 			Expect(targetClient.Create(ctx, namespace2)).To(Succeed())
 
 			secret1 = &corev1.Secret{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "Secret"},
-				ObjectMeta: metav1.ObjectMeta{Name: "secret1", Namespace: namespace1.Name},
+				APIVersion: "v1", Kind: "Secret",
+				Name: "secret1", Namespace: namespace1.Name,
 			}
 			secret2 = &corev1.Secret{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "Secret"},
-				ObjectMeta: metav1.ObjectMeta{Name: "secret2", Namespace: namespace2.Name},
+				APIVersion: "v1", Kind: "Secret",
+				Name: "secret2", Namespace: namespace2.Name,
 			}
 			secret3 = &corev1.Secret{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "Secret"},
-				ObjectMeta: metav1.ObjectMeta{Name: "secret3", Namespace: namespace2.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"}},
+				APIVersion: "v1", Kind: "Secret",
+				Name: "secret3", Namespace: namespace2.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"},
 			}
 
 			configMap1 = &corev1.ConfigMap{
-				TypeMeta:   metav1.TypeMeta{APIVersion: corev1.SchemeGroupVersion.Version, Kind: "ConfigMap"},
-				ObjectMeta: metav1.ObjectMeta{Name: "configMap1", Namespace: namespace1.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"}},
+				APIVersion: corev1.SchemeGroupVersion.Version, Kind: "ConfigMap",
+				Name: "configMap1", Namespace: namespace1.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"},
 			}
 			configMap2 = &corev1.ConfigMap{
-				TypeMeta:   metav1.TypeMeta{APIVersion: corev1.SchemeGroupVersion.Version, Kind: "ConfigMap"},
-				ObjectMeta: metav1.ObjectMeta{Name: "configMap2", Namespace: namespace2.Name},
+				APIVersion: corev1.SchemeGroupVersion.Version, Kind: "ConfigMap",
+				Name: "configMap2", Namespace: namespace2.Name,
 			}
 
 			deployment1 = &appsv1.Deployment{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-				ObjectMeta: metav1.ObjectMeta{Name: "deployment1", Namespace: namespace1.Name},
+				APIVersion: "apps/v1", Kind: "Deployment",
+				Name: "deployment1", Namespace: namespace1.Name,
 			}
 			deployment2 = &appsv1.Deployment{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-				ObjectMeta: metav1.ObjectMeta{Name: "deployment2", Namespace: namespace1.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"}},
+				APIVersion: "apps/v1", Kind: "Deployment",
+				Name: "deployment2", Namespace: namespace1.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"},
 			}
 			deployment3 = &appsv1.Deployment{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-				ObjectMeta: metav1.ObjectMeta{Name: "deployment3", Namespace: namespace2.Name},
+				APIVersion: "apps/v1", Kind: "Deployment",
+				Name: "deployment3", Namespace: namespace2.Name,
 			}
 
 			endpointSlice1 = &discoveryv1.EndpointSlice{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "discovery.k8s.io/v1", Kind: "EndpointSlice"},
-				ObjectMeta: metav1.ObjectMeta{Name: "endpointSlice1", Namespace: namespace1.Name},
+				APIVersion: "discovery.k8s.io/v1", Kind: "EndpointSlice",
+				Name: "endpointSlice1", Namespace: namespace1.Name,
 			}
 			endpointSlice2 = &discoveryv1.EndpointSlice{
-				TypeMeta:   metav1.TypeMeta{APIVersion: "discovery.k8s.io/v1", Kind: "EndpointSlice"},
-				ObjectMeta: metav1.ObjectMeta{Name: "endpointSlice2", Namespace: namespace2.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"}},
+				APIVersion: "discovery.k8s.io/v1", Kind: "EndpointSlice",
+				Name: "endpointSlice2", Namespace: namespace2.Name, Labels: map[string]string{"credentials.gardener.cloud/key-name": "kube-apiserver-etcd-encryption-key-current"},
 			}
 
 			for _, obj := range []client.Object{
@@ -155,13 +155,13 @@ var _ = Describe("ETCD", func() {
 			endpointSlice1ResourceVersion = endpointSlice1.ResourceVersion
 			endpointSlice2ResourceVersion = endpointSlice2.ResourceVersion
 
-			kubeAPIServerDeployment = &appsv1.Deployment{TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"}, ObjectMeta: metav1.ObjectMeta{Name: kubeAPIServerDeploymentName, Namespace: kubeAPIServerNamespace}}
+			kubeAPIServerDeployment = &appsv1.Deployment{APIVersion: "apps/v1", Kind: "Deployment", Name: kubeAPIServerDeploymentName, Namespace: kubeAPIServerNamespace}
 			Expect(runtimeClient.Create(ctx, kubeAPIServerDeployment)).To(Succeed())
 		})
 
 		Describe("#RewriteEncryptedDataAddLabel", func() {
 			It("should patch all resources and add the label if not already done", func() {
-				Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver-etcd-encryption-key-current", Namespace: kubeAPIServerNamespace}})).To(Succeed())
+				Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "kube-apiserver-etcd-encryption-key-current", Namespace: kubeAPIServerNamespace})).To(Succeed())
 
 				resources := []string{
 					corev1.Resource("secrets").String(),
@@ -203,7 +203,7 @@ var _ = Describe("ETCD", func() {
 			})
 
 			It("should not label the resources if the kube-apiserver deployment has the resources-labeled annotation", func() {
-				Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver-etcd-encryption-key-current", Namespace: kubeAPIServerNamespace}})).To(Succeed())
+				Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: "kube-apiserver-etcd-encryption-key-current", Namespace: kubeAPIServerNamespace})).To(Succeed())
 
 				resources := []string{
 					corev1.Resource("secrets").String(),

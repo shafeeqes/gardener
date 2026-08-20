@@ -7,7 +7,6 @@ package care
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -103,5 +102,5 @@ func (r *Reconciler) IsSystemComponent() predicate.Predicate {
 
 // MapManagedResourceToSeed is a handler.MapFunc for mapping a ManagedResource to the owning Seed.
 func (r *Reconciler) MapManagedResourceToSeed(_ context.Context, _ client.Object) []reconcile.Request {
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: r.SeedName}}}
+	return []reconcile.Request{{Name: r.SeedName}}
 }

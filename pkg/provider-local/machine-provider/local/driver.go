@@ -13,7 +13,6 @@ import (
 	"github.com/gardener/machine-controller-manager/pkg/util/provider/machinecodes/codes"
 	"github.com/gardener/machine-controller-manager/pkg/util/provider/machinecodes/status"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	apiv1alpha1 "github.com/gardener/gardener/pkg/provider-local/machine-provider/api/v1alpha1"
@@ -49,40 +48,28 @@ func (*localDriver) InitializeMachine(context.Context, *driver.InitializeMachine
 
 func serviceForMachine(machine *machinev1alpha1.Machine, machineClass *machinev1alpha1.MachineClass, providerSpec *apiv1alpha1.ProviderSpec) *corev1.Service {
 	return &corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Service",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      podName(machine.Name),
-			Namespace: getNamespaceForMachine(machine, machineClass, providerSpec),
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Service",
+		Name:       podName(machine.Name),
+		Namespace:  getNamespaceForMachine(machine, machineClass, providerSpec),
 	}
 }
 
 func podForMachine(machine *machinev1alpha1.Machine, machineClass *machinev1alpha1.MachineClass, providerSpec *apiv1alpha1.ProviderSpec) *corev1.Pod {
 	return &corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Pod",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      podName(machine.Name),
-			Namespace: getNamespaceForMachine(machine, machineClass, providerSpec),
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Pod",
+		Name:       podName(machine.Name),
+		Namespace:  getNamespaceForMachine(machine, machineClass, providerSpec),
 	}
 }
 
 func userDataSecretForMachine(machine *machinev1alpha1.Machine, machineClass *machinev1alpha1.MachineClass, providerSpec *apiv1alpha1.ProviderSpec) *corev1.Secret {
 	return &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Secret",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      podName(machine.Name) + "-userdata",
-			Namespace: getNamespaceForMachine(machine, machineClass, providerSpec),
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Secret",
+		Name:       podName(machine.Name) + "-userdata",
+		Namespace:  getNamespaceForMachine(machine, machineClass, providerSpec),
 	}
 }
 

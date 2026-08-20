@@ -147,7 +147,7 @@ func printResetCommand(clientSet kubernetes.Interface, bootstrapTokenSecret *cor
 }
 
 func validateIsShootCluster(ctx context.Context, c client.Client) error {
-	configMap := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.ConfigMapNameShootInfo, Namespace: metav1.NamespaceSystem}}
+	configMap := &corev1.ConfigMap{Name: v1beta1constants.ConfigMapNameShootInfo, Namespace: metav1.NamespaceSystem}
 	if err := c.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return fmt.Errorf("failed checking whether cluster is a Shoot: %w", err)

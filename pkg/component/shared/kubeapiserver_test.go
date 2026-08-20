@@ -99,15 +99,13 @@ var _ = Describe("KubeAPIServer", func() {
 			auditWebhookConfig = nil
 			istioTLSTerminationEnabled = false
 			authenticationWebhookConfig = &kubeapiserver.AuthenticationWebhook{Version: new("authn-version")}
-			authorizationWebhookConfigs = []kubeapiserver.AuthorizationWebhook{{Name: "custom", Kubeconfig: []byte("bar"), WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{FailurePolicy: "Fail"}}}
+			authorizationWebhookConfigs = []kubeapiserver.AuthorizationWebhook{{Name: "custom", Kubeconfig: []byte("bar"), FailurePolicy: "Fail"}}
 			resourcesToStoreInETCDEvents = []schema.GroupResource{{Resource: "foo", Group: "bar"}}
 
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "secret-1",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{"kubeconfig": []byte("kubeconfig-data")},
+				Name:      "secret-1",
+				Namespace: namespace,
+				Data:      map[string][]byte{"kubeconfig": []byte("kubeconfig-data")},
 			}
 
 			runtimeClientSet = fake.NewClientSetBuilder().WithClient(runtimeClient).WithVersion(runtimeVersion.String()).Build()
@@ -166,7 +164,7 @@ var _ = Describe("KubeAPIServer", func() {
 
 			It("should deactivate UnauthenticatedHTTP2DOSMitigation feature gate when IstioTLSTermination is active and it is manually activated", func() {
 				istioTLSTerminationEnabled = true
-				apiServerConfig = &gardencorev1beta1.KubeAPIServerConfig{KubernetesConfig: gardencorev1beta1.KubernetesConfig{FeatureGates: map[string]bool{"UnauthenticatedHTTP2DOSMitigation": true}}}
+				apiServerConfig = &gardencorev1beta1.KubeAPIServerConfig{FeatureGates: map[string]bool{"UnauthenticatedHTTP2DOSMitigation": true}}
 
 				kubeAPIServer, err := NewKubeAPIServer(ctx, runtimeClientSet, resourceConfigClient, namespace, objectMeta, runtimeVersion, targetVersion, sm, namePrefix, apiServerConfig, autoscalingConfig, vpnConfig, priorityClassName, isWorkerless, runsAsStaticPod, istioTLSTerminationEnabled, auditWebhookConfig, authenticationWebhookConfig, authorizationWebhookConfigs, resourcesToStoreInETCDEvents)
 				Expect(err).NotTo(HaveOccurred())
@@ -192,7 +190,7 @@ var _ = Describe("KubeAPIServer", func() {
 				Entry("only default plugins",
 					nil,
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "NodeRestriction"}},
+						{Name: "NodeRestriction"},
 					},
 					false,
 				),
@@ -201,7 +199,7 @@ var _ = Describe("KubeAPIServer", func() {
 						{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}, KubeconfigSecretName: new("secret-1")},
 					},
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}, KubeconfigSecretName: new("secret-1")}, Kubeconfig: []byte("kubeconfig-data")},
+						{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}, KubeconfigSecretName: new("secret-1"), Kubeconfig: []byte("kubeconfig-data")},
 					},
 					false,
 				),
@@ -213,10 +211,10 @@ var _ = Describe("KubeAPIServer", func() {
 						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}},
 					},
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Bar"}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}}},
+						{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}},
+						{Name: "Foo"},
+						{Name: "Bar"},
+						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}},
 					},
 					false,
 				),
@@ -228,8 +226,8 @@ var _ = Describe("KubeAPIServer", func() {
 						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}, Disabled: new(true)},
 					},
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
+						{Name: "NodeRestriction", Config: &runtime.RawExtension{Raw: []byte("node-restriction-config")}},
+						{Name: "Foo"},
 					},
 					false,
 				),
@@ -241,9 +239,9 @@ var _ = Describe("KubeAPIServer", func() {
 						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}},
 					},
 					[]apiserver.AdmissionPluginConfig{
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Foo"}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Bar"}},
-						{AdmissionPlugin: gardencorev1beta1.AdmissionPlugin{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}}},
+						{Name: "Foo"},
+						{Name: "Bar"},
+						{Name: "Baz", Config: &runtime.RawExtension{Raw: []byte("baz-config")}},
 					},
 					false,
 				),
@@ -526,11 +524,9 @@ exemptions:
 
 			BeforeEach(func() {
 				auditPolicyConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "my-audit-policy",
-						Namespace: objectMeta.Namespace,
-					},
-					Data: map[string]string{"policy": policy},
+					Name:      "my-audit-policy",
+					Namespace: objectMeta.Namespace,
+					Data:      map[string]string{"policy": policy},
 				}
 			})
 
@@ -679,11 +675,9 @@ exemptions:
 
 			BeforeEach(func() {
 				authenticationConfigurationCm = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "auth-config",
-						Namespace: objectMeta.Namespace,
-					},
-					Data: map[string]string{"config.yaml": config},
+					Name:      "auth-config",
+					Namespace: objectMeta.Namespace,
+					Data:      map[string]string{"config.yaml": config},
 				}
 			})
 
@@ -797,11 +791,9 @@ authorizers:
 
 			BeforeEach(func() {
 				authorizationConfigurationCm = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "auth-config",
-						Namespace: objectMeta.Namespace,
-					},
-					Data: map[string]string{"config.yaml": config},
+					Name:      "auth-config",
+					Namespace: objectMeta.Namespace,
+					Data:      map[string]string{"config.yaml": config},
 				}
 			})
 
@@ -821,9 +813,9 @@ authorizers:
 				Entry("KubeAPIServerConfig is nil",
 					nil,
 					[]kubeapiserver.AuthorizationWebhook{{
-						Name:                 "custom",
-						Kubeconfig:           []byte("bar"),
-						WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{FailurePolicy: "Fail"}},
+						Name:          "custom",
+						Kubeconfig:    []byte("bar"),
+						FailurePolicy: "Fail"},
 					},
 					Not(HaveOccurred()),
 				),
@@ -832,9 +824,9 @@ authorizers:
 						apiServerConfig = &gardencorev1beta1.KubeAPIServerConfig{}
 					},
 					[]kubeapiserver.AuthorizationWebhook{{
-						Name:                 "custom",
-						Kubeconfig:           []byte("bar"),
-						WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{FailurePolicy: "Fail"}},
+						Name:          "custom",
+						Kubeconfig:    []byte("bar"),
+						FailurePolicy: "Fail"},
 					},
 					Not(HaveOccurred()),
 				),
@@ -847,9 +839,9 @@ authorizers:
 						}
 					},
 					[]kubeapiserver.AuthorizationWebhook{{
-						Name:                 "custom",
-						Kubeconfig:           []byte("bar"),
-						WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{FailurePolicy: "Fail"}},
+						Name:          "custom",
+						Kubeconfig:    []byte("bar"),
+						FailurePolicy: "Fail"},
 					},
 					Not(HaveOccurred()),
 				),
@@ -874,9 +866,9 @@ authorizers:
 						}
 					},
 					[]kubeapiserver.AuthorizationWebhook{{
-						Name:                 "custom",
-						Kubeconfig:           []byte("bar"),
-						WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{FailurePolicy: "Fail"}},
+						Name:          "custom",
+						Kubeconfig:    []byte("bar"),
+						FailurePolicy: "Fail"},
 					},
 					Not(HaveOccurred()),
 				),
@@ -925,8 +917,8 @@ authorizers:
 					func() {
 						Expect(resourceConfigClient.Create(ctx, authorizationConfigurationCm)).To(Succeed())
 						Expect(resourceConfigClient.Create(ctx, &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{Name: "authz-kubeconfig", Namespace: authorizationConfigurationCm.Namespace},
-							Data:       map[string][]byte{"kubeconfig": []byte("webhook-kubeconfig")},
+							Name: "authz-kubeconfig", Namespace: authorizationConfigurationCm.Namespace,
+							Data: map[string][]byte{"kubeconfig": []byte("webhook-kubeconfig")},
 						})).To(Succeed())
 
 						apiServerConfig = &gardencorev1beta1.KubeAPIServerConfig{
@@ -938,24 +930,22 @@ authorizers:
 					},
 					[]kubeapiserver.AuthorizationWebhook{
 						{
-							Name:                 "custom",
-							Kubeconfig:           []byte("bar"),
-							WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{FailurePolicy: "Fail"},
+							Name:          "custom",
+							Kubeconfig:    []byte("bar"),
+							FailurePolicy: "Fail",
 						},
 						{
-							Name:       "webhook",
-							Kubeconfig: []byte("webhook-kubeconfig"),
-							WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{
-								AuthorizedTTL:                            metav1.Duration{Duration: 5 * time.Minute},
-								CacheAuthorizedRequests:                  new(true),
-								UnauthorizedTTL:                          metav1.Duration{Duration: 30 * time.Second},
-								CacheUnauthorizedRequests:                new(true),
-								Timeout:                                  metav1.Duration{Duration: 3 * time.Second},
-								SubjectAccessReviewVersion:               "v1",
-								MatchConditionSubjectAccessReviewVersion: "v1",
-								FailurePolicy:                            "Deny",
-								MatchConditions:                          []apiserverv1beta1.WebhookMatchCondition{{Expression: `request.resourceAttributes.namespace == 'kube-system'`}},
-							},
+							Name:                                     "webhook",
+							Kubeconfig:                               []byte("webhook-kubeconfig"),
+							AuthorizedTTL:                            metav1.Duration{Duration: 5 * time.Minute},
+							CacheAuthorizedRequests:                  new(true),
+							UnauthorizedTTL:                          metav1.Duration{Duration: 30 * time.Second},
+							CacheUnauthorizedRequests:                new(true),
+							Timeout:                                  metav1.Duration{Duration: 3 * time.Second},
+							SubjectAccessReviewVersion:               "v1",
+							MatchConditionSubjectAccessReviewVersion: "v1",
+							FailurePolicy:                            "Deny",
+							MatchConditions:                          []apiserverv1beta1.WebhookMatchCondition{{Expression: `request.resourceAttributes.namespace == 'kube-system'`}},
 						},
 					},
 					Not(HaveOccurred()),
@@ -1035,9 +1025,7 @@ authorizers:
 				featureGates := map[string]bool{"foo": true, "bar": false}
 
 				apiServerConfig = &gardencorev1beta1.KubeAPIServerConfig{
-					KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-						FeatureGates: featureGates,
-					},
+					FeatureGates: featureGates,
 				}
 
 				kubeAPIServer, err := NewKubeAPIServer(ctx, runtimeClientSet, resourceConfigClient, namespace, objectMeta, runtimeVersion, targetVersion, sm, namePrefix, apiServerConfig, autoscalingConfig, vpnConfig, priorityClassName, isWorkerless, runsAsStaticPod, istioTLSTerminationEnabled, auditWebhookConfig, authenticationWebhookConfig, authorizationWebhookConfigs, resourcesToStoreInETCDEvents)
@@ -1233,10 +1221,8 @@ authorizers:
 			Entry("set the existing requirements when the deployment is found and scale-down is disabled",
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-apiserver",
-							Namespace: namespace,
-						},
+						Name:      "kube-apiserver",
+						Namespace: namespace,
 						Spec: appsv1.DeploymentSpec{
 							Template: corev1.PodTemplateSpec{
 								Spec: corev1.PodSpec{
@@ -1255,10 +1241,8 @@ authorizers:
 			Entry("set the existing requirements when the deployment is found and scale-down is enabled",
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-apiserver",
-							Namespace: namespace,
-						},
+						Name:      "kube-apiserver",
+						Namespace: namespace,
 						Spec: appsv1.DeploymentSpec{
 							Template: corev1.PodTemplateSpec{
 								Spec: corev1.PodSpec{
@@ -1320,10 +1304,8 @@ authorizers:
 			Entry("use deployment replicas because they are greater than 0",
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-apiserver",
-							Namespace: namespace,
-						},
+						Name:      "kube-apiserver",
+						Namespace: namespace,
 						Spec: appsv1.DeploymentSpec{
 							Replicas: new(int32(3)),
 						},
@@ -1336,10 +1318,8 @@ authorizers:
 				func() {
 					wantScaleDown = true
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-apiserver",
-							Namespace: namespace,
-						},
+						Name:      "kube-apiserver",
+						Namespace: namespace,
 						Spec: appsv1.DeploymentSpec{
 							Replicas: new(int32(0)),
 						},
@@ -1395,12 +1375,10 @@ authorizers:
 				gardencorev1beta1.RotationPreparing,
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "kube-apiserver",
-							Namespace:   namespace,
-							Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
-						},
+						APIVersion: "apps/v1", Kind: "Deployment",
+						Name:        "kube-apiserver",
+						Namespace:   namespace,
+						Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
 					})).To(Succeed())
 				},
 				apiserver.ETCDEncryptionConfig{
@@ -1416,11 +1394,9 @@ authorizers:
 				gardencorev1beta1.RotationPreparing,
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-apiserver",
-							Namespace: namespace,
-						},
+						APIVersion: "apps/v1", Kind: "Deployment",
+						Name:      "kube-apiserver",
+						Namespace: namespace,
 					})).To(Succeed())
 
 					kubeAPIServer.EXPECT().Wait(ctx)
@@ -1442,7 +1418,7 @@ authorizers:
 					EncryptionProvider:    etcdEncryptionType,
 				},
 				func() {
-					deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver", Namespace: namespace}}
+					deployment := &appsv1.Deployment{Name: "kube-apiserver", Namespace: namespace}
 					Expect(runtimeClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 					Expect(deployment.Annotations).To(HaveKeyWithValue("credentials.gardener.cloud/new-encryption-key-populated", "true"))
 				},
@@ -1463,12 +1439,10 @@ authorizers:
 				gardencorev1beta1.RotationCompleting,
 				func() {
 					Expect(runtimeClient.Create(ctx, &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "kube-apiserver",
-							Namespace:   namespace,
-							Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
-						},
+						APIVersion: "apps/v1", Kind: "Deployment",
+						Name:        "kube-apiserver",
+						Namespace:   namespace,
+						Annotations: map[string]string{"credentials.gardener.cloud/new-encryption-key-populated": "true"},
 					})).To(Succeed())
 				},
 				apiserver.ETCDEncryptionConfig{
@@ -1479,7 +1453,7 @@ authorizers:
 					EncryptionProvider:    etcdEncryptionType,
 				},
 				func() {
-					deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver", Namespace: namespace}}
+					deployment := &appsv1.Deployment{Name: "kube-apiserver", Namespace: namespace}
 					Expect(runtimeClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 					Expect(deployment.Annotations).NotTo(HaveKey("credentials.gardener.cloud/new-encryption-key-populated"))
 				},

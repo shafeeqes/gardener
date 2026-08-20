@@ -18,7 +18,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -91,16 +90,14 @@ var _ = Describe("Extension", func() {
 	)
 
 	BeforeEach(func() {
-		namespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "test-namespace"}}
+		namespace = &corev1.Namespace{Name: "test-namespace"}
 
 		logf.SetLogger(logger.MustNewZapLogger(logger.DebugLevel, logger.FormatJSON, zap.WriteTo(GinkgoWriter)))
 		log = logf.Log.WithName("extensions")
 
 		defaultExtension = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      defaultName,
-				Namespace: namespace.Name,
-			},
+			Name:      defaultName,
+			Namespace: namespace.Name,
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: defaultName,
@@ -110,10 +107,8 @@ var _ = Describe("Extension", func() {
 
 		beforeKubeAPIServer := gardencorev1beta1.BeforeKubeAPIServer
 		beforeExtension = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      beforeName,
-				Namespace: namespace.Name,
-			},
+			Name:      beforeName,
+			Namespace: namespace.Name,
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: beforeName,
@@ -123,10 +118,8 @@ var _ = Describe("Extension", func() {
 
 		afterKubeAPIServer := gardencorev1beta1.AfterKubeAPIServer
 		afterExtension = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      afterName,
-				Namespace: namespace.Name,
-			},
+			Name:      afterName,
+			Namespace: namespace.Name,
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: afterName,
@@ -136,10 +129,8 @@ var _ = Describe("Extension", func() {
 
 		afterWorker := gardencorev1beta1.AfterWorker
 		afterWorkerExtension = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      afterWorkerName,
-				Namespace: namespace.Name,
-			},
+			Name:      afterWorkerName,
+			Namespace: namespace.Name,
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: afterWorkerName,
@@ -260,10 +251,8 @@ var _ = Describe("Extension", func() {
 		It("should return error when resource is not ready", func() {
 			errDescription := "Some error"
 			beforeExtension.Status = extensionsv1alpha1.ExtensionStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastError: &gardencorev1beta1.LastError{
-						Description: errDescription,
-					},
+				LastError: &gardencorev1beta1.LastError{
+					Description: errDescription,
 				},
 			}
 			Expect(fakeSeedClient.Create(ctx, afterExtension)).To(Succeed())
@@ -311,10 +300,8 @@ var _ = Describe("Extension", func() {
 		It("should return error when resource is not ready", func() {
 			errDescription := "Some error"
 			beforeExtension.Status = extensionsv1alpha1.ExtensionStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastError: &gardencorev1beta1.LastError{
-						Description: errDescription,
-					},
+				LastError: &gardencorev1beta1.LastError{
+					Description: errDescription,
 				},
 			}
 			Expect(fakeSeedClient.Create(ctx, afterExtension)).To(Succeed())
@@ -354,17 +341,13 @@ var _ = Describe("Extension", func() {
 		It("should return error when resource is not ready", func() {
 			errDescription := "Some error"
 			defaultExtension.Status = extensionsv1alpha1.ExtensionStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastError: &gardencorev1beta1.LastError{
-						Description: errDescription,
-					},
+				LastError: &gardencorev1beta1.LastError{
+					Description: errDescription,
 				},
 			}
 			afterExtension.Status = extensionsv1alpha1.ExtensionStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastError: &gardencorev1beta1.LastError{
-						Description: errDescription,
-					},
+				LastError: &gardencorev1beta1.LastError{
+					Description: errDescription,
 				},
 			}
 			Expect(fakeSeedClient.Create(ctx, defaultExtension)).To(Succeed())
@@ -404,10 +387,8 @@ var _ = Describe("Extension", func() {
 		It("should return error when resource is not ready", func() {
 			errDescription := "Some error"
 			afterWorkerExtension.Status = extensionsv1alpha1.ExtensionStatus{
-				DefaultStatus: extensionsv1alpha1.DefaultStatus{
-					LastError: &gardencorev1beta1.LastError{
-						Description: errDescription,
-					},
+				LastError: &gardencorev1beta1.LastError{
+					Description: errDescription,
 				},
 			}
 			Expect(fakeSeedClient.Create(ctx, afterExtension)).To(Succeed())

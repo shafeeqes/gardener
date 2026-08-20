@@ -281,15 +281,13 @@ func getRESTConfigNodeAgentAuthorizer(ctx context.Context, log logr.Logger, fs a
 		return nil, fmt.Errorf("failed checking whether kubeconfig file %q exists: %w", nodeagentconfigv1alpha1.KubeconfigFilePath, err)
 	} else if !kubeconfigExists {
 		restConfig := &rest.Config{
-			Burst: int(cfg.ClientConnection.Burst),
-			QPS:   cfg.ClientConnection.QPS,
-			ContentConfig: rest.ContentConfig{
-				AcceptContentTypes: cfg.ClientConnection.AcceptContentTypes,
-				ContentType:        cfg.ClientConnection.ContentType,
-			},
-			Host:            cfg.APIServer.Server,
-			TLSClientConfig: rest.TLSClientConfig{CAFile: nodeagentconfigv1alpha1.ClusterCAFilePath},
-			BearerTokenFile: nodeagentconfigv1alpha1.BootstrapTokenFilePath,
+			Burst:              int(cfg.ClientConnection.Burst),
+			QPS:                cfg.ClientConnection.QPS,
+			AcceptContentTypes: cfg.ClientConnection.AcceptContentTypes,
+			ContentType:        cfg.ClientConnection.ContentType,
+			Host:               cfg.APIServer.Server,
+			CAFile:             nodeagentconfigv1alpha1.ClusterCAFilePath,
+			BearerTokenFile:    nodeagentconfigv1alpha1.BootstrapTokenFilePath,
 		}
 
 		if bootstrapTokenExists, err := fs.Exists(nodeagentconfigv1alpha1.BootstrapTokenFilePath); err != nil {

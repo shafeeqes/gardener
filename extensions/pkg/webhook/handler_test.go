@@ -46,7 +46,7 @@ var _ = Describe("Handler", func() {
 
 		objTypes = []Type{{Obj: &corev1.Service{}}}
 		svc      = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name},
+			Namespace: namespace, Name: name,
 		}
 
 		req admission.Request
@@ -64,13 +64,11 @@ var _ = Describe("Handler", func() {
 		mgr = test.FakeManager{Scheme: scheme, Client: fakeClient}
 
 		req = admission.Request{
-			AdmissionRequest: admissionv1.AdmissionRequest{
-				Kind:      metav1.GroupVersionKind{Group: "", Version: "v1", Kind: "Service"},
-				Name:      name,
-				Namespace: namespace,
-				Operation: admissionv1.Create,
-				Object:    runtime.RawExtension{Raw: encode(svc)},
-			},
+			Kind:      metav1.GroupVersionKind{Group: "", Version: "v1", Kind: "Service"},
+			Name:      name,
+			Namespace: namespace,
+			Operation: admissionv1.Create,
+			Object:    runtime.RawExtension{Raw: encode(svc)},
 		}
 
 	})
@@ -92,11 +90,9 @@ var _ = Describe("Handler", func() {
 			// Call Handle and check response
 			resp := h.Handle(context.TODO(), req)
 			Expect(resp).To(Equal(admission.Response{
-				AdmissionResponse: admissionv1.AdmissionResponse{
-					Allowed: true,
-					Result: &metav1.Status{
-						Code: 200,
-					},
+				Allowed: true,
+				Result: &metav1.Status{
+					Code: 200,
 				},
 			}))
 		})
@@ -120,11 +116,9 @@ var _ = Describe("Handler", func() {
 			// Call Handle and check response
 			resp := h.Handle(context.TODO(), req)
 			Expect(resp).To(Equal(admission.Response{
-				AdmissionResponse: admissionv1.AdmissionResponse{
-					Allowed: true,
-					Result: &metav1.Status{
-						Code: 200,
-					},
+				Allowed: true,
+				Result: &metav1.Status{
+					Code: 200,
 				},
 			}))
 		})
@@ -152,10 +146,8 @@ var _ = Describe("Handler", func() {
 						Value:     map[string]any{"foo": "bar"},
 					},
 				},
-				AdmissionResponse: admissionv1.AdmissionResponse{
-					Allowed:   true,
-					PatchType: &pt,
-				},
+				Allowed:   true,
+				PatchType: &pt,
 			}))
 		})
 
@@ -171,13 +163,11 @@ var _ = Describe("Handler", func() {
 			// Call Handle and check response
 			resp := h.Handle(context.TODO(), req)
 			Expect(resp).To(Equal(admission.Response{
-				AdmissionResponse: admissionv1.AdmissionResponse{
-					Allowed: false,
-					Result: &metav1.Status{
-						Code:    http.StatusForbidden,
-						Message: "test error",
-						Reason:  metav1.StatusReasonForbidden,
-					},
+				Allowed: false,
+				Result: &metav1.Status{
+					Code:    http.StatusForbidden,
+					Message: "test error",
+					Reason:  metav1.StatusReasonForbidden,
 				},
 			}))
 		})
@@ -202,13 +192,11 @@ var _ = Describe("Handler", func() {
 			ctxWithRemoteAddress := context.WithValue(ctxWithClient, RemoteAddrContextKey{}, ipAddress)
 
 			Expect(fakeClient.Create(context.Background(), &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-apiserver",
-					Namespace: controlPlaneNamespace,
-					Labels: map[string]string{
-						"app":  "kubernetes",
-						"role": "apiserver",
-					},
+				Name:      "kube-apiserver",
+				Namespace: controlPlaneNamespace,
+				Labels: map[string]string{
+					"app":  "kubernetes",
+					"role": "apiserver",
 				},
 				Status: corev1.PodStatus{
 					PodIP: ipAddress,
@@ -216,10 +204,8 @@ var _ = Describe("Handler", func() {
 			})).To(Succeed())
 
 			Expect(fakeClient.Create(context.Background(), &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener",
-					Namespace: controlPlaneNamespace,
-				},
+				Name:      "gardener",
+				Namespace: controlPlaneNamespace,
 				Data: map[string][]byte{"kubeconfig": []byte(`apiVersion: v1
 clusters:
 - cluster:
@@ -242,11 +228,9 @@ users:
 			// Call Handle and check response
 			resp := h.Handle(ctxWithRemoteAddress, req)
 			Expect(resp).To(Equal(admission.Response{
-				AdmissionResponse: admissionv1.AdmissionResponse{
-					Allowed: true,
-					Result: &metav1.Status{
-						Code: 200,
-					},
+				Allowed: true,
+				Result: &metav1.Status{
+					Code: 200,
 				},
 			}))
 
@@ -278,13 +262,11 @@ users:
 			ctxWithRemoteAddress := context.WithValue(ctxWithClient, RemoteAddrContextKey{}, ipAddress)
 
 			Expect(fakeClient.Create(context.Background(), &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-apiserver",
-					Namespace: controlPlaneNamespace,
-					Labels: map[string]string{
-						"app":  "kubernetes",
-						"role": "apiserver",
-					},
+				Name:      "kube-apiserver",
+				Namespace: controlPlaneNamespace,
+				Labels: map[string]string{
+					"app":  "kubernetes",
+					"role": "apiserver",
 				},
 				Status: corev1.PodStatus{
 					PodIP: ipAddress,
@@ -292,9 +274,7 @@ users:
 			})).To(Succeed())
 
 			cluster := &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: controlPlaneNamespace,
-				},
+				Name: controlPlaneNamespace,
 			}
 
 			Expect(fakeClient.Create(context.Background(), cluster)).To(Succeed())
@@ -302,11 +282,9 @@ users:
 			// Call Handle and check response
 			resp := h.Handle(ctxWithRemoteAddress, req)
 			Expect(resp).To(Equal(admission.Response{
-				AdmissionResponse: admissionv1.AdmissionResponse{
-					Allowed: true,
-					Result: &metav1.Status{
-						Code: 200,
-					},
+				Allowed: true,
+				Result: &metav1.Status{
+					Code: 200,
 				},
 			}))
 

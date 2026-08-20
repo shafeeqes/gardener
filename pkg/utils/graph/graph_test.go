@@ -188,7 +188,7 @@ var _ = Describe("graph for seeds", func() {
 		Expect(graph.Setup(ctx, fakeInformers)).To(Succeed())
 
 		seed1 = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: "seed1"},
+			Name: "seed1",
 			Spec: gardencorev1beta1.SeedSpec{
 				Backup: &gardencorev1beta1.Backup{
 					CredentialsRef: &seed1BackupSecretCredentialsRef,
@@ -216,23 +216,19 @@ var _ = Describe("graph for seeds", func() {
 		}
 
 		namespace1 = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "namespace1",
-				Labels: map[string]string{
-					"project.gardener.cloud/name": "project1",
-				},
+			Name: "namespace1",
+			Labels: map[string]string{
+				"project.gardener.cloud/name": "project1",
 			},
 		}
 		Expect(fakeClient.Create(ctx, namespace1)).To(Succeed())
 
 		shoot1 = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot1",
-				Namespace: namespace1.Name,
-				UID:       "f486b21b-7cbe-4bde-9b83-bf8a55c7f075",
-				Annotations: map[string]string{
-					"authentication.gardener.cloud/issuer": "managed",
-				},
+			Name:      "shoot1",
+			Namespace: namespace1.Name,
+			UID:       "f486b21b-7cbe-4bde-9b83-bf8a55c7f075",
+			Annotations: map[string]string{
+				"authentication.gardener.cloud/issuer": "managed",
 			},
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName: new("cloudprofile1"),
@@ -274,7 +270,7 @@ var _ = Describe("graph for seeds", func() {
 		shoot1ConfigMapNameCACluster = shoot1.Name + ".ca-cluster"
 
 		project1 = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{Name: "project1"},
+			Name: "project1",
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: new(namespace1.Name),
 			},
@@ -283,7 +279,7 @@ var _ = Describe("graph for seeds", func() {
 		shoot1SecretNameManagedIssuer = fmt.Sprintf("%s--%s", project1.Name, shoot1.UID)
 
 		backupBucket1 = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{Name: "backupbucket1"},
+			Name: "backupbucket1",
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				CredentialsRef: &backupBucket1SecretCredentialsRef,
 				SeedName:       &seed1.Name,
@@ -294,15 +290,13 @@ var _ = Describe("graph for seeds", func() {
 		}
 
 		backupEntry1 = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "backupentry1",
-				Namespace: "backupentry1namespace",
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-					Name:       shoot1.Name,
-				}},
-			},
+			Name:      "backupentry1",
+			Namespace: "backupentry1namespace",
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       shoot1.Name,
+			}},
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				BucketName: backupBucket1.Name,
 				SeedName:   &seed1.Name,
@@ -310,19 +304,19 @@ var _ = Describe("graph for seeds", func() {
 		}
 
 		bastion1 = &operationsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{Name: "bastion1", Namespace: "bastion1namespace"},
+			Name: "bastion1", Namespace: "bastion1namespace",
 			Spec: operationsv1alpha1.BastionSpec{
 				SeedName: &seed1.Name,
 			},
 		}
 
 		secretBinding1 = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{Name: "secretbinding1", Namespace: "sb1namespace"},
-			SecretRef:  secretBinding1SecretRef,
+			Name: "secretbinding1", Namespace: "sb1namespace",
+			SecretRef: secretBinding1SecretRef,
 		}
 
 		controllerInstallation1 = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{Name: "controllerinstallation1"},
+			Name: "controllerinstallation1",
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				DeploymentRef:   &corev1.ObjectReference{Name: "controllerdeployment1"},
 				RegistrationRef: corev1.ObjectReference{Name: "controllerregistration1"},
@@ -332,35 +326,31 @@ var _ = Describe("graph for seeds", func() {
 		}
 
 		credentialsBinding1 = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta:     metav1.ObjectMeta{Name: "credentialsBinding1", Namespace: "cb1namespace"},
+			Name: "credentialsBinding1", Namespace: "cb1namespace",
 			CredentialsRef: credentialsBindingRef,
 		}
 
 		seedConfig1 = &gardenletconfigv1alpha1.SeedConfig{
-			SeedTemplate: gardencorev1beta1.SeedTemplate{
-				Spec: gardencorev1beta1.SeedSpec{
-					Backup: &gardencorev1beta1.Backup{
-						CredentialsRef: &backupSecretCredentialsRef,
-					},
-					Resources: []gardencorev1beta1.NamedResourceReference{{
-						ResourceRef: seed1SecretResourceRef,
-					}},
+			Spec: gardencorev1beta1.SeedSpec{
+				Backup: &gardencorev1beta1.Backup{
+					CredentialsRef: &backupSecretCredentialsRef,
 				},
+				Resources: []gardencorev1beta1.NamedResourceReference{{
+					ResourceRef: seed1SecretResourceRef,
+				}},
 			},
 		}
 
 		seedConfig2 = &gardenletconfigv1alpha1.SeedConfig{
-			SeedTemplate: gardencorev1beta1.SeedTemplate{
-				Spec: gardencorev1beta1.SeedSpec{
-					Backup: &gardencorev1beta1.Backup{
-						CredentialsRef: &backupSecretCredentialsRef,
-					},
+			Spec: gardencorev1beta1.SeedSpec{
+				Backup: &gardencorev1beta1.Backup{
+					CredentialsRef: &backupSecretCredentialsRef,
 				},
 			},
 		}
 
 		managedSeed1 = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{Name: "managedseed1", Namespace: "managedseednamespace"},
+			Name: "managedseed1", Namespace: "managedseednamespace",
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Shoot: &seedmanagementv1alpha1.Shoot{Name: shoot1.Name},
 				Gardenlet: seedmanagementv1alpha1.GardenletConfig{
@@ -375,7 +365,7 @@ var _ = Describe("graph for seeds", func() {
 		}
 
 		gardenlet1 = &seedmanagementv1alpha1.Gardenlet{
-			ObjectMeta: metav1.ObjectMeta{Name: seed1.Name, Namespace: "gardenletnamespace"},
+			Name: seed1.Name, Namespace: "gardenletnamespace",
 			Spec: seedmanagementv1alpha1.GardenletSpec{
 				Config: runtime.RawExtension{
 					Object: &gardenletconfigv1alpha1.GardenletConfiguration{
@@ -394,7 +384,7 @@ var _ = Describe("graph for seeds", func() {
 		}
 
 		csr1 = &certificatesv1.CertificateSigningRequest{
-			ObjectMeta: metav1.ObjectMeta{Name: "csr1"},
+			Name: "csr1",
 			Spec: certificatesv1.CertificateSigningRequestSpec{
 				Request: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIClzCCAX8CAQAwUjEkMCIGA1UEChMbZ2FyZGVuZXIuY2xvdWQ6c3lzdGVtOnNl
@@ -421,7 +411,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		}
 
 		serviceAccount1 = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{Namespace: "sa1ns", Name: gardenletbootstraputil.ServiceAccountNamePrefix + "sa1"},
+			Namespace: "sa1ns", Name: gardenletbootstraputil.ServiceAccountNamePrefix + "sa1",
 			Secrets: []corev1.ObjectReference{
 				{Name: serviceAccount1Secret1},
 				{Name: serviceAccount1Secret2},
@@ -1243,14 +1233,12 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		Expect(graph.HasPathFrom(VertexTypeCredentialsBinding, shoot1.Namespace, *shoot1.Spec.CredentialsBindingName, VertexTypeShoot, shoot1.Namespace, shoot1.Name)).To(BeTrue())
 
 		By("Intermediate deletion of secret and credentials binding")
-		credentialsBinding := &securityv1alpha1.CredentialsBinding{ObjectMeta: metav1.ObjectMeta{
+		credentialsBinding := &securityv1alpha1.CredentialsBinding{
 			Name:      *shoot1.Spec.CredentialsBindingName,
-			Namespace: shoot1.Namespace,
-		}}
-		secretBinding := &gardencorev1beta1.SecretBinding{ObjectMeta: metav1.ObjectMeta{
+			Namespace: shoot1.Namespace}
+		secretBinding := &gardencorev1beta1.SecretBinding{
 			Name:      *shoot1.Spec.SecretBindingName,
-			Namespace: shoot1.Namespace,
-		}}
+			Namespace: shoot1.Namespace}
 		fakeInformerCredentialsBinding.Delete(credentialsBinding)
 		fakeInformerSecretBinding.Delete(secretBinding)
 		Expect(graph.HasPathFrom(VertexTypeSecretBinding, shoot1.Namespace, *shoot1.Spec.SecretBindingName, VertexTypeShoot, shoot1.Namespace, shoot1.Name)).To(BeFalse())
@@ -1681,7 +1669,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		newCABundleSecretName := "my-new-ca-bundle-secret"
 
 		controllerDeployment := &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{Name: "controllerdeployment"},
+			Name: "controllerdeployment",
 			Helm: &gardencorev1.HelmControllerDeployment{
 				OCIRepository: &gardencorev1.OCIRepository{
 					PullSecretRef:     &corev1.LocalObjectReference{Name: pullSecretName},
@@ -1734,7 +1722,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		newConfigMapRefName := "new-resource-configmap"
 
 		controllerDeployment := &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{Name: "controllerdeployment"},
+			Name: "controllerdeployment",
 			Helm: &gardencorev1.HelmControllerDeployment{
 				OCIRepository: &gardencorev1.OCIRepository{},
 			},
@@ -1781,7 +1769,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		configMapRefName := "resource-configmap"
 
 		controllerDeployment := &gardencorev1.ControllerDeployment{
-			ObjectMeta: metav1.ObjectMeta{Name: "controllerdeployment"},
+			Name: "controllerdeployment",
 			Helm: &gardencorev1.HelmControllerDeployment{
 				OCIRepository: &gardencorev1.OCIRepository{},
 			},
@@ -1838,7 +1826,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		Expect(graph.HasPathFrom(VertexTypeSecret, bootstrapTokenNamespace, managedSeedBootstrapTokenName, VertexTypeManagedSeed, managedSeed1.Namespace, managedSeed1.Name)).To(BeTrue())
 
 		By("Update (backup credentials ref to new secret), seed exists")
-		seed := &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: managedSeed1.Name}}
+		seed := &gardencorev1beta1.Seed{Name: managedSeed1.Name}
 		Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 		managedSeed1Copy = managedSeed1.DeepCopy()
 		seedConfig1.Spec.Backup.CredentialsRef = &corev1.ObjectReference{APIVersion: "v1", Kind: "Secret", Namespace: "new2", Name: "newaswell2"}
@@ -1853,7 +1841,7 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 		Expect(graph.HasPathFrom(VertexTypeSecret, bootstrapTokenNamespace, managedSeedBootstrapTokenName, VertexTypeManagedSeed, managedSeed1.Namespace, managedSeed1.Name)).To(BeFalse())
 
 		By("Update (backup credentials ref to workloadidentity), seed exists")
-		seed = &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: managedSeed1.Name}}
+		seed = &gardencorev1beta1.Seed{Name: managedSeed1.Name}
 		Expect(fakeClient.Delete(ctx, seed)).To(Succeed())
 		Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 		managedSeed1Copy = managedSeed1.DeepCopy()
@@ -1871,8 +1859,8 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 
 		By("Update (annotation), seed exists but with expired client cert")
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: managedSeed1.Name},
-			Status:     gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)}},
+			Name:   managedSeed1.Name,
+			Status: gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)}},
 		}
 		Expect(fakeClient.Delete(ctx, seed)).To(Succeed())
 		Expect(fakeClient.Create(ctx, seed)).To(Succeed())
@@ -1889,8 +1877,8 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 
 		By("Update (annotation), seed exists with non-expired client cert")
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: managedSeed1.Name},
-			Status:     gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(time.Hour)}},
+			Name:   managedSeed1.Name,
+			Status: gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(time.Hour)}},
 		}
 		Expect(fakeClient.Delete(ctx, seed)).To(Succeed())
 		Expect(fakeClient.Create(ctx, seed)).To(Succeed())
@@ -1988,8 +1976,8 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 
 		By("Update (annotation), seed exists with expired client cert")
 		seed := &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: gardenlet1.Name},
-			Status:     gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)}},
+			Name:   gardenlet1.Name,
+			Status: gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(-time.Hour)}},
 		}
 		Expect(fakeClient.Create(ctx, seed)).To(Succeed())
 		gardenlet1Copy = gardenlet1.DeepCopy()
@@ -2003,8 +1991,8 @@ yO57qEcJqG1cB7iSchFuCSTuDBbZlN0fXgn4YjiWZyb4l3BDp3rm4iJImA==
 
 		By("Update (annotation), seed exists with non-expired client cert")
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{Name: gardenlet1.Name},
-			Status:     gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(time.Hour)}},
+			Name:   gardenlet1.Name,
+			Status: gardencorev1beta1.SeedStatus{ClientCertificateExpirationTimestamp: &metav1.Time{Time: time.Now().Add(time.Hour)}},
 		}
 		Expect(fakeClient.Delete(ctx, seed)).To(Succeed())
 		Expect(fakeClient.Create(ctx, seed)).To(Succeed())
@@ -2784,7 +2772,7 @@ var _ = Describe("graph for shoots", func() {
 		Expect(graph.Setup(ctx, fakeInformers)).To(Succeed())
 
 		csr1 = &certificatesv1.CertificateSigningRequest{
-			ObjectMeta: metav1.ObjectMeta{Name: "csr1"},
+			Name: "csr1",
 			Spec: certificatesv1.CertificateSigningRequestSpec{
 				Request: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIICrTCCAZUCAQAwaDElMCMGA1UECgwcZ2FyZGVuZXIuY2xvdWQ6c3lzdGVtOnNo
@@ -2812,11 +2800,11 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 		}
 
 		gardenlet1 = &seedmanagementv1alpha1.Gardenlet{
-			ObjectMeta: metav1.ObjectMeta{Name: "self-hosted-shoot-" + shootName, Namespace: shootNamespace},
+			Name: "self-hosted-shoot-" + shootName, Namespace: shootNamespace,
 		}
 
 		managedSeed1 = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{Name: "managedseed1", Namespace: shootNamespace},
+			Name: "managedseed1", Namespace: shootNamespace,
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Shoot: &seedmanagementv1alpha1.Shoot{Name: shootName},
 				Gardenlet: seedmanagementv1alpha1.GardenletConfig{
@@ -2826,30 +2814,24 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 		}
 
 		serviceAccount1 = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: shootNamespace,
-				Name:      v1beta1constants.ExtensionShootServiceAccountPrefix + shootName + "--provider-aws",
-			},
+			Namespace: shootNamespace,
+			Name:      v1beta1constants.ExtensionShootServiceAccountPrefix + shootName + "--provider-aws",
 		}
 
 		namespace1 = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "namespace1",
-				Labels: map[string]string{
-					"project.gardener.cloud/name": "project1",
-				},
+			Name: "namespace1",
+			Labels: map[string]string{
+				"project.gardener.cloud/name": "project1",
 			},
 		}
 		Expect(fakeClient.Create(ctx, namespace1)).To(Succeed())
 
 		shoot1 = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot1",
-				Namespace: namespace1.Name,
-				UID:       "f486b21b-7cbe-4bde-9b83-bf8a55c7f075",
-				Annotations: map[string]string{
-					"authentication.gardener.cloud/issuer": "managed",
-				},
+			Name:      "shoot1",
+			Namespace: namespace1.Name,
+			UID:       "f486b21b-7cbe-4bde-9b83-bf8a55c7f075",
+			Annotations: map[string]string{
+				"authentication.gardener.cloud/issuer": "managed",
 			},
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName: new("cloudprofile1"),
@@ -2890,7 +2872,7 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 		shoot1ConfigMapNameCACluster = shoot1.Name + ".ca-cluster"
 
 		project1 = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{Name: "project1"},
+			Name: "project1",
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: new(namespace1.Name),
 			},
@@ -2899,7 +2881,7 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 		shoot1SecretNameManagedIssuer = fmt.Sprintf("%s--%s", project1.Name, shoot1.UID)
 
 		backupBucket1 = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{Name: "backupbucket1"},
+			Name: "backupbucket1",
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				CredentialsRef: &backupBucket1SecretCredentialsRef,
 				ShootRef:       &corev1.ObjectReference{Name: shoot1.Name, Namespace: shoot1.Namespace},
@@ -2910,15 +2892,13 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 		}
 
 		backupEntry1 = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "backupentry1",
-				Namespace: "backupentry1namespace",
-				OwnerReferences: []metav1.OwnerReference{{
-					APIVersion: "core.gardener.cloud/v1beta1",
-					Kind:       "Shoot",
-					Name:       shoot1.Name,
-				}},
-			},
+			Name:      "backupentry1",
+			Namespace: "backupentry1namespace",
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion: "core.gardener.cloud/v1beta1",
+				Kind:       "Shoot",
+				Name:       shoot1.Name,
+			}},
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				BucketName: backupBucket1.Name,
 				ShootRef:   &corev1.ObjectReference{Name: shoot1.Name, Namespace: "backupentry1namespace"},
@@ -2926,7 +2906,7 @@ Foj/rmOanFj5g6QF3GRDrqaNc1GNEXDU6fW7JsTx6+Anj1M/aDNxOXYqIqUN0s3d
 		}
 
 		bastion1 = &operationsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{Name: "bastion1", Namespace: namespace1.Name},
+			Name: "bastion1", Namespace: namespace1.Name,
 			Spec: operationsv1alpha1.BastionSpec{
 				ShootRef: corev1.LocalObjectReference{Name: shoot1.Name},
 			},

@@ -59,7 +59,7 @@ var _ = Describe("MachineControllerManager", func() {
 		kubernetesClientSet = fakekubernetes.NewClientSetBuilder().WithClient(fakeClient).WithVersion("1.31.1").Build()
 
 		shoot = &gardencorev1beta1.Shoot{Spec: gardencorev1beta1.ShootSpec{Kubernetes: gardencorev1beta1.Kubernetes{Version: "1.31.1"}}}
-		deployment = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager", Namespace: namespace}}
+		deployment = &appsv1.Deployment{Name: "machine-controller-manager", Namespace: namespace}
 
 		botanist = &Botanist{Operation: &operation.Operation{}}
 		botanist.SeedClientSet = kubernetesClientSet
@@ -72,9 +72,7 @@ var _ = Describe("MachineControllerManager", func() {
 	Describe("#DeployMachineControllerManager", func() {
 		BeforeEach(func() {
 			botanist.SeedNamespaceObject = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					UID: types.UID("5678"),
-				},
+				UID: types.UID("5678"),
 			}
 
 			machineControllerManager, err := botanist.DefaultMachineControllerManager()
@@ -83,7 +81,7 @@ var _ = Describe("MachineControllerManager", func() {
 			botanist.Shoot.Components = &shootpkg.Components{ControlPlane: &shootpkg.ControlPlane{MachineControllerManager: machineControllerManager}}
 
 			By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 		})
 
 		DescribeTable("it should successfully create a machine-controller-manager interface",
@@ -104,8 +102,8 @@ var _ = Describe("MachineControllerManager", func() {
 			}),
 			Entry("when machine deployments with positive replica count exist", 1, func() {
 				machineDeployment := &machinev1alpha1.MachineDeployment{
-					ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: namespace},
-					Spec:       machinev1alpha1.MachineDeploymentSpec{Replicas: 5},
+					Name: "foo", Namespace: namespace,
+					Spec: machinev1alpha1.MachineDeploymentSpec{Replicas: 5},
 				}
 				Expect(fakeClient.Create(ctx, machineDeployment)).To(Succeed())
 			}),

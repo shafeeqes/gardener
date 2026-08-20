@@ -141,10 +141,8 @@ var _ = Describe("CheckHealth", func() {
 					},
 				}
 				unhealthyWithSkipHealthCheckAnnotation = &apiextensionsv1.CustomResourceDefinition{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							resourcesv1alpha1.SkipHealthCheck: "true",
-						},
+					Annotations: map[string]string{
+						resourcesv1alpha1.SkipHealthCheck: "true",
 					},
 					Status: apiextensionsv1.CustomResourceDefinitionStatus{
 						Conditions: []apiextensionsv1.CustomResourceDefinitionCondition{
@@ -203,10 +201,8 @@ var _ = Describe("CheckHealth", func() {
 					},
 				}
 				unhealthyWithSkipHealthCheckAnnotation = &apiextensionsv1beta1.CustomResourceDefinition{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							resourcesv1alpha1.SkipHealthCheck: "true",
-						},
+					Annotations: map[string]string{
+						resourcesv1alpha1.SkipHealthCheck: "true",
 					},
 					Status: apiextensionsv1beta1.CustomResourceDefinitionStatus{
 						Conditions: []apiextensionsv1beta1.CustomResourceDefinitionCondition{
@@ -248,10 +244,8 @@ var _ = Describe("CheckHealth", func() {
 				},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Status: appsv1.DaemonSetStatus{
 					DesiredNumberScheduled: 1,
@@ -279,10 +273,8 @@ var _ = Describe("CheckHealth", func() {
 				}}},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Status: appsv1.DeploymentStatus{Conditions: []appsv1.DeploymentCondition{{
 					Type:   appsv1.DeploymentAvailable,
@@ -309,10 +301,8 @@ var _ = Describe("CheckHealth", func() {
 				}},
 			}}
 			unhealthyWithSkipHealthCheckAnnotation = &batchv1.Job{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Status: batchv1.JobStatus{
 					Conditions: []batchv1.JobCondition{{
@@ -338,10 +328,8 @@ var _ = Describe("CheckHealth", func() {
 				},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Status: corev1.PodStatus{
 					Phase: corev1.PodFailed,
@@ -363,10 +351,8 @@ var _ = Describe("CheckHealth", func() {
 				Status: appsv1.ReplicaSetStatus{ReadyReplicas: 1},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &appsv1.ReplicaSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Spec:   appsv1.ReplicaSetSpec{Replicas: new(int32(2))},
 				Status: appsv1.ReplicaSetStatus{ReadyReplicas: 1},
@@ -387,10 +373,8 @@ var _ = Describe("CheckHealth", func() {
 				Status: corev1.ReplicationControllerStatus{ReadyReplicas: 1},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &corev1.ReplicationController{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Spec:   corev1.ReplicationControllerSpec{Replicas: new(int32(2))},
 				Status: corev1.ReplicationControllerStatus{ReadyReplicas: 1},
@@ -413,17 +397,15 @@ var _ = Describe("CheckHealth", func() {
 				},
 			}
 			unhealthy = &corev1.Service{
-				TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Service"},
-				Spec:     corev1.ServiceSpec{Type: corev1.ServiceTypeLoadBalancer},
+				APIVersion: "v1", Kind: "Service",
+				Spec: corev1.ServiceSpec{Type: corev1.ServiceTypeLoadBalancer},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
-				TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Service"},
-				Spec:     corev1.ServiceSpec{Type: corev1.ServiceTypeLoadBalancer},
+				APIVersion: "v1", Kind: "Service",
+				Spec: corev1.ServiceSpec{Type: corev1.ServiceTypeLoadBalancer},
 			}
 		})
 
@@ -441,10 +423,8 @@ var _ = Describe("CheckHealth", func() {
 				Status: appsv1.StatefulSetStatus{ReadyReplicas: 1},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Spec:   appsv1.StatefulSetSpec{Replicas: new(int32(2))},
 				Status: appsv1.StatefulSetStatus{ReadyReplicas: 1},
@@ -465,10 +445,8 @@ var _ = Describe("CheckHealth", func() {
 				Status: monitoringv1.PrometheusStatus{AvailableReplicas: 1},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &monitoringv1.Prometheus{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Spec:   monitoringv1.PrometheusSpec{CommonPrometheusFields: monitoringv1.CommonPrometheusFields{Replicas: new(int32(2))}},
 				Status: monitoringv1.PrometheusStatus{AvailableReplicas: 1},
@@ -489,10 +467,8 @@ var _ = Describe("CheckHealth", func() {
 				Status: monitoringv1.AlertmanagerStatus{AvailableReplicas: 1},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &monitoringv1.Alertmanager{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Spec:   monitoringv1.AlertmanagerSpec{Replicas: new(int32(2))},
 				Status: monitoringv1.AlertmanagerStatus{AvailableReplicas: 1},
@@ -509,10 +485,8 @@ var _ = Describe("CheckHealth", func() {
 				Status: vpaautoscalingv1.VerticalPodAutoscalerStatus{Conditions: []vpaautoscalingv1.VerticalPodAutoscalerCondition{{Type: vpaautoscalingv1.ConfigUnsupported, Status: corev1.ConditionTrue}}},
 			}
 			unhealthyWithSkipHealthCheckAnnotation = &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Status: vpaautoscalingv1.VerticalPodAutoscalerStatus{Conditions: []vpaautoscalingv1.VerticalPodAutoscalerCondition{{Type: vpaautoscalingv1.ConfigUnsupported, Status: corev1.ConditionTrue}}},
 			}
@@ -540,10 +514,8 @@ var _ = Describe("CheckHealth", func() {
 			}
 
 			unhealthyWithSkipHealthCheckAnnotation = &certv1alpha1.Certificate{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 				Status: certv1alpha1.CertificateStatus{Conditions: []metav1.Condition{unhealthyReadyCondition}},
 			}
@@ -562,10 +534,8 @@ var _ = Describe("CheckHealth", func() {
 
 			unhealthy = &certv1alpha1.Issuer{}
 			unhealthyWithSkipHealthCheckAnnotation = &certv1alpha1.Issuer{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						resourcesv1alpha1.SkipHealthCheck: "true",
-					},
+				Annotations: map[string]string{
+					resourcesv1alpha1.SkipHealthCheck: "true",
 				},
 			}
 		})

@@ -10,7 +10,6 @@ import (
 	"slices"
 
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -79,10 +78,8 @@ func ComputeRequiredExtensionsForGarden(garden *operatorv1alpha1.Garden, extensi
 // IsRuntimeExtensionInstallationSuccessful returns an error if an Extension is not marked as "successfully" in the Garden runtime cluster.
 func IsRuntimeExtensionInstallationSuccessful(ctx context.Context, c client.Client, gardenNamespace, extensionName string) error {
 	managedResource := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ExtensionRuntimeManagedResourceName(extensionName),
-			Namespace: gardenNamespace,
-		},
+		Name:      ExtensionRuntimeManagedResourceName(extensionName),
+		Namespace: gardenNamespace,
 	}
 
 	if err := c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource); err != nil {

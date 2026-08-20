@@ -29,7 +29,6 @@ import (
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
-	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	fakekubernetes "github.com/gardener/gardener/pkg/client/kubernetes/fake"
@@ -68,9 +67,7 @@ var _ = Describe("Bootstrap", func() {
 			selfHostedShootMeta    *types.NamespacedName
 
 			approvedCSR = certificatesv1.CertificateSigningRequest{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "approved-csr",
-				},
+				Name: "approved-csr",
 				Status: certificatesv1.CertificateSigningRequestStatus{
 					Conditions: []certificatesv1.CertificateSigningRequestCondition{
 						{
@@ -82,9 +79,7 @@ var _ = Describe("Bootstrap", func() {
 			}
 
 			deniedCSR = certificatesv1.CertificateSigningRequest{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "denied-csr",
-				},
+				Name: "denied-csr",
 				Status: certificatesv1.CertificateSigningRequestStatus{
 					Conditions: []certificatesv1.CertificateSigningRequestCondition{
 						{
@@ -95,9 +90,7 @@ var _ = Describe("Bootstrap", func() {
 			}
 
 			failedCSR = certificatesv1.CertificateSigningRequest{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "failed-csr",
-				},
+				Name: "failed-csr",
 				Status: certificatesv1.CertificateSigningRequestStatus{
 					Conditions: []certificatesv1.CertificateSigningRequestCondition{
 						{
@@ -138,14 +131,13 @@ var _ = Describe("Bootstrap", func() {
 			}}
 
 			// rest config for the bootstrap client
-			bootstrapClientConfig = &rest.Config{Host: "testhost", TLSClientConfig: rest.TLSClientConfig{
+			bootstrapClientConfig = &rest.Config{Host: "testhost",
 				Insecure: false,
-				CAFile:   "filepath",
-			}}
+				CAFile:   "filepath"}
 		})
 
 		When("gardenlet is responsible for seed", func() {
-			var seedConfig = &gardenletconfigv1alpha1.SeedConfig{SeedTemplate: gardencorev1beta1.SeedTemplate{ObjectMeta: metav1.ObjectMeta{Name: "test"}}}
+			var seedConfig = &gardenletconfigv1alpha1.SeedConfig{Name: "test"}
 
 			It("should not return an error", func() {
 				DeferCleanup(test.WithVar(&certificatesigningrequest.DigestedName, func(any, *pkix.Name, []certificatesv1.KeyUsage, string) (string, error) {
@@ -295,7 +287,7 @@ var _ = Describe("Bootstrap", func() {
 		})
 
 		It("should delete nothing because the username in the CSR does not match a known pattern", func() {
-			Expect(runtimeClient.Create(ctx, &certificatesv1.CertificateSigningRequest{ObjectMeta: metav1.ObjectMeta{Name: csrKey.Name}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &certificatesv1.CertificateSigningRequest{Name: csrKey.Name})).To(Succeed())
 
 			Expect(DeleteBootstrapAuth(ctx, runtimeClient, runtimeClient, csrName)).To(Succeed())
 		})
@@ -305,10 +297,10 @@ var _ = Describe("Bootstrap", func() {
 				bootstrapTokenID         = "12345"
 				bootstrapTokenSecretName = "bootstrap-token-" + bootstrapTokenID
 				bootstrapTokenUserName   = bootstraptokenapi.BootstrapUserPrefix + bootstrapTokenID
-				bootstrapTokenSecret     = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceSystem, Name: bootstrapTokenSecretName}}
+				bootstrapTokenSecret     = &corev1.Secret{Namespace: metav1.NamespaceSystem, Name: bootstrapTokenSecretName}
 			)
 
-			csr := &certificatesv1.CertificateSigningRequest{ObjectMeta: metav1.ObjectMeta{Name: csrKey.Name}, Spec: certificatesv1.CertificateSigningRequestSpec{Username: bootstrapTokenUserName}}
+			csr := &certificatesv1.CertificateSigningRequest{Name: csrKey.Name, Spec: certificatesv1.CertificateSigningRequestSpec{Username: bootstrapTokenUserName}}
 			Expect(runtimeClient.Create(ctx, csr)).To(Succeed())
 			Expect(runtimeClient.Create(ctx, bootstrapTokenSecret)).To(Succeed())
 
@@ -323,11 +315,11 @@ var _ = Describe("Bootstrap", func() {
 				serviceAccountName      = "foo"
 				serviceAccountNamespace = v1beta1constants.GardenNamespace
 				serviceAccountUserName  = serviceaccount.MakeUsername(serviceAccountNamespace, serviceAccountName)
-				serviceAccount          = &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Namespace: serviceAccountNamespace, Name: serviceAccountName}}
-				clusterRoleBinding      = &rbacv1.ClusterRoleBinding{ObjectMeta: metav1.ObjectMeta{Name: gardenletbootstraputil.ClusterRoleBindingName(serviceAccountNamespace, seedName)}}
+				serviceAccount          = &corev1.ServiceAccount{Namespace: serviceAccountNamespace, Name: serviceAccountName}
+				clusterRoleBinding      = &rbacv1.ClusterRoleBinding{Name: gardenletbootstraputil.ClusterRoleBindingName(serviceAccountNamespace, seedName)}
 			)
 
-			csr := &certificatesv1.CertificateSigningRequest{ObjectMeta: metav1.ObjectMeta{Name: csrKey.Name}, Spec: certificatesv1.CertificateSigningRequestSpec{Username: serviceAccountUserName}}
+			csr := &certificatesv1.CertificateSigningRequest{Name: csrKey.Name, Spec: certificatesv1.CertificateSigningRequestSpec{Username: serviceAccountUserName}}
 			Expect(runtimeClient.Create(ctx, csr)).To(Succeed())
 			Expect(runtimeClient.Create(ctx, serviceAccount)).To(Succeed())
 			Expect(runtimeClient.Create(ctx, clusterRoleBinding)).To(Succeed())

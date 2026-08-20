@@ -91,8 +91,8 @@ var _ = Describe("KubeAPIServer", func() {
 		sm = fakesecretsmanager.New(seedClient, controlPlaneNamespace)
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
-		Expect(seedClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: controlPlaneNamespace}})).To(Succeed())
-		Expect(seedClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "user-kubeconfig", Namespace: controlPlaneNamespace}})).To(Succeed())
+		Expect(seedClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: controlPlaneNamespace})).To(Succeed())
+		Expect(seedClient.Create(ctx, &corev1.Secret{Name: "user-kubeconfig", Namespace: controlPlaneNamespace})).To(Succeed())
 
 		kubeAPIServer = mockkubeapiserver.NewMockInterface(ctrl)
 		botanist = &Botanist{
@@ -137,10 +137,8 @@ var _ = Describe("KubeAPIServer", func() {
 		}
 
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: projectNamespace,
-			},
+			Name:      shootName,
+			Namespace: projectNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				DNS: &gardencorev1beta1.DNS{
 					Domain: &externalClusterDomain,
@@ -293,12 +291,10 @@ var _ = Describe("KubeAPIServer", func() {
 	Describe("#DeployKubeAPIServer", func() {
 		Describe("SNIConfig", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "wildcard-secret",
-					Namespace: controlPlaneNamespace,
-					Labels: map[string]string{
-						"gardener.cloud/role": "controlplane-cert",
-					},
+				Name:      "wildcard-secret",
+				Namespace: controlPlaneNamespace,
+				Labels: map[string]string{
+					"gardener.cloud/role": "controlplane-cert",
 				},
 			}
 
@@ -425,9 +421,7 @@ var _ = Describe("KubeAPIServer", func() {
 					func() {
 						botanist.Garden = &garden.Garden{
 							Project: &gardencorev1beta1.Project{
-								ObjectMeta: metav1.ObjectMeta{
-									Name: "test",
-								},
+								Name: "test",
 							},
 						}
 						botanist.Shoot.ServiceAccountIssuerHostname = new("foo.bar.example.cloud")
@@ -456,9 +450,7 @@ var _ = Describe("KubeAPIServer", func() {
 			It("should return error because shoot wants managed issuer, but issuer hostname is not configured", func() {
 				botanist.Garden = &garden.Garden{
 					Project: &gardencorev1beta1.Project{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "test",
-						},
+						Name: "test",
 					},
 				}
 				botanist.Shoot.ServiceAccountIssuerHostname = nil
@@ -495,19 +487,17 @@ users:
 `)
 
 			expectedAuthorizationWebhook := kubeapiserver.AuthorizationWebhook{
-				Name:       "node-agent-authorizer",
-				Kubeconfig: expectedKubeconfig,
-				WebhookConfiguration: apiserverv1beta1.WebhookConfiguration{
-					AuthorizedTTL:                            metav1.Duration{Duration: 1 * time.Nanosecond},
-					UnauthorizedTTL:                          metav1.Duration{Duration: 1 * time.Nanosecond},
-					Timeout:                                  metav1.Duration{Duration: 10 * time.Second},
-					FailurePolicy:                            "Deny",
-					SubjectAccessReviewVersion:               "v1",
-					MatchConditionSubjectAccessReviewVersion: "v1",
-					MatchConditions: []apiserverv1beta1.WebhookMatchCondition{{
-						Expression: "'gardener.cloud:node-agents' in request.groups",
-					}},
-				},
+				Name:                                     "node-agent-authorizer",
+				Kubeconfig:                               expectedKubeconfig,
+				AuthorizedTTL:                            metav1.Duration{Duration: 1 * time.Nanosecond},
+				UnauthorizedTTL:                          metav1.Duration{Duration: 1 * time.Nanosecond},
+				Timeout:                                  metav1.Duration{Duration: 10 * time.Second},
+				FailurePolicy:                            "Deny",
+				SubjectAccessReviewVersion:               "v1",
+				MatchConditionSubjectAccessReviewVersion: "v1",
+				MatchConditions: []apiserverv1beta1.WebhookMatchCondition{{
+					Expression: "'gardener.cloud:node-agents' in request.groups",
+				}},
 			}
 
 			kubeAPIServer.EXPECT().GetValues()
@@ -553,7 +543,7 @@ users:
 	})
 
 	Describe("#ScaleKubeAPIServerToOne", func() {
-		deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "kube-apiserver", Namespace: controlPlaneNamespace}}
+		deployment := &appsv1.Deployment{Name: "kube-apiserver", Namespace: controlPlaneNamespace}
 
 		It("should scale the deployment", func() {
 			Expect(seedClient.Create(ctx, deployment)).To(Succeed())

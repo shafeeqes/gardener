@@ -12,7 +12,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -236,7 +235,7 @@ func (r *Reconciler) MapObjectKindToControllerInstallations(log logr.Logger, obj
 
 			for _, resource := range controllerRegistration.Spec.Resources {
 				if resource.Kind == objectKind {
-					requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: obj.Name}})
+					requests = append(requests, reconcile.Request{Name: obj.Name})
 					break
 				}
 			}

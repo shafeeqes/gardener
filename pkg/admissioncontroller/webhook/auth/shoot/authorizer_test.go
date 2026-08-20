@@ -2205,10 +2205,8 @@ var _ = Describe("Shoot", func() {
 
 					BeforeEach(func() {
 						bootstrapTokenSecret = &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "bootstrap-token-abcdef",
-								Namespace: "kube-system",
-							},
+							Name:      "bootstrap-token-abcdef",
+							Namespace: "kube-system",
 						}
 
 						attrs.Verb = "delete"

@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
@@ -28,27 +27,25 @@ var _ = Describe("Registry", func() {
 		registry *Registry
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "secret:name",
-				Namespace: "foo",
-				Annotations: map[string]string{
-					"foo.bar/test-939fc8c2": "3",
-					"foo.bar/test-ea8edc28": "7",
-					"foo.bar/test-9dca243c": "1",
-					"foo.bar/test-47fc132b": "2",
-					"foo.bar/test-2871f8c4": "4",
-					"foo.bar/test-07679f5e": "5",
-					"foo.bar/test-d2718f1d": "6",
-				},
-				Labels: map[string]string{
-					"foo.bar/test-939fc8c2": "3",
-					"foo.bar/test-47fc132b": "2",
-					"foo.bar/test-d2718f1d": "6",
-					"foo.bar/test-9dca243c": "1",
-					"foo.bar/test-07679f5e": "5",
-					"foo.bar/test-2871f8c4": "4",
-					"foo.bar/test-ea8edc28": "7",
-				},
+			Name:      "secret:name",
+			Namespace: "foo",
+			Annotations: map[string]string{
+				"foo.bar/test-939fc8c2": "3",
+				"foo.bar/test-ea8edc28": "7",
+				"foo.bar/test-9dca243c": "1",
+				"foo.bar/test-47fc132b": "2",
+				"foo.bar/test-2871f8c4": "4",
+				"foo.bar/test-07679f5e": "5",
+				"foo.bar/test-d2718f1d": "6",
+			},
+			Labels: map[string]string{
+				"foo.bar/test-939fc8c2": "3",
+				"foo.bar/test-47fc132b": "2",
+				"foo.bar/test-d2718f1d": "6",
+				"foo.bar/test-9dca243c": "1",
+				"foo.bar/test-07679f5e": "5",
+				"foo.bar/test-2871f8c4": "4",
+				"foo.bar/test-ea8edc28": "7",
 			},
 		}
 		secretSerialized = `apiVersion: v1
@@ -75,10 +72,8 @@ metadata:
 `
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "rolebinding.name",
-				Namespace: "bar",
-			},
+			Name:      "rolebinding.name",
+			Namespace: "bar",
 		}
 		roleBindingSerialized = `apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/api/core/helper"
 	"github.com/gardener/gardener/pkg/apis/core"
@@ -194,10 +193,8 @@ var _ = Describe("Helper", func() {
 	Describe("#ConvertSeed", func() {
 		It("should convert the external Seed version to an internal one", func() {
 			result, err := ConvertSeed(&gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-					Kind:       "Seed",
-				},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Kind:       "Seed",
 			})
 
 			Expect(err).NotTo(HaveOccurred())
@@ -211,10 +208,8 @@ var _ = Describe("Helper", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(&gardencorev1beta1.Seed{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-					Kind:       "Seed",
-				},
+				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+				Kind:       "Seed",
 			}))
 		})
 	})
@@ -222,20 +217,16 @@ var _ = Describe("Helper", func() {
 	Describe("#ConvertSeedTemplate", func() {
 		It("should convert the external SeedTemplate version to an internal one", func() {
 			Expect(ConvertSeedTemplate(&gardencorev1beta1.SeedTemplate{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      map[string]string{"foo": "bar"},
-					Annotations: map[string]string{"baz": "boo"},
-				},
+				Labels:      map[string]string{"foo": "bar"},
+				Annotations: map[string]string{"baz": "boo"},
 				Spec: gardencorev1beta1.SeedSpec{
 					Provider: gardencorev1beta1.SeedProvider{
 						Type: "local",
 					},
 				},
 			})).To(Equal(&core.SeedTemplate{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      map[string]string{"foo": "bar"},
-					Annotations: map[string]string{"baz": "boo"},
-				},
+				Labels:      map[string]string{"foo": "bar"},
+				Annotations: map[string]string{"baz": "boo"},
 				Spec: core.SeedSpec{
 					Provider: core.SeedProvider{
 						Type: "local",
@@ -248,20 +239,16 @@ var _ = Describe("Helper", func() {
 	Describe("#ConvertSeedTemplateExternal", func() {
 		It("should convert the internal SeedTemplate version to an external one", func() {
 			Expect(ConvertSeedTemplateExternal(&core.SeedTemplate{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      map[string]string{"foo": "bar"},
-					Annotations: map[string]string{"baz": "boo"},
-				},
+				Labels:      map[string]string{"foo": "bar"},
+				Annotations: map[string]string{"baz": "boo"},
 				Spec: core.SeedSpec{
 					Provider: core.SeedProvider{
 						Type: "local",
 					},
 				},
 			})).To(Equal(&gardencorev1beta1.SeedTemplate{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      map[string]string{"foo": "bar"},
-					Annotations: map[string]string{"baz": "boo"},
-				},
+				Labels:      map[string]string{"foo": "bar"},
+				Annotations: map[string]string{"baz": "boo"},
 				Spec: gardencorev1beta1.SeedSpec{
 					Provider: gardencorev1beta1.SeedProvider{
 						Type: "local",

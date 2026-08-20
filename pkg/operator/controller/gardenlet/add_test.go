@@ -43,7 +43,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.VirtualScheme).Build()
 			predicate = (&Reconciler{VirtualClient: fakeClient}).OperatorResponsiblePredicate(ctx)
-			gardenlet = &seedmanagementv1alpha1.Gardenlet{ObjectMeta: metav1.ObjectMeta{Name: "test"}}
+			gardenlet = &seedmanagementv1alpha1.Gardenlet{Name: "test"}
 		})
 
 		It("should return true when the seed object does not exist", func() {
@@ -57,7 +57,7 @@ var _ = Describe("Add", func() {
 
 		When("seed object exists", func() {
 			BeforeEach(func() {
-				Expect(fakeClient.Create(ctx, &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: gardenlet.Name}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &gardencorev1beta1.Seed{Name: gardenlet.Name})).To(Succeed())
 			})
 
 			It("should return false because there is no force-redeploy annotation and no kubeconfig secret ref", func() {

@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -26,9 +25,7 @@ var _ = Describe("Project", func() {
 
 		projectName     = "bar"
 		projectInternal = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: projectName,
-			},
+			Name: projectName,
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: &namespaceName,
 			},

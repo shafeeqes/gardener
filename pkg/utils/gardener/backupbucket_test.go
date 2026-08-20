@@ -31,8 +31,8 @@ var _ = Describe("BackupBucket", func() {
 
 		It("should return True when all BackupBuckets are healthy", func() {
 			bbs := []gardencorev1beta1.BackupBucket{
-				{ObjectMeta: metav1.ObjectMeta{Name: "bb1"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "bb2"}},
+				{Name: "bb1"},
+				{Name: "bb2"},
 			}
 			c := ComputeBackupBucketsCondition(clock, condition, bbs)
 			Expect(c.Status).To(Equal(gardencorev1beta1.ConditionTrue))
@@ -41,10 +41,10 @@ var _ = Describe("BackupBucket", func() {
 
 		It("should return False when at least one BackupBucket has an error", func() {
 			bbs := []gardencorev1beta1.BackupBucket{
-				{ObjectMeta: metav1.ObjectMeta{Name: "bb1"}},
+				{Name: "bb1"},
 				{
-					ObjectMeta: metav1.ObjectMeta{Name: "bb2"},
-					Status:     gardencorev1beta1.BackupBucketStatus{LastError: &gardencorev1beta1.LastError{Description: "some error"}},
+					Name:   "bb2",
+					Status: gardencorev1beta1.BackupBucketStatus{LastError: &gardencorev1beta1.LastError{Description: "some error"}},
 				},
 			}
 			c := ComputeBackupBucketsCondition(clock, condition, bbs)

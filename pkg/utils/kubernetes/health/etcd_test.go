@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -27,9 +26,7 @@ var _ = Describe("Etcd", func() {
 	DescribeTable("Backup condition",
 		func(backupReady *bool, matcher types.GomegaMatcher) {
 			etcd := &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "etcd-foo",
-				},
+				Name: "etcd-foo",
 				Status: druidcorev1alpha1.EtcdStatus{
 					Ready: new(true),
 				},

@@ -63,11 +63,9 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 		createPodWithNetPolLabels = func(namespaceName string, labels map[string]string) *corev1.Pod {
 			pod := &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "pod-",
-					Namespace:    namespaceName,
-					Labels:       labels,
-				},
+				GenerateName: "pod-",
+				Namespace:    namespaceName,
+				Labels:       labels,
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
 						Name:  "test",
@@ -221,22 +219,16 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		skipPodCreation = false
 
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "test-ns-" + testRunID,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "test-ns-" + testRunID,
+			Labels: map[string]string{testID: testRunID},
 		}
 		otherNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "other-ns-" + testRunID,
-				Labels: map[string]string{"other": "namespace"},
-			},
+			Name:   "other-ns-" + testRunID,
+			Labels: map[string]string{"other": "namespace"},
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "service-",
-				Namespace:    namespace.Name,
-			},
+			GenerateName: "service-",
+			Namespace:    namespace.Name,
 			Spec: corev1.ServiceSpec{
 				Selector: serviceSelector,
 				Ports: []corev1.ServicePort{
@@ -314,7 +306,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		It("should create the expected network policies", func() {
 			By("Wait until ingress policy was created for first port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -328,7 +320,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created for first port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -342,7 +334,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress policy was created for second port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port2Suffix, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port2Suffix, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -356,7 +348,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created for second port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port2Suffix, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port2Suffix, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -447,25 +439,21 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 		It("should clean up the policies when the service is already gone", func() {
 			networkPolicy1 := &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "policy1",
-					Namespace: namespace.Name,
-					Labels: map[string]string{
-						"networking.resources.gardener.cloud/service-name":      "foo",
-						"networking.resources.gardener.cloud/service-namespace": namespace.Name,
-					},
+				Name:      "policy1",
+				Namespace: namespace.Name,
+				Labels: map[string]string{
+					"networking.resources.gardener.cloud/service-name":      "foo",
+					"networking.resources.gardener.cloud/service-namespace": namespace.Name,
 				},
 			}
 			Expect(testClient.Create(ctx, networkPolicy1)).To(Succeed())
 
 			networkPolicy2 := &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "policy2",
-					Namespace: namespace.Name,
-					Labels: map[string]string{
-						"networking.resources.gardener.cloud/service-name":      "foo",
-						"networking.resources.gardener.cloud/service-namespace": "bar",
-					},
+				Name:      "policy2",
+				Namespace: namespace.Name,
+				Labels: map[string]string{
+					"networking.resources.gardener.cloud/service-name":      "foo",
+					"networking.resources.gardener.cloud/service-namespace": "bar",
 				},
 			}
 			Expect(testClient.Create(ctx, networkPolicy2)).To(Succeed())
@@ -484,11 +472,11 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 			It("should shorten the label selector key", func() {
 				By("Ensure expected policies are created with shortened label selector key")
 				Eventually(func(g Gomega) {
-					ingressPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}}
+					ingressPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(ingressPolicy), ingressPolicy)).To(Succeed())
 					g.Expect(ingressPolicy.Spec.Ingress[0].From[0].PodSelector.MatchLabels).To(Equal(map[string]string{"networking.resources.gardener.cloud/to-this-is-a-very-long-svc-name-which-will-exceed-max-len-7c268": "allowed"}))
 
-					egressPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}}
+					egressPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port1Suffix, Namespace: service.Namespace}
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(egressPolicy), egressPolicy)).To(Succeed())
 					g.Expect(egressPolicy.Spec.PodSelector.MatchLabels).To(Equal(map[string]string{"networking.resources.gardener.cloud/to-this-is-a-very-long-svc-name-which-will-exceed-max-len-7c268": "allowed"}))
 				}).Should(Succeed())
@@ -534,7 +522,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress from other-namespace policy was created for first port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port1Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port1Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -551,7 +539,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress from other-namespace policy was created for first port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix, Namespace: otherNamespace.Name}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix, Namespace: otherNamespace.Name}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -568,7 +556,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress from other-namespace policy was created for second port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port2Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port2Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -585,7 +573,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress from other-namespace policy was created for second port")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Namespace + "-" + service.Name + port2Suffix, Namespace: otherNamespace.Name}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Namespace + "-" + service.Name + port2Suffix, Namespace: otherNamespace.Name}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -731,10 +719,9 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		})
 
 		It("should create the expected cross-namespace policies as soon as a new namespace appears", func() {
-			newNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{
+			newNamespace := &corev1.Namespace{
 				GenerateName: "new-ns-",
-				Labels:       map[string]string{"other": "namespace"},
-			}}
+				Labels:       map[string]string{"other": "namespace"}}
 
 			By("Create new Namespace")
 			Expect(testClient.Create(ctx, newNamespace)).To(Succeed())
@@ -794,28 +781,28 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 				By("Wait until ingress from other-namespace policy was created for first port")
 				Eventually(func(g Gomega) *metav1.LabelSelector {
-					networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port1Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}}
+					networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port1Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 					return networkPolicy.Spec.Ingress[0].From[0].PodSelector
 				}).Should(Equal(&metav1.LabelSelector{MatchLabels: map[string]string{"networking.resources.gardener.cloud/to-" + alias + "-" + service.Name + port1Suffix: "allowed"}}))
 
 				By("Wait until egress from other-namespace policy was created for first port")
 				Eventually(func(g Gomega) metav1.LabelSelector {
-					networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix, Namespace: otherNamespace.Name}}
+					networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix, Namespace: otherNamespace.Name}
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 					return networkPolicy.Spec.PodSelector
 				}).Should(Equal(metav1.LabelSelector{MatchLabels: map[string]string{"networking.resources.gardener.cloud/to-" + alias + "-" + service.Name + port1Suffix: "allowed"}}))
 
 				By("Wait until ingress from other-namespace policy was created for second port")
 				Eventually(func(g Gomega) *metav1.LabelSelector {
-					networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port2Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}}
+					networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port2Suffix + "-from-" + otherNamespace.Name, Namespace: service.Namespace}
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 					return networkPolicy.Spec.Ingress[0].From[0].PodSelector
 				}).Should(Equal(&metav1.LabelSelector{MatchLabels: map[string]string{"networking.resources.gardener.cloud/to-" + alias + "-" + service.Name + port2Suffix: "allowed"}}))
 
 				By("Wait until egress from other-namespace policy was created for second port")
 				Eventually(func(g Gomega) metav1.LabelSelector {
-					networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Namespace + "-" + service.Name + port2Suffix, Namespace: otherNamespace.Name}}
+					networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Namespace + "-" + service.Name + port2Suffix, Namespace: otherNamespace.Name}
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 					return networkPolicy.Spec.PodSelector
 				}).Should(Equal(metav1.LabelSelector{MatchLabels: map[string]string{"networking.resources.gardener.cloud/to-" + alias + "-" + service.Name + port2Suffix: "allowed"}}))
@@ -839,7 +826,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		It("should create the expected network policies", func() {
 			By("Wait until ingress policy was created for first port of first alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port3Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port3Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -853,7 +840,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created for first port of first alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port3Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port3Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -867,7 +854,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress policy was created for second port of first alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port4Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port4Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -881,7 +868,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created for second port of first alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port4Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port4Suffix + "-via-" + customPodLabelSelector1, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -895,7 +882,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress policy was created for first port of second alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port5Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port5Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -909,7 +896,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created for first port of second alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port5Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port5Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -923,7 +910,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress policy was created for second port of second alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port6Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port6Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -937,7 +924,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created for second port of second alias")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Name + port6Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Name + port6Suffix + "-via-" + customPodLabelSelector2, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -1036,7 +1023,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress from world policy was created")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + "-from-world", Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + "-from-world", Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -1062,7 +1049,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until ingress from world policy was updated")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + "-from-world", Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + "-from-world", Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -1130,32 +1117,28 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		)
 
 		JustBeforeEach(func() {
-			controllerNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: ingressControllerNamespace}}
+			controllerNamespace = &corev1.Namespace{Name: ingressControllerNamespace}
 
 			pathType := networkingv1.PathTypePrefix
 			ingress = &networkingv1.Ingress{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      service.Name,
-					Namespace: service.Namespace,
-				},
+				Name:      service.Name,
+				Namespace: service.Namespace,
 				Spec: networkingv1.IngressSpec{
 					Rules: []networkingv1.IngressRule{{
 						Host: "foo.example.com",
-						IngressRuleValue: networkingv1.IngressRuleValue{
-							HTTP: &networkingv1.HTTPIngressRuleValue{
-								Paths: []networkingv1.HTTPIngressPath{{
-									Path:     "/bar",
-									PathType: &pathType,
-									Backend: networkingv1.IngressBackend{
-										Service: &networkingv1.IngressServiceBackend{
-											Name: service.Name,
-											Port: networkingv1.ServiceBackendPort{
-												Number: port1ServicePort,
-											},
+						HTTP: &networkingv1.HTTPIngressRuleValue{
+							Paths: []networkingv1.HTTPIngressPath{{
+								Path:     "/bar",
+								PathType: &pathType,
+								Backend: networkingv1.IngressBackend{
+									Service: &networkingv1.IngressServiceBackend{
+										Name: service.Name,
+										Port: networkingv1.ServiceBackendPort{
+											Number: port1ServicePort,
 										},
 									},
-								}},
-							},
+								},
+							}},
 						},
 					}},
 				},
@@ -1193,7 +1176,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		It("should create the expected network policies", func() {
 			By("Wait until ingress policy was created")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port1Suffix + "-from-ingress-controller", Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port1Suffix + "-from-ingress-controller", Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -1210,7 +1193,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix + "-from-ingress-controller", Namespace: controllerNamespace.Name}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix + "-from-ingress-controller", Namespace: controllerNamespace.Name}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -1379,14 +1362,12 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		)
 
 		JustBeforeEach(func() {
-			istioNamespaceResource = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: istioNamespace}}
+			istioNamespaceResource = &corev1.Namespace{Name: istioNamespace}
 
 			istioPod = &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "istio-ingressgateway",
-					Namespace: istioNamespace,
-					Labels:    istioPodSelector.MatchLabels,
-				},
+				Name:      "istio-ingressgateway",
+				Namespace: istioNamespace,
+				Labels:    istioPodSelector.MatchLabels,
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
 						Name:  "istio-proxy",
@@ -1396,20 +1377,16 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 			}
 
 			gateway = &istionetworkingv1beta1.Gateway{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      service.Name,
-					Namespace: service.Namespace,
-				},
+				Name:      service.Name,
+				Namespace: service.Namespace,
 				Spec: istioapinetworkingv1beta1.Gateway{
 					Selector: istioPodSelector.MatchLabels,
 				},
 			}
 
 			virtualService = &istionetworkingv1beta1.VirtualService{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      service.Name,
-					Namespace: service.Namespace,
-				},
+				Name:      service.Name,
+				Namespace: service.Namespace,
 				Spec: istioapinetworkingv1beta1.VirtualService{
 					Gateways: []string{gateway.Name},
 					Hosts:    []string{"foo.example.com"},
@@ -1495,7 +1472,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 		It("should create the expected network policies", func() {
 			By("Wait until virtualService policy was created")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "ingress-to-" + service.Name + port1Suffix + "-from-" + istioNamespaceResource.Name, Namespace: service.Namespace}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "ingress-to-" + service.Name + port1Suffix + "-from-" + istioNamespaceResource.Name, Namespace: service.Namespace}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{
@@ -1512,7 +1489,7 @@ var _ = Describe("NetworkPolicy Controller tests", func() {
 
 			By("Wait until egress policy was created")
 			Eventually(func(g Gomega) networkingv1.NetworkPolicySpec {
-				networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix + "-from-istio", Namespace: istioNamespaceResource.Name}}
+				networkPolicy := &networkingv1.NetworkPolicy{Name: "egress-to-" + service.Namespace + "-" + service.Name + port1Suffix + "-from-istio", Namespace: istioNamespaceResource.Name}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(networkPolicy), networkPolicy)).To(Succeed())
 				return networkPolicy.Spec
 			}).Should(Equal(networkingv1.NetworkPolicySpec{

@@ -7,7 +7,6 @@ package clusterfinalizer
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -56,7 +55,7 @@ func ControllerInstallationEventHandlerForSeed() handler.EventHandler {
 				return
 			}
 
-			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.SeedRef.Name}})
+			q.Add(reconcile.Request{Name: controllerInstallation.Spec.SeedRef.Name})
 		},
 		UpdateFunc: func(_ context.Context, evt event.UpdateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
 			oldControllerInstallation, ok := evt.ObjectOld.(*gardencorev1beta1.ControllerInstallation)
@@ -71,7 +70,7 @@ func ControllerInstallationEventHandlerForSeed() handler.EventHandler {
 
 			// Enqueue the seed when `.spec.seedRef` was cleared.
 			if newControllerInstallation.Spec.SeedRef == nil {
-				q.Add(reconcile.Request{NamespacedName: types.NamespacedName{Name: oldControllerInstallation.Spec.SeedRef.Name}})
+				q.Add(reconcile.Request{Name: oldControllerInstallation.Spec.SeedRef.Name})
 			}
 		},
 	}
@@ -87,7 +86,7 @@ func ControllerInstallationEventHandlerForShoot() handler.EventHandler {
 				return
 			}
 
-			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.ShootRef.Name, Namespace: controllerInstallation.Spec.ShootRef.Namespace}})
+			q.Add(reconcile.Request{Name: controllerInstallation.Spec.ShootRef.Name, Namespace: controllerInstallation.Spec.ShootRef.Namespace})
 		},
 	}
 }

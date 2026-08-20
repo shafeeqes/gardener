@@ -12,7 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -155,6 +154,6 @@ func (r *Reconciler) MapObjectToProject(log logr.Logger) handler.MapFunc {
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: project.Name}}}
+		return []reconcile.Request{{Name: project.Name}}
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -70,7 +69,7 @@ func (r *Reconciler) EventHandler() handler.TypedEventHandler[client.Object, Req
 			if e.Object != nil {
 				_, isSelfHostedShoot := e.Object.(*gardencorev1beta1.Shoot)
 				q.Add(Request{
-					Request:           reconcile.Request{NamespacedName: types.NamespacedName{Name: e.Object.GetName(), Namespace: e.Object.GetNamespace()}},
+					Name: e.Object.GetName(), Namespace: e.Object.GetNamespace(),
 					IsSelfHostedShoot: isSelfHostedShoot,
 				})
 			}

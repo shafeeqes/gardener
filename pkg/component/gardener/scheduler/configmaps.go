@@ -77,11 +77,9 @@ func (g *gardenerScheduler) configMapSchedulerConfig() (*corev1.ConfigMap, error
 	}
 
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapSchedulerPrefix,
-			Namespace: g.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      configMapSchedulerPrefix,
+		Namespace: g.namespace,
+		Labels:    GetLabels(),
 		Data: map[string]string{
 			dataConfigKey: string(data),
 		},

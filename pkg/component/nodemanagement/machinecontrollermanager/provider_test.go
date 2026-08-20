@@ -58,12 +58,10 @@ var _ = Describe("Provider", func() {
 				"--v=3",
 			},
 			LivenessProbe: &corev1.Probe{
-				ProbeHandler: corev1.ProbeHandler{
-					HTTPGet: &corev1.HTTPGetAction{
-						Path:   "/healthz",
-						Port:   intstr.FromInt32(10259),
-						Scheme: "HTTP",
-					},
+				HTTPGet: &corev1.HTTPGetAction{
+					Path:   "/healthz",
+					Port:   intstr.FromInt32(10259),
+					Scheme: "HTTP",
 				},
 				InitialDelaySeconds: 30,
 				TimeoutSeconds:      5,

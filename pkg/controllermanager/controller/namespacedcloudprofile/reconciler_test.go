@@ -16,7 +16,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -62,15 +61,11 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 		namespacedCloudProfileName = "test-namespacedcloudprofile"
 
 		cloudProfile = &gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: cloudProfileName,
-			},
+			Name: cloudProfileName,
 		}
 		namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      namespacedCloudProfileName,
-				Namespace: namespaceName,
-			},
+			Name:      namespacedCloudProfileName,
+			Namespace: namespaceName,
 			Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 				Parent: gardencorev1beta1.CloudProfileReference{
 					Kind: "CloudProfile",
@@ -94,7 +89,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 	})
 
 	It("should return nil because object not found", func() {
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -110,7 +105,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Build()
 		reconciler = &namespacedcloudprofilecontroller.Reconciler{Client: fakeClient, Recorder: &events.FakeRecorder{}}
 
-		result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+		result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 		Expect(result).To(Equal(reconcile.Result{}))
 		Expect(err).To(MatchError(fakeErr))
 	})
@@ -122,7 +117,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -141,7 +136,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -157,7 +152,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				{
 					Name: "test-image-namespaced",
 					Versions: []gardencorev1beta1.MachineImageVersion{{
-						ExpirableVersion:         gardencorev1beta1.ExpirableVersion{Version: "1.1.2"},
+						Version:                  "1.1.2",
 						CRI:                      []gardencorev1beta1.CRI{{Name: "containerd"}},
 						Architectures:            []string{"arm64"},
 						KubeletVersionConstraint: new("==1.30.0"),
@@ -172,7 +167,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -208,7 +203,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -225,7 +220,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -245,7 +240,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -271,7 +266,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				updated.Finalizers = []string{"some-other-finalizer"}
 				Expect(fakeClient.Patch(ctx, updated, client.MergeFrom(namespacedCloudProfile))).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -281,7 +276,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 
 			It("should return an error because Shoot referencing NamespacedCloudProfile exists", func() {
 				shoot := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{Name: "test-shoot", Namespace: namespaceName},
+					Name: "test-shoot", Namespace: namespaceName,
 					Spec: gardencorev1beta1.ShootSpec{
 						CloudProfile: &gardencorev1beta1.CloudProfileReference{
 							Kind: "NamespacedCloudProfile",
@@ -291,7 +286,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				}
 				Expect(fakeClient.Create(ctx, shoot)).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).To(MatchError(ContainSubstring("Cannot delete NamespacedCloudProfile")))
 			})
@@ -314,13 +309,13 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				Expect(fakeClient.Create(ctx, ncp)).To(Succeed())
 				Expect(fakeClient.Delete(ctx, ncp.DeepCopy())).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).To(MatchError(fakeErr))
 			})
 
 			It("should remove the finalizer (no error)", func() {
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -343,7 +338,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 
 				Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).To(HaveOccurred())
 			})
@@ -354,7 +349,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 				Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-				result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+				result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 				Expect(result).To(Equal(reconcile.Result{}))
 				Expect(err).NotTo(HaveOccurred())
 
@@ -371,7 +366,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				{
 					Name: "test-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{{
-						ExpirableVersion:         gardencorev1beta1.ExpirableVersion{Version: "1.0.0"},
+						Version:                  "1.0.0",
 						CRI:                      []gardencorev1beta1.CRI{{Name: "containerd"}},
 						Architectures:            []string{"amd64"},
 						KubeletVersionConstraint: new("==1.30.0"),
@@ -386,7 +381,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				{
 					Name: "test-image-namespaced",
 					Versions: []gardencorev1beta1.MachineImageVersion{{
-						ExpirableVersion:         gardencorev1beta1.ExpirableVersion{Version: "1.1.2"},
+						Version:                  "1.1.2",
 						CRI:                      []gardencorev1beta1.CRI{{Name: "containerd"}},
 						Architectures:            []string{"arm64"},
 						KubeletVersionConstraint: new("==1.30.0"),
@@ -398,7 +393,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -434,9 +429,9 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 					Name: "test-image",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						// override existing version with new expiration date
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0", ExpirationDate: &newExpiryDate}},
+						{Version: "1.0.0", ExpirationDate: &newExpiryDate},
 						// add new version
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.2"}},
+						{Version: "1.1.2"},
 					},
 				},
 			}
@@ -444,7 +439,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -471,7 +466,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -517,7 +512,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -546,7 +541,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			Expect(fakeClient.Create(ctx, cloudProfile.DeepCopy())).To(Succeed())
 			Expect(fakeClient.Create(ctx, namespacedCloudProfile.DeepCopy())).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfileName, Namespace: namespaceName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfileName, Namespace: namespaceName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).ToNot(HaveOccurred())
 
@@ -597,18 +592,14 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			namespaceName = "garden-test"
 
 			cloudProfile = &gardencorev1beta1.CloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-profile",
-				},
+				Name: "test-profile",
 				Spec: gardencorev1beta1.CloudProfileSpec{},
 			}
 
 			namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       "n-profile-1",
-					Namespace:  namespaceName,
-					Generation: 1,
-				},
+				Name:       "n-profile-1",
+				Namespace:  namespaceName,
+				Generation: 1,
 				Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 					Parent: gardencorev1beta1.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -622,7 +613,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			BeforeEach(func() {
 				cloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{
 					{Name: "machine-image-1", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"}},
+						{Version: "1.0.0"},
 					}},
 				}
 				cloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Object: &v1alpha1.CloudProfileConfig{MachineImages: []v1alpha1.MachineImages{
@@ -632,7 +623,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 
 				namespacedCloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{
 					{Name: "machine-image-2", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "2.0.0"}},
+						{Version: "2.0.0"},
 					}},
 				}
 				namespacedCloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Object: &v1alpha1.CloudProfileConfig{MachineImages: []v1alpha1.MachineImages{
@@ -642,21 +633,21 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 			})
 
 			It("should successfully reconcile the NamespacedCloudProfile", func() {
-				_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfile.Name, Namespace: namespaceName}})
+				_, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfile.Name, Namespace: namespaceName})
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(namespacedCloudProfile), namespacedCloudProfile)).To(Succeed())
 				Expect(namespacedCloudProfile.Status.CloudProfileSpec.MachineImages).To(ConsistOf(
 					gardencorev1beta1.MachineImage{Name: "machine-image-1", Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"},
-							Architectures:    []string{"amd64"},
+							Version:       "1.0.0",
+							Architectures: []string{"amd64"},
 						},
 					}},
 					gardencorev1beta1.MachineImage{Name: "machine-image-2", Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "2.0.0"},
-							Architectures:    []string{"amd64"},
+							Version:       "2.0.0",
+							Architectures: []string{"amd64"},
 						},
 					}},
 				))
@@ -688,7 +679,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(namespacedCloudProfile), namespacedCloudProfile)).To(Succeed())
 				namespacedCloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{
 					{Name: "machine-image-2", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "3.0.0"}},
+						{Version: "3.0.0"},
 					}},
 				}
 				namespacedCloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Object: &v1alpha1.CloudProfileConfig{MachineImages: []v1alpha1.MachineImages{
@@ -696,21 +687,21 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				}}}
 				Expect(fakeClient.Update(ctx, namespacedCloudProfile)).To(Succeed())
 
-				_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfile.Name, Namespace: namespaceName}})
+				_, err = reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfile.Name, Namespace: namespaceName})
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(namespacedCloudProfile), namespacedCloudProfile)).To(Succeed())
 				Expect(namespacedCloudProfile.Status.CloudProfileSpec.MachineImages).To(ConsistOf(
 					gardencorev1beta1.MachineImage{Name: "machine-image-1", Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"},
-							Architectures:    []string{"amd64"},
+							Version:       "1.0.0",
+							Architectures: []string{"amd64"},
 						},
 					}},
 					gardencorev1beta1.MachineImage{Name: "machine-image-2", Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "3.0.0"},
-							Architectures:    []string{"amd64"},
+							Version:       "3.0.0",
+							Architectures: []string{"amd64"},
 						},
 					}},
 				))
@@ -729,7 +720,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				namespacedCloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{{
 					Name:           "machine-image-1",
 					UpdateStrategy: new(gardencorev1beta1.UpdateStrategyMajor),
-					Versions:       []gardencorev1beta1.MachineImageVersion{{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"}, Architectures: []string{"amd64", "arm64"}}}},
+					Versions:       []gardencorev1beta1.MachineImageVersion{{Version: "1.0.0", Architectures: []string{"amd64", "arm64"}}}},
 				}
 				namespacedCloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Object: &v1alpha1.CloudProfileConfig{MachineImages: []v1alpha1.MachineImages{
 					{Name: "machine-image-1", Versions: []v1alpha1.MachineImageVersion{{Version: "1.0.0", Image: "local-dev:1.0.0-nscpfl"}}},
@@ -737,14 +728,14 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				Expect(fakeClient.Create(ctx, namespacedCloudProfile)).To(Succeed())
 
 				// Reconcile NamespacedCloudProfile Status.
-				_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfile.Name, Namespace: namespaceName}})
+				_, err := reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfile.Name, Namespace: namespaceName})
 				Expect(err).ToNot(HaveOccurred())
 
 				// Add custom machine image from NamespacedCloudProfile to parent CloudProfile.
 				cloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{{
 					Name:           "machine-image-1",
 					UpdateStrategy: new(gardencorev1beta1.UpdateStrategyMinor),
-					Versions:       []gardencorev1beta1.MachineImageVersion{{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0.0"}}}},
+					Versions:       []gardencorev1beta1.MachineImageVersion{{Version: "1.0.0"}}},
 				}
 				cloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Object: &v1alpha1.CloudProfileConfig{MachineImages: []v1alpha1.MachineImages{
 					{Name: "machine-image-1", Versions: []v1alpha1.MachineImageVersion{{Version: "1.0.0", Image: "local-dev:1.0.0-cpfl"}}},
@@ -752,7 +743,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 				Expect(fakeClient.Update(ctx, cloudProfile)).To(Succeed())
 
 				// Reconcile NamespacedCloudProfile Status again.
-				_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespacedCloudProfile.Name, Namespace: namespaceName}})
+				_, err = reconciler.Reconcile(ctx, reconcile.Request{Name: namespacedCloudProfile.Name, Namespace: namespaceName})
 				Expect(err).ToNot(HaveOccurred())
 
 				// Expect that the NamespacedCloudProfile Status is as expected.
@@ -781,15 +772,15 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								{
 									Name: "image-b",
 									Versions: []gardencorev1beta1.MachineImageVersion{
-										{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.0"}, Architectures: []string{"amd64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
+										{Version: "1.0", Architectures: []string{"amd64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
 											"architecture": {"amd64"},
 											"cap-b":        {"three", "two", "one"},
 											"cap-a":        {"standard"},
 										}}}},
-										{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "2.0"}, Architectures: []string{"amd64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
+										{Version: "2.0", Architectures: []string{"amd64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
 											"architecture": {"amd64"},
 										}}}},
-										{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "3.0"}, Architectures: []string{"arm64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
+										{Version: "3.0", Architectures: []string{"arm64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
 											"architecture": {"arm64"},
 											"cap-a":        {"featured"},
 										}}}},
@@ -830,8 +821,8 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 						{
 							Name: "image-b",
 							Versions: []gardencorev1beta1.MachineImageVersion{
-								{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "2.0", ExpirationDate: &expirationDate}},
-								{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.0"}, Architectures: []string{"amd64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
+								{Version: "2.0", ExpirationDate: &expirationDate},
+								{Version: "4.0", Architectures: []string{"amd64"}, CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
 									"architecture": {"amd64"},
 								}}}},
 							},
@@ -855,8 +846,8 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 
 					expectedSpec.MachineImages[1].Versions[1].ExpirationDate = &expirationDate
 					expectedSpec.MachineImages[1].Versions = append(expectedSpec.MachineImages[1].Versions, gardencorev1beta1.MachineImageVersion{
-						ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "4.0"},
-						Architectures:    []string{"amd64"},
+						Version:       "4.0",
+						Architectures: []string{"amd64"},
 						CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{{Capabilities: map[string]gardencorev1beta1.CapabilityValues{
 							"architecture": {"amd64"},
 						}}},
@@ -947,8 +938,8 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								Name: "ubuntu",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
-										Architectures:    []string{"amd64", "arm64"},
+										Version:       "20.04",
+										Architectures: []string{"amd64", "arm64"},
 									},
 								},
 							},
@@ -971,8 +962,8 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								Name: "ubuntu",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
-										Architectures:    []string{"amd64"},
+										Version:       "20.04",
+										Architectures: []string{"amd64"},
 									},
 								},
 							},
@@ -992,7 +983,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								Name: "ubuntu",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
+										Version: "20.04",
 										CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 											{
 												Capabilities: gardencorev1beta1.Capabilities{
@@ -1059,8 +1050,8 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								Name: "ubuntu",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
-										Architectures:    []string{"amd64", "arm64"},
+										Version:       "20.04",
+										Architectures: []string{"amd64", "arm64"},
 									},
 								},
 							},
@@ -1099,7 +1090,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								Name: "ubuntu",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
+										Version: "20.04",
 										CapabilityFlavors: []gardencorev1beta1.MachineImageFlavor{
 											{
 												Capabilities: gardencorev1beta1.Capabilities{
@@ -1151,7 +1142,7 @@ var _ = Describe("NamespacedCloudProfile Reconciler", func() {
 								Name: "ubuntu",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "20.04"},
+										Version: "20.04",
 									},
 								},
 							},

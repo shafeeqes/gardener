@@ -228,17 +228,15 @@ func (m *machineControllerManager) Deploy(ctx context.Context) error {
 		deployment.Spec.RevisionHistoryLimit = new(int32(2))
 		deployment.Spec.Selector = &metav1.LabelSelector{MatchLabels: getLabels()}
 		deployment.Spec.Template = corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: utils.MergeStringMaps(getLabels(), map[string]string{
-					v1beta1constants.GardenRole:                                                                                 v1beta1constants.GardenRoleControlPlane,
-					v1beta1constants.LabelPodMaintenanceRestart:                                                                 "true",
-					v1beta1constants.LabelNetworkPolicyToDNS:                                                                    v1beta1constants.LabelNetworkPolicyAllowed,
-					v1beta1constants.LabelNetworkPolicyToPublicNetworks:                                                         v1beta1constants.LabelNetworkPolicyAllowed,
-					v1beta1constants.LabelNetworkPolicyToPrivateNetworks:                                                        v1beta1constants.LabelNetworkPolicyAllowed,
-					v1beta1constants.LabelNetworkPolicyToRuntimeAPIServer:                                                       v1beta1constants.LabelNetworkPolicyAllowed,
-					gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
-				}),
-			},
+			Labels: utils.MergeStringMaps(getLabels(), map[string]string{
+				v1beta1constants.GardenRole:                                                                                 v1beta1constants.GardenRoleControlPlane,
+				v1beta1constants.LabelPodMaintenanceRestart:                                                                 "true",
+				v1beta1constants.LabelNetworkPolicyToDNS:                                                                    v1beta1constants.LabelNetworkPolicyAllowed,
+				v1beta1constants.LabelNetworkPolicyToPublicNetworks:                                                         v1beta1constants.LabelNetworkPolicyAllowed,
+				v1beta1constants.LabelNetworkPolicyToPrivateNetworks:                                                        v1beta1constants.LabelNetworkPolicyAllowed,
+				v1beta1constants.LabelNetworkPolicyToRuntimeAPIServer:                                                       v1beta1constants.LabelNetworkPolicyAllowed,
+				gardenerutils.NetworkPolicyLabel(v1beta1constants.DeploymentNameKubeAPIServer, kubeapiserverconstants.Port): v1beta1constants.LabelNetworkPolicyAllowed,
+			}),
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{{
 					Name:            containerName,
@@ -259,12 +257,10 @@ func (m *machineControllerManager) Deploy(ctx context.Context) error {
 						"--v=3",
 					},
 					LivenessProbe: &corev1.Probe{
-						ProbeHandler: corev1.ProbeHandler{
-							HTTPGet: &corev1.HTTPGetAction{
-								Path:   "/healthz",
-								Port:   intstr.FromInt32(portMetrics),
-								Scheme: corev1.URISchemeHTTP,
-							},
+						HTTPGet: &corev1.HTTPGetAction{
+							Path:   "/healthz",
+							Port:   intstr.FromInt32(portMetrics),
+							Scheme: corev1.URISchemeHTTP,
 						},
 						FailureThreshold:    3,
 						InitialDelaySeconds: 30,
@@ -578,9 +574,7 @@ func (m *machineControllerManager) computeShootResourcesData(serviceAccountName 
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:machine-controller-manager",
-			},
+			Name: "gardener.cloud:target:machine-controller-manager",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -616,9 +610,7 @@ func (m *machineControllerManager) computeShootResourcesData(serviceAccountName 
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:machine-controller-manager",
-			},
+			Name: "gardener.cloud:target:machine-controller-manager",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -628,11 +620,9 @@ func (m *machineControllerManager) computeShootResourcesData(serviceAccountName 
 		}
 
 		role = &rbacv1.Role{
-			TypeMeta: metav1.TypeMeta{},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:machine-controller-manager",
-				Namespace: metav1.NamespaceSystem,
-			},
+			TypeMeta:  metav1.TypeMeta{},
+			Name:      "gardener.cloud:target:machine-controller-manager",
+			Namespace: metav1.NamespaceSystem,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -643,11 +633,9 @@ func (m *machineControllerManager) computeShootResourcesData(serviceAccountName 
 		}
 
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:target:machine-controller-manager",
-				Namespace: metav1.NamespaceSystem,
-			},
-			Subjects: []rbacv1.Subject{subject},
+			Name:      "gardener.cloud:target:machine-controller-manager",
+			Namespace: metav1.NamespaceSystem,
+			Subjects:  []rbacv1.Subject{subject},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "Role",
@@ -665,19 +653,19 @@ func (m *machineControllerManager) computeShootResourcesData(serviceAccountName 
 }
 
 func (m *machineControllerManager) emptyServiceAccount() *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager", Namespace: m.namespace}}
+	return &corev1.ServiceAccount{Name: "machine-controller-manager", Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) emptyRole() *rbacv1.Role {
-	return &rbacv1.Role{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager", Namespace: m.namespace}}
+	return &rbacv1.Role{Name: "machine-controller-manager", Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) emptyRoleBindingRuntime() *rbacv1.RoleBinding {
-	return &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "machine-controller-manager", Namespace: m.namespace}}
+	return &rbacv1.RoleBinding{Name: "machine-controller-manager", Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) emptyService() *corev1.Service {
-	return &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: m.namespace}}
+	return &corev1.Service{Name: serviceName, Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) newShootAccessSecret() *gardenerutils.AccessSecret {
@@ -685,15 +673,15 @@ func (m *machineControllerManager) newShootAccessSecret() *gardenerutils.AccessS
 }
 
 func (m *machineControllerManager) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: m.namespace}}
+	return &appsv1.Deployment{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) emptyPodDisruptionBudget() *policyv1.PodDisruptionBudget {
-	return &policyv1.PodDisruptionBudget{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: m.namespace}}
+	return &policyv1.PodDisruptionBudget{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: VPAName, Namespace: m.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: VPAName, Namespace: m.namespace}
 }
 
 func (m *machineControllerManager) emptyPrometheusRule() *monitoringv1.PrometheusRule {
@@ -705,7 +693,7 @@ func (m *machineControllerManager) emptyServiceMonitor() *monitoringv1.ServiceMo
 }
 
 func (m *machineControllerManager) emptyManagedResource() *resourcesv1alpha1.ManagedResource {
-	return &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceTargetName, Namespace: m.namespace}}
+	return &resourcesv1alpha1.ManagedResource{Name: managedResourceTargetName, Namespace: m.namespace}
 }
 
 func getLabels() map[string]string {

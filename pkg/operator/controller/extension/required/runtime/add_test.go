@@ -11,8 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -70,9 +68,7 @@ var _ = Describe("Add", func() {
 
 				BeforeEach(func() {
 					infraExtension = &operatorv1alpha1.Extension{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "local-infra",
-						},
+						Name: "local-infra",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: "BackupBucket", Type: "local-infrastructure"},
@@ -81,9 +77,7 @@ var _ = Describe("Add", func() {
 					}
 
 					dnsExtension = &operatorv1alpha1.Extension{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "local-dns",
-						},
+						Name: "local-dns",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: "DNSRecord", Type: "local-dns"},
@@ -92,9 +86,7 @@ var _ = Describe("Add", func() {
 					}
 
 					genericExtension = &operatorv1alpha1.Extension{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "local-generic",
-						},
+						Name: "local-generic",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: "Extension", Type: "local-extension"},
@@ -109,9 +101,9 @@ var _ = Describe("Add", func() {
 
 				It("should return all extensions", func() {
 					Expect(mapperFunc(ctx, nil)).To(ConsistOf(
-						Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: infraExtension.Name}}),
-						Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: dnsExtension.Name}}),
-						Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: genericExtension.Name}}),
+						Equal(reconcile.Request{Name: infraExtension.Name}),
+						Equal(reconcile.Request{Name: dnsExtension.Name}),
+						Equal(reconcile.Request{Name: genericExtension.Name}),
 					))
 				})
 			})
@@ -154,9 +146,7 @@ var _ = Describe("Add", func() {
 					requiredExtensionType = "local"
 
 					testExtension1 = &operatorv1alpha1.Extension{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "test-extension-1",
-						},
+						Name: "test-extension-1",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: requiredExtensionKind, Type: requiredExtensionType},
@@ -165,9 +155,7 @@ var _ = Describe("Add", func() {
 					}
 
 					testExtension2 = &operatorv1alpha1.Extension{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "test-extension-2",
-						},
+						Name: "test-extension-2",
 						Spec: operatorv1alpha1.ExtensionSpec{
 							Resources: []gardencorev1beta1.ControllerResource{
 								{Kind: "DNSRecord", Type: requiredExtensionType},
@@ -180,16 +168,14 @@ var _ = Describe("Add", func() {
 				})
 
 				It("should add the kind with an empty set to the map and return the extension", func() {
-					Expect(mapperFunc(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: testExtension1.Name, Namespace: testExtension1.Namespace}})))
+					Expect(mapperFunc(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{Name: testExtension1.Name, Namespace: testExtension1.Namespace})))
 					Expect(kindToRequiredTypes).To(HaveKeyWithValue(requiredExtensionKind, sets.New[string]()))
 				})
 
 				It("should correctly calculate the kind-to-types map and return the expected extension in the requests", func() {
 					By("Invoke mapper the first time and expect requests")
 					backupBucket := &extensionsv1alpha1.BackupBucket{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "test-backup-bucket",
-						},
+						Name: "test-backup-bucket",
 						Spec: extensionsv1alpha1.BackupBucketSpec{
 							DefaultSpec: extensionsv1alpha1.DefaultSpec{
 								Type:  requiredExtensionType,
@@ -200,7 +186,7 @@ var _ = Describe("Add", func() {
 
 					Expect(fakeClient.Create(ctx, backupBucket)).To(Succeed())
 
-					Expect(mapperFunc(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: testExtension1.Name, Namespace: testExtension1.Namespace}})))
+					Expect(mapperFunc(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{Name: testExtension1.Name, Namespace: testExtension1.Namespace})))
 					Expect(kindToRequiredTypes).To(HaveKeyWithValue(requiredExtensionKind, sets.New(requiredExtensionType)))
 
 					By("Invoke mapper again w/o changes and expect no requests")
@@ -209,7 +195,7 @@ var _ = Describe("Add", func() {
 
 					By("Delete BackupBucket and expect the extension in the requests")
 					Expect(fakeClient.Delete(ctx, backupBucket)).To(Succeed())
-					Expect(mapperFunc(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: testExtension1.Name, Namespace: testExtension1.Namespace}})))
+					Expect(mapperFunc(ctx, nil)).To(ConsistOf(Equal(reconcile.Request{Name: testExtension1.Name, Namespace: testExtension1.Namespace})))
 					Expect(kindToRequiredTypes).To(HaveKeyWithValue(requiredExtensionKind, sets.New[string]()))
 				})
 			})

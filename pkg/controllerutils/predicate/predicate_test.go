@@ -95,7 +95,7 @@ var _ = Describe("Predicate", func() {
 
 		BeforeEach(func() {
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "foobar"},
+				Name: "foobar",
 			}
 
 			predicate = HasName(shoot.Name)
@@ -150,7 +150,7 @@ var _ = Describe("Predicate", func() {
 
 		BeforeEach(func() {
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Namespace: "foobar"},
+				Namespace: "foobar",
 			}
 
 			predicate = HasNamespace(shoot.Namespace)
@@ -402,14 +402,10 @@ var _ = Describe("Predicate", func() {
 
 		BeforeEach(func() {
 			extensionBackupBucket = &extensionsv1alpha1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: bucketName,
-				},
+				Name: bucketName,
 			}
 			extensionBackupEntry = &extensionsv1alpha1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: entryName,
-				},
+				Name: entryName,
 			}
 			p = LastOperationChanged(GetExtensionLastOperation)
 		})

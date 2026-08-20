@@ -8,7 +8,6 @@ import (
 	"context"
 	"time"
 
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -35,9 +34,7 @@ func SecretToBackupBucketMapper(reader client.Reader, predicates []predicate.Pre
 			if backupBucket.Spec.SecretRef.Name == obj.GetName() && backupBucket.Spec.SecretRef.Namespace == obj.GetNamespace() {
 				if predicateutils.EvalGeneric(&backupBucket, predicates...) {
 					requests = append(requests, reconcile.Request{
-						NamespacedName: types.NamespacedName{
-							Name: backupBucket.Name,
-						},
+						Name: backupBucket.Name,
 					})
 				}
 			}

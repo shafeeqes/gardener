@@ -100,9 +100,7 @@ var _ = Describe("ManagedSeedSet controller test", func() {
 
 	BeforeEach(func() {
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{testID: testRunID},
-			},
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -148,15 +146,11 @@ var _ = Describe("ManagedSeedSet controller test", func() {
 		}
 
 		gardenletConfig = &gardenletconfigv1alpha1.GardenletConfiguration{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "GardenletConfiguration",
-			},
+			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "GardenletConfiguration",
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: seed.ObjectMeta,
-					Spec:       seed.Spec,
-				},
+				ObjectMeta: seed.ObjectMeta,
+				Spec:       seed.Spec,
 			},
 		}
 
@@ -164,10 +158,8 @@ var _ = Describe("ManagedSeedSet controller test", func() {
 		utilruntime.Must(err)
 
 		managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: gardenNamespace.Name,
-				Labels:    map[string]string{testID: testRunID},
-			},
+			Namespace: gardenNamespace.Name,
+			Labels:    map[string]string{testID: testRunID},
 			Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 				Gardenlet: seedmanagementv1alpha1.GardenletConfig{
 					Config: runtime.RawExtension{
@@ -178,12 +170,10 @@ var _ = Describe("ManagedSeedSet controller test", func() {
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: gardenNamespace.Name,
-				Labels: map[string]string{
-					testID:                       testRunID,
-					v1beta1constants.ShootStatus: "healthy",
-				},
+			Namespace: gardenNamespace.Name,
+			Labels: map[string]string{
+				testID:                       testRunID,
+				v1beta1constants.ShootStatus: "healthy",
 			},
 			Spec: gardencorev1beta1.ShootSpec{
 				CloudProfileName: new("foo"),
@@ -221,11 +211,9 @@ var _ = Describe("ManagedSeedSet controller test", func() {
 		}
 
 		managedSeedSet = &seedmanagementv1alpha1.ManagedSeedSet{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: testID + "-",
-				Namespace:    gardenNamespace.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: testID + "-",
+			Namespace:    gardenNamespace.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: seedmanagementv1alpha1.ManagedSeedSetSpec{
 				Selector: metav1.LabelSelector{
 					MatchLabels: map[string]string{testID: testRunID},

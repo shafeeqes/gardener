@@ -61,5 +61,5 @@ func DeployZeroDownTimeValidatorJob(ctx context.Context, c client.Client, testNa
 
 // EmptyZeroDownTimeValidatorJob returns a Job object with only metadata set.
 func EmptyZeroDownTimeValidatorJob(name, namespace string) *batchv1.Job {
-	return &batchv1.Job{ObjectMeta: metav1.ObjectMeta{Name: "zero-down-time-validator-" + name, Namespace: namespace}}
+	return &batchv1.Job{Name: "zero-down-time-validator-" + name, Namespace: namespace}
 }

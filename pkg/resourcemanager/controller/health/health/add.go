@@ -11,7 +11,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
@@ -118,16 +117,14 @@ func (r *Reconciler) AddToManager(mgr manager.Manager, sourceCluster, targetClus
 func (r *Reconciler) EnqueueCreateAndUpdate() handler.EventHandler {
 	return &handler.Funcs{
 		CreateFunc: func(_ context.Context, e event.CreateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{
+			q.Add(reconcile.Request{
 				Name:      e.Object.GetName(),
-				Namespace: e.Object.GetNamespace(),
-			}})
+				Namespace: e.Object.GetNamespace()})
 		},
 		UpdateFunc: func(_ context.Context, e event.UpdateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{
+			q.Add(reconcile.Request{
 				Name:      e.ObjectNew.GetName(),
-				Namespace: e.ObjectNew.GetNamespace(),
-			}})
+				Namespace: e.ObjectNew.GetNamespace()})
 		},
 	}
 }

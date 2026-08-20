@@ -40,15 +40,11 @@ var _ = Describe("validator", func() {
 			providerType         = "provider"
 
 			seedBase = core.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: seedName,
-				},
+				Name: seedName,
 			}
 			shootBase = gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot",
-					Namespace: namespaceName,
-				},
+				Name:      "shoot",
+				Namespace: namespaceName,
 				Spec: gardencorev1beta1.ShootSpec{
 					CloudProfileName:  new("profile"),
 					Region:            "europe",
@@ -58,9 +54,7 @@ var _ = Describe("validator", func() {
 			}
 
 			backupBucketBase = gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: backupBucketName,
-				},
+				Name: backupBucketName,
 			}
 		)
 
@@ -233,10 +227,8 @@ var _ = Describe("validator", func() {
 					newSeed = oldSeed.DeepCopy()
 
 					workloadIdentity := &securityv1alpha1.WorkloadIdentity{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      workloadIdentityName,
-							Namespace: namespaceName,
-						},
+						Name:      workloadIdentityName,
+						Namespace: namespaceName,
 						Spec: securityv1alpha1.WorkloadIdentitySpec{
 							TargetSystem: securityv1alpha1.TargetSystem{
 								Type: providerType,
@@ -358,10 +350,8 @@ var _ = Describe("validator", func() {
 				}
 
 				workloadIdentity := &securityv1alpha1.WorkloadIdentity{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      workloadIdentityName,
-						Namespace: namespaceName,
-					},
+					Name:      workloadIdentityName,
+					Namespace: namespaceName,
 					Spec: securityv1alpha1.WorkloadIdentitySpec{
 						TargetSystem: securityv1alpha1.TargetSystem{
 							Type: providerType,

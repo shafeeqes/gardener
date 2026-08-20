@@ -19,9 +19,7 @@ func (k *kubeControllerManager) reconcileShootResources(ctx context.Context, ser
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:target:kube-controller-manager",
-			},
+			Name: "gardener.cloud:target:kube-controller-manager",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",

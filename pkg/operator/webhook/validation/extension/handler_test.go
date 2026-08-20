@@ -37,12 +37,10 @@ var _ = Describe("Handler", func() {
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &gardencorev1.OCIRepository{
-									Repository: new("example.com/repo"),
-									Tag:        new("v0.0.0"),
-								},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &gardencorev1.OCIRepository{
+								Repository: new("example.com/repo"),
+								Tag:        new("v0.0.0"),
 							},
 						},
 					},

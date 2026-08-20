@@ -10,7 +10,6 @@ import (
 
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -72,7 +71,7 @@ func run(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("failed creating client: %w", err)
 	}
 
-	shoot := &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: opts.Name, Namespace: opts.Namespace}}
+	shoot := &gardencorev1beta1.Shoot{Name: opts.Name, Namespace: opts.Namespace}
 	if err := clientSet.Client().Get(ctx, client.ObjectKeyFromObject(shoot), shoot); err != nil {
 		return fmt.Errorf("failed getting Shoot %s from garden cluster: %w", client.ObjectKeyFromObject(shoot), err)
 	}

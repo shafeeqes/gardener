@@ -25,9 +25,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			p = (&Reconciler{}).SecretPredicate()
 			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{"resources.gardener.cloud/purpose": "token-requestor"},
-				},
+				Labels: map[string]string{"resources.gardener.cloud/purpose": "token-requestor"},
 			}
 		})
 

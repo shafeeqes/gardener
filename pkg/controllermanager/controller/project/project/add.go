@@ -12,7 +12,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -93,7 +92,7 @@ func (r *Reconciler) MapShootToProjectInDeletion(log logr.Logger) handler.MapFun
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: project.Name}}}
+		return []reconcile.Request{{Name: project.Name}}
 	}
 }
 

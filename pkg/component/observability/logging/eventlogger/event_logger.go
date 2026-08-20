@@ -126,10 +126,8 @@ func (l *eventLogger) reconcileRBACForShoot(ctx context.Context) error {
 
 	var (
 		eventLoggerClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   roleName,
-				Labels: getLabels(),
-			},
+			Name:   roleName,
+			Labels: getLabels(),
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -143,10 +141,8 @@ func (l *eventLogger) reconcileRBACForShoot(ctx context.Context) error {
 		}
 
 		eventLoggerClusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: getLabels(),
-			},
+			Name:   name,
+			Labels: getLabels(),
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{
@@ -330,23 +326,23 @@ func (l *eventLogger) newShootAccessSecret() *gardenerutils.AccessSecret {
 }
 
 func (l *eventLogger) emptyRole() *rbacv1.Role {
-	return &rbacv1.Role{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: l.namespace}}
+	return &rbacv1.Role{Name: name, Namespace: l.namespace}
 }
 
 func (l *eventLogger) emptyRoleBinding() *rbacv1.RoleBinding {
-	return &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: l.namespace}}
+	return &rbacv1.RoleBinding{Name: name, Namespace: l.namespace}
 }
 
 func (l *eventLogger) emptyServiceAccount() *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: l.namespace}}
+	return &corev1.ServiceAccount{Name: name, Namespace: l.namespace}
 }
 
 func (l *eventLogger) emptyDeployment() *appsv1.Deployment {
-	return &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: l.namespace}}
+	return &appsv1.Deployment{Name: name, Namespace: l.namespace}
 }
 
 func (l *eventLogger) emptyVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
-	return &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: vpaName, Namespace: l.namespace}}
+	return &vpaautoscalingv1.VerticalPodAutoscaler{Name: vpaName, Namespace: l.namespace}
 }
 
 func (l *eventLogger) computeCommand() []string {

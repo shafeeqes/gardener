@@ -44,11 +44,9 @@ var _ = Describe("Default Resource Quota", func() {
 
 		BeforeEach(func() {
 			project = &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      projectName,
-					Namespace: namespace,
-					UID:       "1",
-				},
+				Name:      projectName,
+				Namespace: namespace,
+				UID:       "1",
 			}
 			fooSelector, _ = metav1.ParseToLabelSelector("role = foo")
 			resourceQuota = corev1.ResourceQuota{
@@ -161,24 +159,20 @@ var _ = Describe("Default Resource Quota", func() {
 
 		BeforeEach(func() {
 			project = &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      projectName,
-					Namespace: namespace,
-					UID:       "1",
-				},
+				Name:      projectName,
+				Namespace: namespace,
+				UID:       "1",
 			}
 			ownerRef = metav1.NewControllerRef(project, gardencorev1beta1.SchemeGroupVersion.WithKind("Project"))
 			shoots = "shoots.core.gardener.cloud"
 			secrets = "secrets"
 			quantity = resource.MustParse("10")
 			resourceQuota = corev1.ResourceQuota{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						"foo": "bar",
-					},
-					Labels: map[string]string{
-						"bar": "baz",
-					},
+				Annotations: map[string]string{
+					"foo": "bar",
+				},
+				Labels: map[string]string{
+					"bar": "baz",
 				},
 				Spec: corev1.ResourceQuotaSpec{
 					Hard: map[corev1.ResourceName]resource.Quantity{
@@ -213,11 +207,9 @@ var _ = Describe("Default Resource Quota", func() {
 
 			existingOwnerRef := metav1.OwnerReference{Name: "foo"}
 			existingResourceQuota := &corev1.ResourceQuota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            ResourceQuotaName,
-					Namespace:       namespace,
-					OwnerReferences: []metav1.OwnerReference{existingOwnerRef},
-				},
+				Name:            ResourceQuotaName,
+				Namespace:       namespace,
+				OwnerReferences: []metav1.OwnerReference{existingOwnerRef},
 				Spec: corev1.ResourceQuotaSpec{
 					Hard: map[corev1.ResourceName]resource.Quantity{
 						shoots: resource.MustParse("50"),

@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -131,9 +130,9 @@ var _ = BeforeSuite(func() {
 
 	By("Create nodes so that hasMoreThanOneNode returns true")
 	for _, name := range []string{"node1", "node2"} {
-		Expect(testClient.Create(ctx, &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: name}})).To(Succeed())
+		Expect(testClient.Create(ctx, &corev1.Node{Name: name})).To(Succeed())
 		DeferCleanup(func(name string) {
-			Expect(testClient.Delete(ctx, &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: name}})).To(Succeed())
+			Expect(testClient.Delete(ctx, &corev1.Node{Name: name})).To(Succeed())
 		}, name)
 	}
 
@@ -146,13 +145,9 @@ var _ = BeforeSuite(func() {
 func getMutatingWebhookConfigurations() []*admissionregistrationv1.MutatingWebhookConfiguration {
 	webhookConfig := []*admissionregistrationv1.MutatingWebhookConfiguration{
 		{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
-				Kind:       "MutatingWebhookConfiguration",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener-resource-manager",
-			},
+			APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
+			Kind:       "MutatingWebhookConfiguration",
+			Name:       "gardener-resource-manager",
 			Webhooks: []admissionregistrationv1.MutatingWebhook{
 				resourcemanager.NewHighAvailabilityConfigMutatingWebhook(nil, nil, nil, func(_ *corev1.Secret, path string) admissionregistrationv1.WebhookClientConfig {
 					return admissionregistrationv1.WebhookClientConfig{

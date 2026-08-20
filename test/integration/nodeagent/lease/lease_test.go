@@ -25,12 +25,10 @@ var _ = Describe("Reconcile", func() {
 
 		BeforeEach(func() {
 			node = &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   nodeName,
-					Labels: map[string]string{testID: testRunID},
-				},
+				Name:   nodeName,
+				Labels: map[string]string{testID: testRunID},
 			}
-			lease := &coordinationv1.Lease{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace.Name, Name: "gardener-node-agent-" + nodeName}}
+			lease := &coordinationv1.Lease{Namespace: testNamespace.Name, Name: "gardener-node-agent-" + nodeName}
 
 			By("Create Node")
 			Expect(testClient.Create(ctx, node)).To(Succeed())

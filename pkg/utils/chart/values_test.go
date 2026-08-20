@@ -12,7 +12,6 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -36,22 +35,18 @@ var _ = Describe("Values", func() {
 	BeforeEach(func() {
 		ctx = context.Background()
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-secret",
-				Namespace: namespace,
-				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference},
-			},
+			Name:      "my-secret",
+			Namespace: namespace,
+			Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference},
 			Data: map[string][]byte{
 				"username": []byte("admin"),
 				"password": []byte("s3cret"),
 			},
 		}
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-config",
-				Namespace: namespace,
-				Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference},
-			},
+			Name:      "my-config",
+			Namespace: namespace,
+			Labels:    map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference},
 			Data: map[string]string{
 				"foo": "bar",
 				"bar": "foo",

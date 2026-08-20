@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/gardener/gardener/pkg/utils/kubernetes"
 )
@@ -72,7 +71,7 @@ var _ = Describe("Node", func() {
 		var node corev1.Node
 
 		BeforeEach(func() {
-			node = corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node1"}}
+			node = corev1.Node{Name: "node1"}
 		})
 
 		It("should return the IPv4 address when preferIPv6=false", func() {

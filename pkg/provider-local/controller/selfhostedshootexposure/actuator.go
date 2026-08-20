@@ -15,7 +15,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -98,10 +97,8 @@ func (a *actuator) Delete(ctx context.Context, log logr.Logger, exposure *extens
 	// cluster so they won't be garbage collected automatically.
 	for _, family := range endpointSliceFamiliesForCluster(cluster) {
 		if err := providerClient.Delete(ctx, &discoveryv1.EndpointSlice{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      endpointSliceName(exposure, family),
-				Namespace: infraNamespace,
-			},
+			Name:      endpointSliceName(exposure, family),
+			Namespace: infraNamespace,
 		}); client.IgnoreNotFound(err) != nil {
 			return fmt.Errorf("could not delete %s EndpointSlice: %w", family, err)
 		}
@@ -143,14 +140,10 @@ func endpointSliceFamiliesForCluster(cluster *extensionscontroller.Cluster) []di
 
 func serviceForExposure(exposure *extensionsv1alpha1.SelfHostedShootExposure, namespace string) *corev1.Service {
 	return &corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Service",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceName(exposure),
-			Namespace: namespace,
-		},
+		APIVersion: "v1",
+		Kind:       "Service",
+		Name:       serviceName(exposure),
+		Namespace:  namespace,
 		Spec: corev1.ServiceSpec{
 			Type:           corev1.ServiceTypeLoadBalancer,
 			IPFamilyPolicy: new(corev1.IPFamilyPolicyPreferDualStack),
@@ -194,15 +187,11 @@ func endpointSliceForExposure(exposure *extensionsv1alpha1.SelfHostedShootExposu
 	}
 
 	return &discoveryv1.EndpointSlice{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "discovery.k8s.io/v1",
-			Kind:       "EndpointSlice",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      endpointSliceName(exposure, family),
-			Namespace: namespace,
-			Labels:    map[string]string{discoveryv1.LabelServiceName: serviceName(exposure)},
-		},
+		APIVersion:  "discovery.k8s.io/v1",
+		Kind:        "EndpointSlice",
+		Name:        endpointSliceName(exposure, family),
+		Namespace:   namespace,
+		Labels:      map[string]string{discoveryv1.LabelServiceName: serviceName(exposure)},
 		AddressType: family,
 		Endpoints:   endpoints,
 		Ports: []discoveryv1.EndpointPort{{

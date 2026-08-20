@@ -54,10 +54,8 @@ var testNamespace *corev1.Namespace
 func prepareAndRunTest(ignoreOperationAnnotation bool) {
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-			GenerateName: testID + "-",
-		},
+		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+		GenerateName: testID + "-",
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -68,9 +66,7 @@ func prepareAndRunTest(ignoreOperationAnnotation bool) {
 	})
 
 	cluster := &extensionsv1alpha1.Cluster{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: testNamespace.Name,
-		},
+		Name: testNamespace.Name,
 		Spec: extensionsv1alpha1.ClusterSpec{
 			CloudProfile: runtime.RawExtension{Raw: []byte("{}")},
 			Seed:         &runtime.RawExtension{Raw: []byte("{}")},
@@ -122,17 +118,13 @@ func prepareAndRunTest(ignoreOperationAnnotation bool) {
 func runTest(c client.Client, ignoreOperationAnnotation bool) {
 	var (
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.SecretNameCloudProvider,
-				Namespace: testNamespace.Name,
-			},
+			Name:      v1beta1constants.SecretNameCloudProvider,
+			Namespace: testNamespace.Name,
 		}
 		secretObjectKey = client.ObjectKeyFromObject(secret)
 
 		backupBucket = &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testNamespace.Name,
-			},
+			Name: testNamespace.Name,
 			Spec: extensionsv1alpha1.BackupBucketSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: extensionsintegrationtest.Type,

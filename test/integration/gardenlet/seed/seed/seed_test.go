@@ -73,9 +73,7 @@ var _ = Describe("Seed controller tests", func() {
 	BeforeEach(func() {
 		By("Create test Namespace")
 		testNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "garden-",
-			},
+			GenerateName: "garden-",
 		}
 		Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 		log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -163,11 +161,7 @@ var _ = Describe("Seed controller tests", func() {
 					},
 				},
 				SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-					SeedTemplate: gardencorev1beta1.SeedTemplate{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: seedName,
-						},
-					},
+					Name: seedName,
 				},
 			},
 			Identity:        identity,
@@ -195,13 +189,12 @@ var _ = Describe("Seed controller tests", func() {
 		))
 
 		By("Create DNS provider secret in garden namespace")
-		dnsProviderSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+		dnsProviderSecret := &corev1.Secret{
 			GenerateName: "secret-",
 			Namespace:    testNamespace.Name,
 			Labels: map[string]string{
 				testID: testRunID,
-			},
-		}}
+			}}
 		Expect(testClient.Create(ctx, dnsProviderSecret)).To(Succeed())
 
 		By("Wait until the manager cache observes the DNS provider secret")
@@ -213,10 +206,8 @@ var _ = Describe("Seed controller tests", func() {
 		extensionData = []byte(`{"someField":"someValue"}`)
 
 		seed = &gardencorev1beta1.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   seedName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   seedName,
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.SeedSpec{
 				Provider: gardencorev1beta1.SeedProvider{
 					Region: "region",
@@ -275,18 +266,14 @@ var _ = Describe("Seed controller tests", func() {
 		}
 
 		referencedConfigMap := corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-config",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "extension-config",
+			Namespace: testNamespace.Name,
 		}
 		Expect(testClient.Create(ctx, &referencedConfigMap)).To(Succeed())
 
 		controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "ctrlreg-" + testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "ctrlreg-" + testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerRegistrationSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{Kind: extensionsv1alpha1.DNSRecordResource, Type: providerName},
@@ -307,10 +294,8 @@ var _ = Describe("Seed controller tests", func() {
 		log.Info("Created ControllerRegistration for test", "controllerRegistration", controllerRegistration.Name)
 
 		seedControllerInst = &gardencorev1beta1.ControllerInstallation{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "ctrlinst-" + testID + "-",
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "ctrlinst-" + testID + "-",
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ControllerInstallationSpec{
 				RegistrationRef: corev1.ObjectReference{
 					Name: controllerRegistration.Name,
@@ -384,7 +369,7 @@ var _ = Describe("Seed controller tests", func() {
 
 		JustBeforeEach(func() {
 			By("Create seed namespace in garden")
-			seedNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: gardenerutils.ComputeGardenNamespace(seed.Name)}}
+			seedNamespace = &corev1.Namespace{Name: gardenerutils.ComputeGardenNamespace(seed.Name)}
 			Expect(testClient.Create(ctx, seedNamespace)).To(Succeed())
 
 			By("Wait until the manager cache observes the seed namespace")
@@ -432,13 +417,11 @@ var _ = Describe("Seed controller tests", func() {
 			JustBeforeEach(func() {
 				By("Create global monitoring secret in seed namespace")
 				globalMonitoringSecret = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: "secret-",
-						Namespace:    seedNamespace.Name,
-						Labels: map[string]string{
-							testID:                testRunID,
-							"gardener.cloud/role": "global-monitoring",
-						},
+					GenerateName: "secret-",
+					Namespace:    seedNamespace.Name,
+					Labels: map[string]string{
+						testID:                testRunID,
+						"gardener.cloud/role": "global-monitoring",
 					},
 					Data: map[string][]byte{"foo": []byte("bar")},
 				}
@@ -602,7 +585,7 @@ var _ = Describe("Seed controller tests", func() {
 					// let's fake this here.
 					By("Patch " + mrName + " managed resource to report healthiness")
 					Eventually(func(g Gomega) {
-						mr := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: mrName, Namespace: testNamespace.Name}}
+						mr := &resourcesv1alpha1.ManagedResource{Name: mrName, Namespace: testNamespace.Name}
 						g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 
 						patch := client.MergeFrom(mr.DeepCopy())
@@ -632,7 +615,7 @@ var _ = Describe("Seed controller tests", func() {
 					// let's fake this here.
 					By("Patch gardener-resource-manager deployment to report healthiness")
 					Eventually(func(g Gomega) {
-						deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager", Namespace: testNamespace.Name}}
+						deployment := &appsv1.Deployment{Name: "gardener-resource-manager", Namespace: testNamespace.Name}
 						g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 
 						patch := client.MergeFrom(deployment.DeepCopy())
@@ -657,7 +640,7 @@ var _ = Describe("Seed controller tests", func() {
 					var (
 						applier                  = kubernetes.NewApplier(testClient, testClient.RESTMapper())
 						managedResourceCRDReader = kubernetes.NewManifestReader([]byte(managedResourcesCRD))
-						istioSystemNamespace     = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "istio-system"}}
+						istioSystemNamespace     = &corev1.Namespace{Name: "istio-system"}
 					)
 					istioCRDs, err := istio.NewCRD(testClient)
 					Expect(err).NotTo(HaveOccurred())
@@ -799,10 +782,8 @@ var _ = Describe("Seed controller tests", func() {
 				By("Verify extension object")
 				Eventually(func(g Gomega) {
 					extension := &extensionsv1alpha1.Extension{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      providerName,
-							Namespace: testNamespace.Name,
-						},
+						Name:      providerName,
+						Namespace: testNamespace.Name,
 					}
 
 					g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(extension), extension)).To(Succeed())
@@ -843,7 +824,7 @@ var _ = Describe("Seed controller tests", func() {
 					// It can happen that the storage layer needs to recover, as some CRDs might end up in a stuck terminating state,
 					// with error: "InstanceDeletionFailed could not list instances: storage is (re)initializing}"
 					Eventually(func() error {
-						deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager", Namespace: testNamespace.Name}}
+						deployment := &appsv1.Deployment{Name: "gardener-resource-manager", Namespace: testNamespace.Name}
 						return testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)
 					}).WithTimeout(4 * time.Minute).Should(BeNotFoundError())
 
@@ -869,11 +850,9 @@ var _ = Describe("Seed controller tests", func() {
 				BeforeEach(func() {
 					By("Create Garden")
 					garden := &operatorv1alpha1.Garden{
-						ObjectMeta: metav1.ObjectMeta{
-							GenerateName: "garden-",
-							Labels: map[string]string{
-								testID: testRunID,
-							},
+						GenerateName: "garden-",
+						Labels: map[string]string{
+							testID: testRunID,
 						},
 						Spec: operatorv1alpha1.GardenSpec{
 							RuntimeCluster: operatorv1alpha1.RuntimeCluster{
@@ -937,7 +916,7 @@ var _ = Describe("Seed controller tests", func() {
 			When("seed cluster is a self-hosted shoot", func() {
 				BeforeEach(func() {
 					By("Label kube-system namespace to indicate self-hosted shoot")
-					kubeSystemNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system"}}
+					kubeSystemNamespace := &corev1.Namespace{Name: "kube-system"}
 					Expect(testClient.Get(ctx, client.ObjectKeyFromObject(kubeSystemNamespace), kubeSystemNamespace)).To(Succeed())
 					patch := client.MergeFrom(kubeSystemNamespace.DeepCopy())
 					metav1.SetMetaDataLabel(&kubeSystemNamespace.ObjectMeta, "gardener.cloud/role", "shoot")
@@ -945,7 +924,7 @@ var _ = Describe("Seed controller tests", func() {
 
 					DeferCleanup(func() {
 						By("Remove self-hosted shoot label from kube-system namespace")
-						kubeSystemNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system"}}
+						kubeSystemNamespace := &corev1.Namespace{Name: "kube-system"}
 						Expect(testClient.Get(ctx, client.ObjectKeyFromObject(kubeSystemNamespace), kubeSystemNamespace)).To(Succeed())
 						patch := client.MergeFrom(kubeSystemNamespace.DeepCopy())
 						delete(kubeSystemNamespace.Labels, "gardener.cloud/role")
@@ -954,18 +933,16 @@ var _ = Describe("Seed controller tests", func() {
 
 					By("Wait until the manager cache observes the kube-system label")
 					Eventually(func(g Gomega) map[string]string {
-						ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "kube-system"}}
+						ns := &corev1.Namespace{Name: "kube-system"}
 						g.Expect(mgrClient.Get(ctx, client.ObjectKeyFromObject(ns), ns)).To(Succeed())
 						return ns.Labels
 					}).Should(HaveKeyWithValue("gardener.cloud/role", "shoot"))
 
 					By("Create shoot-info ConfigMap in kube-system")
 					shootInfoCM := &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "shoot-info",
-							Namespace: "kube-system",
-						},
-						Data: map[string]string{"projectNamespace": "garden-local"},
+						Name:      "shoot-info",
+						Namespace: "kube-system",
+						Data:      map[string]string{"projectNamespace": "garden-local"},
 					}
 					Expect(testClient.Create(ctx, shootInfoCM)).To(Succeed())
 					DeferCleanup(func() {
@@ -974,10 +951,8 @@ var _ = Describe("Seed controller tests", func() {
 
 					By("Create Cluster resource in kube-system namespace with managed infrastructure Shoot")
 					shoot := &gardencorev1beta1.Shoot{
-						TypeMeta: metav1.TypeMeta{
-							APIVersion: "core.gardener.cloud/v1beta1",
-							Kind:       "Shoot",
-						},
+						APIVersion: "core.gardener.cloud/v1beta1",
+						Kind:       "Shoot",
 						Spec: gardencorev1beta1.ShootSpec{
 							CredentialsBindingName: new("my-credentials"),
 						},
@@ -986,9 +961,7 @@ var _ = Describe("Seed controller tests", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					cluster := &extensionsv1alpha1.Cluster{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "kube-system",
-						},
+						Name: "kube-system",
 						Spec: extensionsv1alpha1.ClusterSpec{
 							CloudProfile: runtime.RawExtension{Raw: []byte("{}")},
 							Seed:         &runtime.RawExtension{Raw: []byte("{}")},
@@ -1079,7 +1052,7 @@ var _ = Describe("Seed controller tests", func() {
 					patchMRHealth := func(mrName string) {
 						By("Patch " + mrName + " managed resource to report healthiness")
 						Eventually(func(g Gomega) {
-							mr := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: mrName, Namespace: testNamespace.Name}}
+							mr := &resourcesv1alpha1.ManagedResource{Name: mrName, Namespace: testNamespace.Name}
 							g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(mr), mr)).To(Succeed())
 
 							patch := client.MergeFrom(mr.DeepCopy())

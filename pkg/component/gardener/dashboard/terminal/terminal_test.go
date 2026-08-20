@@ -110,54 +110,42 @@ var _ = Describe("Terminal", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 
 		managedResourceRuntime = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameRuntime,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameRuntime,
+			Namespace: namespace,
 		}
 		managedResourceVirtual = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceNameVirtual,
-				Namespace: namespace,
-			},
+			Name:      managedResourceNameVirtual,
+			Namespace: namespace,
 		}
 		managedResourceSecretRuntime = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceRuntime.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceRuntime.Name,
+			Namespace: namespace,
 		}
 		managedResourceSecretVirtual = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceVirtual.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResourceVirtual.Name,
+			Namespace: namespace,
 		}
 
 		virtualGardenAccessSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-terminal-controller-manager",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "terminal-controller-manager",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
+			Name:      "shoot-access-terminal-controller-manager",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "terminal-controller-manager",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "terminal-controller-manager",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "terminal-controller-manager"},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports":       `[{"protocol":"TCP","port":9443}]`,
-					"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8443}]`,
-				},
+			Name:      "terminal-controller-manager",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "terminal-controller-manager"},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-webhook-targets-allowed-ports":       `[{"protocol":"TCP","port":9443}]`,
+				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":8443}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Type:     corev1.ServiceTypeClusterIP,
@@ -182,13 +170,11 @@ var _ = Describe("Terminal", func() {
 		configMap = expectedConfigMap(namespace, `["https://api.example.com"]`)
 
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "terminal-controller-manager",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app": "terminal-controller-manager",
-					"high-availability-config.resources.gardener.cloud/type": "server",
-				},
+			Name:      "terminal-controller-manager",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "terminal-controller-manager",
+				"high-availability-config.resources.gardener.cloud/type": "server",
 			},
 			Spec: appsv1.DeploymentSpec{
 				Replicas:             new(int32(1)),
@@ -249,12 +235,10 @@ var _ = Describe("Terminal", func() {
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromInt32(8081),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/healthz",
+									Port:   intstr.FromInt32(8081),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 15,
 								TimeoutSeconds:      5,
@@ -263,12 +247,10 @@ var _ = Describe("Terminal", func() {
 								PeriodSeconds:       20,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromInt32(8081),
-										Scheme: corev1.URISchemeHTTP,
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path:   "/readyz",
+									Port:   intstr.FromInt32(8081),
+									Scheme: corev1.URISchemeHTTP,
 								},
 								InitialDelaySeconds: 5,
 								TimeoutSeconds:      5,
@@ -297,18 +279,14 @@ var _ = Describe("Terminal", func() {
 						Volumes: []corev1.Volume{
 							{
 								Name: "config",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{Name: configMap.Name},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Name: configMap.Name,
 								},
 							},
 							{
 								Name: "server-cert",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: "terminal-controller-manager",
-									},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "terminal-controller-manager",
 								},
 							},
 						},
@@ -321,11 +299,9 @@ var _ = Describe("Terminal", func() {
 		utilruntime.Must(references.InjectAnnotations(deployment))
 
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "terminal-controller-manager",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "terminal-controller-manager"},
-			},
+			Name:      "terminal-controller-manager",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "terminal-controller-manager"},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable:             new(intstr.FromInt32(1)),
 				Selector:                   &metav1.LabelSelector{MatchLabels: map[string]string{"app": "terminal-controller-manager"}},
@@ -333,11 +309,9 @@ var _ = Describe("Terminal", func() {
 			},
 		}
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "terminal-controller-manager-vpa",
-				Namespace: namespace,
-				Labels:    map[string]string{"app": "terminal-controller-manager"},
-			},
+			Name:      "terminal-controller-manager-vpa",
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "terminal-controller-manager"},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -366,27 +340,19 @@ var _ = Describe("Terminal", func() {
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "garden-terminal-controller-manager",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "garden"},
-			},
+			Name:      "garden-terminal-controller-manager",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "garden"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{"app": "terminal-controller-manager"}},
 				Endpoints: []monitoringv1.Endpoint{{
-					Port:   "metrics",
-					Scheme: new(monitoringv1.SchemeHTTPS),
-					HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-						HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-							TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)}},
-							HTTPConfigWithoutTLS: monitoringv1.HTTPConfigWithoutTLS{
-								Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "shoot-access-prometheus-garden"},
-									Key:                  "token",
-								}},
-							},
-						},
-					},
+					Port:      "metrics",
+					Scheme:    new(monitoringv1.SchemeHTTPS),
+					TLSConfig: &monitoringv1.TLSConfig{InsecureSkipVerify: new(true)},
+					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
+						Name: "shoot-access-prometheus-garden",
+						Key:  "token",
+					}},
 					MetricRelabelConfigs: []monitoringv1.RelabelConfig{
 						{
 							Action: "labeldrop",
@@ -402,13 +368,11 @@ var _ = Describe("Terminal", func() {
 		crd = obj.(*apiextensionsv1.CustomResourceDefinition)
 
 		mutatingWebhookConfiguration = &admissionregistrationv1.MutatingWebhookConfiguration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "terminal-mutating-webhook-configuration",
-				Labels: map[string]string{
-					"app":                         "terminal-controller-manager",
-					"app.kubernetes.io/name":      "terminal",
-					"app.kubernetes.io/component": "admission-controller",
-				},
+			Name: "terminal-mutating-webhook-configuration",
+			Labels: map[string]string{
+				"app":                         "terminal-controller-manager",
+				"app.kubernetes.io/name":      "terminal",
+				"app.kubernetes.io/component": "admission-controller",
 			},
 			Webhooks: []admissionregistrationv1.MutatingWebhook{{
 				Name:                    "mutating-create-update-terminal.gardener.cloud",
@@ -417,24 +381,20 @@ var _ = Describe("Terminal", func() {
 				FailurePolicy:           new(admissionregistrationv1.Fail),
 				SideEffects:             new(admissionregistrationv1.SideEffectClassNone),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{"dashboard.gardener.cloud"},
-						APIVersions: []string{"v1alpha1"},
-						Resources:   []string{"terminals"},
-					},
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+					APIGroups:   []string{"dashboard.gardener.cloud"},
+					APIVersions: []string{"v1alpha1"},
+					Resources:   []string{"terminals"},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 				}},
 			}},
 		}
 
 		validatingWebhookConfiguration = &admissionregistrationv1.ValidatingWebhookConfiguration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "terminal-validating-webhook-configuration",
-				Labels: map[string]string{
-					"app":                         "terminal-controller-manager",
-					"app.kubernetes.io/name":      "terminal",
-					"app.kubernetes.io/component": "admission-controller",
-				},
+			Name: "terminal-validating-webhook-configuration",
+			Labels: map[string]string{
+				"app":                         "terminal-controller-manager",
+				"app.kubernetes.io/name":      "terminal",
+				"app.kubernetes.io/component": "admission-controller",
 			},
 			Webhooks: []admissionregistrationv1.ValidatingWebhook{{
 				Name:                    "validating-create-update-terminal.gardener.cloud",
@@ -443,21 +403,17 @@ var _ = Describe("Terminal", func() {
 				FailurePolicy:           new(admissionregistrationv1.Fail),
 				SideEffects:             new(admissionregistrationv1.SideEffectClassNone),
 				Rules: []admissionregistrationv1.RuleWithOperations{{
-					Rule: admissionregistrationv1.Rule{
-						APIGroups:   []string{"dashboard.gardener.cloud"},
-						APIVersions: []string{"v1alpha1"},
-						Resources:   []string{"terminals"},
-					},
-					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+					APIGroups:   []string{"dashboard.gardener.cloud"},
+					APIVersions: []string{"v1alpha1"},
+					Resources:   []string{"terminals"},
+					Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 				}},
 			}},
 		}
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:terminal-controller-manager",
-				Labels: map[string]string{"app": "terminal-controller-manager"},
-			},
+			Name:   "gardener.cloud:system:terminal-controller-manager",
+			Labels: map[string]string{"app": "terminal-controller-manager"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -517,10 +473,8 @@ var _ = Describe("Terminal", func() {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:terminal-controller-manager",
-				Labels: map[string]string{"app": "terminal-controller-manager"},
-			},
+			Name:   "gardener.cloud:system:terminal-controller-manager",
+			Labels: map[string]string{"app": "terminal-controller-manager"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -533,11 +487,9 @@ var _ = Describe("Terminal", func() {
 			}},
 		}
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:terminal-controller-manager",
-				Namespace: "kube-system",
-				Labels:    map[string]string{"app": "terminal-controller-manager"},
-			},
+			Name:      "gardener.cloud:system:terminal-controller-manager",
+			Namespace: "kube-system",
+			Labels:    map[string]string{"app": "terminal-controller-manager"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -552,11 +504,9 @@ var _ = Describe("Terminal", func() {
 			},
 		}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:terminal-controller-manager",
-				Namespace: "kube-system",
-				Labels:    map[string]string{"app": "terminal-controller-manager"},
-			},
+			Name:      "gardener.cloud:system:terminal-controller-manager",
+			Namespace: "kube-system",
+			Labels:    map[string]string{"app": "terminal-controller-manager"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "Role",
@@ -580,8 +530,8 @@ var _ = Describe("Terminal", func() {
 		deployer = New(fakeClient, namespace, fakeSecretManager, values)
 
 		By("Create secrets managed outside of this package for which secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-garden-runtime", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca-garden-runtime", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#Deploy", func() {
@@ -595,21 +545,17 @@ var _ = Describe("Terminal", func() {
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretVirtual), managedResourceSecretVirtual)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 			})
 
@@ -618,15 +564,13 @@ var _ = Describe("Terminal", func() {
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceRuntime), managedResourceRuntime)).To(Succeed())
 				expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceRuntime.Name,
-						Namespace:       managedResourceRuntime.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
-						},
+					Name:            managedResourceRuntime.Name,
+					Namespace:       managedResourceRuntime.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class:       new("seed"),
@@ -643,15 +587,13 @@ var _ = Describe("Terminal", func() {
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceVirtual), managedResourceVirtual)).To(Succeed())
 				expectedVirtualMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceVirtual.Name,
-						Namespace:       managedResourceVirtual.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"origin":                             "gardener",
-							"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
-						},
+					Name:            managedResourceVirtual.Name,
+					Namespace:       managedResourceVirtual.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"origin":                             "gardener",
+						"care.gardener.cloud/condition-type": "VirtualComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -792,21 +734,17 @@ var _ = Describe("Terminal", func() {
 
 			It("should fail because the runtime and virtual ManagedResources are unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -814,20 +752,16 @@ var _ = Describe("Terminal", func() {
 
 			It("should fail because the runtime ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -852,11 +786,9 @@ var _ = Describe("Terminal", func() {
 
 			It("should fail because the virtual ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -877,12 +809,10 @@ var _ = Describe("Terminal", func() {
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -890,11 +820,9 @@ var _ = Describe("Terminal", func() {
 
 			It("should succeed because the runtime and virtual ManagedResource are healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -915,11 +843,9 @@ var _ = Describe("Terminal", func() {
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -944,11 +870,9 @@ var _ = Describe("Terminal", func() {
 
 			It("should succeed because the both ManagedResource are healthy and progressed", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameRuntime,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameRuntime,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -969,11 +893,9 @@ var _ = Describe("Terminal", func() {
 				})).To(Succeed())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceNameVirtual,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceNameVirtual,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1019,11 +941,9 @@ var _ = Describe("Terminal", func() {
 
 func expectedConfigMap(namespace, allowedAPIServerURLs string) *corev1.ConfigMap {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "terminal-controller-manager",
-			Namespace: namespace,
-			Labels:    map[string]string{"app": "terminal-controller-manager"},
-		},
+		Name:      "terminal-controller-manager",
+		Namespace: namespace,
+		Labels:    map[string]string{"app": "terminal-controller-manager"},
 		Data: map[string]string{"config.yaml": `apiVersion: dashboard.gardener.cloud/v1alpha1
 kind: ControllerManagerConfiguration
 allowedAPIServerURLs: ` + allowedAPIServerURLs + `

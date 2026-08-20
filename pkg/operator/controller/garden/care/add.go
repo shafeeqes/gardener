@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -102,6 +101,6 @@ func (r *Reconciler) MapManagedResourceToGarden(log logr.Logger) handler.MapFunc
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: garden.Name}}}
+		return []reconcile.Request{{Name: garden.Name}}
 	}
 }

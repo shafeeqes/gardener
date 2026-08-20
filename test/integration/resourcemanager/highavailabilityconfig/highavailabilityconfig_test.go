@@ -31,9 +31,7 @@ var _ = Describe("HighAvailabilityConfig tests", func() {
 
 	BeforeEach(func() {
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
-			},
+			Name: testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
 		}
 
 		objectMeta = metav1.ObjectMeta{
@@ -104,10 +102,8 @@ var _ = Describe("HighAvailabilityConfig tests", func() {
 			}
 
 			hpa = &autoscalingv2.HorizontalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
-					Namespace: namespace.Name,
-				},
+				Name:      testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+				Namespace: namespace.Name,
 				Spec: autoscalingv2.HorizontalPodAutoscalerSpec{
 					MaxReplicas: 5,
 					ScaleTargetRef: autoscalingv2.CrossVersionObjectReference{

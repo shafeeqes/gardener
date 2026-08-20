@@ -114,9 +114,7 @@ var _ = Describe("Garden controller tests", func() {
 
 		By("Create test Namespace")
 		testNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "garden-",
-			},
+			GenerateName: "garden-",
 		}
 		Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 		log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -172,10 +170,8 @@ var _ = Describe("Garden controller tests", func() {
 		extensionTypeAfterWorker = "test-extension-after-worker"
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "garden-" + testRunID,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "garden-" + testRunID,
+			Labels: map[string]string{testID: testRunID},
 			Spec: operatorv1alpha1.GardenSpec{
 				Extensions: []operatorv1alpha1.GardenExtension{
 					{Type: extensionType},
@@ -284,7 +280,7 @@ var _ = Describe("Garden controller tests", func() {
 		By("Create gardener-{apiserver,admission-controller} deployments to prevent infinite reconciliation loops")
 		gardenerAPIServerDeployment := newDeployment("gardener-apiserver", testNamespace.Name)
 		gardenerAdmissionControllerDeployment := newDeployment("gardener-admission-controller", testNamespace.Name)
-		gardenerSystemPublicNamespace := corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "gardener-system-public"}}
+		gardenerSystemPublicNamespace := corev1.Namespace{Name: "gardener-system-public"}
 		Expect(testClient.Create(ctx, gardenerAPIServerDeployment)).To(Succeed())
 		Expect(testClient.Create(ctx, gardenerAdmissionControllerDeployment)).To(Succeed())
 		Expect(testClient.Create(ctx, &gardenerSystemPublicNamespace)).To(Succeed())
@@ -296,10 +292,8 @@ var _ = Describe("Garden controller tests", func() {
 
 		By("Create Extension", func() {
 			extension = &operatorv1alpha1.Extension{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testRunID,
-					Namespace: testNamespace.Name,
-				},
+				Name:      testRunID,
+				Namespace: testNamespace.Name,
 				Spec: operatorv1alpha1.ExtensionSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: "Extension", Type: extensionType},
@@ -310,10 +304,8 @@ var _ = Describe("Garden controller tests", func() {
 			}
 
 			extensionManagedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "extension-" + extension.Name + "-garden",
-					Namespace: testNamespace.Name,
-				},
+				Name:      "extension-" + extension.Name + "-garden",
+				Namespace: testNamespace.Name,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{
 						{Name: "extension-" + extension.Name + "-garden"},
@@ -339,12 +331,10 @@ var _ = Describe("Garden controller tests", func() {
 
 		By("Create wildcard certificate secret")
 		Expect(testClient.Create(ctx, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "dummy-garden-wildcard-cert",
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					"gardener.cloud/role": "garden-cert",
-				},
+			Name:      "dummy-garden-wildcard-cert",
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				"gardener.cloud/role": "garden-cert",
 			},
 			StringData: map[string]string{
 				"tls.crt": "dummy-cert",
@@ -513,7 +503,7 @@ spec:
 		// The garden controller waits for the gardener-resource-manager Deployment to be healthy, so let's fake this here.
 		By("Patch gardener-resource-manager deployment to report healthiness")
 		Eventually(func(g Gomega) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager", Namespace: testNamespace.Name}}
+			deployment := &appsv1.Deployment{Name: "gardener-resource-manager", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 
 			patch := client.MergeFrom(deployment.DeepCopy())
@@ -604,7 +594,7 @@ spec:
 		))
 
 		Eventually(func(g Gomega) map[string]string {
-			service := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-kube-apiserver", Namespace: testNamespace.Name}}
+			service := &corev1.Service{Name: "virtual-garden-kube-apiserver", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(service), service)).To(Succeed())
 			return service.Annotations
 		}).Should(Equal(map[string]string{
@@ -618,7 +608,7 @@ spec:
 		By("Patch Etcd resources to report healthiness")
 		Eventually(func(g Gomega) {
 			for _, suffix := range []string{"main", "events"} {
-				etcd := &druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-etcd-" + suffix, Namespace: testNamespace.Name}}
+				etcd := &druidcorev1alpha1.Etcd{Name: "virtual-garden-etcd-" + suffix, Namespace: testNamespace.Name}
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(etcd), etcd)).To(Succeed(), "for "+etcd.Name)
 
 				patch := client.MergeFrom(etcd.DeepCopy())
@@ -638,18 +628,14 @@ spec:
 		Eventually(func(g Gomega) {
 
 			istioNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "virtual-garden-istio-ingress",
-				},
+				Name: "virtual-garden-istio-ingress",
 			}
 
 			g.Expect(testClient.Create(ctx, istioNamespace)).To(Or(Succeed(), BeAlreadyExistsError()))
 
 			istioService = &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "istio-ingressgateway",
-					Namespace: istioNamespace.Name,
-				},
+				Name:      "istio-ingressgateway",
+				Namespace: istioNamespace.Name,
 				Spec: corev1.ServiceSpec{
 					Type:  corev1.ServiceTypeLoadBalancer,
 					Ports: []corev1.ServicePort{{Protocol: corev1.ProtocolTCP, Port: 443}},
@@ -679,7 +665,7 @@ spec:
 		))
 
 		Eventually(func(g Gomega) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-kube-apiserver", Namespace: testNamespace.Name}}
+			deployment := &appsv1.Deployment{Name: "virtual-garden-kube-apiserver", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 
 			podList := &corev1.PodList{}
@@ -689,12 +675,10 @@ spec:
 				g.Expect(testClient.DeleteAllOf(ctx, &corev1.Pod{}, client.InNamespace(testNamespace.Name), client.MatchingLabels(kubeapiserver.GetLabels()))).To(Succeed())
 				for i := range desiredReplicas {
 					g.Expect(testClient.Create(ctx, &corev1.Pod{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      fmt.Sprintf("virtual-garden-kube-apiserver-%d", i),
-							Namespace: testNamespace.Name,
-							Labels:    kubeapiserver.GetLabels(),
-						},
-						Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "app", Image: "app"}}},
+						Name:      fmt.Sprintf("virtual-garden-kube-apiserver-%d", i),
+						Namespace: testNamespace.Name,
+						Labels:    kubeapiserver.GetLabels(),
+						Spec:      corev1.PodSpec{Containers: []corev1.Container{{Name: "app", Image: "app"}}},
 					})).To(Succeed(), fmt.Sprintf("create virtual-garden-kube-apiserver pod number %d", i))
 				}
 			}
@@ -729,7 +713,7 @@ spec:
 		// virtual-garden-gardener-resource manager usually sets the token-renew-timestamp when it reconciled the secret.
 		// It is not running here, so we have to patch the secret by ourselves.
 		Eventually(func(g Gomega) {
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "shoot-access-gardener-resource-manager", Namespace: testNamespace.Name}}
+			secret := &corev1.Secret{Name: "shoot-access-gardener-resource-manager", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 
 			patch := client.MergeFrom(secret.DeepCopy())
@@ -748,7 +732,7 @@ spec:
 		// The garden controller waits for the virtual-garden-gardener-resource-manager Deployment to be healthy, so let's fake this here.
 		By("Patch virtual-garden-gardener-resource-manager deployment to report healthiness")
 		Eventually(func(g Gomega) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-gardener-resource-manager", Namespace: testNamespace.Name}}
+			deployment := &appsv1.Deployment{Name: "virtual-garden-gardener-resource-manager", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 
 			// Don't patch bootstrapping deployment but wait for final deployment
@@ -764,7 +748,7 @@ spec:
 
 		By("Patch gardener-internal kubeconfig secret to add the token usually added by virtual-garden-gardener-resource-manager")
 		Eventually(func(g Gomega) {
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "gardener-internal", Namespace: testNamespace.Name}}
+			secret := &corev1.Secret{Name: "gardener-internal", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 
 			kubeconfigRaw, ok := secret.Data["kubeconfig"]
@@ -796,7 +780,7 @@ spec:
 		// The garden controller waits for the virtual-garden-kube-controller-manager Deployment to be healthy, so let's fake this here.
 		By("Patch virtual-garden-kube-controller-manager deployment to report healthiness")
 		Eventually(func(g Gomega) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "virtual-garden-kube-controller-manager", Namespace: testNamespace.Name}}
+			deployment := &appsv1.Deployment{Name: "virtual-garden-kube-controller-manager", Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)).To(Succeed())
 
 			podList := &corev1.PodList{}
@@ -806,12 +790,10 @@ spec:
 				g.Expect(testClient.DeleteAllOf(ctx, &corev1.Pod{}, client.InNamespace(testNamespace.Name), client.MatchingLabels(map[string]string{"app": "kubernetes", "role": "controller-manager"}))).To(Succeed())
 				for i := range desiredReplicas {
 					g.Expect(testClient.Create(ctx, &corev1.Pod{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      fmt.Sprintf("virtual-garden-kube-controller-manager-%d", i),
-							Namespace: testNamespace.Name,
-							Labels:    map[string]string{"app": "kubernetes", "role": "controller-manager"},
-						},
-						Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "app", Image: "app"}}},
+						Name:      fmt.Sprintf("virtual-garden-kube-controller-manager-%d", i),
+						Namespace: testNamespace.Name,
+						Labels:    map[string]string{"app": "kubernetes", "role": "controller-manager"},
+						Spec:      corev1.PodSpec{Containers: []corev1.Container{{Name: "app", Image: "app"}}},
 					})).To(Succeed(), fmt.Sprintf("create virtual-garden-kube-apiserver pod number %d", i))
 				}
 			}
@@ -830,10 +812,8 @@ spec:
 		// reality, this is created asynchronously by gardener-resource-manager which is not running in this test).
 		// Hence, let's manually create it to satisfy the reconciliation flow.
 		gardenerAPIServerService := &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener-apiserver",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "gardener-apiserver",
+			Namespace: testNamespace.Name,
 			Spec: corev1.ServiceSpec{
 				Type:     corev1.ServiceTypeClusterIP,
 				Ports:    []corev1.ServicePort{{Port: 443, TargetPort: intstr.FromInt32(443)}},
@@ -890,13 +870,13 @@ spec:
 
 		By("Ensure relevant Gardenlet resources get auto-updated")
 		Eventually(func(g Gomega) gardencorev1.OCIRepository {
-			gardenlet := &seedmanagementv1alpha1.Gardenlet{ObjectMeta: metav1.ObjectMeta{Name: gardenletNameWithAutoUpdate, Namespace: testNamespace.Name}}
+			gardenlet := &seedmanagementv1alpha1.Gardenlet{Name: gardenletNameWithAutoUpdate, Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(gardenlet), gardenlet)).To(Succeed())
 			return gardenlet.Spec.Deployment.Helm.OCIRepository
 		}).Should(Equal(gardencorev1.OCIRepository{Ref: new("europe-docker.pkg.dev/gardener-project/releases/charts/gardener/gardenlet:v0.0.0-master+$Format:%H$")}))
 
 		Consistently(func(g Gomega) gardencorev1.OCIRepository {
-			gardenlet := &seedmanagementv1alpha1.Gardenlet{ObjectMeta: metav1.ObjectMeta{Name: gardenletNameWithoutAutoUpdate, Namespace: testNamespace.Name}}
+			gardenlet := &seedmanagementv1alpha1.Gardenlet{Name: gardenletNameWithoutAutoUpdate, Namespace: testNamespace.Name}
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(gardenlet), gardenlet)).To(Succeed())
 			return gardenlet.Spec.Deployment.Helm.OCIRepository
 		}).Should(Equal(gardencorev1.OCIRepository{Ref: &noAutoUpdateRef}))
@@ -936,7 +916,7 @@ spec:
 
 		By("Verify that gardener-resource-manager has been deleted")
 		Eventually(func() error {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-resource-manager", Namespace: testNamespace.Name}}
+			deployment := &appsv1.Deployment{Name: "gardener-resource-manager", Namespace: testNamespace.Name}
 			return testClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment)
 		}).Should(BeNotFoundError())
 
@@ -981,10 +961,8 @@ func untilInTest(_ context.Context, _ time.Duration, _ retry.Func) error {
 
 func newDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"foo": "bar"}},
 			Replicas: new(int32(1)),
@@ -1003,10 +981,8 @@ func newDeployment(name, namespace string) *appsv1.Deployment {
 
 func patchExtensionStatus(cl client.Client, name, namespace string, lastOp gardencorev1beta1.LastOperationState) {
 	var ext = &extensionsv1alpha1.Extension{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "garden-" + name,
-			Namespace: namespace,
-		},
+		Name:      "garden-" + name,
+		Namespace: namespace,
 	}
 
 	EventuallyWithOffset(1, func() error {
@@ -1018,13 +994,11 @@ func patchExtensionStatus(cl client.Client, name, namespace string, lastOp garde
 
 	patch = client.MergeFrom(ext.DeepCopy())
 	ext.Status = extensionsv1alpha1.ExtensionStatus{
-		DefaultStatus: extensionsv1alpha1.DefaultStatus{
-			LastOperation: &gardencorev1beta1.LastOperation{
-				LastUpdateTime: metav1.NewTime(time.Date(9999, time.January, 1, 0, 0, 0, 0, time.UTC)),
-				State:          lastOp,
-			},
-			ObservedGeneration: ext.Generation,
+		LastOperation: &gardencorev1beta1.LastOperation{
+			LastUpdateTime: metav1.NewTime(time.Date(9999, time.January, 1, 0, 0, 0, 0, time.UTC)),
+			State:          lastOp,
 		},
+		ObservedGeneration: ext.Generation,
 	}
 	EventuallyWithOffset(1, func() error { return cl.Status().Patch(ctx, ext, patch) }).To(Succeed())
 }

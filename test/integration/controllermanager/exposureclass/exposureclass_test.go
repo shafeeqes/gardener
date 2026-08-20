@@ -7,7 +7,6 @@ package exposureclass_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -23,27 +22,21 @@ var _ = Describe("ExposureClass controller test", func() {
 
 	BeforeEach(func() {
 		exposureClass = &gardencorev1beta1.ExposureClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:    testID + "-" + utils.ComputeSHA256Hex([]byte(testNamespace.Name + CurrentSpecReport().LeafNodeLocation.String()))[:8],
+			Labels:  map[string]string{testID: testRunID},
 			Handler: "test-exposure-class-handler-name",
 			Scheduling: &gardencorev1beta1.ExposureClassScheduling{
 				SeedSelector: &gardencorev1beta1.SeedSelector{
-					LabelSelector: metav1.LabelSelector{
-						MatchLabels: map[string]string{
-							"test": "foo",
-						},
+					MatchLabels: map[string]string{
+						"test": "foo",
 					},
 				},
 			},
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    testNamespace.Name,
-			},
+			GenerateName: "test-",
+			Namespace:    testNamespace.Name,
 			Spec: gardencorev1beta1.ShootSpec{
 				ExposureClassName: new(exposureClass.Name),
 				CloudProfileName:  new("test-cloudprofile"),

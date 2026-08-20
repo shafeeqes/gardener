@@ -138,12 +138,10 @@ func createOrUpdateNodeCriticalManagedResource(ctx context.Context, seedClient, 
 	GinkgoHelper()
 
 	daemonSet := &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: "kube-system",
-			Labels: map[string]string{
-				v1beta1constants.LabelNodeCriticalComponent: "true",
-			},
+		Name:      name,
+		Namespace: "kube-system",
+		Labels: map[string]string{
+			v1beta1constants.LabelNodeCriticalComponent: "true",
 		},
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{

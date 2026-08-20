@@ -25,10 +25,8 @@ var _ = Describe("Health controller tests", func() {
 
 	BeforeEach(func() {
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:    testNamespace.Name,
-				GenerateName: "test-",
-			},
+			Namespace:    testNamespace.Name,
+			GenerateName: "test-",
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs: []corev1.LocalObjectReference{{
 					Name: "foo",
@@ -184,12 +182,10 @@ var _ = Describe("Health controller tests", func() {
 			By("Add resources to ManagedResource status")
 			patch := client.MergeFrom(managedResource.DeepCopy())
 			managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{{
-				ObjectReference: corev1.ObjectReference{
-					APIVersion: "v1",
-					Kind:       "ConfigMap",
-					Namespace:  testNamespace.Name,
-					Name:       "non-existing",
-				},
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Namespace:  testNamespace.Name,
+				Name:       "non-existing",
 			}}
 			Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
 
@@ -205,12 +201,10 @@ var _ = Describe("Health controller tests", func() {
 			By("Add resources to ManagedResource status")
 			patch := client.MergeFrom(managedResource.DeepCopy())
 			managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{{
-				ObjectReference: corev1.ObjectReference{
-					APIVersion: "resources.gardener.cloud/v1alpha1",
-					Kind:       "ManagedResource",
-					Namespace:  testNamespace.Name,
-					Name:       "non-existing",
-				},
+				APIVersion: "resources.gardener.cloud/v1alpha1",
+				Kind:       "ManagedResource",
+				Namespace:  testNamespace.Name,
+				Name:       "non-existing",
 			}}
 			Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
 
@@ -226,12 +220,10 @@ var _ = Describe("Health controller tests", func() {
 			By("Add resources to ManagedResource status")
 			patch := client.MergeFrom(managedResource.DeepCopy())
 			managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{{
-				ObjectReference: corev1.ObjectReference{
-					APIVersion: "non-existing.k8s.io/v1",
-					Kind:       "ConfigMap",
-					Namespace:  testNamespace.Name,
-					Name:       managedResource.Name,
-				},
+				APIVersion: "non-existing.k8s.io/v1",
+				Kind:       "ConfigMap",
+				Namespace:  testNamespace.Name,
+				Name:       managedResource.Name,
 			}}
 			Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
 
@@ -259,12 +251,10 @@ var _ = Describe("Health controller tests", func() {
 				By("Add resources to ManagedResource status")
 				patch := client.MergeFrom(managedResource.DeepCopy())
 				managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{{
-					ObjectReference: corev1.ObjectReference{
-						APIVersion: "v1",
-						Kind:       "Pod",
-						Namespace:  pod.Namespace,
-						Name:       pod.Name,
-					},
+					APIVersion: "v1",
+					Kind:       "Pod",
+					Namespace:  pod.Namespace,
+					Name:       pod.Name,
 				}}
 				Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
 			})
@@ -319,12 +309,10 @@ var _ = Describe("Health controller tests", func() {
 			By("Add resources to ManagedResource status")
 			patch := client.MergeFrom(managedResource.DeepCopy())
 			managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{{
-				ObjectReference: corev1.ObjectReference{
-					APIVersion: "v1",
-					Kind:       "ConfigMap",
-					Namespace:  testNamespace.Name,
-					Name:       "non-existing",
-				},
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Namespace:  testNamespace.Name,
+				Name:       "non-existing",
 			}}
 			Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
 
@@ -340,12 +328,10 @@ var _ = Describe("Health controller tests", func() {
 			By("Add resources to ManagedResource status")
 			patch := client.MergeFrom(managedResource.DeepCopy())
 			managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{{
-				ObjectReference: corev1.ObjectReference{
-					APIVersion: "apps/v1",
-					Kind:       "Deployment",
-					Namespace:  testNamespace.Name,
-					Name:       "non-existing",
-				},
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Namespace:  testNamespace.Name,
+				Name:       "non-existing",
 			}}
 			Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
 
@@ -432,60 +418,46 @@ var _ = Describe("Health controller tests", func() {
 				patch := client.MergeFrom(managedResource.DeepCopy())
 				managedResource.Status.Resources = []resourcesv1alpha1.ObjectReference{
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "apps/v1",
-							Kind:       "Deployment",
-							Namespace:  deployment.Namespace,
-							Name:       deployment.Name,
-						},
+						APIVersion: "apps/v1",
+						Kind:       "Deployment",
+						Namespace:  deployment.Namespace,
+						Name:       deployment.Name,
 					},
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "apps/v1",
-							Kind:       "StatefulSet",
-							Namespace:  statefulSet.Namespace,
-							Name:       statefulSet.Name,
-						},
+						APIVersion: "apps/v1",
+						Kind:       "StatefulSet",
+						Namespace:  statefulSet.Namespace,
+						Name:       statefulSet.Name,
 					},
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "apps/v1",
-							Kind:       "DaemonSet",
-							Namespace:  daemonSet.Namespace,
-							Name:       daemonSet.Name,
-						},
+						APIVersion: "apps/v1",
+						Kind:       "DaemonSet",
+						Namespace:  daemonSet.Namespace,
+						Name:       daemonSet.Name,
 					},
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "monitoring.coreos.com/v1",
-							Kind:       "Prometheus",
-							Namespace:  prometheus.Namespace,
-							Name:       prometheus.Name,
-						},
+						APIVersion: "monitoring.coreos.com/v1",
+						Kind:       "Prometheus",
+						Namespace:  prometheus.Namespace,
+						Name:       prometheus.Name,
 					},
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "monitoring.coreos.com/v1",
-							Kind:       "Alertmanager",
-							Namespace:  alertManager.Namespace,
-							Name:       alertManager.Name,
-						},
+						APIVersion: "monitoring.coreos.com/v1",
+						Kind:       "Alertmanager",
+						Namespace:  alertManager.Namespace,
+						Name:       alertManager.Name,
 					},
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "cert.gardener.cloud/v1alpha1",
-							Kind:       "Certificate",
-							Namespace:  cert.Namespace,
-							Name:       cert.Name,
-						},
+						APIVersion: "cert.gardener.cloud/v1alpha1",
+						Kind:       "Certificate",
+						Namespace:  cert.Namespace,
+						Name:       cert.Name,
 					},
 					{
-						ObjectReference: corev1.ObjectReference{
-							APIVersion: "cert.gardener.cloud/v1alpha1",
-							Kind:       "Issuer",
-							Namespace:  issuer.Namespace,
-							Name:       issuer.Name,
-						},
+						APIVersion: "cert.gardener.cloud/v1alpha1",
+						Kind:       "Issuer",
+						Namespace:  issuer.Namespace,
+						Name:       issuer.Name,
 					},
 				}
 				Expect(testClient.Status().Patch(ctx, managedResource, patch)).To(Succeed())
@@ -735,10 +707,8 @@ func setCondition(managedResource *resourcesv1alpha1.ManagedResource, status gar
 
 func generatePodTestResource(name string) *corev1.Pod {
 	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: corev1.PodSpec{
 			RestartPolicy: corev1.RestartPolicyNever,
 			Containers: []corev1.Container{{
@@ -755,10 +725,8 @@ func generatePodTestResource(name string) *corev1.Pod {
 
 func generateDeploymentTestResource(name string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: appsv1.DeploymentSpec{
 			Replicas: new(int32(1)),
 			Selector: &metav1.LabelSelector{
@@ -782,11 +750,9 @@ func generateDeploymentTestResource(name string) *appsv1.Deployment {
 
 func generatePodForDeployment(deployment *appsv1.Deployment) *corev1.Pod {
 	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: deployment.Name + "-pod-",
-			Namespace:    deployment.Namespace,
-			Labels:       deployment.Spec.Selector.MatchLabels,
-		},
+		GenerateName: deployment.Name + "-pod-",
+		Namespace:    deployment.Namespace,
+		Labels:       deployment.Spec.Selector.MatchLabels,
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{
 				Name:  "app",
@@ -798,10 +764,8 @@ func generatePodForDeployment(deployment *appsv1.Deployment) *corev1.Pod {
 
 func generateStatefulSetTestResource(name string) *appsv1.StatefulSet {
 	return &appsv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: appsv1.StatefulSetSpec{
 			Replicas: new(int32(1)),
 			Selector: &metav1.LabelSelector{
@@ -822,10 +786,8 @@ func generateStatefulSetTestResource(name string) *appsv1.StatefulSet {
 
 func generateDaemonSetTestResource(name string) *appsv1.DaemonSet {
 	return &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
@@ -845,10 +807,8 @@ func generateDaemonSetTestResource(name string) *appsv1.DaemonSet {
 
 func generatePrometheusTestResource(name string) *monitoringv1.Prometheus {
 	return &monitoringv1.Prometheus{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: monitoringv1.PrometheusSpec{
 			CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 				Replicas: new(int32(1)),
@@ -878,10 +838,8 @@ func generatePrometheusTestResource(name string) *monitoringv1.Prometheus {
 
 func generateAlertmanagerTestResource(name string) *monitoringv1.Alertmanager {
 	return &monitoringv1.Alertmanager{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: monitoringv1.AlertmanagerSpec{
 			Replicas: new(int32(1)),
 		},
@@ -909,10 +867,8 @@ func generateAlertmanagerTestResource(name string) *monitoringv1.Alertmanager {
 
 func generateCertificateTestResource(name string) *certv1alpha1.Certificate {
 	return &certv1alpha1.Certificate{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Spec: certv1alpha1.CertificateSpec{
 			DNSNames: []string{"foo.bar"},
 		},
@@ -933,10 +889,8 @@ func generateCertificateTestResource(name string) *certv1alpha1.Certificate {
 
 func generateCertificateIssuerTestResource(name string) *certv1alpha1.Issuer {
 	return &certv1alpha1.Issuer{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: testNamespace.Name,
-		},
+		Name:      name,
+		Namespace: testNamespace.Name,
 		Status: certv1alpha1.IssuerStatus{
 			State:              "Ready",
 			ObservedGeneration: 42,
@@ -946,10 +900,8 @@ func generateCertificateIssuerTestResource(name string) *certv1alpha1.Issuer {
 
 func generatePodTemplate() corev1.PodTemplateSpec {
 	return corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				"test": "foo",
-			},
+		Labels: map[string]string{
+			"test": "foo",
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{

@@ -16,11 +16,9 @@ func (a *alertManager) podDisruptionBudget() *policyv1.PodDisruptionBudget {
 	}
 
 	pdb := &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.name(),
-			Namespace: a.namespace,
-			Labels:    a.getLabels(),
-		},
+		Name:      a.name(),
+		Namespace: a.namespace,
+		Labels:    a.getLabels(),
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             new(intstr.FromInt32(1)),
 			Selector:                   &metav1.LabelSelector{MatchLabels: a.getLabels()},

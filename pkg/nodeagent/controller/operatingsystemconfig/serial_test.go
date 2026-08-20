@@ -26,7 +26,7 @@ import (
 
 var _ = Describe("#serialReconciliation", func() {
 	It("should return true when annotation is 'true'", func() {
-		s := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: "true"}}}
+		s := &corev1.Secret{Annotations: map[string]string{v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: "true"}}
 		Expect(serialReconciliation(s)).To(BeTrue())
 	})
 
@@ -35,12 +35,12 @@ var _ = Describe("#serialReconciliation", func() {
 	})
 
 	It("should return false when annotation is 'false'", func() {
-		s := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: "false"}}}
+		s := &corev1.Secret{Annotations: map[string]string{v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: "false"}}
 		Expect(serialReconciliation(s)).To(BeFalse())
 	})
 
 	It("should return false when annotation is empty string", func() {
-		s := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: ""}}}
+		s := &corev1.Secret{Annotations: map[string]string{v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: ""}}
 		Expect(serialReconciliation(s)).To(BeFalse())
 	})
 })
@@ -59,7 +59,7 @@ var _ = Describe("#newLeaderElectorForSecret", func() {
 	})
 
 	It("should return leaderElector with nil lease when annotation is not set", func() {
-		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "s", Namespace: "ns"}}
+		secret := &corev1.Secret{Name: "s", Namespace: "ns"}
 
 		le := newLeaderElectorForSecret(log, fakeClient, fakeClock, secret, identity)
 		Expect(le).NotTo(BeNil())
@@ -69,13 +69,11 @@ var _ = Describe("#newLeaderElectorForSecret", func() {
 
 	It("should return leaderElector with correct lease when annotation is 'true'", func() {
 		secret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-secret",
-				Namespace: "test-namespace",
-				UID:       "test-uid",
-				Annotations: map[string]string{
-					v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: "true",
-				},
+			Name:      "test-secret",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+			Annotations: map[string]string{
+				v1beta1constants.AnnotationNodeAgentSerialOSCReconciliation: "true",
 			},
 		}
 
@@ -112,7 +110,7 @@ var _ = Describe("leaderElector", func() {
 		now = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
 		clk = testclock.NewFakeClock(now)
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
-		lease = &coordinationv1.Lease{ObjectMeta: metav1.ObjectMeta{Name: "test-lease", Namespace: "test-ns"}}
+		lease = &coordinationv1.Lease{Name: "test-lease", Namespace: "test-ns"}
 		le = &leaderElector{log: logr.Discard(), client: fakeClient, clock: clk, identity: identity, lease: lease}
 	})
 
@@ -243,8 +241,8 @@ var _ = Describe("leaderElector", func() {
 	Describe("#reload", func() {
 		It("should reload an existing lease", func() {
 			existing := &coordinationv1.Lease{
-				ObjectMeta: metav1.ObjectMeta{Name: lease.Name, Namespace: lease.Namespace},
-				Spec:       coordinationv1.LeaseSpec{HolderIdentity: new("some-holder")},
+				Name: lease.Name, Namespace: lease.Namespace,
+				Spec: coordinationv1.LeaseSpec{HolderIdentity: new("some-holder")},
 			}
 			Expect(fakeClient.Create(ctx, existing)).To(Succeed())
 			Expect(le.reload(ctx)).To(Succeed())

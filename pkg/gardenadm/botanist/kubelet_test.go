@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/afero"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -71,13 +70,11 @@ var _ = Describe("Kubelet", func() {
 			HostName: hostName,
 		}
 		b.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: namespace,
-			},
+			Name:      "foo",
+			Namespace: namespace,
 		})
 
-		Expect(fakeSeedClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+		Expect(fakeSeedClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#WriteKubeletBootstrapKubeconfig", func() {

@@ -38,15 +38,12 @@ var _ = Describe("Reconciler", func() {
 
 	BeforeEach(func() {
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden-local"},
+			Name: "garden-local",
 		}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot",
-				Namespace: "namespace",
-			},
+			Name:      "shoot",
+			Namespace: "namespace",
 			Spec: gardencorev1beta1.ShootSpec{
 				Provider: gardencorev1beta1.Provider{
 					Workers: []gardencorev1beta1.Worker{
@@ -155,7 +152,7 @@ var _ = Describe("Reconciler", func() {
 			shootForCluster := shoot.DeepCopy()
 			shootForCluster.TypeMeta = metav1.TypeMeta{APIVersion: gardencorev1beta1.SchemeGroupVersion.String(), Kind: "Shoot"}
 			Expect(seedClient.Create(ctx, &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{Name: shoot.Status.TechnicalID},
+				Name: shoot.Status.TechnicalID,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{Object: shootForCluster},
 				},

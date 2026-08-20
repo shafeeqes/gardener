@@ -58,16 +58,12 @@ var _ = Describe("Extension health", func() {
 		fakeClock = testclock.NewFakeClock(time.Now())
 
 		controllerRegistration = &gardencorev1beta1.ControllerRegistration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			Name: "foo",
 		}
 		Expect(virtualClient.Create(ctx, controllerRegistration)).To(Succeed())
 
 		extension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			Name: "foo",
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					AdmissionDeployment: &operatorv1alpha1.AdmissionDeploymentSpec{},
@@ -713,10 +709,8 @@ func managedResource(namespace, name string, classSeed bool, conditions []garden
 	}
 
 	return &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: resourcesv1alpha1.ManagedResourceSpec{
 			Class: class,
 		},
@@ -886,9 +880,7 @@ func unhealthyControllerInstallation(name, controllerRegistrationName, controlle
 
 func controllerInstallation(name, controllerRegistrationName, controllerRegistrationResourceVersion string, conditions []gardencorev1beta1.Condition) *gardencorev1beta1.ControllerInstallation {
 	return &gardencorev1beta1.ControllerInstallation{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 		Spec: gardencorev1beta1.ControllerInstallationSpec{
 			RegistrationRef: corev1.ObjectReference{
 				Name:            controllerRegistrationName,

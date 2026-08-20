@@ -7,7 +7,6 @@ package garden
 import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
@@ -17,12 +16,10 @@ import (
 
 func defaultBackupSecret() *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "virtual-garden-etcd-main-backup",
-			Namespace: v1beta1constants.GardenNamespace,
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{"hostPath": []byte("/etc/gardener/local-backupbuckets")},
+		Name:      "virtual-garden-etcd-main-backup",
+		Namespace: v1beta1constants.GardenNamespace,
+		Type:      corev1.SecretTypeOpaque,
+		Data:      map[string][]byte{"hostPath": []byte("/etc/gardener/local-backupbuckets")},
 	}
 }
 
@@ -37,9 +34,7 @@ func defaultGarden(backupSecret *corev1.Secret, specifyBackupBucket bool) *opera
 	}
 
 	return &operatorv1alpha1.Garden{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+		Name: name,
 		Spec: operatorv1alpha1.GardenSpec{
 			DNS: &operatorv1alpha1.DNSManagement{
 				Providers: []operatorv1alpha1.DNSProvider{{

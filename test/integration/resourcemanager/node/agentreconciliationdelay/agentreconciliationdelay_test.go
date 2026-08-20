@@ -175,12 +175,11 @@ var _ = Describe("AgentReconciliationDelay tests", func() {
 func prepareSecret() *corev1.Secret {
 	GinkgoHelper()
 
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+	secret := &corev1.Secret{
 		GenerateName: "gardener-node-agent-",
 		Namespace:    "kube-system",
 		Annotations:  map[string]string{"reconciliation.osc.node-agent.gardener.cloud/serial": "true"},
-		Labels:       map[string]string{"gardener.cloud/role": "operating-system-config", testID: testRunID},
-	}}
+		Labels:       map[string]string{"gardener.cloud/role": "operating-system-config", testID: testRunID}}
 
 	Expect(testClient.Create(ctx, secret)).To(Succeed())
 	By("Created gardener-node-agent Secret " + secret.Name + " with serial OSC reconciliation for test")
@@ -221,10 +220,8 @@ var nodeGroup int
 
 func newNode(suffix int, gardenerNodeAgentSecret *corev1.Secret) *corev1.Node {
 	node := &corev1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "node-" + strconv.Itoa(nodeGroup) + "-" + strconv.Itoa(suffix),
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   "node-" + strconv.Itoa(nodeGroup) + "-" + strconv.Itoa(suffix),
+		Labels: map[string]string{testID: testRunID},
 	}
 
 	if gardenerNodeAgentSecret != nil {

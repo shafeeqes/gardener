@@ -48,18 +48,14 @@ var _ = Describe("Token controller tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			secret1 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      strings.ToLower(secret1Name),
-					Namespace: metav1.NamespaceSystem,
-				},
-				Data: map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken1},
+				Name:      strings.ToLower(secret1Name),
+				Namespace: metav1.NamespaceSystem,
+				Data:      map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken1},
 			}
 			secret2 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      strings.ToLower(secret2Name),
-					Namespace: metav1.NamespaceSystem,
-				},
-				Data: map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken2},
+				Name:      strings.ToLower(secret2Name),
+				Namespace: metav1.NamespaceSystem,
+				Data:      map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken2},
 			}
 
 			By("Setup manager")
@@ -203,18 +199,14 @@ var _ = Describe("Token controller tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			secret1 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      strings.ToLower(secret1Name),
-					Namespace: metav1.NamespaceSystem,
-				},
-				Data: map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken1},
+				Name:      strings.ToLower(secret1Name),
+				Namespace: metav1.NamespaceSystem,
+				Data:      map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken1},
 			}
 			secret2 = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      strings.ToLower(secret2Name),
-					Namespace: metav1.NamespaceSystem,
-				},
-				Data: map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken2},
+				Name:      strings.ToLower(secret2Name),
+				Namespace: metav1.NamespaceSystem,
+				Data:      map[string][]byte{resourcesv1alpha1.DataKeyToken: accessToken2},
 			}
 
 			By("Setup manager")

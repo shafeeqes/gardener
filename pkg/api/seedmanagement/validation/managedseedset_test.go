@@ -23,20 +23,16 @@ import (
 var _ = Describe("ManagedSeedSet Validation Tests", func() {
 	var (
 		managedSeed = &seedmanagement.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-				},
+			Labels: map[string]string{
+				"foo": "bar",
 			},
 			Spec: seedmanagement.ManagedSeedSpec{
 				Gardenlet: seedmanagement.GardenletConfig{},
 			},
 		}
 		shoot = &core.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-				},
+			Labels: map[string]string{
+				"foo": "bar",
 			},
 			Spec: core.ShootSpec{
 				CloudProfileName: new("foo"),
@@ -72,11 +68,9 @@ var _ = Describe("ManagedSeedSet Validation Tests", func() {
 
 	BeforeEach(func() {
 		managedSeedSet = &seedmanagement.ManagedSeedSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       name,
-				Namespace:  namespace,
-				Generation: 1,
-			},
+			Name:       name,
+			Namespace:  namespace,
+			Generation: 1,
 			Spec: seedmanagement.ManagedSeedSetSpec{
 				Replicas: new(int32(1)),
 				Selector: *metav1.SetAsLabelSelector(labels.Set{
@@ -238,10 +232,8 @@ var _ = Describe("ManagedSeedSet Validation Tests", func() {
 			})
 			managedSeedSet.Spec.Template.Spec.Gardenlet = seedmanagement.GardenletConfig{
 				Config: gardenletConfiguration(&gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"foo": "bar",
-						},
+					Labels: map[string]string{
+						"foo": "bar",
 					},
 				}, nil),
 			}
@@ -274,11 +266,9 @@ var _ = Describe("ManagedSeedSet Validation Tests", func() {
 			managedSeedCopy.Spec.Shoot = &seedmanagement.Shoot{}
 			managedSeedCopy.Spec.Gardenlet = seedmanagement.GardenletConfig{
 				Config: gardenletConfiguration(&gardencorev1beta1.Seed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "foo",
-						Labels: map[string]string{
-							"foo": "bar",
-						},
+					Name: "foo",
+					Labels: map[string]string{
+						"foo": "bar",
 					},
 				}, nil),
 			}

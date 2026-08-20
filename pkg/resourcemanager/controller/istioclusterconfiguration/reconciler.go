@@ -171,10 +171,8 @@ func (r *Reconciler) reconcileEnvoyFilters(ctx context.Context, destinationRules
 		log := logf.FromContext(ctx).WithValues("targetNamespace", istioIngressNamespace)
 
 		envoyFilter := &istionetworkingv1alpha3.EnvoyFilter{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      getEnvoyFilterName(sourceNamespace.Name),
-				Namespace: istioIngressNamespace,
-			},
+			Name:      getEnvoyFilterName(sourceNamespace.Name),
+			Namespace: istioIngressNamespace,
 		}
 
 		switch len(envoyConfigPatches[istioIngressNamespace]) {

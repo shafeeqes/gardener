@@ -77,12 +77,10 @@ var _ = Describe("KubeStateMetrics", func() {
 			}
 
 			obj := &rbacv1.ClusterRole{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: name,
-					Labels: map[string]string{
-						"component": "kube-state-metrics" + nameSuffix,
-						"type":      string(clusterType),
-					},
+				Name: name,
+				Labels: map[string]string{
+					"component": "kube-state-metrics" + nameSuffix,
+					"type":      string(clusterType),
 				},
 				Rules: []rbacv1.PolicyRule{
 					{
@@ -144,15 +142,13 @@ var _ = Describe("KubeStateMetrics", func() {
 			}
 
 			obj := &rbacv1.ClusterRoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: name,
-					Labels: map[string]string{
-						"component": "kube-state-metrics" + nameSuffix,
-						"type":      string(clusterType),
-					},
-					Annotations: map[string]string{
-						"resources.gardener.cloud/delete-on-invalid-update": "true",
-					},
+				Name: name,
+				Labels: map[string]string{
+					"component": "kube-state-metrics" + nameSuffix,
+					"type":      string(clusterType),
+				},
+				Annotations: map[string]string{
+					"resources.gardener.cloud/delete-on-invalid-update": "true",
 				},
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: rbacv1.GroupName,
@@ -180,13 +176,11 @@ var _ = Describe("KubeStateMetrics", func() {
 			}
 
 			obj := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"component": name,
-						"type":      string(clusterType),
-					},
+				Name:      name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"component": name,
+					"type":      string(clusterType),
 				},
 				Spec: corev1.ServiceSpec{
 					Type: corev1.ServiceTypeClusterIP,
@@ -355,12 +349,8 @@ var _ = Describe("KubeStateMetrics", func() {
 
 			volumes = []corev1.Volume{{
 				Name: customResourceStateConfigMap.Name,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: customResourceStateConfigMap.Name,
-						},
-					},
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					Name: customResourceStateConfigMap.Name,
 				},
 			}}
 
@@ -456,33 +446,27 @@ var _ = Describe("KubeStateMetrics", func() {
 				})
 				volumes = append(volumes, corev1.Volume{
 					Name: "kubeconfig",
-					VolumeSource: corev1.VolumeSource{
-						Projected: &corev1.ProjectedVolumeSource{
-							DefaultMode: new(int32(420)),
-							Sources: []corev1.VolumeProjection{
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: "generic-token-kubeconfig",
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  "kubeconfig",
-											Path: "kubeconfig",
-										}},
-										Optional: new(false),
-									},
+					Projected: &corev1.ProjectedVolumeSource{
+						DefaultMode: new(int32(420)),
+						Sources: []corev1.VolumeProjection{
+							{
+								Secret: &corev1.SecretProjection{
+									Name: "generic-token-kubeconfig",
+									Items: []corev1.KeyToPath{{
+										Key:  "kubeconfig",
+										Path: "kubeconfig",
+									}},
+									Optional: new(false),
 								},
-								{
-									Secret: &corev1.SecretProjection{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: "shoot-access-kube-state-metrics",
-										},
-										Items: []corev1.KeyToPath{{
-											Key:  "token",
-											Path: "token",
-										}},
-										Optional: new(false),
-									},
+							},
+							{
+								Secret: &corev1.SecretProjection{
+									Name: "shoot-access-kube-state-metrics",
+									Items: []corev1.KeyToPath{{
+										Key:  "token",
+										Path: "token",
+									}},
+									Optional: new(false),
 								},
 							},
 						},
@@ -491,11 +475,9 @@ var _ = Describe("KubeStateMetrics", func() {
 			}
 
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels:    deploymentLabels,
-				},
+				Name:      name,
+				Namespace: namespace,
+				Labels:    deploymentLabels,
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(0)),
 					RevisionHistoryLimit: new(int32(2)),
@@ -522,21 +504,17 @@ var _ = Describe("KubeStateMetrics", func() {
 									Protocol:      corev1.ProtocolTCP,
 								}},
 								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/healthz",
-											Port: intstr.FromInt32(8080),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: intstr.FromInt32(8080),
 									},
 									InitialDelaySeconds: 5,
 									TimeoutSeconds:      5,
 								},
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path: "/healthz",
-											Port: intstr.FromInt32(8080),
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: intstr.FromInt32(8080),
 									},
 									InitialDelaySeconds: 5,
 									PeriodSeconds:       30,
@@ -570,11 +548,9 @@ var _ = Describe("KubeStateMetrics", func() {
 
 		scrapeConfigCacheFor = func(nameSuffix string) *monitoringv1alpha1.ScrapeConfig {
 			return &monitoringv1alpha1.ScrapeConfig{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "cache-kube-state-metrics",
-					Namespace: namespace,
-					Labels:    map[string]string{"prometheus": "cache"},
-				},
+				Name:      "cache-kube-state-metrics",
+				Namespace: namespace,
+				Labels:    map[string]string{"prometheus": "cache"},
 				Spec: monitoringv1alpha1.ScrapeConfigSpec{
 					KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 						Role:       "Service",
@@ -616,11 +592,9 @@ var _ = Describe("KubeStateMetrics", func() {
 			}
 		}
 		scrapeConfigSeed = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "seed-kube-state-metrics",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "seed"},
-			},
+			Name:      "seed-kube-state-metrics",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "seed"},
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					Role:       "Service",
@@ -653,11 +627,9 @@ var _ = Describe("KubeStateMetrics", func() {
 			},
 		}
 		scrapeConfigGarden = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "garden-kube-state-metrics",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "garden"},
-			},
+			Name:      "garden-kube-state-metrics",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "garden"},
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					Role:       "Service",
@@ -697,11 +669,9 @@ var _ = Describe("KubeStateMetrics", func() {
 			},
 		}
 		scrapeConfigShoot = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-kube-state-metrics",
-				Namespace: namespace,
-				Labels:    map[string]string{"prometheus": "shoot"},
-			},
+			Name:      "shoot-kube-state-metrics",
+			Namespace: namespace,
+			Labels:    map[string]string{"prometheus": "shoot"},
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 					Role:       "Service",
@@ -806,11 +776,9 @@ var _ = Describe("KubeStateMetrics", func() {
 			}
 
 			return &monitoringv1.PrometheusRule{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-kube-state-metrics",
-					Namespace: namespace,
-					Labels:    map[string]string{"prometheus": "shoot"},
-				},
+				Name:      "shoot-kube-state-metrics",
+				Namespace: namespace,
+				Labels:    map[string]string{"prometheus": "shoot"},
 				Spec: monitoringv1.PrometheusRuleSpec{
 					Groups: []monitoringv1.RuleGroup{{
 						Name:  "kube-state-metrics.rules",
@@ -838,39 +806,33 @@ var _ = Describe("KubeStateMetrics", func() {
 		}
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 
 		serviceAccountFor = func(nameSuffix string) *corev1.ServiceAccount {
 			return &corev1.ServiceAccount{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-state-metrics" + nameSuffix,
-					Namespace: namespace,
-					Labels:    selectorLabelsForClusterType(nameSuffix),
-				},
+				Name:                         "kube-state-metrics" + nameSuffix,
+				Namespace:                    namespace,
+				Labels:                       selectorLabelsForClusterType(nameSuffix),
 				AutomountServiceAccountToken: new(false),
 			}
 		}
 		secretShootAccess = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-kube-state-metrics",
-				Namespace: namespace,
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "kube-state-metrics",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
+			Name:      "shoot-access-kube-state-metrics",
+			Namespace: namespace,
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "kube-state-metrics",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
+			},
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 		vpaFor = func(nameSuffix string) *vpaautoscalingv1.VerticalPodAutoscaler {
 			return &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-state-metrics-vpa" + nameSuffix,
-					Namespace: namespace,
-				},
+				Name:      "kube-state-metrics-vpa" + nameSuffix,
+				Namespace: namespace,
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: "apps/v1",
@@ -899,11 +861,9 @@ var _ = Describe("KubeStateMetrics", func() {
 		maxUnavailable := intstr.FromInt32(1)
 		pdbFor = func(nameSuffix string) *policyv1.PodDisruptionBudget {
 			return &policyv1.PodDisruptionBudget{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-state-metrics-pdb" + nameSuffix,
-					Namespace: namespace,
-					Labels:    selectorLabelsForClusterType(nameSuffix),
-				},
+				Name:      "kube-state-metrics-pdb" + nameSuffix,
+				Namespace: namespace,
+				Labels:    selectorLabelsForClusterType(nameSuffix),
 				Spec: policyv1.PodDisruptionBudgetSpec{
 					Selector: &metav1.LabelSelector{
 						MatchLabels: selectorLabelsForClusterType(nameSuffix),
@@ -917,22 +877,16 @@ var _ = Describe("KubeStateMetrics", func() {
 
 	JustBeforeEach(func() {
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceTarget = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceTargetName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceTargetName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -953,10 +907,8 @@ var _ = Describe("KubeStateMetrics", func() {
 				managedResourceName = "kube-state-metrics-runtime"
 
 				customResourceStateConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "kube-state-metrics-custom-resource-state",
-						Namespace: namespace,
-					},
+					Name:      "kube-state-metrics-custom-resource-state",
+					Namespace: namespace,
 					Data: map[string]string{
 						"custom-resource-state.yaml": expectedCustomResourceStateConfig(values.NameSuffix),
 					},
@@ -971,15 +923,13 @@ var _ = Describe("KubeStateMetrics", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: namespace,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
-						ResourceVersion: "1",
+					Name:      managedResourceName,
+					Namespace: namespace,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -1027,10 +977,8 @@ var _ = Describe("KubeStateMetrics", func() {
 				managedResourceName = "kube-state-metrics-seed"
 
 				customResourceStateConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "kube-state-metrics-custom-resource-state",
-						Namespace: namespace,
-					},
+					Name:      "kube-state-metrics-custom-resource-state",
+					Namespace: namespace,
 					Data: map[string]string{
 						"custom-resource-state.yaml": expectedCustomResourceStateConfig(values.NameSuffix),
 					},
@@ -1045,15 +993,13 @@ var _ = Describe("KubeStateMetrics", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: namespace,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
-						ResourceVersion: "1",
+					Name:      managedResourceName,
+					Namespace: namespace,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -1097,10 +1043,8 @@ var _ = Describe("KubeStateMetrics", func() {
 				managedResourceTargetName = "shoot-core-kube-state-metrics-target"
 
 				customResourceStateConfigMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "kube-state-metrics-custom-resource-state",
-						Namespace: namespace,
-					},
+					Name:      "kube-state-metrics-custom-resource-state",
+					Namespace: namespace,
 					Data: map[string]string{
 						"custom-resource-state.yaml": expectedCustomResourceStateConfig(values.NameSuffix),
 					},
@@ -1122,14 +1066,12 @@ var _ = Describe("KubeStateMetrics", func() {
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceTarget), managedResourceTarget)).To(Succeed())
 
 				expectedMrTarget := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceTargetName,
-						Namespace:       namespace,
-						ResourceVersion: "1",
-						Labels: map[string]string{
-							"origin":                             "gardener",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
+					Name:            managedResourceTargetName,
+					Namespace:       namespace,
+					ResourceVersion: "1",
+					Labels: map[string]string{
+						"origin":                             "gardener",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
@@ -1147,15 +1089,13 @@ var _ = Describe("KubeStateMetrics", func() {
 				))
 
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: namespace,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
-						ResourceVersion: "1",
+					Name:      managedResourceName,
+					Namespace: namespace,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -1256,11 +1196,9 @@ var _ = Describe("KubeStateMetrics", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceName,
-							Namespace:  namespace,
-							Generation: 1,
-						},
+						Name:       managedResourceName,
+						Namespace:  namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1283,11 +1221,9 @@ var _ = Describe("KubeStateMetrics", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceName,
-							Namespace:  namespace,
-							Generation: 1,
-						},
+						Name:       managedResourceName,
+						Namespace:  namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -1330,10 +1266,8 @@ var _ = Describe("KubeStateMetrics", func() {
 					fakeOps.MaxAttempts = 2
 
 					managedResource := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      managedResourceName,
-							Namespace: namespace,
-						},
+						Name:      managedResourceName,
+						Namespace: namespace,
 					}
 
 					Expect(c.Create(ctx, managedResource)).To(Succeed())

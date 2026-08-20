@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -46,10 +45,8 @@ var _ = Describe("Add", func() {
 		reconciler = &Reconciler{Client: fakeClient}
 
 		managedSeedSet = &seedmanagementv1alpha1.ManagedSeedSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: seedmanagementv1alpha1.ManagedSeedSetSpec{
 				Selector: metav1.LabelSelector{
 					MatchLabels: map[string]string{
@@ -69,29 +66,25 @@ var _ = Describe("Add", func() {
 			pred = reconciler.ShootPredicate(ctx)
 
 			oldShoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							Kind:       "ManagedSeedSet",
-							Name:       name,
-							Controller: new(true),
-						},
+				Name:      name + "0",
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						Kind:       "ManagedSeedSet",
+						Name:       name,
+						Controller: new(true),
 					},
 				},
 			}
 
 			newShoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							Kind:       "ManagedSeedSet",
-							Name:       name,
-							Controller: new(true),
-						},
+				Name:      name + "0",
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						Kind:       "ManagedSeedSet",
+						Name:       name,
+						Controller: new(true),
 					},
 				},
 			}
@@ -304,29 +297,25 @@ var _ = Describe("Add", func() {
 			pred = reconciler.ManagedSeedPredicate(ctx)
 
 			oldManagedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							Kind:       "ManagedSeedSet",
-							Name:       name,
-							Controller: new(true),
-						},
+				Name:      name + "0",
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						Kind:       "ManagedSeedSet",
+						Name:       name,
+						Controller: new(true),
 					},
 				},
 			}
 
 			newManagedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							Kind:       "ManagedSeedSet",
-							Name:       name,
-							Controller: new(true),
-						},
+				Name:      name + "0",
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						Kind:       "ManagedSeedSet",
+						Name:       name,
+						Controller: new(true),
 					},
 				},
 			}
@@ -438,32 +427,26 @@ var _ = Describe("Add", func() {
 			pred = reconciler.SeedPredicate(ctx)
 
 			managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							Kind:       "ManagedSeedSet",
-							Name:       name,
-							Controller: new(true),
-						},
+				Name:      name + "0",
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						Kind:       "ManagedSeedSet",
+						Name:       name,
+						Controller: new(true),
 					},
 				},
 				Spec: seedmanagementv1alpha1.ManagedSeedSpec{},
 			}
 
 			oldSeed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-				},
+				Name:      name + "0",
+				Namespace: namespace,
 			}
 
 			newSeed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-				},
+				Name:      name + "0",
+				Namespace: namespace,
 			}
 		})
 
@@ -566,21 +549,17 @@ var _ = Describe("Add", func() {
 			log = logr.Discard()
 
 			seed = &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: name + "0",
-				},
+				Name: name + "0",
 			}
 
 			managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name + "0",
-					Namespace: namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							Kind:       "ManagedSeedSet",
-							Name:       name,
-							Controller: new(true),
-						},
+				Name:      name + "0",
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						Kind:       "ManagedSeedSet",
+						Name:       name,
+						Controller: new(true),
 					},
 				},
 				Spec: seedmanagementv1alpha1.ManagedSeedSpec{},
@@ -612,7 +591,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, managedSeedSet)).To(Succeed())
 
 			Expect(reconciler.MapSeedToManagedSeedSet(log)(ctx, seed)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: managedSeedSet.Name, Namespace: managedSeedSet.Namespace}},
+				reconcile.Request{Name: managedSeedSet.Name, Namespace: managedSeedSet.Namespace},
 			))
 		})
 	})

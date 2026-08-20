@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -70,28 +69,28 @@ var _ = Describe("Reconciler", func() {
 			Build()
 
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{Name: projectName},
-			Spec:       gardencorev1beta1.ProjectSpec{Namespace: &namespaceName},
+			Name: projectName,
+			Spec: gardencorev1beta1.ProjectSpec{Namespace: &namespaceName},
 		}
 
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: namespaceName},
+			Name: namespaceName,
 		}
 
 		Expect(fakeClient.Create(ctx, project)).To(Succeed())
 		Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: namespaceName},
-			Spec:       gardencorev1beta1.ShootSpec{SecretBindingName: new(secretBindingName)},
+			Name: "shoot1", Namespace: namespaceName,
+			Spec: gardencorev1beta1.ShootSpec{SecretBindingName: new(secretBindingName)},
 		}
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{Namespace: namespaceName, Name: secretBindingName},
-			SecretRef:  corev1.SecretReference{Namespace: namespaceName, Name: secretName},
-			Quotas:     []corev1.ObjectReference{{}, {Namespace: namespaceName, Name: quotaName}},
+			Namespace: namespaceName, Name: secretBindingName,
+			SecretRef: corev1.SecretReference{Namespace: namespaceName, Name: secretName},
+			Quotas:    []corev1.ObjectReference{{}, {Namespace: namespaceName, Name: quotaName}},
 		}
 		credentialsBinding = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta:     metav1.ObjectMeta{Namespace: namespaceName, Name: credentialsBindingName},
+			Namespace: namespaceName, Name: credentialsBindingName,
 			CredentialsRef: corev1.ObjectReference{Kind: "Secret", APIVersion: "v1", Namespace: namespaceName, Name: secretName},
 			Quotas:         []corev1.ObjectReference{{}, {Namespace: namespaceName, Name: quotaName}},
 		}
@@ -101,7 +100,7 @@ var _ = Describe("Reconciler", func() {
 			StaleExpirationTimeDays: &staleExpirationTimeDays,
 			StaleSyncPeriod:         &staleSyncPeriod,
 		}
-		request = reconcile.Request{NamespacedName: types.NamespacedName{Name: project.Name}}
+		request = reconcile.Request{Name: project.Name}
 
 		reconciler = &Reconciler{Client: fakeClient, Config: cfg, Clock: fakeClock}
 	})
@@ -109,43 +108,35 @@ var _ = Describe("Reconciler", func() {
 	// secretObj creates a corev1.Secret with the specified labels for the fake client.
 	secretObj := func(ns, name string, labels map[string]string) *corev1.Secret {
 		return &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-				Labels:    labels,
-			},
+			Namespace: ns,
+			Name:      name,
+			Labels:    labels,
 		}
 	}
 
 	// internalSecretObj creates a gardencorev1beta1.InternalSecret.
 	internalSecretObj := func(ns, name string, labels map[string]string) *gardencorev1beta1.InternalSecret {
 		return &gardencorev1beta1.InternalSecret{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-				Labels:    labels,
-			},
+			Namespace: ns,
+			Name:      name,
+			Labels:    labels,
 		}
 	}
 
 	// workloadIdentityObj creates a securityv1alpha1.WorkloadIdentity.
 	workloadIdentityObj := func(ns, name string, labels map[string]string) *securityv1alpha1.WorkloadIdentity {
 		return &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-				Labels:    labels,
-			},
+			Namespace: ns,
+			Name:      name,
+			Labels:    labels,
 		}
 	}
 
 	// quotaObj creates a gardencorev1beta1.Quota.
 	quotaObj := func(ns, name string) *gardencorev1beta1.Quota {
 		return &gardencorev1beta1.Quota{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-			},
+			Namespace: ns,
+			Name:      name,
 		}
 	}
 
@@ -209,7 +200,7 @@ var _ = Describe("Reconciler", func() {
 			Describe("project should be marked as not stale", func() {
 				It("has shoots", func() {
 					shootInNs := &gardencorev1beta1.Shoot{
-						ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: namespaceName},
+						Name: "s1", Namespace: namespaceName,
 					}
 
 					Expect(fakeClient.Create(ctx, shootInNs)).To(Succeed())
@@ -223,8 +214,8 @@ var _ = Describe("Reconciler", func() {
 
 				It("has backupentries", func() {
 					backupEntry := &gardencorev1beta1.BackupEntry{
-						ObjectMeta: metav1.ObjectMeta{Name: "be1", Namespace: namespaceName},
-						Spec:       gardencorev1beta1.BackupEntrySpec{BucketName: "bucket1"},
+						Name: "be1", Namespace: namespaceName,
+						Spec: gardencorev1beta1.BackupEntrySpec{BucketName: "bucket1"},
 					}
 					Expect(fakeClient.Create(ctx, backupEntry)).To(Succeed())
 
@@ -270,7 +261,7 @@ var _ = Describe("Reconciler", func() {
 
 				It("has secrets referenced by secret binding that are used by shoots in another namespace", func() {
 					otherNamespace := namespaceName + "other"
-					otherNs := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: otherNamespace}}
+					otherNs := &corev1.Namespace{Name: otherNamespace}
 
 					secret := secretObj(namespaceName, secretName, map[string]string{
 						v1beta1constants.LabelSecretBindingReference: "true",
@@ -294,7 +285,7 @@ var _ = Describe("Reconciler", func() {
 
 				It("has secrets referenced by credentials binding that are used by shoots in another namespace", func() {
 					otherNamespace := namespaceName + "other"
-					otherNs := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: otherNamespace}}
+					otherNs := &corev1.Namespace{Name: otherNamespace}
 
 					secret := secretObj(namespaceName, secretName, map[string]string{
 						v1beta1constants.LabelCredentialsBindingReference: "true",
@@ -349,7 +340,7 @@ var _ = Describe("Reconciler", func() {
 
 				It("has quotas referenced by secret binding that are used by shoots in another namespace", func() {
 					otherNamespace := namespaceName + "other"
-					otherNs := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: otherNamespace}}
+					otherNs := &corev1.Namespace{Name: otherNamespace}
 
 					quota := quotaObj(namespaceName, quotaName)
 					sbInOther := secretBinding.DeepCopy()
@@ -371,7 +362,7 @@ var _ = Describe("Reconciler", func() {
 
 				It("has quotas referenced by credentials binding that are used by shoots in another namespace", func() {
 					otherNamespace := namespaceName + "other"
-					otherNs := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: otherNamespace}}
+					otherNs := &corev1.Namespace{Name: otherNamespace}
 
 					quota := quotaObj(namespaceName, quotaName)
 					cbInOther := credentialsBinding.DeepCopy()
@@ -416,7 +407,7 @@ var _ = Describe("Reconciler", func() {
 
 				It("has internal secrets referenced by credentials binding that are used by shoots in another namespace", func() {
 					otherNamespace := namespaceName + "other"
-					otherNs := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: otherNamespace}}
+					otherNs := &corev1.Namespace{Name: otherNamespace}
 
 					internalSecret := internalSecretObj(namespaceName, internalSecretName, map[string]string{
 						v1beta1constants.LabelCredentialsBindingReference: "true",
@@ -464,7 +455,7 @@ var _ = Describe("Reconciler", func() {
 
 				It("has workload identities referenced by credentials binding that are used by shoots in another namespace", func() {
 					otherNamespace := namespaceName + "other"
-					otherNs := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: otherNamespace}}
+					otherNs := &corev1.Namespace{Name: otherNamespace}
 
 					wi := workloadIdentityObj(namespaceName, workloadIdentityName, map[string]string{
 						v1beta1constants.LabelCredentialsBindingReference: "true",

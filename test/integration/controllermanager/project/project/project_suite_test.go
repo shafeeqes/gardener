@@ -117,10 +117,8 @@ var _ = BeforeSuite(func() {
 
 	By("Register Project controller")
 	defaultResourceQuota = corev1.ResourceQuota{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:      map[string]string{"foo": testRunID},
-			Annotations: map[string]string{"foo": testRunID},
-		},
+		Labels:      map[string]string{"foo": testRunID},
+		Annotations: map[string]string{"foo": testRunID},
 		Spec: corev1.ResourceQuotaSpec{
 			Hard: corev1.ResourceList{
 				"count/shoots.core.gardener.cloud": resource.MustParse("100"),

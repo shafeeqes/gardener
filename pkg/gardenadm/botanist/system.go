@@ -8,7 +8,6 @@ import (
 	"context"
 
 	schedulingv1 "k8s.io/api/scheduling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/controllerutils"
@@ -22,7 +21,7 @@ import (
 // Using system-cluster-critical for gardener-resource-manager could also be good enough, but it's very simple to deploy
 // the gardener-system-critical PriorityClass, so we can also choose the cleaner way.
 func (b *GardenadmBotanist) DeployPriorityClassCritical(ctx context.Context) error {
-	priorityClass := &schedulingv1.PriorityClass{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.PriorityClassNameSeedSystemCritical}}
+	priorityClass := &schedulingv1.PriorityClass{Name: v1beta1constants.PriorityClassNameSeedSystemCritical}
 	_, err := controllerutils.CreateOrGetAndMergePatch(ctx, b.SeedClientSet.Client(), priorityClass, func() error {
 		priorityClass.Value = int32(999998950)
 		priorityClass.GlobalDefault = false

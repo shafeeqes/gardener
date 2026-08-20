@@ -13,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	vpaautoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
@@ -42,7 +41,7 @@ var _ = Describe("VPA", func() {
 
 		ctx = context.Background()
 
-		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: name + "-vpa", Namespace: namespace}}
+		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{Name: name + "-vpa", Namespace: namespace}
 		Expect(fakeClient.Create(ctx, vpa)).To(Succeed())
 	})
 
@@ -52,11 +51,9 @@ var _ = Describe("VPA", func() {
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(vpa), vpa)).To(Succeed())
 			Expect(vpa).To(Equal(&vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            name + "-vpa",
-					Namespace:       namespace,
-					ResourceVersion: "2",
-				},
+				Name:            name + "-vpa",
+				Namespace:       namespace,
+				ResourceVersion: "2",
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: "apps/v1",

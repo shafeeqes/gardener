@@ -12,8 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -33,11 +31,9 @@ var _ = Describe("Add", func() {
 	BeforeEach(func() {
 		reconciler = &Reconciler{}
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "seed-foo",
-				Name:      "baz",
-				Labels:    map[string]string{"foo": "bar"},
-			},
+			Namespace: "seed-foo",
+			Name:      "baz",
+			Labels:    map[string]string{"foo": "bar"},
 		}
 	})
 
@@ -117,17 +113,15 @@ var _ = Describe("Add", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 			reconciler.Client = fakeClient
 
-			clusterRole1 = &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{
+			clusterRole1 = &rbacv1.ClusterRole{
 				Name:        "clusterRole1",
 				Labels:      map[string]string{"authorization.gardener.cloud/custom-extensions-permissions": "true"},
-				Annotations: map[string]string{"authorization.gardener.cloud/extensions-serviceaccount-selector": `{"matchLabels":{"foo":"bar"}}`},
-			}}
-			clusterRole2 = &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{
+				Annotations: map[string]string{"authorization.gardener.cloud/extensions-serviceaccount-selector": `{"matchLabels":{"foo":"bar"}}`}}
+			clusterRole2 = &rbacv1.ClusterRole{
 				Name:        "clusterRole2",
 				Labels:      map[string]string{"authorization.gardener.cloud/custom-extensions-permissions": "true"},
-				Annotations: map[string]string{"authorization.gardener.cloud/extensions-serviceaccount-selector": `{"matchLabels":{"bar":"baz"}}`},
-			}}
-			clusterRole3 = &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{Name: "clusterRole3"}}
+				Annotations: map[string]string{"authorization.gardener.cloud/extensions-serviceaccount-selector": `{"matchLabels":{"bar":"baz"}}`}}
+			clusterRole3 = &rbacv1.ClusterRole{Name: "clusterRole3"}
 
 			Expect(fakeClient.Create(ctx, clusterRole1)).To(Succeed())
 			Expect(fakeClient.Create(ctx, clusterRole2)).To(Succeed())
@@ -135,17 +129,16 @@ var _ = Describe("Add", func() {
 		})
 
 		It("should map to all matching cluster roles", func() {
-			Expect(reconciler.MapToMatchingClusterRoles(log)(ctx, serviceAccount)).To(HaveExactElements(reconcile.Request{NamespacedName: types.NamespacedName{Name: clusterRole1.Name}}))
+			Expect(reconciler.MapToMatchingClusterRoles(log)(ctx, serviceAccount)).To(HaveExactElements(reconcile.Request{Name: clusterRole1.Name}))
 		})
 
 		It("should map to fail when a selector cannot be parsed", func() {
-			Expect(fakeClient.Create(ctx, &rbacv1.ClusterRole{ObjectMeta: metav1.ObjectMeta{
+			Expect(fakeClient.Create(ctx, &rbacv1.ClusterRole{
 				Name:        "clusterRole4",
 				Labels:      map[string]string{"authorization.gardener.cloud/custom-extensions-permissions": "true"},
-				Annotations: map[string]string{"authorization.gardener.cloud/extensions-serviceaccount-selector": `{cannot-parse-this`},
-			}})).To(Succeed())
+				Annotations: map[string]string{"authorization.gardener.cloud/extensions-serviceaccount-selector": `{cannot-parse-this`}})).To(Succeed())
 
-			Expect(reconciler.MapToMatchingClusterRoles(log)(ctx, serviceAccount)).To(HaveExactElements(reconcile.Request{NamespacedName: types.NamespacedName{Name: clusterRole1.Name}}))
+			Expect(reconciler.MapToMatchingClusterRoles(log)(ctx, serviceAccount)).To(HaveExactElements(reconcile.Request{Name: clusterRole1.Name}))
 		})
 	})
 })

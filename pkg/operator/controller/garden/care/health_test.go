@@ -73,9 +73,7 @@ var _ = Describe("Garden health", func() {
 		runtimeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.RuntimeScheme).Build()
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			Name: "foo",
 		}
 		gardenNamespace = "garden"
 
@@ -575,11 +573,9 @@ var _ = Describe("Garden health", func() {
 				DeferCleanup(test.WithFeatureGate(features.DefaultFeatureGate, features.PrometheusHealthChecks, true))
 
 				prometheus = &monitoringv1.Prometheus{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels:    map[string]string{"health-check-by": "gardener-operator"},
-					},
+					Name:      "foo",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels:    map[string]string{"health-check-by": "gardener-operator"},
 				}
 
 				Expect(runtimeClient.Create(ctx, prometheus)).To(Succeed())
@@ -869,11 +865,9 @@ func managedResource(name string, relevantCareCondition string, conditions []gar
 	}
 
 	return &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    labels,
-		},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    labels,
 		Spec: resourcesv1alpha1.ManagedResourceSpec{
 			Class: class,
 		},
@@ -889,11 +883,9 @@ func roleLabels(role string) map[string]string {
 
 func newDeployment(namespace, name string, healthy bool) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels:    roleLabels("controlplane"),
-		},
+		Namespace: namespace,
+		Name:      name,
+		Labels:    roleLabels("controlplane"),
 	}
 	if healthy {
 		deployment.Status = appsv1.DeploymentStatus{Conditions: []appsv1.DeploymentCondition{{
@@ -906,11 +898,9 @@ func newDeployment(namespace, name string, healthy bool) *appsv1.Deployment {
 
 func newEtcd(namespace, name string, healthy bool) *druidcorev1alpha1.Etcd {
 	return &druidcorev1alpha1.Etcd{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels:    roleLabels("controlplane"),
-		},
+		Namespace: namespace,
+		Name:      name,
+		Labels:    roleLabels("controlplane"),
 		Status: druidcorev1alpha1.EtcdStatus{
 			Ready: new(healthy),
 		},

@@ -280,14 +280,10 @@ var _ = Describe("CloudProfile Helper", func() {
 					Name: "coreos",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version: "0.0.2",
-							},
+							Version: "0.0.2",
 						},
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-								Version: "0.0.3",
-							},
+							Version: "0.0.3",
 						},
 					},
 				},
@@ -296,9 +292,7 @@ var _ = Describe("CloudProfile Helper", func() {
 
 		It("should find the machine image version when it exists", func() {
 			expected := gardencorev1beta1.MachineImageVersion{
-				ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-					Version: "0.0.3",
-				},
+				Version: "0.0.3",
 			}
 
 			actual, ok := FindMachineImageVersion(machineImages, "coreos", "0.0.3")
@@ -330,14 +324,10 @@ var _ = Describe("CloudProfile Helper", func() {
 				Name: "coreos",
 				Versions: []gardencorev1beta1.MachineImageVersion{
 					{
-						ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-							Version: "0.0.2",
-						},
+						Version: "0.0.2",
 					},
 					{
-						ExpirableVersion: gardencorev1beta1.ExpirableVersion{
-							Version: "0.0.3",
-						},
+						Version: "0.0.3",
 					},
 				},
 			}

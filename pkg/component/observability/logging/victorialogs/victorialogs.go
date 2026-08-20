@@ -149,10 +149,8 @@ func (v *victoriaLogs) vlSingle() *victoriametricsv1.VLSingle {
 	}
 
 	vlSingle := &victoriametricsv1.VLSingle{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      constants.VLSingleResourceName,
-			Namespace: v.namespace,
-		},
+		Name:      constants.VLSingleResourceName,
+		Namespace: v.namespace,
 		Spec: victoriametricsv1.VLSingleSpec{
 			PodMetadata: &victoriametricsv1beta1.EmbeddedObjectMetadata{
 				Labels: getLabels(),
@@ -194,9 +192,7 @@ func (v *victoriaLogs) vlSingle() *victoriametricsv1.VLSingle {
 				},
 			},
 			ServiceSpec: &victoriametricsv1beta1.AdditionalServiceSpec{
-				EmbeddedObjectMetadata: victoriametricsv1beta1.EmbeddedObjectMetadata{
-					Name: constants.ServiceName,
-				},
+				Name: constants.ServiceName,
 			},
 		},
 	}
@@ -236,11 +232,9 @@ func getLabels() map[string]string {
 
 func (v *victoriaLogs) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "victoria-logs-vpa",
-			Namespace: v.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      "victoria-logs-vpa",
+		Namespace: v.namespace,
+		Labels:    getLabels(),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				Kind:       "Deployment",
@@ -264,11 +258,9 @@ func (v *victoriaLogs) getVPA() *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func (v *victoriaLogs) getPVCA(pvcAutoscaling PVCAutoscalingConfig) *pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler {
 	return &pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      constants.VLSingleResourceName,
-			Namespace: v.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      constants.VLSingleResourceName,
+		Namespace: v.namespace,
+		Labels:    getLabels(),
 		Spec: pvcautoscalerv1alpha1.PersistentVolumeClaimAutoscalerSpec{
 			AutoscalerName: v.getAutoscalerName(),
 			TargetRef: autoscalingv1.CrossVersionObjectReference{

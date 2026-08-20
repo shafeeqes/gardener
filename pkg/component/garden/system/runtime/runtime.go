@@ -9,7 +9,6 @@ import (
 	"time"
 
 	schedulingv1 "k8s.io/api/scheduling/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
@@ -93,9 +92,7 @@ var managedPriorityClasses = []struct {
 func addPriorityClasses(registry *managedresources.Registry) error {
 	for _, class := range managedPriorityClasses {
 		if err := registry.Add(&schedulingv1.PriorityClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: class.name,
-			},
+			Name:          class.name,
 			Description:   class.description,
 			GlobalDefault: false,
 			Value:         class.value,

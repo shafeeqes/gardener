@@ -23,10 +23,8 @@ var _ = Describe("Worker validation tests", func() {
 
 	BeforeEach(func() {
 		worker = &extensionsv1alpha1.Worker{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-worker",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-worker",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.WorkerSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: "provider",

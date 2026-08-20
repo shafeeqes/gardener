@@ -34,7 +34,7 @@ var _ = Describe("AdvertisedAddresses", func() {
 		fakeClient     client.Client
 		fakeSeedClient kubernetes.Interface
 		ctx            = context.TODO()
-		shootNamespace = corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "shoot--test--test"}}
+		shootNamespace = corev1.Namespace{Name: "shoot--test--test"}
 	)
 
 	BeforeEach(func() {
@@ -161,9 +161,7 @@ var _ = Describe("AdvertisedAddresses", func() {
 			botanist.Shoot.ServiceAccountIssuerHostname = new("managed.foo.bar")
 			botanist.Garden = &garden.Garden{
 				Project: &gardencorev1beta1.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "some-proj",
-					},
+					Name: "some-proj",
 				},
 			}
 
@@ -201,9 +199,7 @@ var _ = Describe("AdvertisedAddresses", func() {
 
 			botanist.Garden = &garden.Garden{
 				Project: &gardencorev1beta1.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "some-proj",
-					},
+					Name: "some-proj",
 				},
 			}
 
@@ -234,10 +230,8 @@ var _ = Describe("AdvertisedAddresses", func() {
 		It("returns nothing when no ingress is labeled", func() {
 			// Resource does not have the expected labels
 			ingress := &networkingv1.Ingress{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ingress-1",
-					Namespace: shootNamespace.Name,
-				},
+				Name:      "ingress-1",
+				Namespace: shootNamespace.Name,
 				Spec: networkingv1.IngressSpec{
 					TLS: []networkingv1.IngressTLS{
 						{
@@ -255,12 +249,10 @@ var _ = Describe("AdvertisedAddresses", func() {
 
 		It("returns valid endpoints from ingress resources", func() {
 			ingressA := &networkingv1.Ingress{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ingress-1",
-					Namespace: shootNamespace.Name,
-					Labels: map[string]string{
-						v1beta1constants.LabelShootEndpointAdvertise: "true",
-					},
+				Name:      "ingress-1",
+				Namespace: shootNamespace.Name,
+				Labels: map[string]string{
+					v1beta1constants.LabelShootEndpointAdvertise: "true",
 				},
 				Spec: networkingv1.IngressSpec{
 					TLS: []networkingv1.IngressTLS{
@@ -271,12 +263,10 @@ var _ = Describe("AdvertisedAddresses", func() {
 				},
 			}
 			ingressB := &networkingv1.Ingress{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ingress-2",
-					Namespace: shootNamespace.Name,
-					Labels: map[string]string{
-						v1beta1constants.LabelShootEndpointAdvertise: "true",
-					},
+				Name:      "ingress-2",
+				Namespace: shootNamespace.Name,
+				Labels: map[string]string{
+					v1beta1constants.LabelShootEndpointAdvertise: "true",
 				},
 				Spec: networkingv1.IngressSpec{
 					TLS: []networkingv1.IngressTLS{
@@ -305,13 +295,11 @@ var _ = Describe("AdvertisedAddresses", func() {
 
 		It("returns valid endpoints with application from ingress resources", func() {
 			ingressA := &networkingv1.Ingress{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ingress-1",
-					Namespace: shootNamespace.Name,
-					Labels: map[string]string{
-						v1beta1constants.LabelShootEndpointAdvertise:   "true",
-						v1beta1constants.LabelShootEndpointApplication: "Dashboard",
-					},
+				Name:      "ingress-1",
+				Namespace: shootNamespace.Name,
+				Labels: map[string]string{
+					v1beta1constants.LabelShootEndpointAdvertise:   "true",
+					v1beta1constants.LabelShootEndpointApplication: "Dashboard",
 				},
 				Spec: networkingv1.IngressSpec{
 					TLS: []networkingv1.IngressTLS{
@@ -322,13 +310,11 @@ var _ = Describe("AdvertisedAddresses", func() {
 				},
 			}
 			ingressB := &networkingv1.Ingress{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ingress-2",
-					Namespace: shootNamespace.Name,
-					Labels: map[string]string{
-						v1beta1constants.LabelShootEndpointAdvertise:   "true",
-						v1beta1constants.LabelShootEndpointApplication: "Monitoring",
-					},
+				Name:      "ingress-2",
+				Namespace: shootNamespace.Name,
+				Labels: map[string]string{
+					v1beta1constants.LabelShootEndpointAdvertise:   "true",
+					v1beta1constants.LabelShootEndpointApplication: "Monitoring",
 				},
 				Spec: networkingv1.IngressSpec{
 					TLS: []networkingv1.IngressTLS{
@@ -368,10 +354,8 @@ var _ = Describe("AdvertisedAddresses", func() {
 		It("returns nothing when no virtual service is labeled", func() {
 			// Resource does not have the expected labels
 			virtualService := &istionetworkingv1beta1.VirtualService{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "virtual-service-1",
-					Namespace: shootNamespace.Name,
-				},
+				Name:      "virtual-service-1",
+				Namespace: shootNamespace.Name,
 				Spec: istioapinetworkingv1beta1.VirtualService{
 					Hosts: []string{"foo.example.org"},
 				},
@@ -385,24 +369,20 @@ var _ = Describe("AdvertisedAddresses", func() {
 
 		It("returns valid endpoints from virtual service resources", func() {
 			virtualServiceA := &istionetworkingv1beta1.VirtualService{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "virtual-service-1",
-					Namespace: shootNamespace.Name,
-					Labels: map[string]string{
-						v1beta1constants.LabelShootEndpointAdvertise: "true",
-					},
+				Name:      "virtual-service-1",
+				Namespace: shootNamespace.Name,
+				Labels: map[string]string{
+					v1beta1constants.LabelShootEndpointAdvertise: "true",
 				},
 				Spec: istioapinetworkingv1beta1.VirtualService{
 					Hosts: []string{"foo.example.org"},
 				},
 			}
 			virtualServiceB := &istionetworkingv1beta1.VirtualService{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "virtual-service-2",
-					Namespace: shootNamespace.Name,
-					Labels: map[string]string{
-						v1beta1constants.LabelShootEndpointAdvertise: "true",
-					},
+				Name:      "virtual-service-2",
+				Namespace: shootNamespace.Name,
+				Labels: map[string]string{
+					v1beta1constants.LabelShootEndpointAdvertise: "true",
 				},
 				Spec: istioapinetworkingv1beta1.VirtualService{
 					Hosts: []string{"bar.example.org"},

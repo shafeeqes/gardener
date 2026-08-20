@@ -44,7 +44,7 @@ var _ = Describe("Bastion controller tests", func() {
 		seedName := "foo"
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{Namespace: objectKey.Namespace, Name: objectKey.Name},
+			Namespace: objectKey.Namespace, Name: objectKey.Name,
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("my-provider-account"),
 				CloudProfileName:  new("test-cloudprofile"),
@@ -76,7 +76,7 @@ var _ = Describe("Bastion controller tests", func() {
 			},
 		}
 		bastion = &operationsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{Namespace: objectKey.Namespace, Name: objectKey.Name},
+			Namespace: objectKey.Namespace, Name: objectKey.Name,
 			Spec: operationsv1alpha1.BastionSpec{
 				ShootRef: corev1.LocalObjectReference{
 					Name: shoot.Name,

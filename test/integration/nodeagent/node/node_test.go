@@ -63,10 +63,8 @@ var _ = Describe("Node controller tests", func() {
 		})
 
 		node = &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   nodeName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   nodeName,
+			Labels: map[string]string{testID: testRunID},
 		}
 
 		By("Create Node")

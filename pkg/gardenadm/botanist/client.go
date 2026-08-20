@@ -15,7 +15,6 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	componentbaseconfigv1alpha1 "k8s.io/component-base/config/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -96,7 +95,7 @@ func (b *GardenadmBotanist) FetchKubeconfig(ctx context.Context, output io.Write
 	}
 	kubeconfigBytes := kubeconfigBuffer.Bytes()
 
-	kubeconfigSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: KubeconfigSecretName, Namespace: b.Shoot.ControlPlaneNamespace}}
+	kubeconfigSecret := &corev1.Secret{Name: KubeconfigSecretName, Namespace: b.Shoot.ControlPlaneNamespace}
 	_, err := controllerutils.CreateOrGetAndMergePatch(ctx, b.SeedClientSet.Client(), kubeconfigSecret, func() error {
 		kubeconfigSecret.Data = map[string][]byte{
 			secretsutils.DataKeyKubeconfig: kubeconfigBytes,

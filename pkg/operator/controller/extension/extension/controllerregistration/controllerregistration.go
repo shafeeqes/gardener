@@ -139,10 +139,8 @@ func (r *registration) Delete(ctx context.Context, log logr.Logger, extension *o
 
 func (r *registration) createConfigMapCopy(ctx context.Context, extensionName string, configMapRef *corev1.LocalObjectReference) (*corev1.ConfigMap, error) {
 	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapRef.Name,
-			Namespace: r.gardenNamespace,
-		},
+		Name:      configMapRef.Name,
+		Namespace: r.gardenNamespace,
 	}
 	if err := r.runtimeClient.Get(ctx, client.ObjectKeyFromObject(configMap), configMap); err != nil {
 		return nil, fmt.Errorf("failed to get referenced config map: %w", err)
@@ -160,10 +158,8 @@ func (r *registration) createConfigMapCopy(ctx context.Context, extensionName st
 
 func (r *registration) createSecretCopy(ctx context.Context, extensionName string, secretRef *corev1.LocalObjectReference) (*corev1.Secret, error) {
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretRef.Name,
-			Namespace: r.gardenNamespace,
-		},
+		Name:      secretRef.Name,
+		Namespace: r.gardenNamespace,
 	}
 	if err := r.runtimeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret); err != nil {
 		return nil, fmt.Errorf("failed to get referenced secret: %w", err)

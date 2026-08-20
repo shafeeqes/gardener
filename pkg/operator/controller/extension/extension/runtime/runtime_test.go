@@ -16,7 +16,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -73,37 +72,31 @@ var _ = Describe("Runtime", func() {
 		runtime = New(runtimeClientSet, &events.FakeRecorder{}, "garden", ociRegistry)
 
 		gardenNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "garden",
-				Annotations: map[string]string{
-					"high-availability-config.resources.gardener.cloud/zones": "eu-west-1a,eu-west-1b",
-				},
+			Name: "garden",
+			Annotations: map[string]string{
+				"high-availability-config.resources.gardener.cloud/zones": "eu-west-1a,eu-west-1b",
 			},
 		}
 		Expect(runtimeClient.Create(ctx, gardenNamespace)).To(Succeed())
 		extensionName = "test-extension"
 		extension = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: extensionName,
-				Annotations: map[string]string{
-					"security.gardener.cloud/pod-security-enforce": "baseline",
-				},
+			Name: extensionName,
+			Annotations: map[string]string{
+				"security.gardener.cloud/pod-security-enforce": "baseline",
 			},
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Deployment: &operatorv1alpha1.Deployment{
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
 						RuntimeClusterValues: &apiextensionsv1.JSON{Raw: []byte("{}")},
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &gardencorev1.OCIRepository{Ref: &ociRef},
-							},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &gardencorev1.OCIRepository{Ref: &ociRef},
 						},
 					},
 				},
 			},
 		}
 
-		priorityClass := &schedulingv1.PriorityClass{ObjectMeta: metav1.ObjectMeta{Name: "gardener-garden-system-200"}}
+		priorityClass := &schedulingv1.PriorityClass{Name: "gardener-garden-system-200"}
 		Expect(runtimeClient.Create(ctx, priorityClass)).To(Succeed())
 	})
 
@@ -177,10 +170,10 @@ var _ = Describe("Runtime", func() {
 
 		It("should succeed if extension was deployed before", func() {
 			namespace := fmt.Sprintf("runtime-extension-%s", extensionName)
-			ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
+			ns := &corev1.Namespace{Name: namespace}
 			Expect(runtimeClient.Create(ctx, ns)).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("extension-%s-garden", extensionName), Namespace: "garden"}})).To(Succeed())
-			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: fmt.Sprintf("extension-%s-garden", extensionName), Namespace: "garden"}, Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: fmt.Sprintf("extension-%s-garden", extensionName)}}}})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &corev1.Secret{Name: fmt.Sprintf("extension-%s-garden", extensionName), Namespace: "garden"})).To(Succeed())
+			Expect(runtimeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Name: fmt.Sprintf("extension-%s-garden", extensionName), Namespace: "garden", Spec: resourcesv1alpha1.ManagedResourceSpec{SecretRefs: []corev1.LocalObjectReference{{Name: fmt.Sprintf("extension-%s-garden", extensionName)}}}})).To(Succeed())
 
 			_, err := runtime.Delete(ctx, log, extension)
 			Expect(err).NotTo(HaveOccurred())

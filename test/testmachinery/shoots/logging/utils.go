@@ -116,9 +116,7 @@ func create(ctx context.Context, c client.Client, obj client.Object) error {
 
 func getShootNamespace(number int) *corev1.Namespace {
 	return &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s%v", simulatedShootNamespacePrefix, number),
-		},
+		Name: fmt.Sprintf("%s%v", simulatedShootNamespacePrefix, number),
 	}
 }
 
@@ -140,13 +138,9 @@ func getCluster(number int) *extensionsv1alpha1.Cluster {
 	}
 
 	return &extensionsv1alpha1.Cluster{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Cluster",
-			APIVersion: "extensions.gardener.cloud/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s%v", simulatedShootNamespacePrefix, number),
-		},
+		Kind:       "Cluster",
+		APIVersion: "extensions.gardener.cloud/v1alpha1",
+		Name:       fmt.Sprintf("%s%v", simulatedShootNamespacePrefix, number),
 		Spec: extensionsv1alpha1.ClusterSpec{
 			Shoot: runtime.RawExtension{
 				Raw: encode(shoot),
@@ -163,10 +157,8 @@ func getCluster(number int) *extensionsv1alpha1.Cluster {
 
 func getLoggingShootService(number int) *corev1.Service {
 	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "logging",
-			Namespace: fmt.Sprintf("%s%v", simulatedShootNamespacePrefix, number),
-		},
+		Name:      "logging",
+		Namespace: fmt.Sprintf("%s%v", simulatedShootNamespacePrefix, number),
 		Spec: corev1.ServiceSpec{
 			Type:         corev1.ServiceTypeExternalName,
 			ExternalName: "logging-shoot.garden.svc.cluster.local",
@@ -211,10 +203,8 @@ func getSecretNameFromVolume(volumes []corev1.Volume, wantedVolumeName string) s
 func newEmptyDirVolume(name, size string) corev1.Volume {
 	return corev1.Volume{
 		Name: name,
-		VolumeSource: corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{
-				SizeLimit: new(resource.MustParse(size)),
-			},
+		EmptyDir: &corev1.EmptyDirVolumeSource{
+			SizeLimit: new(resource.MustParse(size)),
 		},
 	}
 }
@@ -234,9 +224,7 @@ func newPodAntiAffinity(matchLabels map[string]string) *corev1.PodAntiAffinity {
 
 func newGardenNamespace(namespace string) *corev1.Namespace {
 	return &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
+		Name: namespace,
 	}
 }
 

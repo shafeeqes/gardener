@@ -327,9 +327,7 @@ func (o *Options) Run(ctx context.Context) error {
 			}
 
 			if _, err := kubeClient.CoreV1().Namespaces().Create(ctx, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: namespace,
-				},
+				Name: namespace,
 			}, kubernetesclient.DefaultCreateOptions()); err != nil {
 				return err
 			}
@@ -358,10 +356,8 @@ func (o *Options) Run(ctx context.Context) error {
 		}
 
 		_, err := kubeClient.CoreV1().ConfigMaps(metav1.NamespaceSystem).Create(ctx, &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.ClusterIdentity,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      v1beta1constants.ClusterIdentity,
+			Namespace: metav1.NamespaceSystem,
 			Immutable: new(true),
 			Data: map[string]string{
 				v1beta1constants.ClusterIdentity:       o.ExtraOptions.ClusterIdentity,

@@ -212,14 +212,10 @@ var _ = Describe("CloudProfile Helper", func() {
 					Name: "coreos",
 					Versions: []core.MachineImageVersion{
 						{
-							ExpirableVersion: core.ExpirableVersion{
-								Version: "0.0.2",
-							},
+							Version: "0.0.2",
 						},
 						{
-							ExpirableVersion: core.ExpirableVersion{
-								Version: "0.0.3",
-							},
+							Version: "0.0.3",
 						},
 					},
 				},
@@ -228,9 +224,7 @@ var _ = Describe("CloudProfile Helper", func() {
 
 		It("should find the machine image version when it exists", func() {
 			expected := core.MachineImageVersion{
-				ExpirableVersion: core.ExpirableVersion{
-					Version: "0.0.3",
-				},
+				Version: "0.0.3",
 			}
 
 			actual, ok := FindMachineImageVersion(machineImages, "coreos", "0.0.3")
@@ -255,42 +249,30 @@ var _ = Describe("CloudProfile Helper", func() {
 	classificationDeprecated := core.ClassificationDeprecated
 	classificationSupported := core.ClassificationSupported
 	previewVersion := core.MachineImageVersion{
-		ExpirableVersion: core.ExpirableVersion{
-			Version:        "1.1.2",
-			Classification: &classificationPreview,
-		},
+		Version:        "1.1.2",
+		Classification: &classificationPreview,
 	}
 	deprecatedVersion := core.MachineImageVersion{
-		ExpirableVersion: core.ExpirableVersion{
-			Version:        "1.1.1",
-			Classification: &classificationDeprecated,
-		},
+		Version:        "1.1.1",
+		Classification: &classificationDeprecated,
 	}
 	supportedVersion := core.MachineImageVersion{
-		ExpirableVersion: core.ExpirableVersion{
-			Version:        "1.1.0",
-			Classification: &classificationSupported,
-		},
+		Version:        "1.1.0",
+		Classification: &classificationSupported,
 	}
 
 	var versions = []core.MachineImageVersion{
 		{
-			ExpirableVersion: core.ExpirableVersion{
-				Version:        "1.0.0",
-				Classification: &classificationDeprecated,
-			},
+			Version:        "1.0.0",
+			Classification: &classificationDeprecated,
 		},
 		{
-			ExpirableVersion: core.ExpirableVersion{
-				Version:        "1.0.1",
-				Classification: &classificationDeprecated,
-			},
+			Version:        "1.0.1",
+			Classification: &classificationDeprecated,
 		},
 		{
-			ExpirableVersion: core.ExpirableVersion{
-				Version:        "1.0.2",
-				Classification: &classificationDeprecated,
-			},
+			Version:        "1.0.2",
+			Classification: &classificationDeprecated,
 		},
 		supportedVersion,
 		deprecatedVersion,
@@ -302,14 +284,10 @@ var _ = Describe("CloudProfile Helper", func() {
 			Name: "coreos",
 			Versions: []core.MachineImageVersion{
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "0.0.2",
-					},
+					Version: "0.0.2",
 				},
 				{
-					ExpirableVersion: core.ExpirableVersion{
-						Version: "0.0.3",
-					},
+					Version: "0.0.3",
 				},
 			},
 		},
@@ -326,7 +304,7 @@ var _ = Describe("CloudProfile Helper", func() {
 		},
 
 		Entry("should return nil - empty machine image slice", nil, map[string]core.MachineImageVersion{}, false),
-		Entry("should return nil - no valid image", []core.MachineImage{{Name: "coreos", Versions: []core.MachineImageVersion{{ExpirableVersion: core.ExpirableVersion{Version: "abc"}}}}}, nil, true),
+		Entry("should return nil - no valid image", []core.MachineImage{{Name: "coreos", Versions: []core.MachineImageVersion{{Version: "abc"}}}}, nil, true),
 		Entry("should determine latest expirable version", machineImages, map[string]core.MachineImageVersion{"coreos": {ExpirableVersion: core.ExpirableVersion{Version: "0.0.3"}}}, false),
 	)
 
@@ -341,10 +319,10 @@ var _ = Describe("CloudProfile Helper", func() {
 		},
 
 		Entry("should determine latest expirable version - do not ignore preview version", versions, false, previewVersion, false),
-		Entry("should determine latest expirable version - prefer older supported version over newer deprecated one (full list of versions)", versions, true, core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "1.1.0", Classification: &classificationSupported}}, false),
-		Entry("should determine latest expirable version - prefer older supported version over newer deprecated one (latest non-deprecated version is earlier in the list)", []core.MachineImageVersion{supportedVersion, deprecatedVersion}, true, core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "1.1.0", Classification: &classificationSupported}}, false),
-		Entry("should determine latest expirable version - prefer older supported version over newer deprecated one (latest deprecated version is earlier in the list)", []core.MachineImageVersion{deprecatedVersion, supportedVersion}, true, core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "1.1.0", Classification: &classificationSupported}}, false),
-		Entry("should determine latest expirable version - select deprecated version when there is no supported one", []core.MachineImageVersion{previewVersion, deprecatedVersion}, true, core.MachineImageVersion{ExpirableVersion: core.ExpirableVersion{Version: "1.1.1", Classification: &classificationDeprecated}}, false),
+		Entry("should determine latest expirable version - prefer older supported version over newer deprecated one (full list of versions)", versions, true, core.MachineImageVersion{Version: "1.1.0", Classification: &classificationSupported}, false),
+		Entry("should determine latest expirable version - prefer older supported version over newer deprecated one (latest non-deprecated version is earlier in the list)", []core.MachineImageVersion{supportedVersion, deprecatedVersion}, true, core.MachineImageVersion{Version: "1.1.0", Classification: &classificationSupported}, false),
+		Entry("should determine latest expirable version - prefer older supported version over newer deprecated one (latest deprecated version is earlier in the list)", []core.MachineImageVersion{deprecatedVersion, supportedVersion}, true, core.MachineImageVersion{Version: "1.1.0", Classification: &classificationSupported}, false),
+		Entry("should determine latest expirable version - select deprecated version when there is no supported one", []core.MachineImageVersion{previewVersion, deprecatedVersion}, true, core.MachineImageVersion{Version: "1.1.1", Classification: &classificationDeprecated}, false),
 		Entry("should return an error - only preview versions", []core.MachineImageVersion{previewVersion}, true, nil, true),
 		Entry("should return an error - empty version slice", []core.MachineImageVersion{}, true, nil, true),
 	)
@@ -411,15 +389,15 @@ var _ = Describe("CloudProfile Helper", func() {
 				{
 					Name: "image-1",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-1"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-2"}},
+						{Version: "version-1"},
+						{Version: "version-2"},
 					},
 				},
 				{
 					Name: "image-2",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-1"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-2"}},
+						{Version: "version-1"},
+						{Version: "version-2"},
 					},
 				},
 			}
@@ -428,15 +406,15 @@ var _ = Describe("CloudProfile Helper", func() {
 				{
 					Name: "image-2",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-2"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-3"}},
+						{Version: "version-2"},
+						{Version: "version-3"},
 					},
 				},
 				{
 					Name: "image-3",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-1"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-2"}},
+						{Version: "version-1"},
+						{Version: "version-2"},
 					},
 				},
 			}
@@ -464,14 +442,14 @@ var _ = Describe("CloudProfile Helper", func() {
 				{
 					Name: "image-2",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-3"}},
+						{Version: "version-3"},
 					},
 				},
 				{
 					Name: "image-3",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-1"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-2"}},
+						{Version: "version-1"},
+						{Version: "version-2"},
 					},
 				},
 			}
@@ -495,14 +473,14 @@ var _ = Describe("CloudProfile Helper", func() {
 				{
 					Name: "image-2",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-3"}},
+						{Version: "version-3"},
 					},
 				},
 				{
 					Name: "image-3",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-1"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "version-2"}},
+						{Version: "version-1"},
+						{Version: "version-2"},
 					},
 				},
 			}
@@ -526,7 +504,7 @@ var _ = Describe("CloudProfile Helper", func() {
 				{
 					Name: "image-1",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{
+						{
 							Version: "version-1",
 							Lifecycle: []core.LifecycleStage{
 								{
@@ -535,8 +513,7 @@ var _ = Describe("CloudProfile Helper", func() {
 								{
 									Classification: classificationSupported,
 								},
-							},
-						}},
+							}},
 					},
 				},
 			}
@@ -545,14 +522,13 @@ var _ = Describe("CloudProfile Helper", func() {
 				{
 					Name: "image-1",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{
+						{
 							Version: "version-1",
 							Lifecycle: []core.LifecycleStage{
 								{
 									Classification: classificationPreview,
 								},
-							},
-						}},
+							}},
 					},
 				},
 			}

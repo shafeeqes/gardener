@@ -27,10 +27,8 @@ func DefaultManagedSeedName() string {
 
 func baseShoot(name string) *gardencorev1beta1.Shoot {
 	return &gardencorev1beta1.Shoot{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: "garden-local",
-		},
+		Name:      name,
+		Namespace: "garden-local",
 		Spec: gardencorev1beta1.ShootSpec{
 			ControlPlane: getShootControlPlane(),
 			Region:       "local",
@@ -129,10 +127,8 @@ func DefaultWorker(name string, updateStrategy *gardencorev1beta1.MachineUpdateS
 // DefaultNamespacedCloudProfile returns a NamespacedCloudProfile object with default values for the e2e tests.
 func DefaultNamespacedCloudProfile() *gardencorev1beta1.NamespacedCloudProfile {
 	return &gardencorev1beta1.NamespacedCloudProfile{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "my-profile",
-			Namespace: "garden-local",
-		},
+		Name:      "my-profile",
+		Namespace: "garden-local",
 		Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 			Parent: gardencorev1beta1.CloudProfileReference{
 				Kind: "CloudProfile",

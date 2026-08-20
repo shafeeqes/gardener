@@ -179,16 +179,12 @@ func allowFromLoadBalancersToKubeAPIServer() networkingv1.NetworkPolicyIngressRu
 
 func emptyNetworkPolicy(name, namespace string) *networkingv1.NetworkPolicy {
 	return &networkingv1.NetworkPolicy{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: networkingv1.SchemeGroupVersion.String(),
-			Kind:       "NetworkPolicy",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "provider-local",
-			},
+		APIVersion: networkingv1.SchemeGroupVersion.String(),
+		Kind:       "NetworkPolicy",
+		Name:       name,
+		Namespace:  namespace,
+		Labels: map[string]string{
+			"app.kubernetes.io/managed-by": "provider-local",
 		},
 	}
 }

@@ -10,8 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -42,16 +40,12 @@ var _ = Describe("Controller Mapper", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test",
-				Namespace: namespace,
-			},
+			Name:      "test",
+			Namespace: namespace,
 		}
 
 		backupBucket = &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "backupBucket-1",
-			},
+			Name: "backupBucket-1",
 			Spec: extensionsv1alpha1.BackupBucketSpec{
 				SecretRef: corev1.SecretReference{
 					Name:      secret.Name,
@@ -60,9 +54,7 @@ var _ = Describe("Controller Mapper", func() {
 			},
 		}
 		backupBucket2 = &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "backupBucket-2",
-			},
+			Name: "backupBucket-2",
 			Spec: extensionsv1alpha1.BackupBucketSpec{
 				SecretRef: corev1.SecretReference{
 					Name:      secret.Name,
@@ -85,14 +77,10 @@ var _ = Describe("Controller Mapper", func() {
 
 			Expect(mapper(ctx, secret)).To(ConsistOf(
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name: backupBucket.Name,
-					},
+					Name: backupBucket.Name,
 				},
 				reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name: backupBucket2.Name,
-					},
+					Name: backupBucket2.Name,
 				}))
 		})
 

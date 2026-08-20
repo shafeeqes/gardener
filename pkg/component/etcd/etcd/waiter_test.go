@@ -72,7 +72,7 @@ var _ = Describe("#Wait", func() {
 		log = logr.Discard()
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
 
 		waiter = &retryfake.Ops{MaxAttempts: 1}
 		cleanupFunc = test.WithVars(
@@ -93,17 +93,13 @@ var _ = Describe("#Wait", func() {
 		})
 
 		expected = &druidcorev1alpha1.Etcd{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: druidcorev1alpha1.SchemeGroupVersion.String(),
-				Kind:       "Etcd",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: testNamespace,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-				},
+			APIVersion: druidcorev1alpha1.SchemeGroupVersion.String(),
+			Kind:       "Etcd",
+			Name:       name,
+			Namespace:  testNamespace,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+				v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
 			},
 			Spec: druidcorev1alpha1.EtcdSpec{
 				Replicas: 3,

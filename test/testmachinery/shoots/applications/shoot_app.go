@@ -86,10 +86,8 @@ var _ = ginkgo.Describe("Shoot application testing", func() {
 
 		url := fmt.Sprintf("https://api.%s/api/v1/namespaces/%s/services/https:kubernetes-dashboard:/proxy", *f.Shoot.Spec.DNS.Domain, "kubernetes-dashboard")
 		serviceAccount := &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.SecretNameGardener,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      v1beta1constants.SecretNameGardener,
+			Namespace: metav1.NamespaceSystem,
 		}
 		token, err := framework.CreateTokenForServiceAccount(ctx, f.ShootClient, serviceAccount, new(int64(3600)))
 		framework.ExpectNoError(err)

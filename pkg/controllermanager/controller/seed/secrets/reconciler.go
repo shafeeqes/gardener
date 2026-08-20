@@ -45,10 +45,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	namespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   gardenerutils.ComputeGardenNamespace(seed.Name),
-			Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed},
-		},
+		Name:   gardenerutils.ComputeGardenNamespace(seed.Name),
+		Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleSeed},
 	}
 	log = log.WithValues("gardenNamespace", namespace.Name)
 
@@ -129,10 +127,8 @@ func (r *Reconciler) syncGardenSecrets(ctx context.Context, namespace *corev1.Na
 		secretNames = append(secretNames, secret.Name)
 		fns = append(fns, func(ctx context.Context) error {
 			seedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secret.Name,
-					Namespace: namespace.Name,
-				},
+				Name:      secret.Name,
+				Namespace: namespace.Name,
 			}
 
 			_, err := controllerutils.GetAndCreateOrMergePatch(ctx, r.Client, seedSecret, func() error {

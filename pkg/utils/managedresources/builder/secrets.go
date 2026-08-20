@@ -10,7 +10,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -102,7 +101,7 @@ func (s *Secret) Unique() (string, *Secret) {
 // Reconcile creates or updates the secret.
 func (s *Secret) Reconcile(ctx context.Context) error {
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{Name: s.secret.Name, Namespace: s.secret.Namespace},
+		Name: s.secret.Name, Namespace: s.secret.Namespace,
 	}
 
 	mutate := func() error {

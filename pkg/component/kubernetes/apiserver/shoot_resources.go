@@ -6,7 +6,6 @@ package apiserver
 
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
@@ -17,7 +16,7 @@ import (
 const ManagedResourceName = "shoot-core-kube-apiserver"
 
 func (k *kubeAPIServer) emptyManagedResource() *resourcesv1alpha1.ManagedResource {
-	return &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: ManagedResourceName, Namespace: k.namespace}}
+	return &resourcesv1alpha1.ManagedResource{Name: ManagedResourceName, Namespace: k.namespace}
 }
 
 func (k *kubeAPIServer) computeShootResourcesData() (map[string][]byte, error) {
@@ -25,9 +24,7 @@ func (k *kubeAPIServer) computeShootResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "system:apiserver:kubelet",
-			},
+			Name: "system:apiserver:kubelet",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
@@ -48,10 +45,8 @@ func (k *kubeAPIServer) computeShootResourcesData() (map[string][]byte, error) {
 		}
 
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "system:apiserver:kubelet",
-				Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
-			},
+			Name:        "system:apiserver:kubelet",
+			Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",

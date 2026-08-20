@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	istionetworkingv1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/version"
@@ -325,30 +324,22 @@ var _ = Describe("istiod", func() {
 
 		managedResourceIstioName = "istio"
 		managedResourceIstio = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceIstioName,
-				Namespace: deployNS,
-			},
+			Name:      managedResourceIstioName,
+			Namespace: deployNS,
 		}
 		managedResourceIstioSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceIstio.Name,
-				Namespace: deployNS,
-			},
+			Name:      "managedresource-" + managedResourceIstio.Name,
+			Namespace: deployNS,
 		}
 
 		managedResourceIstioSystemName = "istio-system"
 		managedResourceIstioSystem = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceIstioSystemName,
-				Namespace: deployNS,
-			},
+			Name:      managedResourceIstioSystemName,
+			Namespace: deployNS,
 		}
 		managedResourceIstioSystemSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResourceIstioSystem.Name,
-				Namespace: deployNS,
-			},
+			Name:      "managedresource-" + managedResourceIstioSystem.Name,
+			Namespace: deployNS,
 		}
 	})
 
@@ -381,12 +372,10 @@ var _ = Describe("istiod", func() {
 			GinkgoHelper()
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResourceIstio), managedResourceIstio)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResourceIstioName,
-					Namespace:       deployNS,
-					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-					ResourceVersion: "1",
-				},
+				Name:            managedResourceIstioName,
+				Namespace:       deployNS,
+				Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -543,10 +532,8 @@ var _ = Describe("istiod", func() {
 				for _, ingressGateway := range igw {
 					for _, statsFilterName := range statsFilterNames {
 						statsFilter := istionetworkingv1alpha3.EnvoyFilter{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      statsFilterName,
-								Namespace: ingressGateway.Namespace,
-							},
+							Name:      statsFilterName,
+							Namespace: ingressGateway.Namespace,
 						}
 						Expect(c.Create(ctx, &statsFilter)).To(Succeed())
 					}
@@ -557,10 +544,8 @@ var _ = Describe("istiod", func() {
 				for _, ingressGateway := range igw {
 					for _, statsFilterName := range statsFilterNames {
 						statsFilter := &istionetworkingv1alpha3.EnvoyFilter{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      statsFilterName,
-								Namespace: ingressGateway.Namespace,
-							},
+							Name:      statsFilterName,
+							Namespace: ingressGateway.Namespace,
 						}
 						Expect(c.Get(ctx, client.ObjectKeyFromObject(statsFilter), statsFilter)).To(BeNotFoundError())
 					}
@@ -818,10 +803,8 @@ var _ = Describe("istiod", func() {
 				DeferCleanup(test.WithFeatureGate(features.DefaultFeatureGate, features.IstioTLSTermination, false))
 
 				envoyFilter := istionetworkingv1alpha3.EnvoyFilter{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot--foo--bar-istio-tls-termination",
-						Namespace: "test-ingress",
-					},
+					Name:      "shoot--foo--bar-istio-tls-termination",
+					Namespace: "test-ingress",
 				}
 				Expect(c.Create(ctx, &envoyFilter)).To(Succeed())
 				DeferCleanup(func() { Expect(c.Delete(ctx, &envoyFilter)).To(Succeed()) })
@@ -854,16 +837,12 @@ var _ = Describe("istiod", func() {
 		BeforeEach(func() {
 			Expect(istiod.Deploy(ctx)).To(Succeed())
 			oldMrSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "managedresource-" + managedResourceIstio.Name,
-					Namespace: deployNS,
-				},
+				Name:      "managedresource-" + managedResourceIstio.Name,
+				Namespace: deployNS,
 			}
 			oldMrSystemSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "managedresource-" + managedResourceIstioSystem.Name,
-					Namespace: deployNS,
-				},
+				Name:      "managedresource-" + managedResourceIstioSystem.Name,
+				Namespace: deployNS,
 			}
 			Expect(c.Create(ctx, oldMrSecret)).To(Succeed())
 			Expect(c.Create(ctx, oldMrSystemSecret)).To(Succeed())
@@ -954,11 +933,9 @@ var _ = Describe("istiod", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceIstioName,
-						Namespace:  deployNS,
-						Generation: 1,
-					},
+					Name:       managedResourceIstioName,
+					Namespace:  deployNS,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -975,11 +952,9 @@ var _ = Describe("istiod", func() {
 				})).To(Succeed())
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceIstioSystemName,
-						Namespace:  deployNS,
-						Generation: 1,
-					},
+					Name:       managedResourceIstioSystemName,
+					Namespace:  deployNS,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -1003,11 +978,9 @@ var _ = Describe("istiod", func() {
 
 				for _, mr := range []string{managedResourceIstioName, managedResourceIstioSystemName} {
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       mr,
-							Namespace:  deployNS,
-							Generation: 1,
-						},
+						Name:       mr,
+						Namespace:  deployNS,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{

@@ -16,7 +16,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -81,9 +80,7 @@ var _ = Describe("References", func() {
 						EnvFrom: []corev1.EnvFromSource{
 							{
 								ConfigMapRef: &corev1.ConfigMapEnvSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: configMap3,
-									},
+									Name: configMap3,
 								},
 							},
 						},
@@ -91,9 +88,7 @@ var _ = Describe("References", func() {
 							{
 								ValueFrom: &corev1.EnvVarSource{
 									ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: configMap5,
-										},
+										Name: configMap5,
 									},
 								},
 							},
@@ -103,23 +98,17 @@ var _ = Describe("References", func() {
 						EnvFrom: []corev1.EnvFromSource{
 							{
 								SecretRef: &corev1.SecretEnvSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: secret3,
-									},
+									Name: secret3,
 								},
 							},
 							{
 								SecretRef: &corev1.SecretEnvSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: secret4,
-									},
+									Name: secret4,
 								},
 							},
 							{
 								ConfigMapRef: &corev1.ConfigMapEnvSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: configMap4,
-									},
+									Name: configMap4,
 								},
 							},
 						},
@@ -127,9 +116,7 @@ var _ = Describe("References", func() {
 							{
 								ValueFrom: &corev1.EnvVarSource{
 									SecretKeyRef: &corev1.SecretKeySelector{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: secret5,
-										},
+										Name: secret5,
 									},
 								},
 							},
@@ -141,50 +128,36 @@ var _ = Describe("References", func() {
 				},
 				Volumes: []corev1.Volume{
 					{
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{Name: configMap1},
-							},
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							Name: configMap1,
 						},
 					},
 					{
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName: secret1,
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName: secret1,
 						},
 					},
 					{
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{Name: configMap2},
-							},
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							Name: configMap2,
 						},
 					},
 					{
-						VolumeSource: corev1.VolumeSource{
-							Secret: &corev1.SecretVolumeSource{
-								SecretName: secret2,
-							},
+						Secret: &corev1.SecretVolumeSource{
+							SecretName: secret2,
 						},
 					},
 					{
-						VolumeSource: corev1.VolumeSource{
-							Projected: &corev1.ProjectedVolumeSource{
-								Sources: []corev1.VolumeProjection{
-									{
-										Secret: &corev1.SecretProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: secret6,
-											},
-										},
+						Projected: &corev1.ProjectedVolumeSource{
+							Sources: []corev1.VolumeProjection{
+								{
+									Secret: &corev1.SecretProjection{
+										Name: secret6,
 									},
-									{
-										ConfigMap: &corev1.ConfigMapProjection{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: configMap6,
-											},
-										},
+								},
+								{
+									ConfigMap: &corev1.ConfigMapProjection{
+										Name: configMap6,
 									},
 								},
 							},
@@ -229,15 +202,11 @@ var _ = Describe("References", func() {
 			}
 
 			pod = &corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
-				Spec: podSpec,
+				Annotations: annotations,
+				Spec:        podSpec,
 			}
 			deployment = &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1.DeploymentSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -245,9 +214,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			deploymentV1beta2 = &appsv1beta2.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1beta2.DeploymentSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -255,9 +222,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			deploymentV1beta1 = &appsv1beta1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1beta1.DeploymentSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -265,9 +230,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			statefulSet = &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1.StatefulSetSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -275,9 +238,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			statefulSetV1beta2 = &appsv1beta2.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1beta2.StatefulSetSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -285,9 +246,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			statefulSetV1beta1 = &appsv1beta1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1beta1.StatefulSetSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -295,9 +254,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			daemonSet = &appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1.DaemonSetSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -305,9 +262,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			daemonSetV1beta2 = &appsv1beta2.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: appsv1beta2.DaemonSetSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -315,9 +270,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			job = &batchv1.Job{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: batchv1.JobSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: podSpec,
@@ -325,9 +278,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			cronJob = &batchv1.CronJob{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: batchv1.CronJobSpec{
 					JobTemplate: batchv1.JobTemplateSpec{
 						Spec: batchv1.JobSpec{
@@ -339,9 +290,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			cronJobV1beta1 = &batchv1beta1.CronJob{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: batchv1beta1.CronJobSpec{
 					JobTemplate: batchv1beta1.JobTemplateSpec{
 						Spec: batchv1.JobSpec{
@@ -353,9 +302,7 @@ var _ = Describe("References", func() {
 				},
 			}
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					SecretRefs: []corev1.LocalObjectReference{
 						{Name: secret2}, {Name: secret5},
@@ -364,9 +311,7 @@ var _ = Describe("References", func() {
 			}
 
 			prometheus = &monitoringv1.Prometheus{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-				},
+				Annotations: annotations,
 				Spec: monitoringv1.PrometheusSpec{
 					CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 						Containers: podSpec.Containers,

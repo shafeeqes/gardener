@@ -85,12 +85,10 @@ var _ = Describe("VPA", func() {
 		imageUpdater             = "some-image:for-updater"
 
 		livenessProbeVpa = &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path:   "/health-check",
-					Port:   intstr.IntOrString{Type: intstr.String, StrVal: "metrics"},
-					Scheme: corev1.URISchemeHTTP,
-				},
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   "/health-check",
+				Port:   intstr.IntOrString{Type: intstr.String, StrVal: "metrics"},
+				Scheme: corev1.URISchemeHTTP,
 			},
 			InitialDelaySeconds: 120,
 			PeriodSeconds:       60,
@@ -187,8 +185,8 @@ var _ = Describe("VPA", func() {
 		managedResourceName = ""
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "generic-token-kubeconfig", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "generic-token-kubeconfig", Namespace: namespace})).To(Succeed())
 
 		vpaFor = func(clusterType component.ClusterType, isGardenCluster bool, isManagedSeed bool, featureGates map[string]bool) component.DeployWaiter {
 			vpa = New(c, namespace, sm, Values{
@@ -206,21 +204,17 @@ var _ = Describe("VPA", func() {
 		}
 
 		serviceAccountUpdater = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-updater",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "vpa-updater",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 		clusterRoleUpdater = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:evictioner",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:evictioner",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -236,14 +230,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingUpdater = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:evictioner",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:evictioner",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -257,11 +249,9 @@ var _ = Describe("VPA", func() {
 			}},
 		}
 		clusterRoleUpdaterInPlace = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:vpa-updater-in-place",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:vpa-updater-in-place",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -272,14 +262,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingUpdaterInPlace = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:vpa-updater-in-place-binding",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:vpa-updater-in-place-binding",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -293,12 +281,10 @@ var _ = Describe("VPA", func() {
 			}},
 		}
 		roleLeaderLockingUpdater = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:vpa:target:leader-locking-vpa-updater",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "gardener.cloud:vpa:target:leader-locking-vpa-updater",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -315,12 +301,10 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		roleBindingLeaderLockingUpdater = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:vpa:target:leader-locking-vpa-updater",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "gardener.cloud:vpa:target:leader-locking-vpa-updater",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -334,17 +318,15 @@ var _ = Describe("VPA", func() {
 			}},
 		}
 		shootAccessSecretUpdater = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-vpa-updater",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "vpa-updater",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
+			Name:      "shoot-access-vpa-updater",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "vpa-updater",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
@@ -382,14 +364,12 @@ var _ = Describe("VPA", func() {
 			}
 
 			obj := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpa-updater",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 "vpa-updater",
-						"gardener.cloud/role": "vpa",
-						"high-availability-config.resources.gardener.cloud/type": "controller",
-					},
+				Name:      "vpa-updater",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 "vpa-updater",
+					"gardener.cloud/role": "vpa",
+					"high-availability-config.resources.gardener.cloud/type": "controller",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -475,11 +455,9 @@ var _ = Describe("VPA", func() {
 			return obj
 		}
 		podDisruptionBudgetUpdater = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-updater",
-				Namespace: namespace,
-				Labels:    map[string]string{"gardener.cloud/role": "vpa"},
-			},
+			Name:      "vpa-updater",
+			Namespace: namespace,
+			Labels:    map[string]string{"gardener.cloud/role": "vpa"},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &maxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -492,11 +470,9 @@ var _ = Describe("VPA", func() {
 		}
 		serviceUpdaterFor = func(clusterType component.ClusterType, isGardenCluster bool) *corev1.Service {
 			obj := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpa-updater",
-					Namespace: namespace,
-					Labels:    map[string]string{"app": "vpa-updater"},
-				},
+				Name:      "vpa-updater",
+				Namespace: namespace,
+				Labels:    map[string]string{"app": "vpa-updater"},
 				Spec: corev1.ServiceSpec{
 					Selector: map[string]string{"app": "vpa-updater"},
 					Ports: []corev1.ServicePort{{
@@ -526,9 +502,7 @@ var _ = Describe("VPA", func() {
 		}
 		serviceMonitorUpdaterFor = func(clusterType component.ClusterType, isGardenCluster bool, isManagedSeed bool) *monitoringv1.ServiceMonitor {
 			obj := &monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-				},
+				Namespace: namespace,
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{"app": "vpa-updater"}},
 					Endpoints: []monitoringv1.Endpoint{{
@@ -577,10 +551,8 @@ var _ = Describe("VPA", func() {
 			return obj
 		}
 		vpaUpdater = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-updater",
-				Namespace: namespace,
-			},
+			Name:      "vpa-updater",
+			Namespace: namespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -604,21 +576,17 @@ var _ = Describe("VPA", func() {
 		}
 
 		serviceAccountRecommender = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-recommender",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "vpa-recommender",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 		clusterRoleRecommenderMetricsReader = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:metrics-reader",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:metrics-reader",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -629,14 +597,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingRecommenderMetricsReader = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:metrics-reader",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:metrics-reader",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -650,11 +616,9 @@ var _ = Describe("VPA", func() {
 			}},
 		}
 		clusterRoleRecommenderCheckpointActor = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:checkpoint-actor",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:checkpoint-actor",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -670,14 +634,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingRecommenderCheckpointActor = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:checkpoint-actor",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:checkpoint-actor",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -691,11 +653,9 @@ var _ = Describe("VPA", func() {
 			}},
 		}
 		clusterRoleRecommenderStatusActor = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:status-actor",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:status-actor",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -706,14 +666,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingRecommenderStatusActor = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:status-actor",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:status-actor",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			Subjects: []rbacv1.Subject{
 				{
@@ -729,12 +687,10 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		roleLeaderLockingRecommender = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:vpa:target:leader-locking-vpa-recommender",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "gardener.cloud:vpa:target:leader-locking-vpa-recommender",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -751,12 +707,10 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		roleBindingLeaderLockingRecommender = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:vpa:target:leader-locking-vpa-recommender",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "gardener.cloud:vpa:target:leader-locking-vpa-recommender",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -771,11 +725,9 @@ var _ = Describe("VPA", func() {
 		}
 		serviceRecommenderFor = func(clusterType component.ClusterType, isGardenCluster bool) *corev1.Service {
 			obj := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpa-recommender",
-					Namespace: namespace,
-					Labels:    map[string]string{"app": "vpa-recommender"},
-				},
+				Name:      "vpa-recommender",
+				Namespace: namespace,
+				Labels:    map[string]string{"app": "vpa-recommender"},
 				Spec: corev1.ServiceSpec{
 					Selector: map[string]string{"app": "vpa-recommender"},
 					Ports: []corev1.ServicePort{{
@@ -804,17 +756,15 @@ var _ = Describe("VPA", func() {
 			return obj
 		}
 		shootAccessSecretRecommender = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-vpa-recommender",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "vpa-recommender",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
+			Name:      "shoot-access-vpa-recommender",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "vpa-recommender",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
@@ -848,14 +798,12 @@ var _ = Describe("VPA", func() {
 			}
 
 			obj := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpa-recommender",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 "vpa-recommender",
-						"gardener.cloud/role": "vpa",
-						"high-availability-config.resources.gardener.cloud/type": "controller",
-					},
+				Name:      "vpa-recommender",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 "vpa-recommender",
+					"gardener.cloud/role": "vpa",
+					"high-availability-config.resources.gardener.cloud/type": "controller",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -951,11 +899,9 @@ var _ = Describe("VPA", func() {
 			return obj
 		}
 		podDisruptionBudgetRecommender = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-recommender",
-				Namespace: namespace,
-				Labels:    map[string]string{"gardener.cloud/role": "vpa"},
-			},
+			Name:      "vpa-recommender",
+			Namespace: namespace,
+			Labels:    map[string]string{"gardener.cloud/role": "vpa"},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &maxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -967,10 +913,8 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		vpaRecommender = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-recommender",
-				Namespace: namespace,
-			},
+			Name:      "vpa-recommender",
+			Namespace: namespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -994,9 +938,7 @@ var _ = Describe("VPA", func() {
 		}
 		serviceMonitorRecommenderFor = func(clusterType component.ClusterType, isGardenCluster bool) *monitoringv1.ServiceMonitor {
 			obj := &monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-				},
+				Namespace: namespace,
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{"app": "vpa-recommender"}},
 					Endpoints: []monitoringv1.Endpoint{{
@@ -1037,21 +979,17 @@ var _ = Describe("VPA", func() {
 		}
 
 		serviceAccountAdmissionController = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-admission-controller",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name:      "vpa-admission-controller",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 		clusterRoleAdmissionController = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:admission-controller",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:admission-controller",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -1077,14 +1015,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingAdmissionController = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:admission-controller",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:admission-controller",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -1098,29 +1034,25 @@ var _ = Describe("VPA", func() {
 			}},
 		}
 		shootAccessSecretAdmissionController = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "shoot-access-vpa-admission-controller",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "vpa-admission-controller",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
+			Name:      "shoot-access-vpa-admission-controller",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
+			},
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "vpa-admission-controller",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 		serviceAdmissionControllerFor = func(clusterType component.ClusterType, isGardenCluster bool) *corev1.Service {
 			obj := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpa-webhook",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 "vpa-admission-controller",
-						"gardener.cloud/role": "vpa",
-					},
+				Name:      "vpa-webhook",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 "vpa-admission-controller",
+					"gardener.cloud/role": "vpa",
 				},
 				Spec: corev1.ServiceSpec{
 					Selector: map[string]string{"app": "vpa-admission-controller"},
@@ -1161,14 +1093,12 @@ var _ = Describe("VPA", func() {
 		}
 		deploymentAdmissionControllerFor = func(withServiceAccount bool) *appsv1.Deployment {
 			obj := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "vpa-admission-controller",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":                 "vpa-admission-controller",
-						"gardener.cloud/role": "vpa",
-						"high-availability-config.resources.gardener.cloud/type": "server",
-					},
+				Name:      "vpa-admission-controller",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":                 "vpa-admission-controller",
+					"gardener.cloud/role": "vpa",
+					"high-availability-config.resources.gardener.cloud/type": "server",
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas:             new(int32(1)),
@@ -1207,12 +1137,10 @@ var _ = Describe("VPA", func() {
 								},
 								LivenessProbe: livenessProbeVpa,
 								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path:   "/health-check",
-											Port:   intstr.IntOrString{Type: intstr.String, StrVal: "metrics"},
-											Scheme: corev1.URISchemeHTTP,
-										},
+									HTTPGet: &corev1.HTTPGetAction{
+										Path:   "/health-check",
+										Port:   intstr.IntOrString{Type: intstr.String, StrVal: "metrics"},
+										Scheme: corev1.URISchemeHTTP,
 									},
 									PeriodSeconds:    10,
 									FailureThreshold: 3,
@@ -1244,35 +1172,29 @@ var _ = Describe("VPA", func() {
 							}},
 							Volumes: []corev1.Volume{{
 								Name: "vpa-tls-certs",
-								VolumeSource: corev1.VolumeSource{
-									Projected: &corev1.ProjectedVolumeSource{
-										DefaultMode: new(int32(420)),
-										Sources: []corev1.VolumeProjection{
-											{
-												Secret: &corev1.SecretProjection{
-													LocalObjectReference: corev1.LocalObjectReference{
-														Name: "ca",
-													},
-													Items: []corev1.KeyToPath{{
-														Key:  "bundle.crt",
-														Path: "bundle.crt",
-													}},
-												},
+								Projected: &corev1.ProjectedVolumeSource{
+									DefaultMode: new(int32(420)),
+									Sources: []corev1.VolumeProjection{
+										{
+											Secret: &corev1.SecretProjection{
+												Name: "ca",
+												Items: []corev1.KeyToPath{{
+													Key:  "bundle.crt",
+													Path: "bundle.crt",
+												}},
 											},
-											{
-												Secret: &corev1.SecretProjection{
-													LocalObjectReference: corev1.LocalObjectReference{
-														Name: "vpa-admission-controller-server",
+										},
+										{
+											Secret: &corev1.SecretProjection{
+												Name: "vpa-admission-controller-server",
+												Items: []corev1.KeyToPath{
+													{
+														Key:  "tls.crt",
+														Path: "tls.crt",
 													},
-													Items: []corev1.KeyToPath{
-														{
-															Key:  "tls.crt",
-															Path: "tls.crt",
-														},
-														{
-															Key:  "tls.key",
-															Path: "tls.key",
-														},
+													{
+														Key:  "tls.key",
+														Path: "tls.key",
 													},
 												},
 											},
@@ -1306,11 +1228,9 @@ var _ = Describe("VPA", func() {
 			return obj
 		}
 		podDisruptionBudgetAdmissionController = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-admission-controller",
-				Namespace: namespace,
-				Labels:    map[string]string{"gardener.cloud/role": "vpa"},
-			},
+			Name:      "vpa-admission-controller",
+			Namespace: namespace,
+			Labels:    map[string]string{"gardener.cloud/role": "vpa"},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: &maxUnavailable,
 				Selector: &metav1.LabelSelector{
@@ -1322,10 +1242,8 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		vpaAdmissionController = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpa-admission-controller",
-				Namespace: namespace,
-			},
+			Name:      "vpa-admission-controller",
+			Namespace: namespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: "apps/v1",
@@ -1349,9 +1267,7 @@ var _ = Describe("VPA", func() {
 		}
 		serviceMonitorAdmissionControllerFor = func(clusterType component.ClusterType, isGardenCluster bool) *monitoringv1.ServiceMonitor {
 			obj := &monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-				},
+				Namespace: namespace,
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{
 						MatchLabels: map[string]string{
@@ -1398,11 +1314,9 @@ var _ = Describe("VPA", func() {
 		}
 
 		clusterRoleGeneralActor = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:actor",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:actor",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -1428,14 +1342,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingGeneralActor = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:actor",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:actor",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -1456,11 +1368,9 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleGeneralTargetReader = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:target-reader",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
+			Name: "gardener.cloud:vpa:target:target-reader",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -1491,14 +1401,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		clusterRoleBindingGeneralTargetReader = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:vpa:target:target-reader",
-				Labels: map[string]string{
-					"gardener.cloud/role": "vpa",
-				},
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:vpa:target:target-reader",
+			Labels: map[string]string{
+				"gardener.cloud/role": "vpa",
+			},
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -1524,14 +1432,12 @@ var _ = Describe("VPA", func() {
 			},
 		}
 		mutatingWebhookConfiguration = &admissionregistrationv1.MutatingWebhookConfiguration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "zzz-vpa-webhook-config-target",
-				Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
-				Annotations: map[string]string{constants.GardenerDescription: "The order in which MutatingWebhooks are " +
-					"called is determined alphabetically. This webhook's name intentionally starts with 'zzz', such " +
-					"that it is called after all other webhooks which inject containers. All containers injected by " +
-					"webhooks that are called _after_ the vpa webhook will not be under control of vpa."},
-			},
+			Name:   "zzz-vpa-webhook-config-target",
+			Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
+			Annotations: map[string]string{constants.GardenerDescription: "The order in which MutatingWebhooks are " +
+				"called is determined alphabetically. This webhook's name intentionally starts with 'zzz', such " +
+				"that it is called after all other webhooks which inject containers. All containers injected by " +
+				"webhooks that are called _after_ the vpa webhook will not be under control of vpa."},
 			Webhooks: []admissionregistrationv1.MutatingWebhook{{
 				Name:                    "vpa.k8s.io",
 				AdmissionReviewVersions: []string{"v1"},
@@ -1545,22 +1451,18 @@ var _ = Describe("VPA", func() {
 				TimeoutSeconds:     new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"v1"},
-							Resources:   []string{"pods"},
-							Scope:       &webhookScope,
-						},
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+						APIGroups:   []string{""},
+						APIVersions: []string{"v1"},
+						Resources:   []string{"pods"},
+						Scope:       &webhookScope,
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 					},
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{"autoscaling.k8s.io"},
-							APIVersions: []string{"*"},
-							Resources:   []string{"verticalpodautoscalers"},
-							Scope:       &webhookScope,
-						},
-						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
+						APIGroups:   []string{"autoscaling.k8s.io"},
+						APIVersions: []string{"*"},
+						Resources:   []string{"verticalpodautoscalers"},
+						Scope:       &webhookScope,
+						Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 					},
 				},
 			}},
@@ -1569,16 +1471,12 @@ var _ = Describe("VPA", func() {
 
 	JustBeforeEach(func() {
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -1678,12 +1576,10 @@ var _ = Describe("VPA", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceName,
-						Namespace:       namespace,
-						Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-						ResourceVersion: "1",
-					},
+					Name:            managedResourceName,
+					Namespace:       namespace,
+					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -1849,12 +1745,10 @@ var _ = Describe("VPA", func() {
 
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceName,
-						Namespace:       namespace,
-						Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
-						ResourceVersion: "1",
-					},
+					Name:            managedResourceName,
+					Namespace:       namespace,
+					Labels:          map[string]string{"gardener.cloud/role": "seed-system-component"},
+					ResourceVersion: "1",
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class: new("seed"),
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -2109,12 +2003,10 @@ var _ = Describe("VPA", func() {
 				Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 
 				expectedMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResourceName,
-						Namespace:       namespace,
-						ResourceVersion: "1",
-						Labels:          map[string]string{"origin": "gardener"},
-					},
+					Name:            managedResourceName,
+					Namespace:       namespace,
+					ResourceVersion: "1",
+					Labels:          map[string]string{"origin": "gardener"},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 						SecretRefs: []corev1.LocalObjectReference{{
@@ -2444,11 +2336,9 @@ var _ = Describe("VPA", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceName,
-							Namespace:  namespace,
-							Generation: 1,
-						},
+						Name:       managedResourceName,
+						Namespace:  namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -2471,11 +2361,9 @@ var _ = Describe("VPA", func() {
 					fakeOps.MaxAttempts = 2
 
 					Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceName,
-							Namespace:  namespace,
-							Generation: 1,
-						},
+						Name:       managedResourceName,
+						Namespace:  namespace,
+						Generation: 1,
 						Status: resourcesv1alpha1.ManagedResourceStatus{
 							ObservedGeneration: 1,
 							Conditions: []gardencorev1beta1.Condition{
@@ -2518,10 +2406,8 @@ var _ = Describe("VPA", func() {
 					fakeOps.MaxAttempts = 2
 
 					managedResource := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      managedResourceName,
-							Namespace: namespace,
-						},
+						Name:      managedResourceName,
+						Namespace: namespace,
 					}
 
 					Expect(c.Create(ctx, managedResource)).To(Succeed())

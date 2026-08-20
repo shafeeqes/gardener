@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
@@ -65,7 +64,7 @@ var _ = Describe("KubeAPIServerExposure", func() {
 		botanist.Seed.SetInfo(&gardencorev1beta1.Seed{})
 
 		botanist.SeedClientSet = fake.NewClientSetBuilder().WithClient(fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()).Build()
-		Expect(botanist.SeedClientSet.Client().Create(context.TODO(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: botanist.Shoot.ControlPlaneNamespace}})).To(Succeed())
+		Expect(botanist.SeedClientSet.Client().Create(context.TODO(), &corev1.Namespace{Name: botanist.Shoot.ControlPlaneNamespace})).To(Succeed())
 
 		botanist.SecretsManager = fakesecretsmanager.New(botanist.SeedClientSet.Client(), botanist.Shoot.ControlPlaneNamespace)
 	})
@@ -80,24 +79,20 @@ var _ = Describe("KubeAPIServerExposure", func() {
 				v1beta1constants.SecretNameCAClient,
 				apiserver.SecretNameServerCert + "-current",
 			} {
-				Expect(botanist.SeedClientSet.Client().Create(context.TODO(), &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: botanist.Shoot.ControlPlaneNamespace}})).To(Succeed())
+				Expect(botanist.SeedClientSet.Client().Create(context.TODO(), &corev1.Secret{Name: name, Namespace: botanist.Shoot.ControlPlaneNamespace})).To(Succeed())
 			}
 
 			Expect(botanist.SeedClientSet.Client().Create(context.TODO(), &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameKubeAPIServer,
-					Namespace: botanist.Shoot.ControlPlaneNamespace,
-				},
+				Name:      v1beta1constants.DeploymentNameKubeAPIServer,
+				Namespace: botanist.Shoot.ControlPlaneNamespace,
 				Spec: corev1.ServiceSpec{
 					ClusterIPs: []string{"10.0.0.1"},
 				},
 			})).To(Succeed())
 
 			Expect(botanist.SeedClientSet.Client().Create(context.TODO(), &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DefaultSNIIngressServiceName,
-					Namespace: v1beta1constants.DefaultSNIIngressNamespace,
-				},
+				Name:      v1beta1constants.DefaultSNIIngressServiceName,
+				Namespace: v1beta1constants.DefaultSNIIngressNamespace,
 				Status: corev1.ServiceStatus{
 					LoadBalancer: corev1.LoadBalancerStatus{
 						Ingress: []corev1.LoadBalancerIngress{{IP: "1.2.3.4"}},

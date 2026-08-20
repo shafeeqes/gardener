@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -46,26 +45,22 @@ var _ = Describe("WorkloadIdentity TokenRequestor tests", func() {
 		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-				Annotations: map[string]string{
-					"workloadidentity.security.gardener.cloud/name":      resourceName,
-					"workloadidentity.security.gardener.cloud/namespace": testNamespace.Name,
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose": "workload-identity-token-requestor",
-				},
+			Name:      resourceName,
+			Namespace: testNamespace.Name,
+			Annotations: map[string]string{
+				"workloadidentity.security.gardener.cloud/name":      resourceName,
+				"workloadidentity.security.gardener.cloud/namespace": testNamespace.Name,
+			},
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose": "workload-identity-token-requestor",
 			},
 		}
 
 		workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      resourceName,
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID: testRunID,
-				},
+			Name:      resourceName,
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID: testRunID,
 			},
 			Spec: securityv1alpha1.WorkloadIdentitySpec{
 				Audiences: []string{"foo"},

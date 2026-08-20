@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -198,7 +197,7 @@ var _ = Describe("Scheduler tests", func() {
 			cloudProfile := createCloudProfile("some-region")
 			_ = createSeed("some-region", nil, nil)
 			shootName := generateShootName()
-			shoot := createShoot(shootName, cloudProfile.Name, "some-region", nil, new(fmt.Sprintf("%s.%s.example.com", shootName, testProject.Name)), nil, []gardencorev1beta1.AccessRestrictionWithOptions{{AccessRestriction: gardencorev1beta1.AccessRestriction{Name: "foo"}}})
+			shoot := createShoot(shootName, cloudProfile.Name, "some-region", nil, new(fmt.Sprintf("%s.%s.example.com", shootName, testProject.Name)), nil, []gardencorev1beta1.AccessRestrictionWithOptions{{Name: "foo"}})
 
 			Eventually(func(g Gomega) string {
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(Succeed())
@@ -213,7 +212,7 @@ var _ = Describe("Scheduler tests", func() {
 			cloudProfile := createCloudProfile("some-region")
 			seed := createSeed("some-region", nil, []gardencorev1beta1.AccessRestriction{{Name: "foo"}})
 			shootName := generateShootName()
-			shoot := createShoot(shootName, cloudProfile.Name, "some-region", nil, new(fmt.Sprintf("%s.%s.example.com", shootName, testProject.Name)), nil, []gardencorev1beta1.AccessRestrictionWithOptions{{AccessRestriction: gardencorev1beta1.AccessRestriction{Name: "foo"}}})
+			shoot := createShoot(shootName, cloudProfile.Name, "some-region", nil, new(fmt.Sprintf("%s.%s.example.com", shootName, testProject.Name)), nil, []gardencorev1beta1.AccessRestrictionWithOptions{{Name: "foo"}})
 
 			Eventually(func(g Gomega) {
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(shoot), shoot)).To(Succeed())
@@ -382,15 +381,13 @@ var _ = Describe("Scheduler tests", func() {
 				cloudProfile := createCloudProfile("eu-west-1")
 
 				regionConfig := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      cloudProfile.Name,
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
-						},
+					Name:      cloudProfile.Name,
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
 					},
 
 					Data: map[string]string{
@@ -423,15 +420,13 @@ us-central-2: 220`,
 				cloudProfile := createCloudProfile("eu-west-1")
 
 				regionConfig := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      cloudProfile.Name,
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
-						},
+					Name:      cloudProfile.Name,
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
 					},
 					// Choose a better value for 'us-east-1' than for 'eu-west-1' to test that the minimal configured distance is really used, not Levenshtein's algorithm.
 					// Also, the distance to itself is higher than other values, so that the logic prefers other regions.
@@ -466,15 +461,13 @@ us-central-2: 220`,
 				cloudProfile := createCloudProfile("eu-west-1")
 
 				regionConfig1 := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "a",
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": "foo-cloudprofile," + cloudProfile.Name,
-						},
+					Name:      "a",
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": "foo-cloudprofile," + cloudProfile.Name,
 					},
 
 					Data: map[string]string{
@@ -487,15 +480,13 @@ us-central-2: 220`,
 				}
 
 				regionConfig2 := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "b",
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
-						},
+					Name:      "b",
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
 					},
 
 					Data: map[string]string{
@@ -534,15 +525,13 @@ us-central-2: 220`,
 				cloudProfile := createCloudProfile("eu-west-1")
 
 				regionConfig := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      cloudProfile.Name,
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
-						},
+					Name:      cloudProfile.Name,
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
 					},
 					Data: map[string]string{
 						"us-east-1": `
@@ -576,15 +565,13 @@ us-central-2: 220`,
 				cloudProfile := createCloudProfile("eu-west-1")
 
 				regionConfig := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      cloudProfile.Name,
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
-						},
+					Name:      cloudProfile.Name,
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
 					},
 					Data: map[string]string{
 						"eu-west-1": `
@@ -617,15 +604,13 @@ us-central-3: 220`,
 				cloudProfile := createCloudProfile("eu-west-1")
 
 				regionConfig := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      cloudProfile.Name,
-						Namespace: testNamespace.Name,
-						Labels: map[string]string{
-							"scheduling.gardener.cloud/purpose": "region-config",
-						},
-						Annotations: map[string]string{
-							"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
-						},
+					Name:      cloudProfile.Name,
+					Namespace: testNamespace.Name,
+					Labels: map[string]string{
+						"scheduling.gardener.cloud/purpose": "region-config",
+					},
+					Annotations: map[string]string{
+						"scheduling.gardener.cloud/cloudprofiles": cloudProfile.Name,
 					},
 					Data: map[string]string{
 						"eu-west-1": `
@@ -779,9 +764,7 @@ func createSeed(region string, zones []string, accessRestrictions []gardencorev1
 func createSeedWithSettings(region string, zones []string, accessRestrictions []gardencorev1beta1.AccessRestriction, zoneSelection *gardencorev1beta1.SeedSettingZoneSelection) *gardencorev1beta1.Seed {
 	By("Create Seed")
 	seed := &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: testID + "-",
-		},
+		GenerateName: testID + "-",
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Type:   "provider-type",
@@ -872,9 +855,7 @@ func createSeedWithSettings(region string, zones []string, accessRestrictions []
 func createCloudProfile(region string) *gardencorev1beta1.CloudProfile {
 	By("Create CloudProfile")
 	cloudProfile := &gardencorev1beta1.CloudProfile{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: testID + "-",
-		},
+		GenerateName: testID + "-",
 		Spec: gardencorev1beta1.CloudProfileSpec{
 			Kubernetes: gardencorev1beta1.KubernetesSettings{
 				Versions: []gardencorev1beta1.ExpirableVersion{{Version: "1.31.1"}},
@@ -884,7 +865,7 @@ func createCloudProfile(region string) *gardencorev1beta1.CloudProfile {
 					Name: "some-OS",
 					Versions: []gardencorev1beta1.MachineImageVersion{
 						{
-							ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.1"},
+							Version: "1.1.1",
 							CRI: []gardencorev1beta1.CRI{
 								{
 									Name: gardencorev1beta1.CRINameContainerD,
@@ -920,10 +901,8 @@ func createCloudProfile(region string) *gardencorev1beta1.CloudProfile {
 func createShoot(shootName, cloudProfile, region string, schedulerName, dnsDomain *string, controlPlane *gardencorev1beta1.ControlPlane, accessRestrictions []gardencorev1beta1.AccessRestrictionWithOptions, workerZones ...[]string) *gardencorev1beta1.Shoot {
 	By("Create Shoot")
 	shoot := &gardencorev1beta1.Shoot{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shootName,
-			Namespace: testNamespace.Name,
-		},
+		Name:      shootName,
+		Namespace: testNamespace.Name,
 		Spec: gardencorev1beta1.ShootSpec{
 			ControlPlane:     controlPlane,
 			CloudProfileName: &cloudProfile,

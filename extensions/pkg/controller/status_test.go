@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -58,11 +57,9 @@ var _ = Describe("Status", func() {
 		statusUpdater = NewStatusUpdater(c)
 
 		obj = &extensionsv1alpha1.Infrastructure{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       "test-infra",
-				Namespace:  "test-ns",
-				Generation: generation,
-			},
+			Name:       "test-infra",
+			Namespace:  "test-ns",
+			Generation: generation,
 		}
 
 		Expect(c.Create(ctx, obj.DeepCopyObject().(client.Object))).To(Succeed())

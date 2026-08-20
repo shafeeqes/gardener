@@ -80,16 +80,12 @@ var _ = Describe("Collector", func() {
 
 		BeforeEach(func() {
 			unlabeledSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "unlabeledsecret1",
-					Namespace: metav1.NamespaceDefault,
-				},
+				Name:      "unlabeledsecret1",
+				Namespace: metav1.NamespaceDefault,
 			}
 			unlabeledConfigMap = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "unlabeledcm1",
-					Namespace: metav1.NamespaceDefault,
-				},
+				Name:      "unlabeledcm1",
+				Namespace: metav1.NamespaceDefault,
 			}
 
 			labeledObjectMeta = metav1.ObjectMeta{

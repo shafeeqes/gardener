@@ -41,17 +41,13 @@ var _ = Describe("Shoot", func() {
 
 		BeforeEach(func() {
 			managedSeed = &seedmanagementv1alpha1.ManagedSeed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
+				Name:      name,
+				Namespace: namespace,
 			}
 
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: namespace,
-				},
+				Name:      shootName,
+				Namespace: namespace,
 				Spec: gardencorev1beta1.ShootSpec{
 					SeedName: new(name),
 				},
@@ -95,10 +91,8 @@ var _ = Describe("Shoot", func() {
 
 			BeforeEach(func() {
 				anotherManagedSeed = &seedmanagementv1alpha1.ManagedSeed{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "bar",
-						Namespace: namespace,
-					},
+					Name:      "bar",
+					Namespace: namespace,
 				}
 			})
 

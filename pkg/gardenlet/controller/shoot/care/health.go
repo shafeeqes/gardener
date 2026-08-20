@@ -371,10 +371,8 @@ func (h *Health) getLastHeartbeatTimeForExtension(ctx context.Context, controlle
 	}
 
 	heartBeatLease := &coordinationv1.Lease{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      extensions.HeartBeatResourceName,
-			Namespace: gardenerutils.NamespaceNameForControllerInstallation(controllerInstallation),
-		},
+		Name:      extensions.HeartBeatResourceName,
+		Namespace: gardenerutils.NamespaceNameForControllerInstallation(controllerInstallation),
 	}
 
 	if err := h.seedClient.Client().Get(ctx, client.ObjectKeyFromObject(heartBeatLease), heartBeatLease); err != nil {
@@ -463,7 +461,7 @@ func (h *Health) checkControlPlane(
 // Used for self-hosted shoots.
 func (h *Health) checkBackupBucketsReady(ctx context.Context, condition gardencorev1beta1.Condition) (*gardencorev1beta1.Condition, error) {
 	backupEntry := &gardencorev1beta1.BackupEntry{
-		ObjectMeta: metav1.ObjectMeta{Name: h.shoot.BackupEntryName, Namespace: h.shoot.GetInfo().Namespace},
+		Name: h.shoot.BackupEntryName, Namespace: h.shoot.GetInfo().Namespace,
 	}
 	if err := h.gardenClient.Get(ctx, client.ObjectKeyFromObject(backupEntry), backupEntry); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -474,7 +472,7 @@ func (h *Health) checkBackupBucketsReady(ctx context.Context, condition gardenco
 	}
 
 	backupBucket := &gardencorev1beta1.BackupBucket{
-		ObjectMeta: metav1.ObjectMeta{Name: backupEntry.Spec.BucketName},
+		Name: backupEntry.Spec.BucketName,
 	}
 	if err := h.gardenClient.Get(ctx, client.ObjectKeyFromObject(backupBucket), backupBucket); err != nil {
 		return nil, fmt.Errorf("failed getting BackupBucket %s: %w", backupEntry.Spec.BucketName, err)
@@ -498,7 +496,7 @@ func CheckIfDependencyWatchdogProberScaledDownControllers(ctx context.Context, s
 			continue
 		}
 
-		deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: dependentResourceInfo.Ref.Name, Namespace: shootNamespace}}
+		deployment := &appsv1.Deployment{Name: dependentResourceInfo.Ref.Name, Namespace: shootNamespace}
 		if err := seedClient.Get(ctx, client.ObjectKeyFromObject(deployment), deployment); err != nil {
 			if apierrors.IsNotFound(err) && dependentResourceInfo.Optional {
 				// If the deployment does not exist then we don't care about it (e.g., some clusters don't have a

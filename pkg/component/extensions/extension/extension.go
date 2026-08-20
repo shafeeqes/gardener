@@ -520,10 +520,8 @@ func (e *extension) initializeExtensionObject(name string) *extensionsv1alpha1.E
 	extensionObj, ok := e.extensions[name]
 	if !ok {
 		extensionObj = &extensionsv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ptr.Deref(e.values.NamePrefix, "") + name,
-				Namespace: e.values.Namespace,
-			},
+			Name:      ptr.Deref(e.values.NamePrefix, "") + name,
+			Namespace: e.values.Namespace,
 			Spec: extensionsv1alpha1.ExtensionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Class: e.values.Class,

@@ -348,10 +348,10 @@ func verifyGardenAccess(ctx context.Context, log logr.Logger, reader client.Read
 
 	var objects []client.Object
 	if seedName != "" {
-		objects = append(objects, &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: seedName}})
+		objects = append(objects, &gardencorev1beta1.Seed{Name: seedName})
 	}
 	if shootName != "" {
-		objects = append(objects, &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: shootNamespace}})
+		objects = append(objects, &gardencorev1beta1.Shoot{Name: shootName, Namespace: shootNamespace})
 	}
 
 	for _, obj := range objects {

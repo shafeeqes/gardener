@@ -23,11 +23,9 @@ const (
 
 func (p *prometheusOperator) deployment() *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: p.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      deploymentName,
+		Namespace: p.namespace,
+		Labels:    GetLabels(),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),

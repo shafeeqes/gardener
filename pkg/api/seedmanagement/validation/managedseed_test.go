@@ -12,7 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"k8s.io/component-base/config/v1alpha1"
 
 	gardencorehelper "github.com/gardener/gardener/pkg/api/core/helper"
 	. "github.com/gardener/gardener/pkg/api/seedmanagement/validation"
@@ -30,10 +29,8 @@ const (
 var _ = Describe("ManagedSeed Validation Tests", func() {
 	var (
 		seed = &core.Seed{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"foo": "bar",
-				},
+			Labels: map[string]string{
+				"foo": "bar",
 			},
 			Spec: core.SeedSpec{
 				Backup: &core.Backup{
@@ -97,11 +94,9 @@ var _ = Describe("ManagedSeed Validation Tests", func() {
 
 	BeforeEach(func() {
 		managedSeed = &seedmanagement.ManagedSeed{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       name,
-				Namespace:  namespace,
-				Generation: 1,
-			},
+			Name:       name,
+			Namespace:  namespace,
+			Generation: 1,
 			Spec: seedmanagement.ManagedSeedSpec{
 				Shoot: &seedmanagement.Shoot{
 					Name: name,
@@ -344,9 +339,7 @@ var _ = Describe("ManagedSeed Validation Tests", func() {
 			It("should forbid garden client connection kubeconfig if bootstrap is specified", func() {
 				managedSeed.Spec.Gardenlet.Config = gardenletConfiguration(seedx,
 					&gardenletconfigv1alpha1.GardenClientConnection{
-						ClientConnectionConfiguration: v1alpha1.ClientConnectionConfiguration{
-							Kubeconfig: "foo",
-						},
+						Kubeconfig: "foo",
 					})
 
 				errorList := ValidateManagedSeed(managedSeed)
@@ -560,15 +553,11 @@ var _ = Describe("ManagedSeed Validation Tests", func() {
 
 func gardenletConfiguration(seed *gardencorev1beta1.Seed, gcc *gardenletconfigv1alpha1.GardenClientConnection) *gardenletconfigv1alpha1.GardenletConfiguration {
 	return &gardenletconfigv1alpha1.GardenletConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "GardenletConfiguration",
-		},
+		APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+		Kind:       "GardenletConfiguration",
 		SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-			SeedTemplate: gardencorev1beta1.SeedTemplate{
-				ObjectMeta: seed.ObjectMeta,
-				Spec:       seed.Spec,
-			},
+			ObjectMeta: seed.ObjectMeta,
+			Spec:       seed.Spec,
 		},
 		GardenClientConnection: gcc,
 	}

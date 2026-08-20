@@ -8,17 +8,14 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const clusterRoleName = "perses-operator"
 
 func (p *persesOperator) clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{appsv1.GroupName},
@@ -106,10 +103,8 @@ func (p *persesOperator) clusterRole() *rbacv1.ClusterRole {
 
 func (p *persesOperator) clusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",

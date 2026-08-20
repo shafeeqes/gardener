@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -38,11 +37,11 @@ var _ = Describe("Quota controller tests", func() {
 		objectKey = client.ObjectKey{Namespace: testNamespace.Name, Name: resourceName}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Namespace: objectKey.Namespace, Name: objectKey.Name},
+			Namespace: objectKey.Namespace, Name: objectKey.Name,
 		}
 
 		quota = &gardencorev1beta1.Quota{
-			ObjectMeta: metav1.ObjectMeta{Namespace: objectKey.Namespace, Name: objectKey.Name},
+			Namespace: objectKey.Namespace, Name: objectKey.Name,
 			Spec: gardencorev1beta1.QuotaSpec{
 				Scope: corev1.ObjectReference{
 					APIVersion: "v1",
@@ -52,7 +51,7 @@ var _ = Describe("Quota controller tests", func() {
 		}
 
 		secretBinding = &gardencorev1beta1.SecretBinding{
-			ObjectMeta: metav1.ObjectMeta{Namespace: objectKey.Namespace, Name: objectKey.Name},
+			Namespace: objectKey.Namespace, Name: objectKey.Name,
 			Provider: &gardencorev1beta1.SecretBindingProvider{
 				Type: providerType,
 			},
@@ -69,7 +68,7 @@ var _ = Describe("Quota controller tests", func() {
 		}
 
 		credentialsBinding = &securityv1alpha1.CredentialsBinding{
-			ObjectMeta: metav1.ObjectMeta{Namespace: objectKey.Namespace, Name: objectKey.Name},
+			Namespace: objectKey.Namespace, Name: objectKey.Name,
 			Provider: securityv1alpha1.CredentialsBindingProvider{
 				Type: providerType,
 			},

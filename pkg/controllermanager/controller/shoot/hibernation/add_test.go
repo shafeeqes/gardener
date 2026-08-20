@@ -7,7 +7,6 @@ package hibernation_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -24,10 +23,8 @@ var _ = Describe("Add", func() {
 	BeforeEach(func() {
 		reconciler = &Reconciler{}
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "name",
-				Namespace: "namespace",
-			},
+			Name:      "name",
+			Namespace: "namespace",
 			Spec: gardencorev1beta1.ShootSpec{
 				Hibernation: &gardencorev1beta1.Hibernation{
 					Schedules: []gardencorev1beta1.HibernationSchedule{{

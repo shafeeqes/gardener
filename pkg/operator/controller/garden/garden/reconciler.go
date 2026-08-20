@@ -579,7 +579,7 @@ func (r *Reconciler) prepareGlobalMonitoringSecretMigration(ctx context.Context,
 		virtualIsManagedSecret := virtualSecret.Labels[secretsmanager.LabelKeyManagedBy] == secretsmanager.LabelValueSecretsManager
 		if virtualIsManagedSecret {
 			secretName := "global-" + v1beta1constants.SecretNameObservabilityIngress
-			migrationSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "migrate-" + secretName, Namespace: r.GardenNamespace}}
+			migrationSecret := &corev1.Secret{Name: "migrate-" + secretName, Namespace: r.GardenNamespace}
 			_, err := controllerutils.GetAndCreateOrMergePatch(ctx, r.RuntimeClientSet.Client(), migrationSecret, func() error {
 				metav1.SetMetaDataLabel(&migrationSecret.ObjectMeta, secretsmanager.LabelKeyUseDataForName, secretName)
 				migrationSecret.Data = virtualSecret.Data
@@ -589,7 +589,7 @@ func (r *Reconciler) prepareGlobalMonitoringSecretMigration(ctx context.Context,
 				return fmt.Errorf("failed to create migration secret for global observability ingress in runtime cluster: %w", err)
 			}
 		} else {
-			runtimeSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: virtualSecret.Name, Namespace: r.GardenNamespace}}
+			runtimeSecret := &corev1.Secret{Name: virtualSecret.Name, Namespace: r.GardenNamespace}
 			_, err := controllerutils.GetAndCreateOrMergePatch(ctx, r.RuntimeClientSet.Client(), runtimeSecret, func() error {
 				for k, v := range virtualSecret.Labels {
 					metav1.SetMetaDataLabel(&runtimeSecret.ObjectMeta, k, v)
@@ -640,7 +640,7 @@ func (r *Reconciler) prepareGlobalMonitoringSecretMigration(ctx context.Context,
 // TODO(vicwicker): Remove after Gardener v1.150 has been released.
 func (r *Reconciler) finalizeGlobalMonitoringSecretMigration(ctx context.Context) error {
 	secretName := "global-" + v1beta1constants.SecretNameObservabilityIngress
-	migrationSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "migrate-" + secretName, Namespace: r.GardenNamespace}}
+	migrationSecret := &corev1.Secret{Name: "migrate-" + secretName, Namespace: r.GardenNamespace}
 	if err := r.RuntimeClientSet.Client().Delete(ctx, migrationSecret); client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("failed to delete migration secret %q from runtime cluster: %w", migrationSecret.Name, err)
 	}

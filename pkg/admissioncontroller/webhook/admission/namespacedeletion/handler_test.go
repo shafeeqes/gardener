@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
-	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -47,17 +46,15 @@ var _ = Describe("handler", func() {
 		fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 
 		namespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   namespaceName,
-				Labels: map[string]string{"project.gardener.cloud/name": projectName},
-			},
+			Name:   namespaceName,
+			Labels: map[string]string{"project.gardener.cloud/name": projectName},
 		}
 
 		handler = &Handler{Logger: log, APIReader: fakeClient, Client: fakeClient}
 	})
 
 	test := func(matcher gomegatypes.GomegaMatcher) {
-		ctx = admission.NewContextWithRequest(ctx, admission.Request{AdmissionRequest: admissionv1.AdmissionRequest{Name: namespaceName}})
+		ctx = admission.NewContextWithRequest(ctx, admission.Request{Name: namespaceName})
 		warning, err := handler.ValidateDelete(ctx, nil)
 		Expect(warning).To(BeNil())
 		Expect(err).To(matcher)
@@ -72,7 +69,7 @@ var _ = Describe("handler", func() {
 
 	It("should pass because namespace is not project related", func() {
 		Expect(fakeClient.Create(ctx, &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: namespaceName},
+			Name: namespaceName,
 		})).To(Succeed())
 
 		test(Succeed())
@@ -123,7 +120,7 @@ var _ = Describe("handler", func() {
 			ns.Finalizers = []string{"kubernetes"}
 			ns.SetDeletionTimestamp(&now)
 			project := &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{Name: projectName},
+				Name: projectName,
 			}
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).
 				WithObjects(ns, project).Build()
@@ -137,7 +134,7 @@ var _ = Describe("handler", func() {
 			Expect(fakeClient.Create(ctx, namespace)).To(Succeed())
 
 			project := &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{Name: projectName},
+				Name: projectName,
 			}
 			Expect(fakeClient.Create(ctx, project)).To(Succeed())
 
@@ -148,11 +145,9 @@ var _ = Describe("handler", func() {
 			BeforeEach(func() {
 				now := metav1.Now()
 				project := &gardencorev1beta1.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:              projectName,
-						Finalizers:        []string{"kubernetes"},
-						DeletionTimestamp: &now,
-					},
+					Name:              projectName,
+					Finalizers:        []string{"kubernetes"},
+					DeletionTimestamp: &now,
 				}
 				fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).
 					WithObjects(namespace, project).Build()
@@ -163,11 +158,9 @@ var _ = Describe("handler", func() {
 			It("should fail because listing shoots fails", func() {
 				now := metav1.Now()
 				project := &gardencorev1beta1.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:              projectName,
-						Finalizers:        []string{"kubernetes"},
-						DeletionTimestamp: &now,
-					},
+					Name:              projectName,
+					Finalizers:        []string{"kubernetes"},
+					DeletionTimestamp: &now,
 				}
 				errClient := fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).
 					WithObjects(namespace, project).
@@ -192,7 +185,7 @@ var _ = Describe("handler", func() {
 
 			It("should forbid namespace deletion because it still contain shoots", func() {
 				existingShoot := &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{Name: "shoot1", Namespace: namespaceName},
+					Name: "shoot1", Namespace: namespaceName,
 				}
 				Expect(fakeClient.Create(ctx, existingShoot)).To(Succeed())
 

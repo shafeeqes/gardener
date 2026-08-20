@@ -62,7 +62,7 @@ var _ = Describe("controlPlaneBootstrap", func() {
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
 		sshKeypairSecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: "ssh-keypair", Namespace: namespace},
+			Name: "ssh-keypair", Namespace: namespace,
 			Data: map[string][]byte{
 				"id_rsa.pub": []byte(sshPublicKey),
 			},
@@ -194,10 +194,8 @@ func oscName(worker *gardencorev1beta1.Worker) string {
 func fakeOSCReconcile(ctx context.Context, clk clock.PassiveClock, c client.Client, osc *extensionsv1alpha1.OperatingSystemConfig) *corev1.Secret {
 	GinkgoHelper()
 	ccSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "cc-" + osc.Name,
-			Namespace: osc.Namespace,
-		},
+		Name:      "cc-" + osc.Name,
+		Namespace: osc.Namespace,
 	}
 	patch := client.MergeFrom(osc.DeepCopy())
 	delete(osc.Annotations, v1beta1constants.GardenerOperation)

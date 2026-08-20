@@ -30,32 +30,26 @@ var _ = Describe("Machines", func() {
 	machineDeploymentName := "machine-deployment-1"
 	var (
 		machineSetReference = machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						Kind: MachineSetKind,
-						Name: machineSetName,
-					},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind: MachineSetKind,
+					Name: machineSetName,
 				},
 			},
 		}
 
 		machineDeploymentReference = machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						Kind: MachineDeploymentKind,
-						Name: machineDeploymentName,
-					},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind: MachineDeploymentKind,
+					Name: machineDeploymentName,
 				},
 			},
 		}
 
 		machineLabelReference = machinev1alpha1.Machine{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"name": machineDeploymentName,
-				},
+			Labels: map[string]string{
+				"name": machineDeploymentName,
 			},
 		}
 	)
@@ -79,32 +73,26 @@ var _ = Describe("Machines", func() {
 
 	var (
 		machineSetWithOwnerReference = machinev1alpha1.MachineSet{
-			ObjectMeta: metav1.ObjectMeta{
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						Kind: MachineDeploymentKind,
-						Name: machineDeploymentName,
-					},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind: MachineDeploymentKind,
+					Name: machineDeploymentName,
 				},
 			},
 		}
 
 		machineSetWithWrongOwnerReference = machinev1alpha1.MachineSet{
-			ObjectMeta: metav1.ObjectMeta{
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						Kind: MachineSetKind,
-						Name: machineDeploymentName,
-					},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind: MachineSetKind,
+					Name: machineDeploymentName,
 				},
 			},
 		}
 
 		machineSetWithLabelReference = machinev1alpha1.MachineSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"name": machineDeploymentName,
-				},
+			Labels: map[string]string{
+				"name": machineDeploymentName,
 			},
 		}
 	)
@@ -171,27 +159,27 @@ var _ = Describe("Machines", func() {
 		})
 
 		It("should fail because MachineDeployments are left", func() {
-			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineDeployment{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineDeployment{GenerateName: "obj-", Namespace: namespace})).To(Succeed())
 			Expect(WaitUntilMachineResourcesDeleted(ctx, log, fakeClient, namespace)).To(MatchError(ContainSubstring("waiting until the following machine resources have been deleted: 0 machines, 0 machine sets, 1 machine deployments, 0 machine classes, 0 machine class secrets")))
 		})
 
 		It("should fail because MachineSets are left", func() {
-			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineSet{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineSet{GenerateName: "obj-", Namespace: namespace})).To(Succeed())
 			Expect(WaitUntilMachineResourcesDeleted(ctx, log, fakeClient, namespace)).To(MatchError(ContainSubstring("waiting until the following machine resources have been deleted: 0 machines, 1 machine sets, 0 machine deployments, 0 machine classes, 0 machine class secrets")))
 		})
 
 		It("should fail because Machine are left", func() {
-			Expect(fakeClient.Create(ctx, &machinev1alpha1.Machine{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &machinev1alpha1.Machine{GenerateName: "obj-", Namespace: namespace})).To(Succeed())
 			Expect(WaitUntilMachineResourcesDeleted(ctx, log, fakeClient, namespace)).To(MatchError(ContainSubstring("waiting until the following machine resources have been deleted: 1 machines, 0 machine sets, 0 machine deployments, 0 machine classes, 0 machine class secrets")))
 		})
 
 		It("should fail because MachineClasses are left", func() {
-			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineClass{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: namespace}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &machinev1alpha1.MachineClass{GenerateName: "obj-", Namespace: namespace})).To(Succeed())
 			Expect(WaitUntilMachineResourcesDeleted(ctx, log, fakeClient, namespace)).To(MatchError(ContainSubstring("waiting until the following machine resources have been deleted: 0 machines, 0 machine sets, 0 machine deployments, 1 machine classes, 0 machine class secrets")))
 		})
 
 		It("should fail because MachineClass secrets are left", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{GenerateName: "obj-", Namespace: namespace, Labels: map[string]string{"gardener.cloud/purpose": "machineclass"}, Finalizers: []string{"foo"}}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{GenerateName: "obj-", Namespace: namespace, Labels: map[string]string{"gardener.cloud/purpose": "machineclass"}, Finalizers: []string{"foo"}})).To(Succeed())
 			Expect(WaitUntilMachineResourcesDeleted(ctx, log, fakeClient, namespace)).To(MatchError(ContainSubstring("waiting until the following machine resources have been deleted: 0 machines, 0 machine sets, 0 machine deployments, 0 machine classes, 1 machine class secrets")))
 		})
 	})

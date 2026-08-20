@@ -8,7 +8,6 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -64,9 +63,7 @@ func (b *Botanist) DeletePublicServiceAccountKeys(ctx context.Context) error {
 
 func (b *Botanist) emptyPublicServiceAccountKeysSecret() *corev1.Secret {
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      gardenerutils.ComputeManagedShootIssuerSecretName(b.Garden.Project.Name, b.Shoot.GetInfo().UID),
-			Namespace: gardencorev1beta1.GardenerShootIssuerNamespace,
-		},
+		Name:      gardenerutils.ComputeManagedShootIssuerSecretName(b.Garden.Project.Name, b.Shoot.GetInfo().UID),
+		Namespace: gardencorev1beta1.GardenerShootIssuerNamespace,
 	}
 }

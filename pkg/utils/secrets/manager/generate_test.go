@@ -897,14 +897,12 @@ var _ = Describe("Generate", func() {
 
 					By("Create CA secret in the system")
 					Expect(fakeClient.Create(ctx, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      caName,
-							Namespace: namespace,
-							Labels: map[string]string{
-								"managed-by":       "secrets-manager",
-								"manager-identity": identity,
-								"name":             caName,
-							},
+						Name:      caName,
+						Namespace: namespace,
+						Labels: map[string]string{
+							"managed-by":       "secrets-manager",
+							"manager-identity": identity,
+							"name":             caName,
 						},
 						Type: corev1.SecretTypeOpaque,
 						Data: caData.SecretData(),
@@ -933,15 +931,13 @@ var _ = Describe("Generate", func() {
 
 					By("Create old CA secret in the system")
 					Expect(fakeClient.Create(ctx, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)},
-							Name:              caName + "-old",
-							Namespace:         namespace,
-							Labels: map[string]string{
-								"managed-by":       "secrets-manager",
-								"manager-identity": identity,
-								"name":             caName,
-							},
+						CreationTimestamp: metav1.Time{Time: time.Now().Add(-time.Hour)},
+						Name:              caName + "-old",
+						Namespace:         namespace,
+						Labels: map[string]string{
+							"managed-by":       "secrets-manager",
+							"manager-identity": identity,
+							"name":             caName,
 						},
 						Type: corev1.SecretTypeOpaque,
 						Data: caOldData.SecretData(),
@@ -949,15 +945,13 @@ var _ = Describe("Generate", func() {
 
 					By("Create current CA secret in the system")
 					Expect(fakeClient.Create(ctx, &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							CreationTimestamp: metav1.Now(),
-							Name:              caName,
-							Namespace:         namespace,
-							Labels: map[string]string{
-								"managed-by":       "secrets-manager",
-								"manager-identity": identity,
-								"name":             caName,
-							},
+						CreationTimestamp: metav1.Now(),
+						Name:              caName,
+						Namespace:         namespace,
+						Labels: map[string]string{
+							"managed-by":       "secrets-manager",
+							"manager-identity": identity,
+							"name":             caName,
 						},
 						Type: corev1.SecretTypeOpaque,
 						Data: caCurrentData.SecretData(),
@@ -1053,13 +1047,11 @@ var _ = Describe("Generate", func() {
 			It("should keep the old data if an existing secrets indicate keeping it", func() {
 				By("Create existing secret with old key")
 				existingSecret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "some-existing-secret",
-						Namespace: namespace,
-						Labels:    map[string]string{"secrets-manager-use-data-for-name": config.GetName()},
-					},
-					Type: corev1.SecretTypeOpaque,
-					Data: oldData,
+					Name:      "some-existing-secret",
+					Namespace: namespace,
+					Labels:    map[string]string{"secrets-manager-use-data-for-name": config.GetName()},
+					Type:      corev1.SecretTypeOpaque,
+					Data:      oldData,
 				}
 				Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed())
 
@@ -1075,11 +1067,9 @@ var _ = Describe("Generate", func() {
 				By("Create existing secret with old key")
 				for i := range 2 {
 					existingSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      fmt.Sprintf("some-existing-secret-%d", i),
-							Namespace: namespace,
-							Labels:    map[string]string{"secrets-manager-use-data-for-name": config.GetName()},
-						},
+						Name:      fmt.Sprintf("some-existing-secret-%d", i),
+						Namespace: namespace,
+						Labels:    map[string]string{"secrets-manager-use-data-for-name": config.GetName()},
 					}
 					Expect(fakeClient.Create(ctx, existingSecret)).To(Succeed(), "for secret "+existingSecret.Name)
 				}

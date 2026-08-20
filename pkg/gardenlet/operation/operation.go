@@ -455,7 +455,7 @@ func (o *Operation) ShootVersion() string {
 
 // DeleteClusterResourceFromSeed deletes the `Cluster` extension resource for the shoot in the seed cluster.
 func (o *Operation) DeleteClusterResourceFromSeed(ctx context.Context) error {
-	return client.IgnoreNotFound(o.SeedClientSet.Client().Delete(ctx, &extensionsv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Name: o.Shoot.ControlPlaneNamespace}}))
+	return client.IgnoreNotFound(o.SeedClientSet.Client().Delete(ctx, &extensionsv1alpha1.Cluster{Name: o.Shoot.ControlPlaneNamespace}))
 }
 
 // IsShootMonitoringEnabled returns true if shoot monitoring is enabled and shoot is not of purpose testing.

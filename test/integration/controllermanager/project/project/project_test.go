@@ -38,10 +38,8 @@ var _ = Describe("Project controller tests", func() {
 		projectName := "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5]
 
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   projectName,
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   projectName,
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: new("garden-" + projectName),
 			},
@@ -51,11 +49,9 @@ var _ = Describe("Project controller tests", func() {
 		projectNamespaceKey = client.ObjectKey{Name: *project.Spec.Namespace}
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "test-",
-				Namespace:    projectNamespaceKey.Name,
-				Labels:       map[string]string{testID: testRunID},
-			},
+			GenerateName: "test-",
+			Namespace:    projectNamespaceKey.Name,
+			Labels:       map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ShootSpec{
 				SecretBindingName: new("mysecretbinding"),
 				CloudProfileName:  new("cloudprofile1"),
@@ -273,9 +269,8 @@ var _ = Describe("Project controller tests", func() {
 
 		Context("existing namespace specified for adoption", func() {
 			BeforeEach(func() {
-				projectNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{
-					Name: projectNamespaceKey.Name,
-				}}
+				projectNamespace = &corev1.Namespace{
+					Name: projectNamespaceKey.Name}
 			})
 
 			Context("namespace without proper project labels", func() {
@@ -370,10 +365,9 @@ var _ = Describe("Project controller tests", func() {
 		var resourceQuota *corev1.ResourceQuota
 
 		BeforeEach(func() {
-			resourceQuota = &corev1.ResourceQuota{ObjectMeta: metav1.ObjectMeta{
+			resourceQuota = &corev1.ResourceQuota{
 				Name:      "gardener",
-				Namespace: projectNamespaceKey.Name,
-			}}
+				Namespace: projectNamespaceKey.Name}
 		})
 
 		JustBeforeEach(func() {
@@ -483,12 +477,10 @@ var _ = Describe("Project controller tests", func() {
 			By("Add admin to project")
 			patch := client.MergeFrom(project.DeepCopy())
 			project.Spec.Members = append(project.Spec.Members, gardencorev1beta1.ProjectMember{
-				Subject: rbacv1.Subject{
-					APIGroup: rbacv1.GroupName,
-					Kind:     rbacv1.UserKind,
-					Name:     testUserName,
-				},
-				Role: "admin",
+				APIGroup: rbacv1.GroupName,
+				Kind:     rbacv1.UserKind,
+				Name:     testUserName,
+				Role:     "admin",
 			})
 			Expect(testClient.Patch(ctx, project, patch)).To(Succeed())
 
@@ -502,7 +494,7 @@ var _ = Describe("Project controller tests", func() {
 			By("Delete RoleBindings")
 			var roleBindings []client.Object
 			for _, name := range []string{"gardener.cloud:system:project-member", "gardener.cloud:system:project-viewer", "gardener.cloud:system:project-serviceaccountmanager"} {
-				roleBindings = append(roleBindings, &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: projectNamespaceKey.Name}})
+				roleBindings = append(roleBindings, &rbacv1.RoleBinding{Name: name, Namespace: projectNamespaceKey.Name})
 			}
 			Expect(kubernetesutils.DeleteObjects(ctx, testClient, roleBindings...)).To(Succeed())
 
@@ -518,17 +510,15 @@ var _ = Describe("Project controller tests", func() {
 			By("Add new member with extension role")
 			patch := client.MergeFrom(project.DeepCopy())
 			project.Spec.Members = append(project.Spec.Members, gardencorev1beta1.ProjectMember{
-				Subject: rbacv1.Subject{
-					APIGroup: rbacv1.GroupName,
-					Kind:     rbacv1.UserKind,
-					Name:     testUserName,
-				},
-				Role: "extension:test",
+				APIGroup: rbacv1.GroupName,
+				Kind:     rbacv1.UserKind,
+				Name:     testUserName,
+				Role:     "extension:test",
 			})
 			Expect(testClient.Patch(ctx, project, patch)).To(Succeed())
 
 			By("Wait until RoleBinding is created")
-			roleBinding := &rbacv1.RoleBinding{ObjectMeta: metav1.ObjectMeta{Name: "gardener.cloud:extension:project:" + project.Name + ":test", Namespace: projectNamespaceKey.Name}}
+			roleBinding := &rbacv1.RoleBinding{Name: "gardener.cloud:extension:project:" + project.Name + ":test", Namespace: projectNamespaceKey.Name}
 			Eventually(func(g Gomega) {
 				g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(roleBinding), roleBinding)).To(Succeed())
 			}).Should(Succeed())
@@ -553,9 +543,7 @@ var _ = Describe("Project controller tests", func() {
 
 			BeforeEach(func() {
 				parentCloudProfile = &gardencorev1beta1.CloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: testID + "-cpfl-",
-					},
+					GenerateName: testID + "-cpfl-",
 					Spec: gardencorev1beta1.CloudProfileSpec{
 						Kubernetes: gardencorev1beta1.KubernetesSettings{
 							Versions: []gardencorev1beta1.ExpirableVersion{{Version: "1.26.0"}, {Version: "1.25.1"}},
@@ -565,7 +553,7 @@ var _ = Describe("Project controller tests", func() {
 								Name: "some-OS",
 								Versions: []gardencorev1beta1.MachineImageVersion{
 									{
-										ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.1"},
+										Version: "1.1.1",
 										CRI: []gardencorev1beta1.CRI{
 											{
 												Name: gardencorev1beta1.CRINameContainerD,
@@ -585,10 +573,8 @@ var _ = Describe("Project controller tests", func() {
 				}
 
 				namespacedCloudProfile = &gardencorev1beta1.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						GenerateName: testID + "-nscpfl-",
-						Namespace:    projectNamespaceKey.Name,
-					},
+					GenerateName: testID + "-nscpfl-",
+					Namespace:    projectNamespaceKey.Name,
 					Spec: gardencorev1beta1.NamespacedCloudProfileSpec{
 						Parent: gardencorev1beta1.CloudProfileReference{
 							Kind: "CloudProfile",
@@ -634,10 +620,8 @@ var _ = Describe("Project controller tests", func() {
 			It("should allow project viewers to read a project's NamespacedCloudProfile", func() {
 				By("Grant project-viewer respective permissions for NamespacedCloudProfiles")
 				clusterRoleGardenerMember := &rbacv1.ClusterRole{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener.cloud:system:project-viewer",
-						Labels: map[string]string{"gardener.cloud/role": "project-viewer"},
-					},
+					Name:   "gardener.cloud:system:project-viewer",
+					Labels: map[string]string{"gardener.cloud/role": "project-viewer"},
 					Rules: []rbacv1.PolicyRule{
 						{
 							APIGroups: []string{"core.gardener.cloud"},
@@ -654,12 +638,10 @@ var _ = Describe("Project controller tests", func() {
 				By("Add viewer to project")
 				patch := client.MergeFrom(project.DeepCopy())
 				project.Spec.Members = append(project.Spec.Members, gardencorev1beta1.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.UserKind,
-						Name:     testUserName,
-					},
-					Role: "viewer",
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.UserKind,
+					Name:     testUserName,
+					Role:     "viewer",
 				})
 				Expect(testClient.Patch(ctx, project, patch)).To(Succeed())
 
@@ -678,10 +660,8 @@ var _ = Describe("Project controller tests", func() {
 			It("should allow project admins to read and modify a project's NamespacedCloudProfile for non-special fields", func() {
 				By("Grant project-member respective permissions for NamespacedCloudProfiles")
 				clusterRoleGardenerMember := &rbacv1.ClusterRole{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener.cloud:system:project-member",
-						Labels: map[string]string{"gardener.cloud/role": "project-member"},
-					},
+					Name:   "gardener.cloud:system:project-member",
+					Labels: map[string]string{"gardener.cloud/role": "project-member"},
 					Rules: []rbacv1.PolicyRule{
 						{
 							APIGroups: []string{"core.gardener.cloud"},
@@ -698,12 +678,10 @@ var _ = Describe("Project controller tests", func() {
 				By("Add admin to project")
 				patch := client.MergeFrom(project.DeepCopy())
 				project.Spec.Members = append(project.Spec.Members, gardencorev1beta1.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.UserKind,
-						Name:     testUserName,
-					},
-					Role: "admin",
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.UserKind,
+					Name:     testUserName,
+					Role:     "admin",
 				})
 				Expect(testClient.Patch(ctx, project, patch)).To(Succeed())
 
@@ -734,7 +712,7 @@ var _ = Describe("Project controller tests", func() {
 				updatedNamespacedCloudProfile = namespacedCloudProfile.DeepCopy()
 				updatedNamespacedCloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{
 					{Name: "some-OS", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.1", ExpirationDate: futureExpirationDate}},
+						{Version: "1.1.1", ExpirationDate: futureExpirationDate},
 					}},
 				}
 				Expect(testUserClient.Update(ctx, updatedNamespacedCloudProfile)).To(BeForbiddenError())
@@ -747,10 +725,8 @@ var _ = Describe("Project controller tests", func() {
 			It("should allow gardener operators to modify a project's NamespacedCloudProfiles including special fields", func() {
 				By("Grant user operator-like permissions to modify special fields in NamespacedCloudProfile")
 				clusterRoleGardenerMember := &rbacv1.ClusterRole{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener.cloud:system:project-member",
-						Labels: map[string]string{"gardener.cloud/role": "project-member"},
-					},
+					Name:   "gardener.cloud:system:project-member",
+					Labels: map[string]string{"gardener.cloud/role": "project-member"},
 					Rules: []rbacv1.PolicyRule{
 						{
 							APIGroups: []string{"core.gardener.cloud"},
@@ -776,12 +752,10 @@ var _ = Describe("Project controller tests", func() {
 				By("Add admin to project")
 				patch := client.MergeFrom(project.DeepCopy())
 				project.Spec.Members = append(project.Spec.Members, gardencorev1beta1.ProjectMember{
-					Subject: rbacv1.Subject{
-						APIGroup: rbacv1.GroupName,
-						Kind:     rbacv1.UserKind,
-						Name:     testUserName,
-					},
-					Role: "admin",
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.UserKind,
+					Name:     testUserName,
+					Role:     "admin",
 				})
 				Expect(testClient.Patch(ctx, project, patch)).To(Succeed())
 
@@ -791,7 +765,7 @@ var _ = Describe("Project controller tests", func() {
 				}
 				namespacedCloudProfile.Spec.MachineImages = []gardencorev1beta1.MachineImage{
 					{Name: "some-OS", Versions: []gardencorev1beta1.MachineImageVersion{
-						{ExpirableVersion: gardencorev1beta1.ExpirableVersion{Version: "1.1.1", ExpirationDate: futureExpirationDate}},
+						{Version: "1.1.1", ExpirationDate: futureExpirationDate},
 					}},
 				}
 				namespacedCloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Raw: []byte(`{"foo": "bar"}`)}

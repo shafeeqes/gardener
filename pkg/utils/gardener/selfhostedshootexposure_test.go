@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 	. "github.com/gardener/gardener/pkg/utils/gardener"
@@ -19,7 +18,7 @@ var _ = Describe("SelfHostedShootExposure", func() {
 		// healthyNode returns a node that passes health.CheckNode (Ready, no pressure) with the given addresses.
 		healthyNode = func(name string, addresses ...corev1.NodeAddress) corev1.Node {
 			return corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
+				Name: name,
 				Status: corev1.NodeStatus{
 					Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}},
 					Addresses:  addresses,

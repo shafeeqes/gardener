@@ -268,21 +268,19 @@ var _ = Describe("Registration", func() {
 
 				// Check seed mutating webhooks
 				expectedSeedMutatingWebhookConfig := &admissionregistrationv1.MutatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener-extension-" + providerName,
-						Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
-					},
+					Name:   "gardener-extension-" + providerName,
+					Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
 					Webhooks: []admissionregistrationv1.MutatingWebhook{
 						buildMutatingWebhook(
 							mutatingWebhooks[0],
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"configmaps"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"configmaps"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"secrets"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"secrets"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -296,7 +294,7 @@ var _ = Describe("Registration", func() {
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"pods"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"pods"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -315,7 +313,7 @@ var _ = Describe("Registration", func() {
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -329,7 +327,7 @@ var _ = Describe("Registration", func() {
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -344,17 +342,15 @@ var _ = Describe("Registration", func() {
 
 				// Check shoot mutating webhooks
 				Expect(shootWebhookConfig.MutatingWebhookConfig).To(Equal(&admissionregistrationv1.MutatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener-extension-" + providerName + "-shoot",
-						Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
-					},
+					Name:   "gardener-extension-" + providerName + "-shoot",
+					Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
 					Webhooks: []admissionregistrationv1.MutatingWebhook{
 						buildMutatingWebhook(
 							mutatingWebhooks[2],
 							buildShootClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -368,7 +364,7 @@ var _ = Describe("Registration", func() {
 							buildShootClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -382,21 +378,19 @@ var _ = Describe("Registration", func() {
 
 				// Check seed validating webhooks
 				expectedSeedValidatingWebhookConfig := &admissionregistrationv1.ValidatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener-extension-" + providerName,
-						Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
-					},
+					Name:   "gardener-extension-" + providerName,
+					Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
 					Webhooks: []admissionregistrationv1.ValidatingWebhook{
 						buildValidatingWebhook(
 							validatingWebhooks[0],
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"configmaps"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"configmaps"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"secrets"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"secrets"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -410,7 +404,7 @@ var _ = Describe("Registration", func() {
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"pods"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"pods"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -429,7 +423,7 @@ var _ = Describe("Registration", func() {
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -443,7 +437,7 @@ var _ = Describe("Registration", func() {
 							buildSeedClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -459,17 +453,15 @@ var _ = Describe("Registration", func() {
 
 				// Check shoot validating webhooks
 				Expect(shootWebhookConfig.ValidatingWebhookConfig).To(Equal(&admissionregistrationv1.ValidatingWebhookConfiguration{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:   "gardener-extension-" + providerName + "-shoot",
-						Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
-					},
+					Name:   "gardener-extension-" + providerName + "-shoot",
+					Labels: map[string]string{"remediation.webhook.shoot.gardener.cloud/exclude": "true"},
 					Webhooks: []admissionregistrationv1.ValidatingWebhook{
 						buildValidatingWebhook(
 							validatingWebhooks[2],
 							buildShootClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts/token"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -483,7 +475,7 @@ var _ = Describe("Registration", func() {
 							buildShootClientConfig,
 							[]admissionregistrationv1.RuleWithOperations{
 								{
-									Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"}},
+									APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"},
 									Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 								},
 							},
@@ -518,16 +510,12 @@ var _ = Describe("Registration", func() {
 		BeforeEach(func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).Build()
 
-			ownerNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: ownerNamespaceName}}
+			ownerNamespace = &corev1.Namespace{Name: ownerNamespaceName}
 			webhookConfig = &admissionregistrationv1.MutatingWebhookConfiguration{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: "admissionregistration.k8s.io/v1",
-					Kind:       "MutatingWebhookConfiguration",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener-extension-provider-foo",
-				},
-				Webhooks: []admissionregistrationv1.MutatingWebhook{{}},
+				APIVersion: "admissionregistration.k8s.io/v1",
+				Kind:       "MutatingWebhookConfiguration",
+				Name:       "gardener-extension-provider-foo",
+				Webhooks:   []admissionregistrationv1.MutatingWebhook{{}},
 			}
 		})
 

@@ -41,7 +41,7 @@ var _ = Describe("Create", func() {
 
 		fakeClient client.Client
 		clientSet  kubernetes.Interface
-		restConfig = &rest.Config{Host: "some-host", TLSClientConfig: rest.TLSClientConfig{CAData: []byte("ca-data")}}
+		restConfig = &rest.Config{Host: "some-host", CAData: []byte("ca-data")}
 
 		tokenID     = "abcdef"
 		tokenSecret = "1234567890abcdef"
@@ -79,7 +79,7 @@ var _ = Describe("Create", func() {
 		It("should create the specified bootstrap token and print it", func() {
 			Expect(command.RunE(command, []string{token})).To(Succeed())
 
-			secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-" + tokenID, Namespace: "kube-system"}}
+			secret := &corev1.Secret{Name: "bootstrap-token-" + tokenID, Namespace: "kube-system"}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 
 			Expect(secret.Data).To(And(
@@ -91,7 +91,7 @@ var _ = Describe("Create", func() {
 		})
 
 		It("should return an error because a bootstrap token with the ID already exists", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-" + tokenID, Namespace: "kube-system"}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "bootstrap-token-" + tokenID, Namespace: "kube-system"})).To(Succeed())
 
 			Expect(command.RunE(command, []string{token})).To(MatchError(ContainSubstring("already exists")))
 		})
@@ -106,7 +106,7 @@ var _ = Describe("Create", func() {
 			})
 
 			It("should successfully print the join command", func() {
-				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.ConfigMapNameShootInfo, Namespace: metav1.NamespaceSystem}})).To(Succeed())
+				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{Name: v1beta1constants.ConfigMapNameShootInfo, Namespace: metav1.NamespaceSystem})).To(Succeed())
 
 				Expect(command.RunE(command, []string{token})).To(Succeed())
 				Eventually(stdOut).Should(Say(`gardenadm join --bootstrap-token abcdef.1234567890abcdef --ca-certificate "Y2EtZGF0YQ==" some-host

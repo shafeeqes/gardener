@@ -10,7 +10,6 @@ import (
 
 	fluentbitv1alpha2 "github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2"
 	"github.com/fluent/fluent-operator/v3/apis/fluentbit/v1alpha2/plugins/custom"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/features"
 )
@@ -92,10 +91,8 @@ func GetDefaultClusterOutput(labels map[string]string) *fluentbitv1alpha2.Cluste
 		return strings.HasPrefix(s, string(features.OpenTelemetryCollector)+"=")
 	}) && features.DefaultFeatureGate.Enabled(features.OpenTelemetryCollector) {
 		return &fluentbitv1alpha2.ClusterOutput{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   outputNameSystemd,
-				Labels: labels,
-			},
+			Name:   outputNameSystemd,
+			Labels: labels,
 			Spec: fluentbitv1alpha2.OutputSpec{
 				CustomPlugin: &custom.CustomPlugin{
 					Config: `Name ` + pluginNameGardener + `
@@ -115,10 +112,8 @@ FallbackToTagWhenMetadataIsMissing false`,
 	}
 
 	return &fluentbitv1alpha2.ClusterOutput{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   outputNameJournald,
-			Labels: labels,
-		},
+		Name:   outputNameJournald,
+		Labels: labels,
 		Spec: fluentbitv1alpha2.OutputSpec{
 			CustomPlugin: &custom.CustomPlugin{
 				Config: `Name ` + pluginNameVali + `
@@ -144,10 +139,8 @@ QueueName ` + queueNameSeedJournald + `
 func GetDynamicClusterOutput(labels map[string]string) *fluentbitv1alpha2.ClusterOutput {
 	if features.DefaultFeatureGate.Enabled(features.OpenTelemetryCollector) {
 		return &fluentbitv1alpha2.ClusterOutput{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   outputNameOpenTelemetry,
-				Labels: labels,
-			},
+			Name:   outputNameOpenTelemetry,
+			Labels: labels,
 			Spec: fluentbitv1alpha2.OutputSpec{
 				CustomPlugin: &custom.CustomPlugin{
 					Config: `Name ` + pluginNameGardener + `
@@ -193,10 +186,8 @@ TagKey                    tag`,
 	// records by the `gardener.cloud/role:shoot` namespace label before any seedClient fallback can
 	// run.
 	return &fluentbitv1alpha2.ClusterOutput{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   outputNameVali,
-			Labels: labels,
-		},
+		Name:   outputNameVali,
+		Labels: labels,
 		Spec: fluentbitv1alpha2.OutputSpec{
 			CustomPlugin: &custom.CustomPlugin{
 				Config: `Name ` + pluginNameVali + `
@@ -227,10 +218,8 @@ func GetStaticClusterOutput(labels map[string]string) *fluentbitv1alpha2.Cluster
 		return strings.HasPrefix(s, string(features.OpenTelemetryCollector)+"=")
 	}) && features.DefaultFeatureGate.Enabled(features.OpenTelemetryCollector) {
 		return &fluentbitv1alpha2.ClusterOutput{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   outputNameStaticOTel,
-				Labels: labels,
-			},
+			Name:   outputNameStaticOTel,
+			Labels: labels,
 			Spec: fluentbitv1alpha2.OutputSpec{
 				CustomPlugin: &custom.CustomPlugin{
 					Config: `Name ` + pluginNameGardener + `
@@ -250,10 +239,8 @@ FallbackToTagWhenMetadataIsMissing true`,
 	}
 
 	return &fluentbitv1alpha2.ClusterOutput{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   outputNameStaticVali,
-			Labels: labels,
-		},
+		Name:   outputNameStaticVali,
+		Labels: labels,
 		Spec: fluentbitv1alpha2.OutputSpec{
 			CustomPlugin: &custom.CustomPlugin{
 				Config: `Name ` + pluginNameVali + `

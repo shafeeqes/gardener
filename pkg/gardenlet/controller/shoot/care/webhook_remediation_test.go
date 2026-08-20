@@ -63,14 +63,10 @@ var _ = Describe("WebhookRemediation", func() {
 
 		BeforeEach(func() {
 			validatingWebhookConfiguration = &admissionregistrationv1.ValidatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "validating",
-				},
+				Name: "validating",
 			}
 			mutatingWebhookConfiguration = &admissionregistrationv1.MutatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "mutating",
-				},
+				Name: "mutating",
 			}
 		})
 
@@ -135,12 +131,10 @@ var _ = Describe("WebhookRemediation", func() {
 				TimeoutSeconds: new(int32(10)),
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   []string{""},
-							APIVersions: []string{"*"},
-							Resources:   []string{"*"},
-							Scope:       &namespacedScope,
-						},
+						APIGroups:   []string{""},
+						APIVersions: []string{"*"},
+						Resources:   []string{"*"},
+						Scope:       &namespacedScope,
 						Operations: []admissionregistrationv1.OperationType{
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
@@ -207,12 +201,10 @@ var _ = Describe("WebhookRemediation", func() {
 						Name:          "some-webhook.example.com",
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"foobars", "barfoos"},
-							},
-							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"foobars", "barfoos"},
+							Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 						}},
 					}}
 					Expect(fakeClient.Create(ctx, validatingWebhookConfiguration)).To(Succeed())
@@ -229,12 +221,10 @@ var _ = Describe("WebhookRemediation", func() {
 						Name:          "some-webhook.example.com",
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"pods"},
-							},
-							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"pods"},
+							Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 						}},
 					}}
 					Expect(fakeClient.Create(ctx, validatingWebhookConfiguration)).To(Succeed())
@@ -261,12 +251,10 @@ var _ = Describe("WebhookRemediation", func() {
 						Name:          "some-webhook.example.com",
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"foobars"},
-							},
-							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"foobars"},
+							Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 						}},
 					}}
 					Expect(fakeClient.Create(ctx, validatingWebhookConfiguration)).To(Succeed())
@@ -296,20 +284,16 @@ var _ = Describe("WebhookRemediation", func() {
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{""},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"foobars", "barfoos", "foobazs"},
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+								APIGroups:   []string{""},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"foobars", "barfoos", "foobazs"},
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{""},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"foobaz2s"},
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+								APIGroups:   []string{""},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"foobaz2s"},
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 							},
 						},
 					}}
@@ -380,11 +364,9 @@ var _ = Describe("WebhookRemediation", func() {
 							},
 							Rules: []admissionregistrationv1.RuleWithOperations{
 								{
-									Rule: admissionregistrationv1.Rule{
-										APIGroups:   []string{"coordination.k8s.io"},
-										APIVersions: []string{"v1", "v1beta1"},
-										Resources:   []string{"leases"},
-									},
+									APIGroups:   []string{"coordination.k8s.io"},
+									APIVersions: []string{"v1", "v1beta1"},
+									Resources:   []string{"leases"},
 									Operations: []admissionregistrationv1.OperationType{
 										"UPDATE",
 									},
@@ -397,11 +379,9 @@ var _ = Describe("WebhookRemediation", func() {
 							FailurePolicy:  &ignore,
 							Rules: []admissionregistrationv1.RuleWithOperations{
 								{
-									Rule: admissionregistrationv1.Rule{
-										APIGroups:   []string{"coordination.k8s.io"},
-										APIVersions: []string{"v1", "v1beta1"},
-										Resources:   []string{"leases"},
-									},
+									APIGroups:   []string{"coordination.k8s.io"},
+									APIVersions: []string{"v1", "v1beta1"},
+									Resources:   []string{"leases"},
 									Operations: []admissionregistrationv1.OperationType{
 										"UPDATE",
 									},
@@ -414,11 +394,9 @@ var _ = Describe("WebhookRemediation", func() {
 							FailurePolicy:  &ignore,
 							Rules: []admissionregistrationv1.RuleWithOperations{
 								{
-									Rule: admissionregistrationv1.Rule{
-										APIGroups:   []string{"coordination.k8s.io"},
-										APIVersions: []string{"v1", "v1beta1"},
-										Resources:   []string{"leases"},
-									},
+									APIGroups:   []string{"coordination.k8s.io"},
+									APIVersions: []string{"v1", "v1beta1"},
+									Resources:   []string{"leases"},
 									Operations: []admissionregistrationv1.OperationType{
 										"UPDATE",
 									},
@@ -447,12 +425,10 @@ var _ = Describe("WebhookRemediation", func() {
 						Name:          "some-webhook.example.com",
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"foobars", "barfoos"},
-							},
-							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"foobars", "barfoos"},
+							Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 						}},
 					}}
 					Expect(fakeClient.Create(ctx, mutatingWebhookConfiguration)).To(Succeed())
@@ -469,12 +445,10 @@ var _ = Describe("WebhookRemediation", func() {
 						Name:          "some-webhook.example.com",
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"pods"},
-							},
-							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"pods"},
+							Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 						}},
 					}}
 					Expect(fakeClient.Create(ctx, mutatingWebhookConfiguration)).To(Succeed())
@@ -501,12 +475,10 @@ var _ = Describe("WebhookRemediation", func() {
 						Name:          "some-webhook.example.com",
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{{
-							Rule: admissionregistrationv1.Rule{
-								APIGroups:   []string{""},
-								APIVersions: []string{"v1"},
-								Resources:   []string{"foobars"},
-							},
-							Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+							APIGroups:   []string{""},
+							APIVersions: []string{"v1"},
+							Resources:   []string{"foobars"},
+							Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 						}},
 					}}
 					Expect(fakeClient.Create(ctx, mutatingWebhookConfiguration)).To(Succeed())
@@ -536,20 +508,16 @@ var _ = Describe("WebhookRemediation", func() {
 						FailurePolicy: &fail,
 						Rules: []admissionregistrationv1.RuleWithOperations{
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{""},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"foobars", "barfoos", "foobazs"},
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+								APIGroups:   []string{""},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"foobars", "barfoos", "foobazs"},
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 							},
 							{
-								Rule: admissionregistrationv1.Rule{
-									APIGroups:   []string{""},
-									APIVersions: []string{"v1"},
-									Resources:   []string{"foobaz2s"},
-								},
-								Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
+								APIGroups:   []string{""},
+								APIVersions: []string{"v1"},
+								Resources:   []string{"foobaz2s"},
+								Operations:  []admissionregistrationv1.OperationType{admissionregistrationv1.Create},
 							},
 						},
 					}}

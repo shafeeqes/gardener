@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
@@ -60,22 +59,18 @@ var _ = Describe("Resources", func() {
 		}}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "foo",
-				Namespace:   gardenNamespace,
-				Finalizers:  []string{"some-finalizer1", "some-finalizer2"},
-				Annotations: map[string]string{"foo": "bar"},
-				Labels:      map[string]string{"bar": "foo"},
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: map[string][]byte{"some": []byte("data")},
+			Name:        "foo",
+			Namespace:   gardenNamespace,
+			Finalizers:  []string{"some-finalizer1", "some-finalizer2"},
+			Annotations: map[string]string{"foo": "bar"},
+			Labels:      map[string]string{"bar": "foo"},
+			Type:        corev1.SecretTypeOpaque,
+			Data:        map[string][]byte{"some": []byte("data")},
 		}
 
 		workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "wi-foo",
-				Namespace: gardenNamespace,
-			},
+			Name:      "wi-foo",
+			Namespace: gardenNamespace,
 			Spec: securityv1alpha1.WorkloadIdentitySpec{
 				TargetSystem: securityv1alpha1.TargetSystem{
 					Type: "test",
@@ -84,15 +79,11 @@ var _ = Describe("Resources", func() {
 		}
 
 		botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "core.gardener.cloud/v1beta1",
-				Kind:       "Shoot",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: gardenNamespace,
-				Name:      "bar",
-				UID:       "shoot-uuid",
-			},
+			APIVersion: "core.gardener.cloud/v1beta1",
+			Kind:       "Shoot",
+			Namespace:  gardenNamespace,
+			Name:       "bar",
+			UID:        "shoot-uuid",
 			Spec: gardencorev1beta1.ShootSpec{
 				Resources: []gardencorev1beta1.NamedResourceReference{
 					{
@@ -126,10 +117,8 @@ var _ = Describe("Resources", func() {
 			Expect(managedResource.Spec.SecretRefs).To(HaveLen(1))
 
 			managedResourceSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResource.Spec.SecretRefs[0].Name,
-					Namespace: managedResource.Namespace,
-				},
+				Name:      managedResource.Spec.SecretRefs[0].Name,
+				Namespace: managedResource.Namespace,
 			}
 			Expect(seedClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(Succeed())
 			Expect(managedResourceSecret.Data).To(HaveKey("referenced-resources"))
@@ -178,33 +167,29 @@ var _ = Describe("Resources", func() {
 			expectReferencedResourcesInSeed(
 				[]client.Object{
 					&corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "ref-" + secret.Name,
-							Namespace:   controlPlaneNamespace,
-							Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
-						},
-						Type: secret.Type,
-						Data: secret.Data,
+						Name:        "ref-" + secret.Name,
+						Namespace:   controlPlaneNamespace,
+						Annotations: map[string]string{resourcesv1alpha1.DeleteOnInvalidUpdate: "true"},
+						Type:        secret.Type,
+						Data:        secret.Data,
 					},
 				},
 				[]client.Object{
 					&corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Annotations: map[string]string{
-								"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"bar","namespace":"garden-foo","uid":"shoot-uuid"}`,
-								"workloadidentity.security.gardener.cloud/name":           "wi-foo",
-								"workloadidentity.security.gardener.cloud/namespace":      "garden-foo",
-							},
-							Labels: map[string]string{
-								"security.gardener.cloud/purpose":                     "workload-identity-token-requestor",
-								"workloadidentity.security.gardener.cloud/referenced": "true",
-								"workloadidentity.security.gardener.cloud/provider":   "test",
-							},
-							Name:            "workload-identity-ref-" + workloadIdentity.Name,
-							Namespace:       controlPlaneNamespace,
-							ResourceVersion: "1",
+						Annotations: map[string]string{
+							"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"bar","namespace":"garden-foo","uid":"shoot-uuid"}`,
+							"workloadidentity.security.gardener.cloud/name":           "wi-foo",
+							"workloadidentity.security.gardener.cloud/namespace":      "garden-foo",
 						},
-						Type: corev1.SecretTypeOpaque,
+						Labels: map[string]string{
+							"security.gardener.cloud/purpose":                     "workload-identity-token-requestor",
+							"workloadidentity.security.gardener.cloud/referenced": "true",
+							"workloadidentity.security.gardener.cloud/provider":   "test",
+						},
+						Name:            "workload-identity-ref-" + workloadIdentity.Name,
+						Namespace:       controlPlaneNamespace,
+						ResourceVersion: "1",
+						Type:            corev1.SecretTypeOpaque,
 					},
 				},
 			)
@@ -213,19 +198,17 @@ var _ = Describe("Resources", func() {
 
 	Describe("#DestroyReferencedResources", func() {
 		It("should destroy the managed resource and its secret for the referenced resources", func() {
-			managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: controlPlaneNamespace, Name: "referenced-resources"}}
+			managedResource := &resourcesv1alpha1.ManagedResource{Namespace: controlPlaneNamespace, Name: "referenced-resources"}
 			Expect(seedClient.Create(ctx, managedResource)).To(Succeed())
 
-			managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: controlPlaneNamespace, Name: "referenced-resources"}}
+			managedResourceSecret := &corev1.Secret{Namespace: controlPlaneNamespace, Name: "referenced-resources"}
 			Expect(seedClient.Create(ctx, managedResourceSecret)).To(Succeed())
 
 			workloadIdentitySecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: controlPlaneNamespace,
-					Name:      "workload-identity-ref-foo",
-					Labels: map[string]string{
-						"workloadidentity.security.gardener.cloud/referenced": "true",
-					},
+				Namespace: controlPlaneNamespace,
+				Name:      "workload-identity-ref-foo",
+				Labels: map[string]string{
+					"workloadidentity.security.gardener.cloud/referenced": "true",
 				},
 			}
 			Expect(seedClient.Create(ctx, workloadIdentitySecret)).To(Succeed())
@@ -255,21 +238,17 @@ var _ = Describe("Resources", func() {
 
 		BeforeEach(func() {
 			botanist.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-shoot",
-					Namespace: "garden",
-					Labels:    shootLabels,
-				},
+				Name:      "test-shoot",
+				Namespace: "garden",
+				Labels:    shootLabels,
 			})
 		})
 
 		When("there are no secrets with static manifests label", func() {
 			It("should delete the managed resource if it exists", func() {
 				managedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: controlPlaneNamespace,
-					},
+					Name:      managedResourceName,
+					Namespace: controlPlaneNamespace,
 				}
 				Expect(seedClient.Create(ctx, managedResource)).To(Succeed())
 
@@ -282,10 +261,8 @@ var _ = Describe("Resources", func() {
 				Expect(botanist.PopulateStaticManifestsFromSeedToShoot(ctx)).To(Succeed())
 
 				managedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      managedResourceName,
-						Namespace: controlPlaneNamespace,
-					},
+					Name:      managedResourceName,
+					Namespace: controlPlaneNamespace,
 				}
 				Expect(seedClient.Get(ctx, client.ObjectKeyFromObject(managedResource), &resourcesv1alpha1.ManagedResource{})).To(BeNotFoundError())
 			})
@@ -296,33 +273,27 @@ var _ = Describe("Resources", func() {
 
 			BeforeEach(func() {
 				secret1 = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "manifest-1",
-						Namespace: "garden",
-						Labels:    map[string]string{"gardener.cloud/purpose": "shoot-static-manifest"},
-					},
-					Type: corev1.SecretTypeOpaque,
-					Data: map[string][]byte{"manifest": []byte("data1")},
+					Name:      "manifest-1",
+					Namespace: "garden",
+					Labels:    map[string]string{"gardener.cloud/purpose": "shoot-static-manifest"},
+					Type:      corev1.SecretTypeOpaque,
+					Data:      map[string][]byte{"manifest": []byte("data1")},
 				}
 
 				secret2 = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "manifest-2",
-						Namespace: "garden",
-						Labels:    map[string]string{"gardener.cloud/purpose": "shoot-static-manifest"},
-					},
-					Type: corev1.SecretTypeTLS,
-					Data: map[string][]byte{"tls.crt": []byte("cert"), "tls.key": []byte("key")},
+					Name:      "manifest-2",
+					Namespace: "garden",
+					Labels:    map[string]string{"gardener.cloud/purpose": "shoot-static-manifest"},
+					Type:      corev1.SecretTypeTLS,
+					Data:      map[string][]byte{"tls.crt": []byte("cert"), "tls.key": []byte("key")},
 				}
 
 				secret3 = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "manifest-3",
-						Namespace: "garden",
-						Labels:    map[string]string{"gardener.cloud/purpose": "shoot-static-manifest"},
-					},
-					Type: corev1.SecretTypeOpaque,
-					Data: map[string][]byte{"manifest": []byte("data3")},
+					Name:      "manifest-3",
+					Namespace: "garden",
+					Labels:    map[string]string{"gardener.cloud/purpose": "shoot-static-manifest"},
+					Type:      corev1.SecretTypeOpaque,
+					Data:      map[string][]byte{"manifest": []byte("data3")},
 				}
 			})
 
@@ -465,12 +436,10 @@ var _ = Describe("Resources", func() {
 
 				It("should not delete unrelated secrets in shoot namespace", func() {
 					unrelatedSecret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "unrelated-secret",
-							Namespace: controlPlaneNamespace,
-							Labels:    map[string]string{"some-other-label": "true"},
-						},
-						Data: map[string][]byte{"data": []byte("test")},
+						Name:      "unrelated-secret",
+						Namespace: controlPlaneNamespace,
+						Labels:    map[string]string{"some-other-label": "true"},
+						Data:      map[string][]byte{"data": []byte("test")},
 					}
 					Expect(seedClient.Create(ctx, unrelatedSecret)).To(Succeed())
 

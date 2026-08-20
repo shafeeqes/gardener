@@ -49,9 +49,7 @@ var _ = Describe("Webhook", func() {
 
 		shootWebhookConfigs = extensionswebhook.Configs{
 			MutatingWebhookConfig: &admissionregistrationv1.MutatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: extensionName,
-				},
+				Name: extensionName,
 				Webhooks: []admissionregistrationv1.MutatingWebhook{{
 					Name: "some-webhook",
 				}},
@@ -94,56 +92,44 @@ var _ = Describe("Webhook", func() {
 
 		BeforeEach(func() {
 			namespace1 = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "namespace1",
-				},
+				Name: "namespace1",
 			}
 			namespace2 = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "namespace2",
-					Labels: map[string]string{
-						"gardener.cloud/role":                      "shoot",
-						"networking.shoot.gardener.cloud/provider": "foo",
-					},
+				Name: "namespace2",
+				Labels: map[string]string{
+					"gardener.cloud/role":                      "shoot",
+					"networking.shoot.gardener.cloud/provider": "foo",
 				},
 			}
 			namespace3 = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "namespace3",
-					Labels: map[string]string{
-						"gardener.cloud/role":                      "shoot",
-						"networking.shoot.gardener.cloud/provider": extensionType,
-					},
+				Name: "namespace3",
+				Labels: map[string]string{
+					"gardener.cloud/role":                      "shoot",
+					"networking.shoot.gardener.cloud/provider": extensionType,
 				},
 			}
 			namespace4 = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "namespace4",
-					Labels: map[string]string{
-						"gardener.cloud/role":                      "shoot",
-						"networking.shoot.gardener.cloud/provider": extensionType,
-					},
+				Name: "namespace4",
+				Labels: map[string]string{
+					"gardener.cloud/role":                      "shoot",
+					"networking.shoot.gardener.cloud/provider": extensionType,
 				},
 			}
 			namespace5 = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "namespace5",
-					Labels: map[string]string{
-						"gardener.cloud/role":                      "shoot",
-						"networking.shoot.gardener.cloud/provider": extensionType,
-					},
+				Name: "namespace5",
+				Labels: map[string]string{
+					"gardener.cloud/role":                      "shoot",
+					"networking.shoot.gardener.cloud/provider": extensionType,
 				},
 			}
 
 			namespace6 = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "namespace6",
-					Labels: map[string]string{
-						"gardener.cloud/role":                      "shoot",
-						"networking.shoot.gardener.cloud/provider": extensionType,
-					},
-					DeletionTimestamp: new(metav1.Now()),
+				Name: "namespace6",
+				Labels: map[string]string{
+					"gardener.cloud/role":                      "shoot",
+					"networking.shoot.gardener.cloud/provider": extensionType,
 				},
+				DeletionTimestamp: new(metav1.Now()),
 				Status: corev1.NamespaceStatus{
 					Phase: corev1.NamespaceTerminating,
 				},
@@ -157,7 +143,7 @@ var _ = Describe("Webhook", func() {
 			Expect(fakeClient.Create(ctx, namespace6)).To(Succeed())
 
 			cluster3 = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{Name: namespace3.Name},
+				Name: namespace3.Name,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Object: &gardencorev1beta1.Shoot{},
@@ -165,7 +151,7 @@ var _ = Describe("Webhook", func() {
 				},
 			}
 			cluster4 = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{Name: namespace4.Name},
+				Name: namespace4.Name,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Object: &gardencorev1beta1.Shoot{},
@@ -173,7 +159,7 @@ var _ = Describe("Webhook", func() {
 				},
 			}
 			cluster5 = &extensionsv1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{Name: namespace5.Name},
+				Name: namespace5.Name,
 				Spec: extensionsv1alpha1.ClusterSpec{
 					Shoot: runtime.RawExtension{
 						Object: &gardencorev1beta1.Shoot{},
@@ -187,8 +173,8 @@ var _ = Describe("Webhook", func() {
 		})
 
 		It("should reconcile the webhook config for namespace3 and namespace4", func() {
-			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: namespace3.Name, Name: managedResourceName}})).To(Succeed())
-			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: namespace4.Name, Name: managedResourceName}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Namespace: namespace3.Name, Name: managedResourceName})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Namespace: namespace4.Name, Name: managedResourceName})).To(Succeed())
 
 			Expect(ReconcileWebhooksForAllNamespaces(ctx, fakeClient, managedResourceName, shootNamespaceSelector, shootWebhookConfigs)).To(Succeed())
 
@@ -201,7 +187,7 @@ var _ = Describe("Webhook", func() {
 		})
 
 		It("should return an error because cluster for namespace3 is missing", func() {
-			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: namespace3.Name, Name: managedResourceName}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Namespace: namespace3.Name, Name: managedResourceName})).To(Succeed())
 			Expect(fakeClient.Delete(ctx, cluster3)).To(Succeed())
 
 			err := ReconcileWebhooksForAllNamespaces(ctx, fakeClient, managedResourceName, shootNamespaceSelector, shootWebhookConfigs)
@@ -211,7 +197,7 @@ var _ = Describe("Webhook", func() {
 		})
 
 		It("should return an error because cluster for namespace4 is does not contain shoot", func() {
-			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Namespace: namespace4.Name, Name: managedResourceName}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{Namespace: namespace4.Name, Name: managedResourceName})).To(Succeed())
 
 			patch := client.MergeFrom(cluster4.DeepCopy())
 			cluster4.Spec.Shoot = runtime.RawExtension{}
@@ -226,11 +212,11 @@ var _ = Describe("Webhook", func() {
 })
 
 func expectWebhookConfigReconciliation(ctx context.Context, fakeClient client.Client, namespace, managedResourceName string, shootWebhook *admissionregistrationv1.MutatingWebhookConfiguration, consistOf func(...client.Object) types.GomegaMatcher) {
-	managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: namespace}}
+	managedResource := &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: namespace}
 	ExpectWithOffset(1, fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 	ExpectWithOffset(1, managedResource.Spec.SecretRefs).To(HaveLen(1))
 
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: namespace}}
+	secret := &corev1.Secret{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: namespace}
 	ExpectWithOffset(1, fakeClient.Get(ctx, client.ObjectKeyFromObject(secret), secret)).To(Succeed())
 	ExpectWithOffset(1, secret.Type).To(Equal(corev1.SecretTypeOpaque))
 	Expect(managedResource).To(consistOf(shootWebhook))

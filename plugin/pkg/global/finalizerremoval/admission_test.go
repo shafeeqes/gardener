@@ -44,10 +44,8 @@ var _ = Describe("finalizerremoval", func() {
 			finalizers = []string{core.GardenerName}
 
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      shootName,
-					Namespace: namespace,
-				},
+				Name:      shootName,
+				Namespace: namespace,
 				Spec: gardencorev1beta1.ShootSpec{
 					CredentialsBindingName: new(credentialsBindingName),
 					SecretBindingName:      new(secretBindingName),
@@ -63,11 +61,9 @@ var _ = Describe("finalizerremoval", func() {
 
 			BeforeEach(func() {
 				coreSecretBinding = &core.SecretBinding{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       secretBindingName,
-						Namespace:  namespace,
-						Finalizers: finalizers,
-					},
+					Name:       secretBindingName,
+					Namespace:  namespace,
+					Finalizers: finalizers,
 				}
 			})
 
@@ -108,11 +104,9 @@ var _ = Describe("finalizerremoval", func() {
 
 			BeforeEach(func() {
 				coreCredentialsBinding = &security.CredentialsBinding{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       credentialsBindingName,
-						Namespace:  namespace,
-						Finalizers: finalizers,
-					},
+					Name:       credentialsBindingName,
+					Namespace:  namespace,
+					Finalizers: finalizers,
 				}
 			})
 
@@ -153,9 +147,7 @@ var _ = Describe("finalizerremoval", func() {
 
 			BeforeEach(func() {
 				coreShoot = &core.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Finalizers: finalizers,
-					},
+					Finalizers: finalizers,
 					Status: core.ShootStatus{
 						TechnicalID: "some-id",
 						LastOperation: &core.LastOperation{

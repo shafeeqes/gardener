@@ -104,12 +104,8 @@ func InjectAuditSettings(deployment *appsv1.Deployment, configMapAuditPolicy *co
 	})
 	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name: volumeNameAuditPolicy,
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: configMapAuditPolicy.Name,
-				},
-			},
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			Name: configMapAuditPolicy.Name,
 		},
 	})
 
@@ -126,10 +122,8 @@ func InjectAuditSettings(deployment *appsv1.Deployment, configMapAuditPolicy *co
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameAuditWebhookKubeconfig,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretWebhookKubeconfig.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretWebhookKubeconfig.Name,
 			},
 		})
 	}

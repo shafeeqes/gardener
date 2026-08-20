@@ -25,11 +25,9 @@ type Config struct {
 // DefaultConfig is the default SSH client Config used by Dial.
 func DefaultConfig() *Config {
 	return &Config{
-		ClientConfig: ssh.ClientConfig{
-			Timeout:         30 * time.Second,
-			HostKeyCallback: SingleKnownHost(),
-		},
-		DialContext: (&net.Dialer{Timeout: 30 * time.Second}).DialContext,
+		Timeout:         30 * time.Second,
+		HostKeyCallback: SingleKnownHost(),
+		DialContext:     (&net.Dialer{Timeout: 30 * time.Second}).DialContext,
 	}
 }
 

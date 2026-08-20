@@ -11,7 +11,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	apiserverv1beta1 "k8s.io/apiserver/pkg/apis/apiserver/v1beta1"
@@ -43,10 +42,8 @@ func (k *kubeAPIServer) reconcileConfigMapAuthorizationConfig(ctx context.Contex
 	}
 
 	authorizationConfiguration := &apiserverv1beta1.AuthorizationConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: apiserverv1beta1.ConfigSchemeGroupVersion.String(),
-			Kind:       "AuthorizationConfiguration",
-		},
+		APIVersion:  apiserverv1beta1.ConfigSchemeGroupVersion.String(),
+		Kind:        "AuthorizationConfiguration",
 		Authorizers: []apiserverv1beta1.AuthorizerConfiguration{{Type: "RBAC", Name: "rbac"}},
 	}
 
@@ -118,11 +115,8 @@ func (k *kubeAPIServer) handleAuthorizationSettings(deployment *appsv1.Deploymen
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameStructuredAuthorizationConfig,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{
-					Name: configMapAuthorizationConfig.Name,
-				}},
-			},
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				Name: configMapAuthorizationConfig.Name},
 		})
 	}
 
@@ -134,10 +128,8 @@ func (k *kubeAPIServer) handleAuthorizationSettings(deployment *appsv1.Deploymen
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volumeNameStructuredAuthorizationWebhookKubeconfigs,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretWebhooksKubeconfigs.Name,
-				},
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretWebhooksKubeconfigs.Name,
 			},
 		})
 	}

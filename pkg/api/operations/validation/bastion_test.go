@@ -22,10 +22,8 @@ var _ = Describe("validation", func() {
 
 	BeforeEach(func() {
 		bastion = &operations.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "example-bastion",
-				Namespace: "garden",
-			},
+			Name:      "example-bastion",
+			Namespace: "garden",
 			Spec: operations.BastionSpec{
 				ShootRef: corev1.LocalObjectReference{
 					Name: "example-shoot",

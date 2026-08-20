@@ -152,44 +152,36 @@ honor_labels: true`
 		contain = NewManagedResourceContainsObjectsMatcher(fakeClient)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9090}]`,
-					"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports":   `[{"protocol":"TCP","port":9090}]`,
-					"networking.resources.gardener.cloud/namespace-selectors":                          `[{"matchLabels":{"gardener.cloud/role":"shoot"}}]`,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
+			},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9090}]`,
+				"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports":   `[{"protocol":"TCP","port":9090}]`,
+				"networking.resources.gardener.cloud/namespace-selectors":                          `[{"matchLabels":{"gardener.cloud/role":"shoot"}}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Type:     corev1.ServiceTypeClusterIP,
@@ -203,20 +195,18 @@ honor_labels: true`
 			},
 		}
 		serviceForIngress = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
-				Annotations: map[string]string{
-					"networking.istio.io/exportTo": "istio-ingress",
-					"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9090}]`,
-					"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports":   `[{"protocol":"TCP","port":9090}]`,
-					"networking.resources.gardener.cloud/namespace-selectors":                          `[{"matchLabels":{"gardener.cloud/role":"shoot"}}]`,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
+			},
+			Annotations: map[string]string{
+				"networking.istio.io/exportTo": "istio-ingress",
+				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9090}]`,
+				"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports":   `[{"protocol":"TCP","port":9090}]`,
+				"networking.resources.gardener.cloud/namespace-selectors":                          `[{"matchLabels":{"gardener.cloud/role":"shoot"}}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Type:     corev1.ServiceTypeClusterIP,
@@ -230,15 +220,13 @@ honor_labels: true`
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "prometheus-" + name,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
-				Annotations: map[string]string{"resources.gardener.cloud/delete-on-invalid-update": "true"},
+			Name: "prometheus-" + name,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
+			Annotations: map[string]string{"resources.gardener.cloud/delete-on-invalid-update": "true"},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -251,14 +239,12 @@ honor_labels: true`
 			}},
 		}
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -273,14 +259,12 @@ honor_labels: true`
 			},
 		}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -294,14 +278,12 @@ honor_labels: true`
 			}},
 		}
 		gardenRoleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + namespace,
-				Namespace: "garden",
-				Labels: map[string]string{
-					"role": "monitoring",
-					"name": name,
-					"app":  "prometheus",
-				},
+			Name:      "prometheus-" + namespace,
+			Namespace: "garden",
+			Labels: map[string]string{
+				"role": "monitoring",
+				"name": name,
+				"app":  "prometheus",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -316,15 +298,13 @@ honor_labels: true`
 		}
 		prometheusFor = func(alertmanagers []alertmanager, restrictToNamespace bool) *monitoringv1.Prometheus {
 			obj := &monitoringv1.Prometheus{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app":             "prometheus",
-						"role":            "monitoring",
-						"name":            name,
-						"health-check-by": "some-component",
-					},
+				Name:      name,
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app":             "prometheus",
+					"role":            "monitoring",
+					"name":            name,
+					"health-check-by": "some-component",
 				},
 				Spec: monitoringv1.PrometheusSpec{
 					Retention:          retention,
@@ -335,8 +315,8 @@ honor_labels: true`
 						ReloadStrategy: new(monitoringv1.HTTPReloadStrategyType),
 						ExternalLabels: externalLabels,
 						AdditionalScrapeConfigs: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: "prometheus-" + name + "-additional-scrape-configs"},
-							Key:                  "prometheus.yaml",
+							Name: "prometheus-" + name + "-additional-scrape-configs",
+							Key:  "prometheus.yaml",
 						},
 
 						PodMetadata: &monitoringv1.EmbeddedObjectMetadata{
@@ -418,15 +398,13 @@ honor_labels: true`
 			return obj
 		}
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-					v1beta1constants.LabelObservabilityApplication: "prometheus-" + name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
+				v1beta1constants.LabelObservabilityApplication: "prometheus-" + name,
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -455,14 +433,12 @@ honor_labels: true`
 			},
 		}
 		gateway = &istionetworkingv1beta1.Gateway{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 
 			Spec: istionetworkingv1alpha3.Gateway{
@@ -481,17 +457,15 @@ honor_labels: true`
 			},
 		}
 		virtualService = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-					"reference.gardener.cloud/basic-auth-secret-name":    "foo",
-					"reference.gardener.cloud/basic-auth-server-name":    "istio-basic-auth-server",
-					"reference.gardener.cloud/basic-auth-secret-managed": "true",
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
+				"reference.gardener.cloud/basic-auth-secret-name":    "foo",
+				"reference.gardener.cloud/basic-auth-server-name":    "istio-basic-auth-server",
+				"reference.gardener.cloud/basic-auth-secret-managed": "true",
 			},
 			Spec: istionetworkingv1alpha3.VirtualService{
 				ExportTo: []string{"istio-ingress"},
@@ -510,14 +484,12 @@ honor_labels: true`
 			},
 		}
 		destinationRule = &istionetworkingv1beta1.DestinationRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			Spec: istionetworkingv1alpha3.DestinationRule{
 				Host: "prometheus-test.some-namespace.svc.cluster.local",
@@ -546,67 +518,55 @@ honor_labels: true`
 			},
 		}
 		tlsSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      namespace + "-prometheus-" + name + "-" + ingressWildcardSecretName,
-				Namespace: "istio-ingress",
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      namespace + "-prometheus-" + name + "-" + ingressWildcardSecretName,
+			Namespace: "istio-ingress",
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 		}
 		prometheusRule = &monitoringv1.PrometheusRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "rule",
-				Labels: map[string]string{"foo": "bar"},
-			},
+			Name:   "rule",
+			Labels: map[string]string{"foo": "bar"},
 			Spec: monitoringv1.PrometheusRuleSpec{
 				Groups: []monitoringv1.RuleGroup{{Name: "foo"}},
 			},
 		}
 		serviceMonitor = &monitoringv1.ServiceMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "monitor",
-				Namespace: "default",
-				Labels:    map[string]string{"foo": "bar"},
-			},
+			Name:      "monitor",
+			Namespace: "default",
+			Labels:    map[string]string{"foo": "bar"},
 			Spec: monitoringv1.ServiceMonitorSpec{
 				JobLabel: "foo",
 			},
 		}
 		podMonitor = &monitoringv1.PodMonitor{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "monitor",
-				Namespace: "default",
-				Labels:    map[string]string{"foo": "bar"},
-			},
+			Name:      "monitor",
+			Namespace: "default",
+			Labels:    map[string]string{"foo": "bar"},
 			Spec: monitoringv1.PodMonitorSpec{
 				JobLabel: "foo",
 			},
 		}
 		scrapeConfig = &monitoringv1alpha1.ScrapeConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "scrape",
-				Namespace: "default",
-				Labels:    map[string]string{"foo": "bar"},
-			},
+			Name:      "scrape",
+			Namespace: "default",
+			Labels:    map[string]string{"foo": "bar"},
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				Scheme: new(monitoringv1.SchemeHTTPS),
 			},
 		}
 		additionalConfigMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{Name: "configmap", Namespace: namespace},
+			Name: "configmap", Namespace: namespace,
 		}
 		secretAdditionalScrapeConfigs = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name + "-additional-scrape-configs",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name + "-additional-scrape-configs",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{"prometheus.yaml": []byte(`- job_name: foo
@@ -616,26 +576,22 @@ honor_labels: true`
 `)},
 		}
 		secretAdditionalAlertmanagerConfigs = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name + "-additional-alertmanager-configs",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name + "-additional-alertmanager-configs",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			Type: corev1.SecretTypeOpaque,
 		}
 		secretRemoteWriteBasicAuth = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name + "-remote-write-basic-auth",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name + "-remote-write-basic-auth",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
@@ -644,14 +600,12 @@ honor_labels: true`
 			},
 		}
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "prometheus-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app":  "prometheus",
-					"role": "monitoring",
-					"name": name,
-				},
+			Name:      "prometheus-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app":  "prometheus",
+				"role": "monitoring",
+				"name": name,
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
@@ -665,18 +619,14 @@ honor_labels: true`
 		}
 
 		clusterRoleTarget = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:monitoring:prometheus-" + name,
-			},
+			Name: "gardener.cloud:monitoring:prometheus-" + name,
 			Rules: []rbacv1.PolicyRule{{
 				NonResourceURLs: []string{"/metrics"},
 				Verbs:           []string{"get"},
 			}},
 		}
 		clusterRoleBindingTarget = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:monitoring:prometheus-" + name,
-			},
+			Name: "gardener.cloud:monitoring:prometheus-" + name,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -708,15 +658,13 @@ honor_labels: true`
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(BeNotFoundError())
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: healthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     healthyManagedResourceStatus,
 				})).To(Succeed())
 
-				tlsSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: ingressWildcardSecretName, Namespace: namespace}}
+				tlsSecret := &corev1.Secret{Name: ingressWildcardSecretName, Namespace: namespace}
 				Expect(fakeClient.Create(ctx, tlsSecret)).To(Succeed())
 			})
 
@@ -725,15 +673,13 @@ honor_labels: true`
 
 				Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 				expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:            managedResource.Name,
-						Namespace:       managedResource.Namespace,
-						ResourceVersion: "2",
-						Generation:      1,
-						Labels: map[string]string{
-							"gardener.cloud/role":                "seed-system-component",
-							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-						},
+					Name:            managedResource.Name,
+					Namespace:       managedResource.Namespace,
+					ResourceVersion: "2",
+					Generation:      1,
+					Labels: map[string]string{
+						"gardener.cloud/role":                "seed-system-component",
+						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 					},
 					Spec: resourcesv1alpha1.ManagedResourceSpec{
 						Class:       new("seed"),
@@ -959,7 +905,7 @@ honor_labels: true`
 						values.Ingress = &IngressValues{Host: ingressHost, IstioIngressGatewayNamespace: ingressNamespace}
 						deployer = New(logr.Discard(), fakeClient, namespace, values)
 						deployer.SetIngressAuthSecret(ingressAuthSecretName, true)
-						deployer.SetIngressWildcardCertSecret(&corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: ingressWildcardSecretName}})
+						deployer.SetIngressWildcardCertSecret(&corev1.Secret{Name: ingressWildcardSecretName})
 					})
 
 					test()
@@ -1040,8 +986,8 @@ honor_labels: true`
 						It("should successfully deploy all resources", func() {
 							prometheusObj := prometheusFor([]alertmanager{{name: alertmanagerName}}, false)
 							prometheusObj.Spec.AdditionalAlertManagerConfigs = &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: secretAdditionalAlertmanagerConfigs.Name},
-								Key:                  "configs.yaml",
+								Name: secretAdditionalAlertmanagerConfigs.Name,
+								Key:  "configs.yaml",
 							}
 
 							secretAdditionalAlertmanagerConfigs.Data = map[string][]byte{"configs.yaml": []byte(`
@@ -1090,8 +1036,8 @@ basic_auth:
 						It("should successfully deploy all resources", func() {
 							prometheusObj := prometheusFor([]alertmanager{{name: alertmanagerName}}, false)
 							prometheusObj.Spec.AdditionalAlertManagerConfigs = &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: secretAdditionalAlertmanagerConfigs.Name},
-								Key:                  "configs.yaml",
+								Name: secretAdditionalAlertmanagerConfigs.Name,
+								Key:  "configs.yaml",
 							}
 
 							secretAdditionalAlertmanagerConfigs.Data = map[string][]byte{"configs.yaml": []byte(`
@@ -1217,14 +1163,12 @@ tls_config:
 
 				It("should successfully deploy all resources", func() {
 					cortexConfigMap := &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "prometheus-" + name + "-cortex",
-							Namespace: namespace,
-							Labels: map[string]string{
-								"app":  "prometheus",
-								"role": "monitoring",
-								"name": name,
-							},
+						Name:      "prometheus-" + name + "-cortex",
+						Namespace: namespace,
+						Labels: map[string]string{
+							"app":  "prometheus",
+							"role": "monitoring",
+							"name": name,
 						},
 						Data: map[string]string{"config.yaml": `target: query-frontend
 auth_enabled: false
@@ -1281,8 +1225,8 @@ query_range:
 						}},
 					})
 					prometheusObj.Spec.Volumes = append(prometheusObj.Spec.Volumes, corev1.Volume{
-						Name:         "cortex-config",
-						VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: cortexConfigMap.Name}}},
+						Name:      "cortex-config",
+						ConfigMap: &corev1.ConfigMapVolumeSource{Name: cortexConfigMap.Name},
 					})
 					Expect(references.InjectAnnotations(prometheusObj)).To(Succeed())
 
@@ -1423,43 +1367,35 @@ query_range:
 					}
 
 					managedResourceTarget = &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      managedResourceName + "-target",
-							Namespace: namespace,
-						},
+						Name:      managedResourceName + "-target",
+						Namespace: namespace,
 					}
 					managedResourceSecretTarget = &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "managedresource-" + managedResource.Name,
-							Namespace: namespace,
-						},
+						Name:      "managedresource-" + managedResource.Name,
+						Namespace: namespace,
 					}
 
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceTarget), managedResourceTarget)).To(BeNotFoundError())
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecretTarget), managedResourceSecretTarget)).To(BeNotFoundError())
 
 					Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:       managedResourceTarget.Name,
-							Namespace:  namespace,
-							Generation: 1,
-						},
-						Status: healthyManagedResourceStatus,
+						Name:       managedResourceTarget.Name,
+						Namespace:  namespace,
+						Generation: 1,
+						Status:     healthyManagedResourceStatus,
 					})).To(Succeed())
 				})
 
 				JustBeforeEach(func() {
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceTarget), managedResourceTarget)).To(Succeed())
 					expectedTargetMr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            managedResourceTarget.Name,
-							Namespace:       managedResourceTarget.Namespace,
-							ResourceVersion: "2",
-							Generation:      1,
-							Labels: map[string]string{
-								"origin":                             "gardener",
-								"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-							},
+						Name:            managedResourceTarget.Name,
+						Namespace:       managedResourceTarget.Namespace,
+						ResourceVersion: "2",
+						Generation:      1,
+						Labels: map[string]string{
+							"origin":                             "gardener",
+							"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 						},
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							SecretRefs:   []corev1.LocalObjectReference{{Name: managedResourceTarget.Spec.SecretRefs[0].Name}},
@@ -1578,12 +1514,10 @@ query_range:
 
 			It("should fail because the ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -1591,11 +1525,9 @@ query_range:
 
 			It("should succeed because the ManagedResource is healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

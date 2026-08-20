@@ -48,10 +48,8 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 
 		It("should allow NamespacedCloudProfile resource with only name and parent field", func() {
 			namespacedCloudProfile := &core.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "profile",
-					Namespace: "default",
-				},
+				Name:      "profile",
+				Namespace: "default",
 				Spec: core.NamespacedCloudProfileSpec{
 					Parent: core.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -66,10 +64,8 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 
 		It("should not allow a NamespacedCloudProfile to change its parent reference", func() {
 			namespacedCloudProfile := &core.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "profile",
-					Namespace: "default",
-				},
+				Name:      "profile",
+				Namespace: "default",
 				Spec: core.NamespacedCloudProfileSpec{
 					Parent: core.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -101,10 +97,8 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 
 			BeforeEach(func() {
 				namespacedCloudProfile = &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "profile",
-						Namespace: "default",
-					},
+					Name:      "profile",
+					Namespace: "default",
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{
 							Kind: "CloudProfile",
@@ -120,9 +114,7 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 								Name: machineImageName,
 								Versions: []core.MachineImageVersion{
 									{
-										ExpirableVersion: core.ExpirableVersion{
-											Version: "1.2.3",
-										},
+										Version: "1.2.3",
 									},
 								},
 							},
@@ -269,9 +261,7 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							Name: machineImageName,
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "3.4.6",
-									},
+									Version: "3.4.6",
 								},
 							},
 						},
@@ -279,9 +269,7 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							Name: machineImageName,
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "3.4.5",
-									},
+									Version: "3.4.5",
 								},
 							},
 						},
@@ -311,11 +299,9 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							UpdateStrategy: new(core.UpdateStrategyPatch),
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "3.4.6",
-										ExpirationDate: validExpirationDate,
-										Classification: new(core.ClassificationDeprecated),
-									},
+									Version:                  "3.4.6",
+									ExpirationDate:           validExpirationDate,
+									Classification:           new(core.ClassificationDeprecated),
 									CRI:                      []core.CRI{{Name: "containerd"}},
 									Architectures:            []string{"amd64"},
 									KubeletVersionConstraint: new(">= 1.32.0"),
@@ -334,12 +320,10 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							Name: machineImageName,
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "3.4.6",
-										ExpirationDate: validExpirationDate,
-									},
-									CRI:           []core.CRI{},
-									Architectures: []string{},
+									Version:        "3.4.6",
+									ExpirationDate: validExpirationDate,
+									CRI:            []core.CRI{},
+									Architectures:  []string{},
 								},
 							},
 						},
@@ -354,9 +338,7 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							Name: machineImageName,
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "0.1.2",
-									},
+									Version: "0.1.2",
 								},
 							},
 						},
@@ -364,9 +346,7 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							Name: "xy",
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version: "a.b.c",
-									},
+									Version: "a.b.c",
 								},
 							},
 						},
@@ -485,10 +465,8 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 
 			BeforeEach(func() {
 				namespacedCloudProfile = &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "profile",
-						Namespace: "default",
-					},
+					Name:      "profile",
+					Namespace: "default",
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{
 							Kind: "CloudProfile",
@@ -551,11 +529,9 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 	Describe("#ValidateNamespacedCloudProfileUpdate", func() {
 		BeforeEach(func() {
 			cloudProfileNew = &core.NamespacedCloudProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					ResourceVersion: "dummy",
-					Name:            "dummy",
-					Namespace:       "dummy",
-				},
+				ResourceVersion: "dummy",
+				Name:            "dummy",
+				Namespace:       "dummy",
 				Spec: core.NamespacedCloudProfileSpec{
 					Parent: core.CloudProfileReference{
 						Kind: "CloudProfile",
@@ -566,10 +542,8 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 							Name: machineImageName,
 							Versions: []core.MachineImageVersion{
 								{
-									ExpirableVersion: core.ExpirableVersion{
-										Version:        "1.2.3",
-										ExpirationDate: dateInThePast,
-									},
+									Version:        "1.2.3",
+									ExpirationDate: dateInThePast,
 								},
 							},
 						},
@@ -608,21 +582,15 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 			It("deleting version - should not return any errors", func() {
 				versions := []core.MachineImageVersion{
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version: "2135.6.2",
-						},
+						Version: "2135.6.2",
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version:        "2135.6.1",
-							ExpirationDate: dateInThePast,
-						},
+						Version:        "2135.6.1",
+						ExpirationDate: dateInThePast,
 					},
 					{
-						ExpirableVersion: core.ExpirableVersion{
-							Version:        "2135.6.0",
-							ExpirationDate: dateInThePast,
-						},
+						Version:        "2135.6.0",
+						ExpirationDate: dateInThePast,
 					},
 				}
 				cloudProfileNew.Spec.MachineImages[0].Versions = versions[0:1]
@@ -636,12 +604,10 @@ var _ = Describe("NamespacedCloudProfile Validation Tests ", func() {
 		Context("limits validation", func() {
 			BeforeEach(func() {
 				cloudProfileNew = &core.NamespacedCloudProfile{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "profile",
-						Namespace: "default",
+					Name:      "profile",
+					Namespace: "default",
 
-						ResourceVersion: "1",
-					},
+					ResourceVersion: "1",
 					Spec: core.NamespacedCloudProfileSpec{
 						Parent: core.CloudProfileReference{
 							Kind: "CloudProfile",

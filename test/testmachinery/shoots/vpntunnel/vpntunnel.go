@@ -67,10 +67,8 @@ var _ = ginkgo.Describe("Shoot vpn tunnel testing", func() {
 
 		ginkgo.By("Request ServiceAccount token with cluster-admin privileges")
 		serviceAccount := &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.SecretNameGardener,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      v1beta1constants.SecretNameGardener,
+			Namespace: metav1.NamespaceSystem,
 		}
 		token, err := framework.CreateTokenForServiceAccount(ctx, f.ShootClient, serviceAccount, new(int64(3600)))
 		framework.ExpectNoError(err)
@@ -118,10 +116,8 @@ var _ = ginkgo.Describe("Shoot vpn tunnel testing", func() {
 	}, testTimeout, framework.WithCAfterTest(func(ctx context.Context) {
 		ginkgo.By("Cleanup logging-pod resources")
 		loggerDeploymentToDelete := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      deploymentName,
-				Namespace: namespace,
-			},
+			Name:      deploymentName,
+			Namespace: namespace,
 		}
 		err := kubernetesutils.DeleteObject(ctx, f.ShootClient.Client(), loggerDeploymentToDelete)
 		framework.ExpectNoError(err)
@@ -132,7 +128,7 @@ var _ = ginkgo.Describe("Shoot vpn tunnel testing", func() {
 		kubeconfig, err := access.RequestAdminKubeconfigForShoot(ctx, f.GardenClient, f.Shoot, new(int64(3600)))
 		framework.ExpectNoError(err)
 
-		testSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: copyDeployment, Namespace: namespace}}
+		testSecret := &corev1.Secret{Name: copyDeployment, Namespace: namespace}
 		_, err = controllerutils.GetAndCreateOrMergePatch(ctx, f.ShootClient.Client(), testSecret, func() error {
 			testSecret.Type = corev1.SecretTypeOpaque
 			testSecret.Data = map[string][]byte{
@@ -188,16 +184,12 @@ var _ = ginkgo.Describe("Shoot vpn tunnel testing", func() {
 	}, testTimeout, framework.WithCAfterTest(func(ctx context.Context) {
 		ginkgo.By("Cleanup copy resources")
 		deploymentToDelete := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      copyDeployment,
-				Namespace: namespace,
-			},
+			Name:      copyDeployment,
+			Namespace: namespace,
 		}
 		secretToDelete := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      copyDeployment,
-				Namespace: namespace,
-			},
+			Name:      copyDeployment,
+			Namespace: namespace,
 		}
 		err := kubernetesutils.DeleteObjects(ctx, f.ShootClient.Client(), deploymentToDelete, secretToDelete)
 		framework.ExpectNoError(err)

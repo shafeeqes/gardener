@@ -103,7 +103,7 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationControlPlane = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-controlplane"},
+				Name: "ext-controlplane",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 						DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -116,7 +116,7 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationInfraWorker = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-infra-worker"},
+				Name: "ext-infra-worker",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 						DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -130,7 +130,7 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationNetwork = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-network"},
+				Name: "ext-network",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 						DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -143,7 +143,7 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationOSC = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-osc"},
+				Name: "ext-osc",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 						DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -156,7 +156,7 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationDNS = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "dns-clouddns"},
+				Name: "dns-clouddns",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 						DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -169,7 +169,7 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationSelfHostedShootExposure = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-selfhostedshootexposure"},
+				Name: "ext-selfhostedshootexposure",
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Deployment: &gardencorev1beta1.ControllerRegistrationDeployment{
 						DeploymentRefs: []gardencorev1beta1.DeploymentRef{
@@ -182,26 +182,26 @@ var _ = Describe("Extensions", func() {
 				},
 			}
 			controllerRegistrationUnused = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-unused"},
+				Name: "ext-unused",
 			}
 
 			controllerDeploymentControlPlane = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-controlplane"},
+				Name: "ext-controlplane",
 			}
 			controllerDeploymentInfraWorker = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-infra-worker"},
+				Name: "ext-infra-worker",
 			}
 			controllerDeploymentNetwork = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-network"},
+				Name: "ext-network",
 			}
 			controllerDeploymentOSC = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-osc"},
+				Name: "ext-osc",
 			}
 			controllerDeploymentDNS = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "dns-clouddns"},
+				Name: "dns-clouddns",
 			}
 			controllerDeploymentSelfHostedShootExposure = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "ext-selfhostedshootexposure"},
+				Name: "ext-selfhostedshootexposure",
 			}
 
 			controllerRegistrations = []*gardencorev1beta1.ControllerRegistration{
@@ -367,13 +367,13 @@ var _ = Describe("Extensions", func() {
 					},
 				},
 				Extensions: []Extension{
-					{ControllerInstallation: &gardencorev1beta1.ControllerInstallation{ObjectMeta: metav1.ObjectMeta{Name: extension1}}},
-					{ControllerInstallation: &gardencorev1beta1.ControllerInstallation{ObjectMeta: metav1.ObjectMeta{Name: extension2}}},
+					{ControllerInstallation: &gardencorev1beta1.ControllerInstallation{Name: extension1}},
+					{ControllerInstallation: &gardencorev1beta1.ControllerInstallation{Name: extension2}},
 				},
 			}
 
-			managedResource1 = &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: extension1, Namespace: controlPlaneNamespace}}
-			managedResource2 = &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: extension2, Namespace: controlPlaneNamespace}}
+			managedResource1 = &resourcesv1alpha1.ManagedResource{Name: extension1, Namespace: controlPlaneNamespace}
+			managedResource2 = &resourcesv1alpha1.ManagedResource{Name: extension2, Namespace: controlPlaneNamespace}
 
 			DeferCleanup(test.WithVar(&TimeoutManagedResourceHealthCheck, time.Millisecond))
 		})

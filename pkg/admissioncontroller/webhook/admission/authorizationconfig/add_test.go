@@ -122,14 +122,10 @@ authorizers:
 		request = admission.Request{}
 
 		shoot = &gardencorev1beta1.Shoot{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
-				Kind:       "Shoot",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			APIVersion: gardencorev1beta1.SchemeGroupVersion.String(),
+			Kind:       "Shoot",
+			Name:       shootName,
+			Namespace:  shootNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				Kubernetes: gardencorev1beta1.Kubernetes{
 					KubeAPIServer: &gardencorev1beta1.KubeAPIServerConfig{
@@ -194,16 +190,16 @@ authorizers:
 
 			It("references a valid AuthorizationConfig (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthorizationConfiguration},
+					Name: configMapName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthorizationConfiguration},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shoot, true, statusCodeAllowed, "referenced authorization configuration is valid", "")
 			})
 
 			It("AuthorizationConfig name was added (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthorizationConfiguration},
+					Name: configMapName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthorizationConfiguration},
 				})).To(Succeed())
 				apiServerConfig := shoot.Spec.Kubernetes.KubeAPIServer.DeepCopy()
 				shoot.Spec.Kubernetes.KubeAPIServer = nil
@@ -214,8 +210,8 @@ authorizers:
 
 			It("referenced AuthorizationConfig name was changed (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapNameOther, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthorizationConfiguration},
+					Name: configMapNameOther, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthorizationConfiguration},
 				})).To(Succeed())
 				newShoot := shoot.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.StructuredAuthorization.ConfigMapName = configMapNameOther
@@ -268,16 +264,16 @@ authorizers:
 
 			It("references ConfigMap without a config.yaml key", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       nil,
+					Name: configMapName, Namespace: shootNamespace,
+					Data: nil,
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shoot, false, statusCodeInvalid, "error getting authorization configuration from ConfigMap fake-cm-namespace/fake-cm-name: missing authorization configuration key in config.yaml ConfigMap data", "")
 			})
 
 			It("references ConfigMap with a webhook for which no kubeconfig secret name is specified (CREATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthorizationConfiguration},
+					Name: configMapName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthorizationConfiguration},
 				})).To(Succeed())
 				shoot.Spec.Kubernetes.KubeAPIServer.StructuredAuthorization.Kubeconfigs = nil
 				test(admissionv1.Create, nil, shoot, false, statusCodeInvalid, `provided invalid authorization configuration: must provide kubeconfig secret name reference for webhook authorizer "webhook"`, "")
@@ -285,8 +281,8 @@ authorizers:
 
 			It("references ConfigMap with a webhook for which no kubeconfig secret name is specified (UPDATE)", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": validAuthorizationConfiguration},
+					Name: configMapName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": validAuthorizationConfiguration},
 				})).To(Succeed())
 				newShoot := shoot.DeepCopy()
 				newShoot.Spec.Kubernetes.KubeAPIServer.StructuredAuthorization.Kubeconfigs[0].AuthorizerName = "does-not-exist"
@@ -295,16 +291,16 @@ authorizers:
 
 			It("references authorization configuration which breaks validation rules", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": invalidAuthorizationConfiguration},
+					Name: configMapName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": invalidAuthorizationConfiguration},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shoot, false, statusCodeInvalid, "provided invalid authorization configuration: [authorizers[0].connectionInfo: Forbidden: connectionInfo is not allowed to be set]", "")
 			})
 
 			It("references authorization configuration with invalid structure", func() {
 				Expect(fakeClient.Create(ctx, &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: shootNamespace},
-					Data:       map[string]string{"config.yaml": missingKeyConfiguration},
+					Name: configMapName, Namespace: shootNamespace,
+					Data: map[string]string{"config.yaml": missingKeyConfiguration},
 				})).To(Succeed())
 				test(admissionv1.Create, nil, shoot, false, statusCodeInvalid, "provided invalid authorization configuration: [[].authorizers[0].subjectAccessReviewVersion: Required value]", "")
 			})
@@ -316,15 +312,11 @@ authorizers:
 			request.Kind = metav1.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"}
 
 			configMap = &corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      configMapName,
-					Namespace: configMapNamespace,
-				},
-				Data: map[string]string{"config.yaml": validAuthorizationConfiguration},
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+				Name:       configMapName,
+				Namespace:  configMapNamespace,
+				Data:       map[string]string{"config.yaml": validAuthorizationConfiguration},
 			}
 		})
 

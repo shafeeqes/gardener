@@ -60,7 +60,7 @@ var _ = Describe("Alertmanager", func() {
 		clusterType              = component.ClusterTypeSeed
 		storageCapacity          = resource.MustParse("1337Gi")
 		alertingSMTPSecret       = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: "smtp-secret"},
+			Name: "smtp-secret",
 			Data: map[string][]byte{
 				"to":            []byte("secret-data1"),
 				"from":          []byte("secret-data2"),
@@ -124,32 +124,26 @@ var _ = Describe("Alertmanager", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient, comptest.CmpOptsForIstio()...)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 
 		service = &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-				},
-				Annotations: map[string]string{
-					"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9093}]`,
-					"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports":   `[{"protocol":"TCP","port":9093}]`,
-					"networking.resources.gardener.cloud/namespace-selectors":                          `[{"matchLabels":{"gardener.cloud/role":"shoot"}}]`,
-				},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
+			},
+			Annotations: map[string]string{
+				"networking.resources.gardener.cloud/from-all-garden-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":9093}]`,
+				"networking.resources.gardener.cloud/from-all-seed-scrape-targets-allowed-ports":   `[{"protocol":"TCP","port":9093}]`,
+				"networking.resources.gardener.cloud/namespace-selectors":                          `[{"matchLabels":{"gardener.cloud/role":"shoot"}}]`,
 			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeClusterIP,
@@ -165,14 +159,12 @@ var _ = Describe("Alertmanager", func() {
 			},
 		}
 		alertManager = &monitoringv1.Alertmanager{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-				},
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
 			},
 			Spec: monitoringv1.AlertmanagerSpec{
 				PodMetadata: &monitoringv1.EmbeddedObjectMetadata{
@@ -216,15 +208,13 @@ var _ = Describe("Alertmanager", func() {
 		}
 
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-					v1beta1constants.LabelObservabilityApplication: "alertmanager-" + name,
-				},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
+				v1beta1constants.LabelObservabilityApplication: "alertmanager-" + name,
 			},
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
@@ -257,10 +247,8 @@ var _ = Describe("Alertmanager", func() {
 			},
 		}
 		config = &monitoringv1alpha1.AlertmanagerConfig{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-			},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
 			Spec: monitoringv1alpha1.AlertmanagerConfigSpec{
 				Route: &monitoringv1alpha1.Route{
 					GroupBy:        []string{"service"},
@@ -313,8 +301,8 @@ var _ = Describe("Alertmanager", func() {
 							AuthUsername: new(string(alertingSMTPSecret.Data["auth_username"])),
 							AuthIdentity: new(string(alertingSMTPSecret.Data["auth_identity"])),
 							AuthPassword: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "alertmanager-" + name + "-smtp"},
-								Key:                  "auth_password",
+								Name: "alertmanager-" + name + "-smtp",
+								Key:  "auth_password",
 							},
 						}},
 					},
@@ -322,22 +310,18 @@ var _ = Describe("Alertmanager", func() {
 			},
 		}
 		smtpSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name + "-smtp",
-				Namespace: namespace,
-			},
-			Type: alertingSMTPSecret.Type,
-			Data: map[string][]byte{"auth_password": alertingSMTPSecret.Data["auth_password"]},
+			Name:      "alertmanager-" + name + "-smtp",
+			Namespace: namespace,
+			Type:      alertingSMTPSecret.Type,
+			Data:      map[string][]byte{"auth_password": alertingSMTPSecret.Data["auth_password"]},
 		}
 		gateway = &istionetworkingv1beta1.Gateway{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-				},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
 			},
 			Spec: istionetworkingv1alpha3.Gateway{
 				Servers: []*istionetworkingv1alpha3.Server{{
@@ -355,17 +339,15 @@ var _ = Describe("Alertmanager", func() {
 			},
 		}
 		virtualService = &istionetworkingv1beta1.VirtualService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-					"reference.gardener.cloud/basic-auth-secret-name":    "foo",
-					"reference.gardener.cloud/basic-auth-server-name":    "istio-basic-auth-server",
-					"reference.gardener.cloud/basic-auth-secret-managed": "true",
-				},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
+				"reference.gardener.cloud/basic-auth-secret-name":    "foo",
+				"reference.gardener.cloud/basic-auth-server-name":    "istio-basic-auth-server",
+				"reference.gardener.cloud/basic-auth-secret-managed": "true",
 			},
 			Spec: istionetworkingv1alpha3.VirtualService{
 				ExportTo: []string{"istio-ingress"},
@@ -397,14 +379,12 @@ var _ = Describe("Alertmanager", func() {
 			},
 		}
 		destinationRule = &istionetworkingv1beta1.DestinationRule{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-				},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
 			},
 			Spec: istionetworkingv1alpha3.DestinationRule{
 				Host: "alertmanager-test.some-namespace.svc.cluster.local",
@@ -433,25 +413,21 @@ var _ = Describe("Alertmanager", func() {
 			},
 		}
 		tlsSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      namespace + "-alertmanager-" + name + "-" + ingressWildcardSecretName,
-				Namespace: "istio-ingress",
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-				},
+			Name:      namespace + "-alertmanager-" + name + "-" + ingressWildcardSecretName,
+			Namespace: "istio-ingress",
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
 			},
 		}
 		podDisruptionBudget = &policyv1.PodDisruptionBudget{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "alertmanager-" + name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					"component":    "alertmanager",
-					"role":         "monitoring",
-					"alertmanager": name,
-				},
+			Name:      "alertmanager-" + name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"component":    "alertmanager",
+				"role":         "monitoring",
+				"alertmanager": name,
 			},
 			Spec: policyv1.PodDisruptionBudgetSpec{
 				MaxUnavailable: new(intstr.FromInt32(1)),
@@ -475,15 +451,13 @@ var _ = Describe("Alertmanager", func() {
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret)).To(BeNotFoundError())
 
 			Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:       managedResourceName,
-					Namespace:  namespace,
-					Generation: 1,
-				},
-				Status: healthyManagedResourceStatus,
+				Name:       managedResourceName,
+				Namespace:  namespace,
+				Generation: 1,
+				Status:     healthyManagedResourceStatus,
 			})).To(Succeed())
 
-			tlsSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: ingressWildcardSecretName, Namespace: namespace}}
+			tlsSecret := &corev1.Secret{Name: ingressWildcardSecretName, Namespace: namespace}
 			Expect(fakeClient.Create(ctx, tlsSecret)).To(Succeed())
 		})
 
@@ -492,15 +466,13 @@ var _ = Describe("Alertmanager", func() {
 
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedRuntimeMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "2",
-					Generation:      1,
-					Labels: map[string]string{
-						"gardener.cloud/role":                "seed-system-component",
-						"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
-					},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "2",
+				Generation:      1,
+				Labels: map[string]string{
+					"gardener.cloud/role":                "seed-system-component",
+					"care.gardener.cloud/condition-type": "ObservabilityComponentsHealthy",
 				},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class:       new("seed"),
@@ -588,8 +560,8 @@ var _ = Describe("Alertmanager", func() {
 							AuthUsername: new(string(alertingSMTPSecret.Data["auth_username"])),
 							AuthIdentity: new(string(alertingSMTPSecret.Data["auth_identity"])),
 							AuthPassword: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "alertmanager-" + name + "-smtp"},
-								Key:                  "auth_password",
+								Name: "alertmanager-" + name + "-smtp",
+								Key:  "auth_password",
 							},
 						},
 						{
@@ -599,8 +571,8 @@ var _ = Describe("Alertmanager", func() {
 							AuthUsername: new(string(alertingSMTPSecret.Data["auth_username"])),
 							AuthIdentity: new(string(alertingSMTPSecret.Data["auth_identity"])),
 							AuthPassword: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: "alertmanager-" + name + "-smtp"},
-								Key:                  "auth_password",
+								Name: "alertmanager-" + name + "-smtp",
+								Key:  "auth_password",
 							},
 						},
 					}
@@ -687,12 +659,10 @@ var _ = Describe("Alertmanager", func() {
 
 			It("should fail because the ManagedResource is unhealthy", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
-					Status: unhealthyManagedResourceStatus,
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
+					Status:     unhealthyManagedResourceStatus,
 				})).To(Succeed())
 
 				Expect(deployer.Wait(ctx)).To(MatchError(ContainSubstring("is not healthy")))
@@ -700,11 +670,9 @@ var _ = Describe("Alertmanager", func() {
 
 			It("should succeed because the ManagedResource is healthy and progressing", func() {
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

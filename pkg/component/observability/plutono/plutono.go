@@ -239,12 +239,10 @@ func (p *plutono) computeResourcesData(ctx context.Context) (*corev1.ConfigMap, 
 		dataSourcesKeySuffix = "-seed"
 	}
 	dataSourceConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "plutono-datasources" + dataSourcesKeySuffix,
-			Namespace: p.namespace,
-			Labels:    utils.MergeStringMaps(getLabels(), map[string]string{p.dataSourceLabel(): labelValueTrue}),
-		},
-		Data: map[string]string{"datasources" + dataSourcesKeySuffix + ".yaml": p.getDataSource()},
+		Name:      "plutono-datasources" + dataSourcesKeySuffix,
+		Namespace: p.namespace,
+		Labels:    utils.MergeStringMaps(getLabels(), map[string]string{p.dataSourceLabel(): labelValueTrue}),
+		Data:      map[string]string{"datasources" + dataSourcesKeySuffix + ".yaml": p.getDataSource()},
 	}
 
 	if p.values.OnlyDeployDataSourcesAndDashboards {
@@ -268,22 +266,18 @@ func (p *plutono) computeResourcesData(ctx context.Context) (*corev1.ConfigMap, 
 
 	var (
 		providerConfigMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "plutono-dashboard-providers",
-				Namespace: p.namespace,
-				Labels:    getLabels(),
-			},
-			Data: map[string]string{"default.yaml": p.getDashboardsProviders()},
+			Name:      "plutono-dashboard-providers",
+			Namespace: p.namespace,
+			Labels:    getLabels(),
+			Data:      map[string]string{"default.yaml": p.getDashboardsProviders()},
 		}
 
 		plutonoConfigSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "plutono-config",
-				Namespace: p.namespace,
-				Labels:    getLabels(),
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: map[string][]byte{dataKeyConfig: []byte(p.getConfig(plutonoAdminUserSecret.Data))},
+			Name:      "plutono-config",
+			Namespace: p.namespace,
+			Labels:    getLabels(),
+			Type:      corev1.SecretTypeOpaque,
+			Data:      map[string][]byte{dataKeyConfig: []byte(p.getConfig(plutonoAdminUserSecret.Data))},
 		}
 	)
 
@@ -426,7 +420,7 @@ func (p *plutono) emptyDashboardConfigMap() *corev1.ConfigMap {
 	} else if p.values.OnlyDeployDataSourcesAndDashboards {
 		name += "-seed"
 	}
-	return &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: p.namespace}}
+	return &corev1.ConfigMap{Name: name, Namespace: p.namespace}
 }
 
 func (p *plutono) getDashboardConfigMap() (*corev1.ConfigMap, error) {
@@ -535,11 +529,9 @@ func (p *plutono) getDashboardConfigMap() (*corev1.ConfigMap, error) {
 
 func (p *plutono) getServiceAccount() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: p.namespace,
-			Labels:    getLabels(),
-		},
+		Name:                         name,
+		Namespace:                    p.namespace,
+		Labels:                       getLabels(),
 		AutomountServiceAccountToken: new(false),
 	}
 }
@@ -548,11 +540,9 @@ const rbacNameDataRefresher = name + "-data-refresher"
 
 func (p *plutono) getRole() *rbacv1.Role {
 	return &rbacv1.Role{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      rbacNameDataRefresher,
-			Namespace: p.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      rbacNameDataRefresher,
+		Namespace: p.namespace,
+		Labels:    getLabels(),
 		Rules: []rbacv1.PolicyRule{{
 			APIGroups: []string{""},
 			Resources: []string{"configmaps"},
@@ -563,11 +553,9 @@ func (p *plutono) getRole() *rbacv1.Role {
 
 func (p *plutono) getRoleBinding() *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      rbacNameDataRefresher,
-			Namespace: p.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      rbacNameDataRefresher,
+		Namespace: p.namespace,
+		Labels:    getLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "Role",
@@ -583,13 +571,11 @@ func (p *plutono) getRoleBinding() *rbacv1.RoleBinding {
 
 func (p *plutono) getService() *corev1.Service {
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: p.namespace,
-			Labels:    getLabels(),
-			Annotations: map[string]string{
-				istioapiannotation.NetworkingExportTo.Name: p.values.IstioIngressGatewayNamespace,
-			},
+		Name:      name,
+		Namespace: p.namespace,
+		Labels:    getLabels(),
+		Annotations: map[string]string{
+			istioapiannotation.NetworkingExportTo.Name: p.values.IstioIngressGatewayNamespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeClusterIP,
@@ -614,11 +600,9 @@ func (p *plutono) getService() *corev1.Service {
 
 func (p *plutono) getDeployment(providerConfigMap *corev1.ConfigMap, plutonoConfigSecret, plutonoAdminUserSecret *corev1.Secret) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: p.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      name,
+		Namespace: p.namespace,
+		Labels:    getLabels(),
 		Spec: appsv1.DeploymentSpec{
 			RevisionHistoryLimit: new(int32(2)),
 			Replicas:             new(p.values.Replicas),
@@ -685,49 +669,35 @@ func (p *plutono) getDeployment(providerConfigMap *corev1.ConfigMap, plutonoConf
 					Volumes: []corev1.Volume{
 						{
 							Name: volumeNameDashboardProviders,
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: providerConfigMap.Name,
-									},
-								},
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								Name: providerConfigMap.Name,
 							},
 						},
 						{
 							Name: volumeNameConfig,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: plutonoConfigSecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: plutonoConfigSecret.Name,
 							},
 						},
 						{
 							Name: volumeNameAdminUser,
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: plutonoAdminUserSecret.Name,
-								},
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: plutonoAdminUserSecret.Name,
 							},
 						},
 						{
 							Name: volumeNameStorage,
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{
-									SizeLimit: new(resource.MustParse("100Mi")),
-								},
+							EmptyDir: &corev1.EmptyDirVolumeSource{
+								SizeLimit: new(resource.MustParse("100Mi")),
 							},
 						},
 						{
-							Name: volumeNameDataSources,
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
+							Name:     volumeNameDataSources,
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 						{
-							Name: volumeNameDashboards,
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
+							Name:     volumeNameDashboards,
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					},
 				},
@@ -832,25 +802,21 @@ func (p *plutono) getIstioResources(ctx context.Context) ([]client.Object, error
 
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	tlsSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ingressTLSSecretName,
-			Namespace: p.namespace,
-		},
+		Name:      ingressTLSSecretName,
+		Namespace: p.namespace,
 	}
 	if err := p.client.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret); err != nil {
 		return nil, fmt.Errorf("failed to get TLS secret %q: %w", ingressTLSSecretName, err)
 	}
 
 	tlsSecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", p.namespace, name, ingressTLSSecretName),
-			Namespace: p.values.IstioIngressGatewayNamespace,
-			Labels:    getLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      fmt.Sprintf("%s-%s-%s", p.namespace, name, ingressTLSSecretName),
+		Namespace: p.values.IstioIngressGatewayNamespace,
+		Labels:    getLabels(),
+		Data:      tlsSecret.Data,
 	}
 
-	gateway := &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: p.namespace}}
+	gateway := &istionetworkingv1beta1.Gateway{Name: gatewayName, Namespace: p.namespace}
 	if err := istio.GatewayWithTLSTermination(
 		gateway,
 		getLabels(),
@@ -862,7 +828,7 @@ func (p *plutono) getIstioResources(ctx context.Context) ([]client.Object, error
 	}
 
 	destinationHost := kubernetesutils.FQDNForService(name, p.namespace)
-	virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: p.namespace}}
+	virtualService := &istionetworkingv1beta1.VirtualService{Name: gatewayName, Namespace: p.namespace}
 	if err := istio.VirtualServiceForTLSTermination(
 		virtualService,
 		utils.MergeStringMaps(getLabels(), istiobasicauthserver.BasicAuthLabels(p.values.IsGardenCluster, credentialsSecretName, credentialsSecretManaged)),
@@ -890,7 +856,7 @@ func (p *plutono) getIstioResources(ctx context.Context) ([]client.Object, error
 		},
 	}}, virtualService.Spec.Http...)
 
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: p.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: gatewayName, Namespace: p.namespace}
 	if err := istio.DestinationRuleWithLocalityPreference(destinationRule, getLabels(), []string{p.values.IstioIngressGatewayNamespace}, destinationHost)(); err != nil {
 		return nil, fmt.Errorf("failed to create destination rule resource: %w", err)
 	}

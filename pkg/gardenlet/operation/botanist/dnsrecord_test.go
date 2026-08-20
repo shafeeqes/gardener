@@ -144,10 +144,8 @@ var _ = Describe("dnsrecord", func() {
 			},
 		}
 		b.Shoot.SetInfo(&gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: shootNamespace,
-			},
+			Name:      shootName,
+			Namespace: shootNamespace,
 			Spec: gardencorev1beta1.ShootSpec{
 				DNS: &gardencorev1beta1.DNS{
 					Domain: new(externalDomain),
@@ -237,18 +235,16 @@ var _ = Describe("dnsrecord", func() {
 			err := c.Get(ctx, types.NamespacedName{Name: shootName + "-" + v1beta1constants.DNSRecordExternalName, Namespace: controlPlaneNamespace}, dnsRecord)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(dnsRecord).To(DeepDerivativeEqual(&extensionsv1alpha1.DNSRecord{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            shootName + "-" + v1beta1constants.DNSRecordExternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-					Annotations: map[string]string{
-						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-					},
-					Labels: map[string]string{
-						"role":                "external",
-						"gardener.cloud/role": "controlplane",
-					},
+				Name:            shootName + "-" + v1beta1constants.DNSRecordExternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Annotations: map[string]string{
+					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+				},
+				Labels: map[string]string{
+					"role":                "external",
+					"gardener.cloud/role": "controlplane",
 				},
 				Spec: extensionsv1alpha1.DNSRecordSpec{
 					DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -270,12 +266,10 @@ var _ = Describe("dnsrecord", func() {
 			err = c.Get(ctx, types.NamespacedName{Name: DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName, Namespace: controlPlaneNamespace}, secret)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(secret).To(DeepDerivativeEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-				},
-				Type: corev1.SecretTypeOpaque,
+				Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Type:            corev1.SecretTypeOpaque,
 				Data: map[string][]byte{
 					"external-foo": []byte("external-bar"),
 				},
@@ -287,10 +281,8 @@ var _ = Describe("dnsrecord", func() {
 			metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, "shoot.gardener.cloud/tasks", "deployDNSRecordExternal")
 
 			b.Shoot.ExternalDomain.Credentials = &securityv1alpha1.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "wi-dns-external",
-					Namespace: "garden",
-				},
+				Name:      "wi-dns-external",
+				Namespace: "garden",
 				Spec: securityv1alpha1.WorkloadIdentitySpec{
 					Audiences: []string{"dns"},
 					TargetSystem: securityv1alpha1.TargetSystem{
@@ -312,18 +304,16 @@ var _ = Describe("dnsrecord", func() {
 			err := c.Get(ctx, types.NamespacedName{Name: shootName + "-" + v1beta1constants.DNSRecordExternalName, Namespace: controlPlaneNamespace}, dnsRecord)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(dnsRecord).To(DeepDerivativeEqual(&extensionsv1alpha1.DNSRecord{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            shootName + "-" + v1beta1constants.DNSRecordExternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-					Annotations: map[string]string{
-						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-					},
-					Labels: map[string]string{
-						"role":                "external",
-						"gardener.cloud/role": "controlplane",
-					},
+				Name:            shootName + "-" + v1beta1constants.DNSRecordExternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Annotations: map[string]string{
+					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+				},
+				Labels: map[string]string{
+					"role":                "external",
+					"gardener.cloud/role": "controlplane",
 				},
 				Spec: extensionsv1alpha1.DNSRecordSpec{
 					DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -345,19 +335,17 @@ var _ = Describe("dnsrecord", func() {
 			err = c.Get(ctx, types.NamespacedName{Name: DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName, Namespace: controlPlaneNamespace}, secret)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(secret).To(DeepDerivativeEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-					Annotations: map[string]string{
-						"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"` + shootName + `","namespace":"` + shootNamespace + `","uid":""}`,
-						"workloadidentity.security.gardener.cloud/name":           "wi-dns-external",
-						"workloadidentity.security.gardener.cloud/namespace":      "garden",
-					},
-					Labels: map[string]string{
-						"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-						"workloadidentity.security.gardener.cloud/provider": "test",
-					},
+				Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordExternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Annotations: map[string]string{
+					"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"` + shootName + `","namespace":"` + shootNamespace + `","uid":""}`,
+					"workloadidentity.security.gardener.cloud/name":           "wi-dns-external",
+					"workloadidentity.security.gardener.cloud/namespace":      "garden",
+				},
+				Labels: map[string]string{
+					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+					"workloadidentity.security.gardener.cloud/provider": "test",
 				},
 				Type: corev1.SecretTypeOpaque,
 				Data: map[string][]byte{
@@ -434,18 +422,16 @@ var _ = Describe("dnsrecord", func() {
 			err := c.Get(ctx, types.NamespacedName{Name: shootName + "-" + v1beta1constants.DNSRecordInternalName, Namespace: controlPlaneNamespace}, dnsRecord)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(dnsRecord).To(DeepDerivativeEqual(&extensionsv1alpha1.DNSRecord{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            shootName + "-" + v1beta1constants.DNSRecordInternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-					Annotations: map[string]string{
-						v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
-						v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
-					},
-					Labels: map[string]string{
-						"role":                "internal",
-						"gardener.cloud/role": "controlplane",
-					},
+				Name:            shootName + "-" + v1beta1constants.DNSRecordInternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Annotations: map[string]string{
+					v1beta1constants.GardenerOperation: v1beta1constants.GardenerOperationReconcile,
+					v1beta1constants.GardenerTimestamp: now.UTC().Format(time.RFC3339Nano),
+				},
+				Labels: map[string]string{
+					"role":                "internal",
+					"gardener.cloud/role": "controlplane",
 				},
 				Spec: extensionsv1alpha1.DNSRecordSpec{
 					DefaultSpec: extensionsv1alpha1.DefaultSpec{
@@ -467,12 +453,10 @@ var _ = Describe("dnsrecord", func() {
 			err = c.Get(ctx, types.NamespacedName{Name: DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordInternalName, Namespace: controlPlaneNamespace}, secret)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(secret).To(DeepDerivativeEqual(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordInternalName,
-					Namespace:       controlPlaneNamespace,
-					ResourceVersion: "1",
-				},
-				Type: corev1.SecretTypeOpaque,
+				Name:            DNSRecordSecretPrefix + "-" + shootName + "-" + v1beta1constants.DNSRecordInternalName,
+				Namespace:       controlPlaneNamespace,
+				ResourceVersion: "1",
+				Type:            corev1.SecretTypeOpaque,
 				Data: map[string][]byte{
 					"internal-foo": []byte("internal-bar"),
 				},

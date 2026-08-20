@@ -75,9 +75,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "kube-system",
-		},
+		Name: "kube-system",
 	}
 	Expect(testClient.Get(ctx, client.ObjectKeyFromObject(testNamespace), testNamespace)).To(Succeed())
 	log.Info("Using Namespace for test", "namespaceName", testNamespace.Name)

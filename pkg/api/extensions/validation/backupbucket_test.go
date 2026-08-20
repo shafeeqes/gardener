@@ -21,9 +21,7 @@ var _ = Describe("BackupBucket validation tests", func() {
 
 	BeforeEach(func() {
 		bb = &extensionsv1alpha1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-bb",
-			},
+			Name: "test-bb",
 			Spec: extensionsv1alpha1.BackupBucketSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: "provider",

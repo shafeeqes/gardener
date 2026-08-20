@@ -96,21 +96,15 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 		registry = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 		namespaceGarden = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        v1beta1constants.GardenNamespace,
-				Labels:      map[string]string{v1beta1constants.LabelApp: v1beta1constants.LabelGardener},
-				Annotations: map[string]string{resourcesv1alpha1.KeepObject: "true"},
-			},
+			Name:        v1beta1constants.GardenNamespace,
+			Labels:      map[string]string{v1beta1constants.LabelApp: v1beta1constants.LabelGardener},
+			Annotations: map[string]string{resourcesv1alpha1.KeepObject: "true"},
 		}
 		namespaceGardenerSystemPublic = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: gardencorev1beta1.GardenerSystemPublicNamespace,
-			},
+			Name: gardencorev1beta1.GardenerSystemPublicNamespace,
 		}
 		clusterRoleSeedBootstrapper = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:seed-bootstrapper",
-			},
+			Name: "gardener.cloud:system:seed-bootstrapper",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{certificatesv1.GroupName},
@@ -125,9 +119,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleBindingSeedBootstrapper = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterRoleSeedBootstrapper.Name,
-			},
+			Name: clusterRoleSeedBootstrapper.Name,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -140,10 +132,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		clusterRoleGardenerAdmin = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:admin",
-				Labels: map[string]string{v1beta1constants.GardenRole: "admin"},
-			},
+			Name:   "gardener.cloud:admin",
+			Labels: map[string]string{v1beta1constants.GardenRole: "admin"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{gardencorev1beta1.GroupName},
@@ -215,9 +205,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleBindingGardenerAdmin = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterRoleGardenerAdmin.Name,
-			},
+			Name: clusterRoleGardenerAdmin.Name,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -230,10 +218,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		clusterRoleGardenerAdminAggregated = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   v1beta1constants.ClusterRoleNameGardenerAdministrators,
-				Labels: map[string]string{v1beta1constants.GardenRole: "administrators"},
-			},
+			Name:   v1beta1constants.ClusterRoleNameGardenerAdministrators,
+			Labels: map[string]string{v1beta1constants.GardenRole: "administrators"},
 			AggregationRule: &rbacv1.AggregationRule{
 				ClusterRoleSelectors: []metav1.LabelSelector{
 					{MatchLabels: map[string]string{v1beta1constants.GardenRole: "admin"}},
@@ -243,10 +229,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleGardenerViewer = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:viewer",
-				Labels: map[string]string{v1beta1constants.GardenRole: "viewer"},
-			},
+			Name:   "gardener.cloud:viewer",
+			Labels: map[string]string{v1beta1constants.GardenRole: "viewer"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{gardencorev1beta1.GroupName},
@@ -320,10 +304,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleGardenerViewerAggregated = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:viewers",
-				Labels: map[string]string{v1beta1constants.GardenRole: "viewers"},
-			},
+			Name:   "gardener.cloud:system:viewers",
+			Labels: map[string]string{v1beta1constants.GardenRole: "viewers"},
 			AggregationRule: &rbacv1.AggregationRule{
 				ClusterRoleSelectors: []metav1.LabelSelector{
 					{MatchLabels: map[string]string{v1beta1constants.GardenRole: "viewer"}},
@@ -332,9 +314,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleReadGlobalResources = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:read-global-resources",
-			},
+			Name: "gardener.cloud:system:read-global-resources",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{gardencorev1beta1.GroupName},
@@ -355,9 +335,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleBindingReadGlobalResources = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterRoleReadGlobalResources.Name,
-			},
+			Name: clusterRoleReadGlobalResources.Name,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -370,9 +348,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		clusterRoleUserAuth = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:user-auth",
-			},
+			Name: "gardener.cloud:system:user-auth",
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{authenticationv1.GroupName},
@@ -387,9 +363,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleBindingUserAuth = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterRoleUserAuth.Name,
-			},
+			Name: clusterRoleUserAuth.Name,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "ClusterRole",
@@ -402,9 +376,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		clusterRoleProjectCreation = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:project-creation",
-			},
+			Name: "gardener.cloud:system:project-creation",
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups: []string{gardencorev1beta1.GroupName},
 				Resources: []string{"projects"},
@@ -412,10 +384,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		clusterRoleProjectMember = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:project-member-aggregation",
-				Labels: map[string]string{v1beta1constants.LabelKeyAggregateToProjectMember: "true"},
-			},
+			Name:   "gardener.cloud:system:project-member-aggregation",
+			Labels: map[string]string{v1beta1constants.LabelKeyAggregateToProjectMember: "true"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{corev1.GroupName},
@@ -490,10 +460,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleProjectMemberAggregated = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:project-member",
-				Labels: map[string]string{v1beta1constants.GardenRole: "project-member"},
-			},
+			Name:   "gardener.cloud:system:project-member",
+			Labels: map[string]string{v1beta1constants.GardenRole: "project-member"},
 			AggregationRule: &rbacv1.AggregationRule{
 				ClusterRoleSelectors: []metav1.LabelSelector{
 					{MatchLabels: map[string]string{v1beta1constants.LabelKeyAggregateToProjectMember: "true"}},
@@ -502,10 +470,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 		}
 		labelKeyAggregateToProjectServiceAccountManager = "rbac.gardener.cloud/aggregate-to-project-serviceaccountmanager"
 		clusterRoleProjectServiceAccountManager         = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:project-serviceaccountmanager-aggregation",
-				Labels: map[string]string{labelKeyAggregateToProjectServiceAccountManager: "true"},
-			},
+			Name:   "gardener.cloud:system:project-serviceaccountmanager-aggregation",
+			Labels: map[string]string{labelKeyAggregateToProjectServiceAccountManager: "true"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{corev1.GroupName},
@@ -520,10 +486,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleProjectServiceAccountManagerAggregated = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:project-serviceaccountmanager",
-				Labels: map[string]string{v1beta1constants.GardenRole: "project-serviceaccountmanager"},
-			},
+			Name:   "gardener.cloud:system:project-serviceaccountmanager",
+			Labels: map[string]string{v1beta1constants.GardenRole: "project-serviceaccountmanager"},
 			AggregationRule: &rbacv1.AggregationRule{
 				ClusterRoleSelectors: []metav1.LabelSelector{
 					{MatchLabels: map[string]string{labelKeyAggregateToProjectServiceAccountManager: "true"}},
@@ -532,10 +496,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 		}
 		labelKeyAggregateToProjectViewer = "rbac.gardener.cloud/aggregate-to-project-viewer"
 		clusterRoleProjectViewer         = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:project-viewer-aggregation",
-				Labels: map[string]string{labelKeyAggregateToProjectViewer: "true"},
-			},
+			Name:   "gardener.cloud:system:project-viewer-aggregation",
+			Labels: map[string]string{labelKeyAggregateToProjectViewer: "true"},
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{corev1.GroupName},
@@ -588,10 +550,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		clusterRoleProjectViewerAggregated = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "gardener.cloud:system:project-viewer",
-				Labels: map[string]string{v1beta1constants.GardenRole: "project-viewer"},
-			},
+			Name:   "gardener.cloud:system:project-viewer",
+			Labels: map[string]string{v1beta1constants.GardenRole: "project-viewer"},
 			AggregationRule: &rbacv1.AggregationRule{
 				ClusterRoleSelectors: []metav1.LabelSelector{
 					{MatchLabels: map[string]string{labelKeyAggregateToProjectViewer: "true"}},
@@ -599,10 +559,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			},
 		}
 		roleReadClusterIdentityConfigMap = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:read-cluster-identity-configmap",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "gardener.cloud:system:read-cluster-identity-configmap",
+			Namespace: metav1.NamespaceSystem,
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups:     []string{corev1.GroupName},
 				Resources:     []string{"configmaps"},
@@ -611,10 +569,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		roleBindingReadClusterIdentityConfigMap = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      roleReadClusterIdentityConfigMap.Name,
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      roleReadClusterIdentityConfigMap.Name,
+			Namespace: metav1.NamespaceSystem,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "Role",
@@ -627,10 +583,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		roleReadGardenerInfoConfigMap = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:system:read-gardener-system-public",
-				Namespace: gardencorev1beta1.GardenerSystemPublicNamespace,
-			},
+			Name:      "gardener.cloud:system:read-gardener-system-public",
+			Namespace: gardencorev1beta1.GardenerSystemPublicNamespace,
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups:     []string{corev1.GroupName},
 				Resources:     []string{"configmaps"},
@@ -639,10 +593,8 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		roleBindingReadGardenerInfoConfigMap = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      roleReadGardenerInfoConfigMap.Name,
-				Namespace: gardencorev1beta1.GardenerSystemPublicNamespace,
-			},
+			Name:      roleReadGardenerInfoConfigMap.Name,
+			Namespace: gardencorev1beta1.GardenerSystemPublicNamespace,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: rbacv1.GroupName,
 				Kind:     "Role",
@@ -688,9 +640,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 	if !g.values.SeedAuthorizerEnabled {
 		var (
 			clusterRoleSeeds = &rbacv1.ClusterRole{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "gardener.cloud:system:seeds",
-				},
+				Name: "gardener.cloud:system:seeds",
 				Rules: []rbacv1.PolicyRule{{
 					APIGroups: []string{"*"},
 					Resources: []string{"*"},
@@ -698,9 +648,7 @@ func (g *gardenSystem) computeResourcesData() (map[string][]byte, error) {
 				}},
 			}
 			clusterRoleBindingSeeds = &rbacv1.ClusterRoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: clusterRoleSeeds.Name,
-				},
+				Name: clusterRoleSeeds.Name,
 				RoleRef: rbacv1.RoleRef{
 					APIGroup: rbacv1.GroupName,
 					Kind:     "ClusterRole",

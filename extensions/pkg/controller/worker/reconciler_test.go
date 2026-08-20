@@ -333,16 +333,12 @@ var _ = Describe("Worker Reconcile", func() {
 
 func getWorker() *extensionsv1alpha1.Worker {
 	return &extensionsv1alpha1.Worker{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Worker",
-			APIVersion: "extensions.gardener.cloud/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            "workerTestReconcile",
-			Namespace:       "test",
-			ResourceVersion: "42",
-		},
-		Spec: extensionsv1alpha1.WorkerSpec{},
+		Kind:            "Worker",
+		APIVersion:      "extensions.gardener.cloud/v1alpha1",
+		Name:            "workerTestReconcile",
+		Namespace:       "test",
+		ResourceVersion: "42",
+		Spec:            extensionsv1alpha1.WorkerSpec{},
 	}
 }
 
@@ -369,23 +365,15 @@ func addFinalizerToWorker(worker *extensionsv1alpha1.Worker, finalizer string) *
 
 func getCluster() *extensionsv1alpha1.Cluster {
 	return &extensionsv1alpha1.Cluster{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Cluster",
-			APIVersion: "extensions.gardener.cloud/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test",
-		},
+		Kind:       "Cluster",
+		APIVersion: "extensions.gardener.cloud/v1alpha1",
+		Name:       "test",
 		Spec: extensionsv1alpha1.ClusterSpec{
 			Shoot: runtime.RawExtension{
 				Raw: encode(&gardencorev1beta1.Shoot{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "Shoot",
-						APIVersion: "core.gardener.cloud/v1beta1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "test",
-					},
+					Kind:       "Shoot",
+					APIVersion: "core.gardener.cloud/v1beta1",
+					Name:       "test",
 				}),
 			},
 		},

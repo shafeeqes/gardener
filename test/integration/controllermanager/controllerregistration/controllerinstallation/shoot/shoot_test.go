@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/pkg/apis/core"
@@ -90,10 +89,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 
 		BeforeEach(func() {
 			backupBucket = &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					Provider: gardencorev1beta1.BackupBucketProvider{Type: providerType, Region: "region"},
 					CredentialsRef: &corev1.ObjectReference{
@@ -114,10 +111,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 
 		It("should reconcile the ControllerInstallations", func() {
 			controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ctrlreg-" + testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "ctrlreg-" + testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{{Kind: extensionsv1alpha1.BackupBucketResource, Type: providerType}},
 				},
@@ -174,10 +169,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 
 		It("should keep the ControllerInstallation because it is required", func() {
 			controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ctrlreg-" + testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "ctrlreg-" + testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{{Kind: extensionsv1alpha1.BackupBucketResource, Type: providerType}},
 				},
@@ -261,10 +254,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 	Context("BackupEntry", func() {
 		It("should reconcile the ControllerInstallations", func() {
 			backupBucket := &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "bucket-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "bucket-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					Provider: gardencorev1beta1.BackupBucketProvider{Type: providerType, Region: "region"},
 					CredentialsRef: &corev1.ObjectReference{
@@ -291,11 +282,9 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 			}).Should(Succeed())
 
 			backupEntry := &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: testID + "-",
-					Namespace:    shoot.Namespace,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: testID + "-",
+				Namespace:    shoot.Namespace,
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					BucketName: backupBucket.Name,
 					ShootRef: &corev1.ObjectReference{
@@ -308,10 +297,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 			}
 
 			controllerRegistration := &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ctrlreg-" + testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "ctrlreg-" + testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: extensionsv1alpha1.BackupBucketResource, Type: providerType},
@@ -384,13 +371,11 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 
 		BeforeEach(func() {
 			referencedSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ref-secret-",
-					Namespace:    v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						testID:                      testRunID,
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-					},
+				GenerateName: "ref-secret-",
+				Namespace:    v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					testID:                      testRunID,
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 				},
 				Data: map[string][]byte{"token": []byte("s3cret")},
 			}
@@ -401,13 +386,11 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 			})
 
 			referencedConfigMap = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ref-configmap-",
-					Namespace:    v1beta1constants.GardenNamespace,
-					Labels: map[string]string{
-						testID:                      testRunID,
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-					},
+				GenerateName: "ref-configmap-",
+				Namespace:    v1beta1constants.GardenNamespace,
+				Labels: map[string]string{
+					testID:                      testRunID,
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 				},
 				Data: map[string]string{"endpoint": "https://example.com"},
 			}
@@ -418,10 +401,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 			})
 
 			controllerDeployment = &gardencorev1.ControllerDeployment{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ctrldeploy-" + testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "ctrldeploy-" + testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Helm: &gardencorev1.HelmControllerDeployment{
 					RawChart: []byte("not-a-real-chart"),
 				},
@@ -437,10 +418,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 			})
 
 			ctrlReg = &gardencorev1beta1.ControllerRegistration{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "ctrlreg-" + testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "ctrlreg-" + testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.ControllerRegistrationSpec{
 					Resources: []gardencorev1beta1.ControllerResource{
 						{Kind: extensionsv1alpha1.BackupBucketResource, Type: providerType},
@@ -462,10 +441,8 @@ var _ = Describe("ControllerInstallation-Shoot controller test", func() {
 			})
 
 			backupBucket = &gardencorev1beta1.BackupBucket{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "bucket-" + testID + "-",
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "bucket-" + testID + "-",
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.BackupBucketSpec{
 					Provider: gardencorev1beta1.BackupBucketProvider{Type: providerType, Region: "region"},
 					CredentialsRef: &corev1.ObjectReference{

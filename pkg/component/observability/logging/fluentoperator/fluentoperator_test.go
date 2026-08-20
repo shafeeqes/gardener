@@ -70,29 +70,23 @@ var _ = Describe("Fluent Operator", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(c)
 
 		serviceAccount = &corev1.ServiceAccount{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "ServiceAccount",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-				Labels: map[string]string{
-					v1beta1constants.LabelApp:   name,
-					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-				},
+			APIVersion: "v1",
+			Kind:       "ServiceAccount",
+			Name:       name,
+			Namespace:  namespace,
+			Labels: map[string]string{
+				v1beta1constants.LabelApp:   name,
+				v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 			},
 			AutomountServiceAccountToken: new(false),
 		}
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:logging:fluent-operator",
-				Labels: map[string]string{
-					v1beta1constants.LabelApp:   name,
-					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-				},
+			Name: "gardener.cloud:logging:fluent-operator",
+			Labels: map[string]string{
+				v1beta1constants.LabelApp:   name,
+				v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -143,13 +137,11 @@ var _ = Describe("Fluent Operator", func() {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "fluent-operator",
-				Labels: map[string]string{
-					v1beta1constants.LabelApp:   name,
-					v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
-				},
+			Name: "fluent-operator",
+			Labels: map[string]string{
+				v1beta1constants.LabelApp:   name,
+				v1beta1constants.LabelRole:  v1beta1constants.LabelLogging,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleLogging,
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -163,10 +155,8 @@ var _ = Describe("Fluent Operator", func() {
 			}},
 		}
 		role = &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:logging:fluent-operator",
-				Namespace: namespace,
-			},
+			Name:      "gardener.cloud:logging:fluent-operator",
+			Namespace: namespace,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{"coordination.k8s.io"},
@@ -191,10 +181,8 @@ var _ = Describe("Fluent Operator", func() {
 			},
 		}
 		roleBinding = &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud:logging:fluent-operator",
-				Namespace: namespace,
-			},
+			Name:      "gardener.cloud:logging:fluent-operator",
+			Namespace: namespace,
 			Subjects: []rbacv1.Subject{
 				{
 					Kind:      "ServiceAccount",
@@ -209,15 +197,13 @@ var _ = Describe("Fluent Operator", func() {
 			},
 		}
 		deployment = &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "fluent-operator",
-				Namespace: namespace,
-				Labels: map[string]string{
-					v1beta1constants.LabelApp:                    name,
-					v1beta1constants.LabelRole:                   v1beta1constants.LabelLogging,
-					v1beta1constants.GardenRole:                  v1beta1constants.GardenRoleLogging,
-					resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
-				},
+			Name:      "fluent-operator",
+			Namespace: namespace,
+			Labels: map[string]string{
+				v1beta1constants.LabelApp:                    name,
+				v1beta1constants.LabelRole:                   v1beta1constants.LabelLogging,
+				v1beta1constants.GardenRole:                  v1beta1constants.GardenRoleLogging,
+				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeController,
 			},
 			Spec: appsv1.DeploymentSpec{
 				RevisionHistoryLimit: new(int32(2)),
@@ -285,10 +271,8 @@ var _ = Describe("Fluent Operator", func() {
 						}},
 						Volumes: []corev1.Volume{
 							{
-								Name: "env",
-								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{},
-								},
+								Name:     "env",
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
 						},
 					},
@@ -298,10 +282,8 @@ var _ = Describe("Fluent Operator", func() {
 
 		vpaUpdateMode := vpaautoscalingv1.UpdateModeInPlaceOrRecreate
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Name:      name,
+			Namespace: namespace,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -332,16 +314,12 @@ var _ = Describe("Fluent Operator", func() {
 
 	JustBeforeEach(func() {
 		operatorManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      OperatorManagedResourceName,
-				Namespace: namespace,
-			},
+			Name:      OperatorManagedResourceName,
+			Namespace: namespace,
 		}
 		operatorManagedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + operatorManagedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + operatorManagedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -353,12 +331,10 @@ var _ = Describe("Fluent Operator", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(operatorManagedResource), operatorManagedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            OperatorManagedResourceName,
-					Namespace:       namespace,
-					Labels:          map[string]string{v1beta1constants.GardenRole: "seed-system-component"},
-					ResourceVersion: "1",
-				},
+				Name:            OperatorManagedResourceName,
+				Namespace:       namespace,
+				Labels:          map[string]string{v1beta1constants.GardenRole: "seed-system-component"},
+				ResourceVersion: "1",
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					Class: new("seed"),
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -419,11 +395,9 @@ var _ = Describe("Fluent Operator", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       operatorManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       operatorManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -446,11 +420,9 @@ var _ = Describe("Fluent Operator", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       operatorManagedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       operatorManagedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -475,10 +447,8 @@ var _ = Describe("Fluent Operator", func() {
 				fakeOps.MaxAttempts = 2
 
 				operatorManagedResource := &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      operatorManagedResourceName,
-						Namespace: namespace,
-					},
+					Name:      operatorManagedResourceName,
+					Namespace: namespace,
 				}
 				Expect(c.Create(ctx, operatorManagedResource)).To(Succeed())
 

@@ -94,9 +94,7 @@ var _ = Describe("ClusterAutoscaler", func() {
 			worker = mockworker.NewMockInterface(ctrl)
 
 			botanist.SeedNamespaceObject = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					UID: namespaceUID,
-				},
+				UID: namespaceUID,
 			}
 			botanist.Shoot.Components = &shootpkg.Components{
 				ControlPlane: &shootpkg.ControlPlane{
@@ -166,8 +164,8 @@ var _ = Describe("ClusterAutoscaler", func() {
 
 		It("should scale the CA deployment", func() {
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{Name: "cluster-autoscaler", Namespace: namespace},
-				Spec:       appsv1.DeploymentSpec{Replicas: new(int32(1))},
+				Name: "cluster-autoscaler", Namespace: namespace,
+				Spec: appsv1.DeploymentSpec{Replicas: new(int32(1))},
 			}
 			Expect(fakeClient.Create(ctx, deployment)).To(Succeed())
 

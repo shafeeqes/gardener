@@ -72,32 +72,32 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 		})
 
 		It("should find the cloud provider secret", func(ctx SpecContext) {
-			cloudProviderSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "cloudprovider", Namespace: technicalID}}
+			cloudProviderSecret := &corev1.Secret{Name: "cloudprovider", Namespace: technicalID}
 			Eventually(ctx, Object(cloudProviderSecret)).Should(HaveField("ObjectMeta.Labels", HaveKeyWithValue("gardener.cloud/purpose", "cloudprovider")))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy gardener-resource-manager", func(ctx SpecContext) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: technicalID}}
+			deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameGardenerResourceManager, Namespace: technicalID}
 			Eventually(ctx, Object(deployment)).Should(BeHealthy(health.CheckDeployment))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy the provider extension", func(ctx SpecContext) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "gardener-extension-" + local.Name, Namespace: "extension-" + local.Name}}
+			deployment := &appsv1.Deployment{Name: "gardener-extension-" + local.Name, Namespace: "extension-" + local.Name}
 			Eventually(ctx, Object(deployment)).Should(BeHealthy(health.CheckDeployment))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy the infrastructure", func(ctx SpecContext) {
-			infra := &extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: technicalID}}
+			infra := &extensionsv1alpha1.Infrastructure{Name: shootName, Namespace: technicalID}
 			Eventually(ctx, Object(infra)).Should(BeHealthy(health.CheckExtensionObject))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy machine-controller-manager", func(ctx SpecContext) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: technicalID}}
+			deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: technicalID}
 			Eventually(ctx, Object(deployment)).Should(BeHealthy(health.CheckDeployment))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy the worker", func(ctx SpecContext) {
-			worker := &extensionsv1alpha1.Worker{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: technicalID}}
+			worker := &extensionsv1alpha1.Worker{Name: shootName, Namespace: technicalID}
 			Eventually(ctx, Object(worker)).Should(BeHealthy(health.CheckExtensionObject))
 		}, SpecTimeout(5*time.Minute))
 
@@ -114,12 +114,12 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 		}, SpecTimeout(time.Minute))
 
 		It("should stop machine-controller-manager", func(ctx SpecContext) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: technicalID}}
+			deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameMachineControllerManager, Namespace: technicalID}
 			Eventually(ctx, Object(deployment)).Should(HaveField("Spec.Replicas", HaveValue(BeEquivalentTo(0))))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy the DNSRecord", func(ctx SpecContext) {
-			dnsRecord := &extensionsv1alpha1.DNSRecord{ObjectMeta: metav1.ObjectMeta{Name: shootName + "-external", Namespace: technicalID}}
+			dnsRecord := &extensionsv1alpha1.DNSRecord{Name: shootName + "-external", Namespace: technicalID}
 			Eventually(ctx, Object(dnsRecord)).Should(BeHealthy(health.CheckExtensionObject))
 		}, SpecTimeout(time.Minute))
 
@@ -144,7 +144,7 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy a bastion with the configured ingress CIDRs", func(ctx SpecContext) {
-			bastion := &extensionsv1alpha1.Bastion{ObjectMeta: metav1.ObjectMeta{Name: "gardenadm-bootstrap", Namespace: technicalID}}
+			bastion := &extensionsv1alpha1.Bastion{Name: "gardenadm-bootstrap", Namespace: technicalID}
 			Eventually(ctx, Object(bastion)).Should(And(
 				HaveField("Spec.Ingress", ConsistOf(
 					HaveField("IPBlock.CIDR", "1.2.3.4/32"),
@@ -185,7 +185,7 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 
 		var kubeconfig string
 		It("should store the shoot kubeconfig in the bootstrap cluster", func(ctx SpecContext) {
-			kubeconfigSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "kubeconfig", Namespace: technicalID}}
+			kubeconfigSecret := &corev1.Secret{Name: "kubeconfig", Namespace: technicalID}
 			Eventually(ctx, Object(kubeconfigSecret)).Should(HaveField("Data", HaveKey("kubeconfig")))
 
 			kubeconfig = string(kubeconfigSecret.Data["kubeconfig"])
@@ -234,7 +234,7 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy/restore the infrastructure in the shoot", func(ctx SpecContext) {
-			infra := &extensionsv1alpha1.Infrastructure{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: "kube-system"}}
+			infra := &extensionsv1alpha1.Infrastructure{Name: shootName, Namespace: "kube-system"}
 			Eventually(ctx, shootKomega.Object(infra)).Should(BeHealthy(health.CheckExtensionObject))
 		}, SpecTimeout(time.Minute))
 
@@ -243,23 +243,23 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 			// not in the shoot itself. This is specific to provider-local as the infrastructure resources are managed in the
 			// bootstrap cluster. This check is unrelated to gardenadm functionality, but serves as an additional verification
 			// that the functionality of using the provider client of the "gardener-local" cluster works.
-			ipPool := &metav1.PartialObjectMetadata{TypeMeta: metav1.TypeMeta{APIVersion: "crd.projectcalico.org/v1", Kind: "IPPool"}, ObjectMeta: metav1.ObjectMeta{Name: infrastructure.IPPoolName(technicalID, string(gardencorev1beta1.IPFamilyIPv4))}}
+			ipPool := &metav1.PartialObjectMetadata{APIVersion: "crd.projectcalico.org/v1", Kind: "IPPool", Name: infrastructure.IPPoolName(technicalID, string(gardencorev1beta1.IPFamilyIPv4))}
 			Consistently(ctx, shootKomega.Get(ipPool)).Should(BeNotFoundError())
 			Eventually(ctx, Get(ipPool)).Should(Succeed())
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy the SelfHostedShootExposure in the shoot", func(ctx SpecContext) {
-			exposure := &extensionsv1alpha1.SelfHostedShootExposure{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: "kube-system"}}
+			exposure := &extensionsv1alpha1.SelfHostedShootExposure{Name: shootName, Namespace: "kube-system"}
 			Eventually(ctx, shootKomega.Object(exposure)).Should(BeHealthy(health.CheckExtensionObject))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy/restore the DNSRecord in the shoot", func(ctx SpecContext) {
-			dnsRecord := &extensionsv1alpha1.DNSRecord{ObjectMeta: metav1.ObjectMeta{Name: shootName + "-external", Namespace: "kube-system"}}
+			dnsRecord := &extensionsv1alpha1.DNSRecord{Name: shootName + "-external", Namespace: "kube-system"}
 			Eventually(ctx, shootKomega.Object(dnsRecord)).Should(BeHealthy(health.CheckExtensionObject))
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy/restore the Worker in the shoot", func(ctx SpecContext) {
-			worker := &extensionsv1alpha1.Worker{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: "kube-system"}}
+			worker := &extensionsv1alpha1.Worker{Name: shootName, Namespace: "kube-system"}
 			Eventually(ctx, shootKomega.Object(worker)).Should(And(
 				BeHealthy(health.CheckExtensionObject),
 				HaveField("Status.DefaultStatus.State", BeNil()), // ensure machine state is removed after restoration
@@ -267,17 +267,17 @@ var _ = Describe("gardenadm managed infrastructure scenario tests", Label("garde
 		}, SpecTimeout(time.Minute))
 
 		It("should deploy the cluster-autoscaler in the shoot", func(ctx SpecContext) {
-			deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: v1beta1constants.DeploymentNameClusterAutoscaler, Namespace: "kube-system"}}
+			deployment := &appsv1.Deployment{Name: v1beta1constants.DeploymentNameClusterAutoscaler, Namespace: "kube-system"}
 			Eventually(ctx, shootKomega.Object(deployment)).Should(BeHealthy(health.CheckDeployment))
 		}, SpecTimeout(time.Minute))
 
 		It("should adopt and keep the initial control plane machine", func(ctx SpecContext) {
 			// This check verifies that the control plane machine that was created in the bootstrap cluster is adopted by
 			// gardenadm init and the machine-controller-manager running in the self-hosted shoot.
-			Eventually(ctx, shootKomega.Object(&machinev1alpha1.Machine{ObjectMeta: metav1.ObjectMeta{Name: initialControlPlaneMachineName, Namespace: "kube-system"}})).
+			Eventually(ctx, shootKomega.Object(&machinev1alpha1.Machine{Name: initialControlPlaneMachineName, Namespace: "kube-system"})).
 				Should(HaveField("Status.CurrentStatus.Phase", machinev1alpha1.MachineRunning))
 
-			Eventually(ctx, Object(&corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "machine-" + initialControlPlaneMachineName, Namespace: infrastructure.NamespaceName(technicalID)}})).
+			Eventually(ctx, Object(&corev1.Pod{Name: "machine-" + initialControlPlaneMachineName, Namespace: infrastructure.NamespaceName(technicalID)})).
 				Should(HaveField("Status.Phase", corev1.PodRunning))
 		}, SpecTimeout(time.Minute))
 

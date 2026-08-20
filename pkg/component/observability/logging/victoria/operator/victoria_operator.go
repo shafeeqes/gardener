@@ -114,22 +114,18 @@ func (v *victoriaOperator) WaitCleanup(ctx context.Context) error {
 
 func (v *victoriaOperator) serviceAccount() *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceAccountName,
-			Namespace: v.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:                         serviceAccountName,
+		Namespace:                    v.namespace,
+		Labels:                       GetLabels(),
 		AutomountServiceAccountToken: new(false),
 	}
 }
 
 func (v *victoriaOperator) deployment() *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: v.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      deploymentName,
+		Namespace: v.namespace,
+		Labels:    GetLabels(),
 		Spec: appsv1.DeploymentSpec{
 			Replicas:             new(int32(1)),
 			RevisionHistoryLimit: new(int32(2)),
@@ -177,21 +173,17 @@ func (v *victoriaOperator) deployment() *appsv1.Deployment {
 								},
 							},
 							LivenessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/health",
-										Port: intstr.FromInt32(healthProbePort),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/health",
+									Port: intstr.FromInt32(healthProbePort),
 								},
 								InitialDelaySeconds: 15,
 								PeriodSeconds:       20,
 							},
 							ReadinessProbe: &corev1.Probe{
-								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/ready",
-										Port: intstr.FromInt32(healthProbePort),
-									},
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/ready",
+									Port: intstr.FromInt32(healthProbePort),
 								},
 								InitialDelaySeconds: 5,
 								PeriodSeconds:       10,
@@ -214,11 +206,9 @@ func (v *victoriaOperator) deployment() *appsv1.Deployment {
 
 func (v *victoriaOperator) vpa() *vpaautoscalingv1.VerticalPodAutoscaler {
 	return &vpaautoscalingv1.VerticalPodAutoscaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      vpaName,
-			Namespace: v.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      vpaName,
+		Namespace: v.namespace,
+		Labels:    GetLabels(),
 		Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscalingv1.CrossVersionObjectReference{
 				APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -248,10 +238,8 @@ func (v *victoriaOperator) vpa() *vpaautoscalingv1.VerticalPodAutoscaler {
 
 func (v *victoriaOperator) clusterRole() *rbacv1.ClusterRole {
 	return &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleName,
+		Labels: GetLabels(),
 		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{corev1.GroupName},
@@ -305,10 +293,8 @@ func (v *victoriaOperator) clusterRole() *rbacv1.ClusterRole {
 
 func (v *victoriaOperator) clusterRoleBinding() *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   clusterRoleBindingName,
-			Labels: GetLabels(),
-		},
+		Name:   clusterRoleBindingName,
+		Labels: GetLabels(),
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
 			Kind:     "ClusterRole",
@@ -326,11 +312,9 @@ func (v *victoriaOperator) clusterRoleBinding() *rbacv1.ClusterRoleBinding {
 
 func (v *victoriaOperator) podDisruptionBudget() *policyv1.PodDisruptionBudget {
 	pdb := &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      podDisruptionBudgetName,
-			Namespace: v.namespace,
-			Labels:    GetLabels(),
-		},
+		Name:      podDisruptionBudgetName,
+		Namespace: v.namespace,
+		Labels:    GetLabels(),
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             new(intstr.FromInt32(1)),
 			Selector:                   &metav1.LabelSelector{MatchLabels: GetLabels()},

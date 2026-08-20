@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -64,7 +63,7 @@ var _ = Describe("KubeProxy", func() {
 		sm = fakesecretsmanager.New(fakeSeedClient, namespace)
 
 		By("Create secrets managed outside of this function for which secretsmanager.Get() will be called")
-		Expect(fakeSeedClient.Create(context.TODO(), &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+		Expect(fakeSeedClient.Create(context.TODO(), &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 
 		botanist = &Botanist{
 			Operation: &operation.Operation{
@@ -239,39 +238,31 @@ users:
 			It("with still existing worker pools", func() {
 				for _, node := range []*corev1.Node{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "node1",
-							Labels: map[string]string{
-								"worker.gardener.cloud/pool":               poolName1,
-								"worker.gardener.cloud/kubernetes-version": kubernetesVersionControlPlane.String(),
-							},
+						Name: "node1",
+						Labels: map[string]string{
+							"worker.gardener.cloud/pool":               poolName1,
+							"worker.gardener.cloud/kubernetes-version": kubernetesVersionControlPlane.String(),
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "node2",
-							Labels: map[string]string{
-								"worker.gardener.cloud/pool":               poolName2,
-								"worker.gardener.cloud/kubernetes-version": "1.27.3",
-							},
+						Name: "node2",
+						Labels: map[string]string{
+							"worker.gardener.cloud/pool":               poolName2,
+							"worker.gardener.cloud/kubernetes-version": "1.27.3",
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "node3",
-							Labels: map[string]string{
-								"worker.gardener.cloud/pool":               poolName2,
-								"worker.gardener.cloud/kubernetes-version": kubernetesVersionPool2.String(),
-							},
+						Name: "node3",
+						Labels: map[string]string{
+							"worker.gardener.cloud/pool":               poolName2,
+							"worker.gardener.cloud/kubernetes-version": kubernetesVersionPool2.String(),
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "node4",
-							Labels: map[string]string{
-								"worker.gardener.cloud/pool":               "pool4",
-								"worker.gardener.cloud/kubernetes-version": "1.27.3",
-							},
+						Name: "node4",
+						Labels: map[string]string{
+							"worker.gardener.cloud/pool":               "pool4",
+							"worker.gardener.cloud/kubernetes-version": "1.27.3",
 						},
 					},
 				} {
@@ -315,22 +306,18 @@ users:
 			It("with control plane nodes identified by node label", func() {
 				for _, node := range []*corev1.Node{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "cp-node",
-							Labels: map[string]string{
-								"worker.gardener.cloud/pool":               poolName1,
-								"worker.gardener.cloud/kubernetes-version": kubernetesVersionControlPlane.String(),
-								"node-role.kubernetes.io/control-plane":    "",
-							},
+						Name: "cp-node",
+						Labels: map[string]string{
+							"worker.gardener.cloud/pool":               poolName1,
+							"worker.gardener.cloud/kubernetes-version": kubernetesVersionControlPlane.String(),
+							"node-role.kubernetes.io/control-plane":    "",
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "worker-node",
-							Labels: map[string]string{
-								"worker.gardener.cloud/pool":               poolName2,
-								"worker.gardener.cloud/kubernetes-version": kubernetesVersionPool2.String(),
-							},
+						Name: "worker-node",
+						Labels: map[string]string{
+							"worker.gardener.cloud/pool":               poolName2,
+							"worker.gardener.cloud/kubernetes-version": kubernetesVersionPool2.String(),
 						},
 					},
 				} {

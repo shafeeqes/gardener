@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -34,10 +33,8 @@ var _ = Describe("Etcd", func() {
 		namespace   = "shoot--foo--bar"
 		image       = "some-image"
 		statefulSet = &appsv1.StatefulSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "etcd-bootstrap-main",
-				Namespace: namespace,
-			},
+			Name:      "etcd-bootstrap-main",
+			Namespace: namespace,
 		}
 	)
 
@@ -47,8 +44,8 @@ var _ = Describe("Etcd", func() {
 		etcd = New(c, namespace, sm, Values{Image: image, Role: "main"})
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: namespace}})).To(Succeed())
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd-peer", Namespace: namespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: namespace})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd-peer", Namespace: namespace})).To(Succeed())
 	})
 
 	Describe("#Deploy", func() {
@@ -71,11 +68,9 @@ var _ = Describe("Etcd", func() {
 			Expect(statefulSet.Spec.Template.Spec.Volumes).Should(ContainElements(
 				corev1.Volume{
 					Name: "data",
-					VolumeSource: corev1.VolumeSource{
-						HostPath: &corev1.HostPathVolumeSource{
-							Path: "/var/lib/etcd-main/data",
-							Type: new(corev1.HostPathDirectoryOrCreate),
-						},
+					HostPath: &corev1.HostPathVolumeSource{
+						Path: "/var/lib/etcd-main/data",
+						Type: new(corev1.HostPathDirectoryOrCreate),
 					},
 				},
 				MatchFields(IgnoreExtras, Fields{"Name": Equal("etcd-ca")}),
@@ -101,7 +96,7 @@ var _ = Describe("Etcd", func() {
 			Expect(etcd.Deploy(ctx)).To(Succeed())
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(statefulSet), statefulSet)).To(Succeed())
 
-			cm := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "etcd-bootstrap-main-config", Namespace: namespace}}
+			cm := &corev1.ConfigMap{Name: "etcd-bootstrap-main-config", Namespace: namespace}
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(cm), cm)).To(Succeed())
 			Expect(cm.Data).To(HaveKey("etcd.conf.yaml"))
 

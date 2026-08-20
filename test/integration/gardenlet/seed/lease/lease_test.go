@@ -29,7 +29,7 @@ var _ = Describe("Seed lease controller tests", func() {
 	BeforeEach(OncePerOrdered, func() {
 		fakeClock.SetTime(time.Now())
 
-		lease = &coordinationv1.Lease{ObjectMeta: metav1.ObjectMeta{Name: seed.Name, Namespace: testNamespace.Name}}
+		lease = &coordinationv1.Lease{Name: seed.Name, Namespace: testNamespace.Name}
 	})
 
 	Describe("maintain the Lease object and set the internal health status to true", Ordered, func() {

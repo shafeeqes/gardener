@@ -161,8 +161,8 @@ func (v *vpnShoot) Deploy(ctx context.Context) error {
 				APIServer:  new("https://" + v1beta1constants.DeploymentNameKubeAPIServer),
 				Namespaces: &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: shoot.AccessSecretName},
-					Key:                  resourcesv1alpha1.DataKeyToken,
+					Name: shoot.AccessSecretName,
+					Key:  resourcesv1alpha1.DataKeyToken,
 				}},
 				// This is needed because we do not fetch the correct cluster CA bundle right now
 				TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
@@ -387,20 +387,16 @@ func (v *vpnShoot) computeResourcesData(secretCAVPN *corev1.Secret, secretsVPNSh
 		registry = managedresources.NewRegistry(kubernetes.ShootScheme, kubernetes.ShootCodec, kubernetes.ShootSerializer)
 
 		secretCA = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpn-shoot-ca",
-				Namespace: metav1.NamespaceSystem,
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: secretCAVPN.Data,
+			Name:      "vpn-shoot-ca",
+			Namespace: metav1.NamespaceSystem,
+			Type:      corev1.SecretTypeOpaque,
+			Data:      secretCAVPN.Data,
 		}
 		secretTLSAuth = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpn-shoot-tlsauth",
-				Namespace: metav1.NamespaceSystem,
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: secretVPNSeedServerTLSAuth.Data,
+			Name:      "vpn-shoot-tlsauth",
+			Namespace: metav1.NamespaceSystem,
+			Type:      corev1.SecretTypeOpaque,
+			Data:      secretVPNSeedServerTLSAuth.Data,
 		}
 		clusterRole        *rbacv1.ClusterRole
 		clusterRoleBinding *rbacv1.ClusterRoleBinding
@@ -411,12 +407,10 @@ func (v *vpnShoot) computeResourcesData(secretCAVPN *corev1.Secret, secretsVPNSh
 
 	for i, item := range secretsVPNShoot {
 		secret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      item.name,
-				Namespace: metav1.NamespaceSystem,
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: item.secret.Data,
+			Name:      item.name,
+			Namespace: metav1.NamespaceSystem,
+			Type:      corev1.SecretTypeOpaque,
+			Data:      item.secret.Data,
 		}
 		utilruntime.Must(kubernetesutils.MakeUnique(secret))
 		secretsVPNShoot[i].secret = secret
@@ -426,22 +420,18 @@ func (v *vpnShoot) computeResourcesData(secretCAVPN *corev1.Secret, secretsVPNSh
 		vpa *vpaautoscalingv1.VerticalPodAutoscaler
 
 		serviceAccount = &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    getLabels(),
-			},
+			Name:                         serviceName,
+			Namespace:                    metav1.NamespaceSystem,
+			Labels:                       getLabels(),
 			AutomountServiceAccountToken: new(false),
 		}
 
 		networkPolicy = &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud--allow-vpn",
-				Namespace: metav1.NamespaceSystem,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerDescription: "Allows the VPN to communicate with shoot components and makes " +
-						"the VPN reachable from the seed.",
-				},
+			Name:      "gardener.cloud--allow-vpn",
+			Namespace: metav1.NamespaceSystem,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerDescription: "Allows the VPN to communicate with shoot components and makes " +
+					"the VPN reachable from the seed.",
 			},
 			Spec: networkingv1.NetworkPolicySpec{
 				PodSelector: metav1.LabelSelector{
@@ -461,13 +451,11 @@ func (v *vpnShoot) computeResourcesData(secretCAVPN *corev1.Secret, secretsVPNSh
 		template = v.podTemplate(serviceAccount, secretsVPNShoot, secretCA, secretTLSAuth)
 
 		networkPolicyFromSeed = &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud--allow-from-seed",
-				Namespace: metav1.NamespaceSystem,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerDescription: fmt.Sprintf("Allows Ingress from the control plane to "+
-						"pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyShootFromSeed, v1beta1constants.LabelNetworkPolicyAllowed),
-				},
+			Name:      "gardener.cloud--allow-from-seed",
+			Namespace: metav1.NamespaceSystem,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerDescription: fmt.Sprintf("Allows Ingress from the control plane to "+
+					"pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyShootFromSeed, v1beta1constants.LabelNetworkPolicyAllowed),
 			},
 			Spec: networkingv1.NetworkPolicySpec{
 				PodSelector: metav1.LabelSelector{MatchLabels: map[string]string{v1beta1constants.LabelNetworkPolicyShootFromSeed: v1beta1constants.LabelNetworkPolicyAllowed}},
@@ -524,10 +512,8 @@ func (v *vpnShoot) computeResourcesData(secretCAVPN *corev1.Secret, secretsVPNSh
 			Mode:          new(vpaautoscalingv1.ContainerScalingModeOff),
 		})
 		vpa = &vpaautoscalingv1.VerticalPodAutoscaler{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "vpn-shoot",
-				Namespace: metav1.NamespaceSystem,
-			},
+			Name:      "vpn-shoot",
+			Namespace: metav1.NamespaceSystem,
 			Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 				TargetRef: &autoscalingv1.CrossVersionObjectReference{
 					APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -570,11 +556,9 @@ func (v *vpnShoot) computeResourcesData(secretCAVPN *corev1.Secret, secretsVPNSh
 
 func (v *vpnShoot) podDisruptionBudget() client.Object {
 	pdb := &policyv1.PodDisruptionBudget{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    getLabels(),
-		},
+		Name:      deploymentName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    getLabels(),
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			MaxUnavailable:             new(intstr.FromInt32(1)),
 			Selector:                   &metav1.LabelSelector{MatchLabels: getLabels()},
@@ -587,13 +571,11 @@ func (v *vpnShoot) podDisruptionBudget() client.Object {
 
 func (v *vpnShoot) podTemplate(serviceAccount *corev1.ServiceAccount, secrets []vpnSecret, secretCA, secretTLSAuth *corev1.Secret) *corev1.PodTemplateSpec {
 	template := &corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				v1beta1constants.GardenRole:     v1beta1constants.GardenRoleSystemComponent,
-				v1beta1constants.LabelApp:       labelValue,
-				managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
-				"type":                          "tunnel",
-			},
+		Labels: map[string]string{
+			v1beta1constants.GardenRole:     v1beta1constants.GardenRoleSystemComponent,
+			v1beta1constants.LabelApp:       labelValue,
+			managedresources.LabelKeyOrigin: managedresources.LabelValueGardener,
+			"type":                          "tunnel",
 		},
 		Spec: corev1.PodSpec{
 			AutomountServiceAccountToken: new(false),
@@ -687,11 +669,9 @@ func (v *vpnShoot) tunnelControllerContainer() *corev1.Container {
 			},
 		},
 		ReadinessProbe: &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path: "/readyz",
-					Port: intstr.FromInt32(8080),
-				},
+			HTTPGet: &corev1.HTTPGetAction{
+				Path: "/readyz",
+				Port: intstr.FromInt32(8080),
 			},
 			SuccessThreshold:    2, // Check twice to buy enough time to establish more than one kube apiserver route.
 			FailureThreshold:    1,
@@ -710,11 +690,9 @@ func (v *vpnShoot) deployment(labels map[string]string, template *corev1.PodTemp
 	)
 
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    labels,
-		},
+		Name:      deploymentName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    labels,
 		Spec: appsv1.DeploymentSpec{
 			RevisionHistoryLimit: new(int32(2)),
 			Replicas:             new(int32(replicas)),
@@ -736,11 +714,9 @@ func (v *vpnShoot) deployment(labels map[string]string, template *corev1.PodTemp
 func (v *vpnShoot) statefulSet(labels map[string]string, template *corev1.PodTemplateSpec) *appsv1.StatefulSet {
 	replicas := v.values.HighAvailabilityNumberOfShootClients
 	return &appsv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    labels,
-		},
+		Name:      deploymentName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    labels,
 		Spec: appsv1.StatefulSetSpec{
 			PodManagementPolicy:  appsv1.ParallelPodManagement,
 			RevisionHistoryLimit: new(int32(2)),
@@ -876,35 +852,29 @@ func (v *vpnShoot) getVolumes(secret []vpnSecret, secretCA, secretTLSAuth *corev
 	for _, item := range secret {
 		volumes = append(volumes, corev1.Volume{
 			Name: item.volumeName,
-			VolumeSource: corev1.VolumeSource{
-				Projected: &corev1.ProjectedVolumeSource{
-					DefaultMode: new(int32(0400)),
-					Sources: []corev1.VolumeProjection{
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: secretCA.Name,
-								},
-								Items: []corev1.KeyToPath{{
-									Key:  secretsutils.DataKeyCertificateBundle,
-									Path: "ca.crt",
-								}},
-							},
+			Projected: &corev1.ProjectedVolumeSource{
+				DefaultMode: new(int32(0400)),
+				Sources: []corev1.VolumeProjection{
+					{
+						Secret: &corev1.SecretProjection{
+							Name: secretCA.Name,
+							Items: []corev1.KeyToPath{{
+								Key:  secretsutils.DataKeyCertificateBundle,
+								Path: "ca.crt",
+							}},
 						},
-						{
-							Secret: &corev1.SecretProjection{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: item.secret.Name,
+					},
+					{
+						Secret: &corev1.SecretProjection{
+							Name: item.secret.Name,
+							Items: []corev1.KeyToPath{
+								{
+									Key:  secretsutils.DataKeyCertificate,
+									Path: secretsutils.DataKeyCertificate,
 								},
-								Items: []corev1.KeyToPath{
-									{
-										Key:  secretsutils.DataKeyCertificate,
-										Path: secretsutils.DataKeyCertificate,
-									},
-									{
-										Key:  secretsutils.DataKeyPrivateKey,
-										Path: secretsutils.DataKeyPrivateKey,
-									},
+								{
+									Key:  secretsutils.DataKeyPrivateKey,
+									Path: secretsutils.DataKeyPrivateKey,
 								},
 							},
 						},
@@ -915,21 +885,17 @@ func (v *vpnShoot) getVolumes(secret []vpnSecret, secretCA, secretTLSAuth *corev
 	}
 	volumes = append(volumes, corev1.Volume{
 		Name: volumeNameTLSAuth,
-		VolumeSource: corev1.VolumeSource{
-			Secret: &corev1.SecretVolumeSource{
-				SecretName:  secretTLSAuth.Name,
-				DefaultMode: new(int32(0400)),
-			},
+		Secret: &corev1.SecretVolumeSource{
+			SecretName:  secretTLSAuth.Name,
+			DefaultMode: new(int32(0400)),
 		},
 	})
 	hostPathCharDev := corev1.HostPathCharDev
 	volumes = append(volumes, corev1.Volume{
 		Name: volumeNameDevNetTun,
-		VolumeSource: corev1.VolumeSource{
-			HostPath: &corev1.HostPathVolumeSource{
-				Path: volumeMountPathDevNetTun,
-				Type: &hostPathCharDev,
-			},
+		HostPath: &corev1.HostPathVolumeSource{
+			Path: volumeMountPathDevNetTun,
+			Type: &hostPathCharDev,
 		},
 	})
 	return volumes

@@ -200,7 +200,7 @@ func (g *gardenerAPIServer) Deploy(ctx context.Context) error {
 		return err
 	}
 
-	serviceRuntime := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: g.namespace}}
+	serviceRuntime := &corev1.Service{Name: serviceName, Namespace: g.namespace}
 	if err := retry.UntilTimeout(ctx, intervalWaitServiceRuntime, timeoutWaitServiceRuntime, func(ctx context.Context) (bool, error) {
 		if err := g.client.Get(ctx, client.ObjectKeyFromObject(serviceRuntime), serviceRuntime); err != nil {
 			if apierrors.IsNotFound(err) {

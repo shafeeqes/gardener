@@ -86,10 +86,8 @@ var _ = Describe("ManagedSeed Tests", Label("ManagedSeed", "default"), Ordered, 
 		itShouldVerifyGardenletKubeconfigRotation(verifier, false, func() {
 			It("Should annotate kubeconfig secret", func(ctx SpecContext) {
 				secret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      gardenletKubeconfigSecretName,
-						Namespace: gardenletKubeconfigSecretNamespace,
-					},
+					Name:      gardenletKubeconfigSecretName,
+					Namespace: gardenletKubeconfigSecretNamespace,
 				}
 
 				Eventually(ctx, s.ShootContext.ShootKomega.Update(secret, func() {
@@ -102,10 +100,8 @@ var _ = Describe("ManagedSeed Tests", Label("ManagedSeed", "default"), Ordered, 
 	Describe("Trigger gardenlet kubeconfig auto-rotation by reducing kubeconfig validity", func() {
 		It("Scale down gardenlet deployment and wait until no gardenlet pods exist anymore", func(ctx SpecContext) {
 			deployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      v1beta1constants.DeploymentNameGardenlet,
-					Namespace: v1beta1constants.GardenNamespace,
-				},
+				Name:      v1beta1constants.DeploymentNameGardenlet,
+				Namespace: v1beta1constants.GardenNamespace,
 			}
 
 			Eventually(ctx, func(g Gomega) {
@@ -163,10 +159,8 @@ const (
 
 func buildManagedSeed(shoot *gardencorev1beta1.Shoot) *seedmanagementv1alpha1.ManagedSeed {
 	gardenletConfig := &gardenletconfigv1alpha1.GardenletConfiguration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "GardenletConfiguration",
-		},
+		APIVersion: gardenletconfigv1alpha1.SchemeGroupVersion.String(),
+		Kind:       "GardenletConfiguration",
 		GardenClientConnection: &gardenletconfigv1alpha1.GardenClientConnection{
 			KubeconfigSecret: &corev1.SecretReference{
 				Name:      gardenletKubeconfigSecretName,
@@ -174,31 +168,29 @@ func buildManagedSeed(shoot *gardencorev1beta1.Shoot) *seedmanagementv1alpha1.Ma
 			},
 		},
 		SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-			SeedTemplate: gardencorev1beta1.SeedTemplate{
-				Spec: gardencorev1beta1.SeedSpec{
-					Settings: &gardencorev1beta1.SeedSettings{
-						ExcessCapacityReservation: &gardencorev1beta1.SeedSettingExcessCapacityReservation{
-							Enabled: new(false),
-						},
-						Scheduling: &gardencorev1beta1.SeedSettingScheduling{
-							Visible: false,
-						},
+			Spec: gardencorev1beta1.SeedSpec{
+				Settings: &gardencorev1beta1.SeedSettings{
+					ExcessCapacityReservation: &gardencorev1beta1.SeedSettingExcessCapacityReservation{
+						Enabled: new(false),
 					},
-					Ingress: &gardencorev1beta1.Ingress{
-						Controller: gardencorev1beta1.IngressController{
-							Kind: "nginx",
-						},
+					Scheduling: &gardencorev1beta1.SeedSettingScheduling{
+						Visible: false,
 					},
-					DNS: gardencorev1beta1.SeedDNS{
-						Internal: &gardencorev1beta1.SeedDNSProviderConfig{
-							Type:   "local",
-							Domain: "internal.local.gardener.cloud",
-							CredentialsRef: corev1.ObjectReference{
-								APIVersion: "v1",
-								Kind:       "Secret",
-								Name:       "internal-domain-internal-local-gardener-cloud",
-								Namespace:  v1beta1constants.GardenNamespace,
-							},
+				},
+				Ingress: &gardencorev1beta1.Ingress{
+					Controller: gardencorev1beta1.IngressController{
+						Kind: "nginx",
+					},
+				},
+				DNS: gardencorev1beta1.SeedDNS{
+					Internal: &gardencorev1beta1.SeedDNSProviderConfig{
+						Type:   "local",
+						Domain: "internal.local.gardener.cloud",
+						CredentialsRef: corev1.ObjectReference{
+							APIVersion: "v1",
+							Kind:       "Secret",
+							Name:       "internal-domain-internal-local-gardener-cloud",
+							Namespace:  v1beta1constants.GardenNamespace,
 						},
 					},
 				},
@@ -212,10 +204,8 @@ func buildManagedSeed(shoot *gardencorev1beta1.Shoot) *seedmanagementv1alpha1.Ma
 	Expect(err).NotTo(HaveOccurred())
 
 	return &seedmanagementv1alpha1.ManagedSeed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      shoot.Name,
-			Namespace: shoot.Namespace,
-		},
+		Name:      shoot.Name,
+		Namespace: shoot.Namespace,
 		Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 			Shoot: &seedmanagementv1alpha1.Shoot{Name: shoot.Name},
 			Gardenlet: seedmanagementv1alpha1.GardenletConfig{
@@ -273,11 +263,9 @@ func patchGardenletKubeconfigValiditySettingsAndTriggerRotation(
 
 func itShouldVerifyPrometheusHealthCheck(s *ManagedSeedContext, prometheusName string) {
 	rule := &monitoringv1.PrometheusRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      prometheusName + "-test-job-down",
-			Namespace: "garden",
-			Labels:    map[string]string{"prometheus": prometheusName},
-		},
+		Name:      prometheusName + "-test-job-down",
+		Namespace: "garden",
+		Labels:    map[string]string{"prometheus": prometheusName},
 		Spec: monitoringv1.PrometheusRuleSpec{
 			Groups: []monitoringv1.RuleGroup{
 				{

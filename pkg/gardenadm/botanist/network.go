@@ -10,7 +10,6 @@ import (
 	"net"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -63,7 +62,7 @@ func (b *GardenadmBotanist) ApplyNetworkPolicies(ctx context.Context) error {
 		b.Logger.Info("Reconciling NetworkPolicies using gardenlet's reconciliation logic", "namespaceName", namespace.Name)
 
 		reconcilerCtx := log.IntoContext(ctx, b.Logger.WithName("networkpolicy-reconciler").WithValues("namespaceName", namespace.Name))
-		if _, err := reconciler.Reconcile(reconcilerCtx, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespace.Name}}); err != nil {
+		if _, err := reconciler.Reconcile(reconcilerCtx, reconcile.Request{Name: namespace.Name}); err != nil {
 			return fmt.Errorf("failed running NetworkPolicy controller for namespace %q: %w", namespace.Name, err)
 		}
 	}

@@ -63,10 +63,8 @@ func ItShouldCreateShoot(s *ShootContext) {
 	It("Create Shoot", func(ctx SpecContext) {
 		if existingShootName != "" {
 			s.Shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      existingShootName,
-					Namespace: projectNamespace,
-				},
+				Name:      existingShootName,
+				Namespace: projectNamespace,
 			}
 			s.Log = s.Log.WithValues("shoot", client.ObjectKeyFromObject(s.Shoot))
 

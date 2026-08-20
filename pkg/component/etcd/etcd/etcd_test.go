@@ -173,12 +173,10 @@ var _ = Describe("Etcd", func() {
 			}
 
 			clientService := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":2379},{"protocol":"TCP","port":8080}]`,
-						"networking.resources.gardener.cloud/namespace-selectors":                   `[{"matchLabels":{"kubernetes.io/metadata.name":"garden"}}]`,
-						"networking.resources.gardener.cloud/pod-label-selector-namespace-alias":    "all-shoots",
-					},
+				Annotations: map[string]string{
+					"networking.resources.gardener.cloud/from-all-scrape-targets-allowed-ports": `[{"protocol":"TCP","port":2379},{"protocol":"TCP","port":8080}]`,
+					"networking.resources.gardener.cloud/namespace-selectors":                   `[{"matchLabels":{"kubernetes.io/metadata.name":"garden"}}]`,
+					"networking.resources.gardener.cloud/pod-label-selector-namespace-alias":    "all-shoots",
 				},
 			}
 			if topologyAwareRoutingEnabled {
@@ -191,17 +189,15 @@ var _ = Describe("Etcd", func() {
 			}
 
 			obj := &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      etcdName,
-					Namespace: testNamespace,
-					Annotations: map[string]string{
-						"gardener.cloud/operation": "reconcile",
-						"gardener.cloud/timestamp": now.Format(time.RFC3339Nano),
-					},
-					Labels: map[string]string{
-						"gardener.cloud/role": "controlplane",
-						"role":                role,
-					},
+				Name:      etcdName,
+				Namespace: testNamespace,
+				Annotations: map[string]string{
+					"gardener.cloud/operation": "reconcile",
+					"gardener.cloud/timestamp": now.Format(time.RFC3339Nano),
+				},
+				Labels: map[string]string{
+					"gardener.cloud/role": "controlplane",
+					"role":                role,
 				},
 				Spec: druidcorev1alpha1.EtcdSpec{
 					Replicas:          replicas,
@@ -308,18 +304,16 @@ var _ = Describe("Etcd", func() {
 					"networking.resources.gardener.cloud/to-etcd-" + role + "-client-tcp-8080": "allowed",
 				})
 				obj.Spec.Etcd.PeerUrlTLS = &druidcorev1alpha1.PeerTLSConfig{
-					TLSConfig: druidcorev1alpha1.TLSConfig{
-						ServerTLSSecretRef: corev1.SecretReference{
-							Name:      secretNameServerPeer,
+					ServerTLSSecretRef: corev1.SecretReference{
+						Name:      secretNameServerPeer,
+						Namespace: testNamespace,
+					},
+					TLSCASecretRef: druidcorev1alpha1.SecretReference{
+						SecretReference: corev1.SecretReference{
+							Name:      secretNamePeerCA,
 							Namespace: testNamespace,
 						},
-						TLSCASecretRef: druidcorev1alpha1.SecretReference{
-							SecretReference: corev1.SecretReference{
-								Name:      secretNamePeerCA,
-								Namespace: testNamespace,
-							},
-							DataKey: new(secretsutils.DataKeyCertificateBundle),
-						},
+						DataKey: new(secretsutils.DataKeyCertificateBundle),
 					},
 				}
 			}
@@ -333,11 +327,9 @@ var _ = Describe("Etcd", func() {
 
 			if ptr.Deref(peerCASecretName, "") != "" {
 				obj.Spec.Etcd.PeerUrlTLS.TLSCASecretRef = druidcorev1alpha1.SecretReference{
-					SecretReference: corev1.SecretReference{
-						Name:      *peerCASecretName,
-						Namespace: testNamespace,
-					},
-					DataKey: new(secretsutils.DataKeyCertificateBundle),
+					Name:      *peerCASecretName,
+					Namespace: testNamespace,
+					DataKey:   new(secretsutils.DataKeyCertificateBundle),
 				}
 			}
 
@@ -398,11 +390,9 @@ var _ = Describe("Etcd", func() {
 			}
 
 			vpa := &vpaautoscalingv1.VerticalPodAutoscaler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      vpaName,
-					Namespace: testNamespace,
-					Labels:    map[string]string{v1beta1constants.LabelRole: "etcd-vpa-" + role},
-				},
+				Name:      vpaName,
+				Namespace: testNamespace,
+				Labels:    map[string]string{v1beta1constants.LabelRole: "etcd-vpa-" + role},
 				Spec: vpaautoscalingv1.VerticalPodAutoscalerSpec{
 					TargetRef: &autoscalingv1.CrossVersionObjectReference{
 						APIVersion: druidcorev1alpha1.SchemeGroupVersion.String(),
@@ -468,11 +458,9 @@ var _ = Describe("Etcd", func() {
 			jobNameEtcd, jobNameBackupRestore := serviceMonitorJobNames(prometheusName)
 
 			return &monitoringv1.ServiceMonitor{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      prometheusName + "-" + etcdName,
-					Namespace: testNamespace,
-					Labels:    map[string]string{"prometheus": prometheusName},
-				},
+				Name:      prometheusName + "-" + etcdName,
+				Namespace: testNamespace,
+				Labels:    map[string]string{"prometheus": prometheusName},
 				Spec: monitoringv1.ServiceMonitorSpec{
 					Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 						druidcorev1alpha1.LabelAppNameKey: fmt.Sprintf("%s-client", etcdName),
@@ -482,21 +470,16 @@ var _ = Describe("Etcd", func() {
 						{
 							Port:   "client",
 							Scheme: new(monitoringv1.SchemeHTTPS),
-							HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-								HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-									TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{
-										InsecureSkipVerify: new(true),
-										Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{Name: clientSecretName},
-											Key:                  secretsutils.DataKeyCertificate,
-										}},
-										KeySecret: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{Name: clientSecretName},
-											Key:                  secretsutils.DataKeyPrivateKey,
-										},
-									}},
-								},
-							},
+							TLSConfig: &monitoringv1.TLSConfig{
+								InsecureSkipVerify: new(true),
+								Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
+									Name: clientSecretName,
+									Key:  secretsutils.DataKeyCertificate,
+								}},
+								KeySecret: &corev1.SecretKeySelector{
+									Name: clientSecretName,
+									Key:  secretsutils.DataKeyPrivateKey,
+								}},
 							RelabelConfigs: []monitoringv1.RelabelConfig{
 								{
 									SourceLabels: []monitoringv1.LabelName{"__meta_kubernetes_service_label_app_kubernetes_io_part_of"},
@@ -516,21 +499,16 @@ var _ = Describe("Etcd", func() {
 						{
 							Port:   "backuprestore",
 							Scheme: new(monitoringv1.SchemeHTTPS),
-							HTTPConfigWithProxyAndTLSFiles: monitoringv1.HTTPConfigWithProxyAndTLSFiles{
-								HTTPConfigWithTLSFiles: monitoringv1.HTTPConfigWithTLSFiles{
-									TLSConfig: &monitoringv1.TLSConfig{SafeTLSConfig: monitoringv1.SafeTLSConfig{
-										InsecureSkipVerify: new(true),
-										Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{Name: clientSecretName},
-											Key:                  secretsutils.DataKeyCertificate,
-										}},
-										KeySecret: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{Name: clientSecretName},
-											Key:                  secretsutils.DataKeyPrivateKey,
-										},
-									}},
-								},
-							},
+							TLSConfig: &monitoringv1.TLSConfig{
+								InsecureSkipVerify: new(true),
+								Cert: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
+									Name: clientSecretName,
+									Key:  secretsutils.DataKeyCertificate,
+								}},
+								KeySecret: &corev1.SecretKeySelector{
+									Name: clientSecretName,
+									Key:  secretsutils.DataKeyPrivateKey,
+								}},
 							RelabelConfigs: []monitoringv1.RelabelConfig{
 								{
 									SourceLabels: []monitoringv1.LabelName{"__meta_kubernetes_service_label_app_kubernetes_io_part_of"},
@@ -568,11 +546,9 @@ var _ = Describe("Etcd", func() {
 			}
 
 			obj := &monitoringv1.PrometheusRule{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "shoot-" + etcdName,
-					Namespace: testNamespace,
-					Labels:    map[string]string{"prometheus": "shoot"},
-				},
+				Name:      "shoot-" + etcdName,
+				Namespace: testNamespace,
+				Labels:    map[string]string{"prometheus": "shoot"},
 				Spec: monitoringv1.PrometheusRuleSpec{
 					Groups: []monitoringv1.RuleGroup{{
 						Name: jobNameEtcd + ".rules",
@@ -759,7 +735,7 @@ var _ = Describe("Etcd", func() {
 		vpaName = etcdName
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
+		Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
 		etcd = New(log, c, testNamespace, sm, Values{
 			Role:                    role,
 			Class:                   class,
@@ -792,7 +768,7 @@ var _ = Describe("Etcd", func() {
 				},
 			}).Build()
 			sm = fakesecretsmanager.New(c, testNamespace)
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
 			etcd = New(log, c, testNamespace, sm, Values{
 				Role: role, Class: class, Replicas: replicas, Autoscaling: autoscalingConfig,
 				StorageCapacity: storageCapacity, StorageClassName: &storageClassName,
@@ -813,7 +789,7 @@ var _ = Describe("Etcd", func() {
 				},
 			}).Build()
 			sm = fakesecretsmanager.New(c, testNamespace)
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
 			etcd = New(log, c, testNamespace, sm, Values{
 				Role: role, Class: class, Replicas: replicas, Autoscaling: autoscalingConfig,
 				StorageCapacity: storageCapacity, StorageClassName: &storageClassName,
@@ -852,8 +828,8 @@ var _ = Describe("Etcd", func() {
 			var existingReplicas int32 = 245
 
 			Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
-				Spec:       druidcorev1alpha1.EtcdSpec{Replicas: existingReplicas},
+				Name: etcdName, Namespace: testNamespace,
+				Spec: druidcorev1alpha1.EtcdSpec{Replicas: existingReplicas},
 			})).To(Succeed())
 
 			etcd = New(log, c, testNamespace, sm, Values{
@@ -895,8 +871,8 @@ var _ = Describe("Etcd", func() {
 			var existingReplicas int32 = 245
 
 			Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
-				Spec:       druidcorev1alpha1.EtcdSpec{Replicas: existingReplicas},
+				Name: etcdName, Namespace: testNamespace,
+				Spec: druidcorev1alpha1.EtcdSpec{Replicas: existingReplicas},
 				Status: druidcorev1alpha1.EtcdStatus{
 					Etcd: &druidcorev1alpha1.CrossVersionObjectReference{Name: etcdName},
 				},
@@ -929,11 +905,9 @@ var _ = Describe("Etcd", func() {
 
 		It("should successfully deploy (normal etcd) and retain annotations (etcd found)", func() {
 			Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        etcdName,
-					Namespace:   testNamespace,
-					Annotations: map[string]string{"foo": "bar"},
-				},
+				Name:        etcdName,
+				Namespace:   testNamespace,
+				Annotations: map[string]string{"foo": "bar"},
 				Status: druidcorev1alpha1.EtcdStatus{
 					Etcd: &druidcorev1alpha1.CrossVersionObjectReference{Name: etcdName},
 				},
@@ -949,7 +923,7 @@ var _ = Describe("Etcd", func() {
 		DescribeTable("should correctly handle the existing defragmentation schedule",
 			func(existingSchedule string, expectedSchedule string) {
 				Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-					ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+					Name: etcdName, Namespace: testNamespace,
 					Spec: druidcorev1alpha1.EtcdSpec{
 						Etcd: druidcorev1alpha1.EtcdConfig{
 							DefragmentationSchedule: &existingSchedule,
@@ -1009,7 +983,7 @@ var _ = Describe("Etcd", func() {
 		It("should not overwrite spec.memberNamePrefix when the Etcd resource already exists (immutable field)", func() {
 			existingPrefix := "existing-prefix"
 			Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+				Name: etcdName, Namespace: testNamespace,
 				Spec: druidcorev1alpha1.EtcdSpec{
 					MemberNamePrefix: &existingPrefix,
 				},
@@ -1045,7 +1019,7 @@ var _ = Describe("Etcd", func() {
 
 		It("should not add spec.memberNamePrefix to an existing Etcd resource that was created without one", func() {
 			Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+				Name: etcdName, Namespace: testNamespace,
 				Status: druidcorev1alpha1.EtcdStatus{
 					Etcd: &druidcorev1alpha1.CrossVersionObjectReference{Name: etcdName},
 				},
@@ -1083,7 +1057,7 @@ var _ = Describe("Etcd", func() {
 			}
 
 			Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+				Name: etcdName, Namespace: testNamespace,
 				Spec: druidcorev1alpha1.EtcdSpec{
 					Etcd: druidcorev1alpha1.EtcdConfig{
 						Resources: existingResourceRequests,
@@ -1192,7 +1166,7 @@ var _ = Describe("Etcd", func() {
 				existingBackupSchedule := "foobarbackupexisting"
 
 				Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-					ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+					Name: etcdName, Namespace: testNamespace,
 					Spec: druidcorev1alpha1.EtcdSpec{
 						Backup: druidcorev1alpha1.BackupSpec{FullSnapshotSchedule: &existingBackupSchedule},
 					},
@@ -1343,7 +1317,7 @@ var _ = Describe("Etcd", func() {
 			BeforeEach(func() {
 				highAvailabilityEnabled = true
 				replicas = new(int32(3))
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd-peer", Namespace: testNamespace}})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd-peer", Namespace: testNamespace})).To(Succeed())
 			})
 
 			createExpectations := func(caSecretName, clientSecretName, serverSecretName, peerCASecretName, peerServerSecretName string) {
@@ -1512,14 +1486,12 @@ var _ = Describe("Etcd", func() {
 					var clientSecretName string
 
 					Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-						ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+						Name: etcdName, Namespace: testNamespace,
 						Spec: druidcorev1alpha1.EtcdSpec{
 							Replicas: 3,
 							Etcd: druidcorev1alpha1.EtcdConfig{
 								PeerUrlTLS: &druidcorev1alpha1.PeerTLSConfig{
-									TLSConfig: druidcorev1alpha1.TLSConfig{
-										ServerTLSSecretRef: corev1.SecretReference{Name: "peerServerSecretName", Namespace: testNamespace},
-									},
+									ServerTLSSecretRef: corev1.SecretReference{Name: "peerServerSecretName", Namespace: testNamespace},
 								},
 							},
 						},
@@ -1558,7 +1530,7 @@ var _ = Describe("Etcd", func() {
 
 				It("should add peer url secrets", func() {
 					Expect(c.Create(ctx, &druidcorev1alpha1.Etcd{
-						ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace},
+						Name: etcdName, Namespace: testNamespace,
 						Spec: druidcorev1alpha1.EtcdSpec{
 							Replicas: 3,
 							Etcd:     druidcorev1alpha1.EtcdConfig{PeerUrlTLS: nil},
@@ -1725,11 +1697,11 @@ var _ = Describe("Etcd", func() {
 		It("should properly delete all expected objects", func() {
 			defer test.WithVar(&gardener.TimeNow, nowFunc)()
 
-			etcdObj := &druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: "etcd-" + testRole, Namespace: testNamespace}}
-			vpaObj := &vpaautoscalingv1.VerticalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Name: "etcd-" + testRole, Namespace: testNamespace}}
-			smObj := &monitoringv1.ServiceMonitor{ObjectMeta: metav1.ObjectMeta{Name: "shoot-etcd-" + testRole, Namespace: testNamespace}}
-			scObj := &monitoringv1alpha1.ScrapeConfig{ObjectMeta: metav1.ObjectMeta{Name: "shoot-etcd-druid", Namespace: testNamespace}}
-			prObj := &monitoringv1.PrometheusRule{ObjectMeta: metav1.ObjectMeta{Name: "shoot-etcd-" + testRole, Namespace: testNamespace}}
+			etcdObj := &druidcorev1alpha1.Etcd{Name: "etcd-" + testRole, Namespace: testNamespace}
+			vpaObj := &vpaautoscalingv1.VerticalPodAutoscaler{Name: "etcd-" + testRole, Namespace: testNamespace}
+			smObj := &monitoringv1.ServiceMonitor{Name: "shoot-etcd-" + testRole, Namespace: testNamespace}
+			scObj := &monitoringv1alpha1.ScrapeConfig{Name: "shoot-etcd-druid", Namespace: testNamespace}
+			prObj := &monitoringv1.PrometheusRule{Name: "shoot-etcd-" + testRole, Namespace: testNamespace}
 			Expect(c.Create(ctx, etcdObj)).To(Succeed())
 			Expect(c.Create(ctx, vpaObj)).To(Succeed())
 			Expect(c.Create(ctx, smObj)).To(Succeed())
@@ -1756,7 +1728,7 @@ var _ = Describe("Etcd", func() {
 					return cl.Delete(ctx, obj, opts...)
 				},
 			}).Build()
-			Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
+			Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
 			etcd = New(log, c, testNamespace, sm, Values{
 				Role: testRole, Class: class, Replicas: new(int32(1)),
 				StorageCapacity: storageCapacity, StorageClassName: &storageClassName,
@@ -1809,10 +1781,8 @@ var _ = Describe("Etcd", func() {
 
 		BeforeEach(func() {
 			etcdObj = &druidcorev1alpha1.Etcd{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "etcd-" + testRole,
-					Namespace: testNamespace,
-				},
+				Name:      "etcd-" + testRole,
+				Namespace: testNamespace,
 			}
 
 			etcd = New(log, c, testNamespace, sm, Values{
@@ -1901,22 +1871,18 @@ var _ = Describe("Etcd", func() {
 
 			createEtcdObj := func(caName string) *druidcorev1alpha1.Etcd {
 				return &druidcorev1alpha1.Etcd{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       etcdName,
-						Namespace:  testNamespace,
-						Generation: 1,
-					},
+					Name:       etcdName,
+					Namespace:  testNamespace,
+					Generation: 1,
 					Spec: druidcorev1alpha1.EtcdSpec{
 						Etcd: druidcorev1alpha1.EtcdConfig{
 							PeerUrlTLS: &druidcorev1alpha1.PeerTLSConfig{
-								TLSConfig: druidcorev1alpha1.TLSConfig{
-									TLSCASecretRef: druidcorev1alpha1.SecretReference{
-										SecretReference: corev1.SecretReference{
-											Name:      caName,
-											Namespace: testNamespace,
-										},
-										DataKey: new(secretsutils.DataKeyCertificateBundle),
+								TLSCASecretRef: druidcorev1alpha1.SecretReference{
+									SecretReference: corev1.SecretReference{
+										Name:      caName,
+										Namespace: testNamespace,
 									},
+									DataKey: new(secretsutils.DataKeyCertificateBundle),
 								},
 							},
 						},
@@ -1939,7 +1905,7 @@ var _ = Describe("Etcd", func() {
 			})
 
 			It("should patch the etcd resource with the new peer CA secret name", func() {
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd-peer", Namespace: testNamespace}})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd-peer", Namespace: testNamespace})).To(Succeed())
 
 				existingEtcd := createEtcdObj("old-ca")
 				Expect(c.Create(ctx, existingEtcd)).To(Succeed())
@@ -1969,7 +1935,7 @@ var _ = Describe("Etcd", func() {
 						return nil
 					},
 				}).Build()
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
 
 				etcd = New(log, c, testNamespace, sm, Values{
 					Role: role, Class: class, Replicas: replicas, PriorityClassName: priorityClassName,
@@ -1985,7 +1951,7 @@ var _ = Describe("Etcd", func() {
 			It("should only patch reconcile annotation data because the expected CA ref is already configured", func() {
 				peerCAName := "ca-etcd-peer"
 
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: peerCAName, Namespace: testNamespace}})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: peerCAName, Namespace: testNamespace})).To(Succeed())
 
 				existingEtcd := createEtcdObj(peerCAName)
 				Expect(c.Create(ctx, existingEtcd)).To(Succeed())
@@ -2014,8 +1980,8 @@ var _ = Describe("Etcd", func() {
 						return nil
 					},
 				}).Build()
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca-etcd", Namespace: testNamespace}})).To(Succeed())
-				Expect(c.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: peerCAName, Namespace: testNamespace}})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: "ca-etcd", Namespace: testNamespace})).To(Succeed())
+				Expect(c.Create(ctx, &corev1.Secret{Name: peerCAName, Namespace: testNamespace})).To(Succeed())
 
 				etcd = New(log, c, testNamespace, sm, Values{
 					Role: role, Class: class, Replicas: replicas, PriorityClassName: priorityClassName,

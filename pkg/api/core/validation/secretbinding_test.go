@@ -23,10 +23,8 @@ var _ = Describe("SecretBinding Validation Tests", func() {
 
 		BeforeEach(func() {
 			secretBinding = &core.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "profile",
-					Namespace: "garden",
-				},
+				Name:      "profile",
+				Namespace: "garden",
 				SecretRef: corev1.SecretReference{
 					Name:      "my-secret",
 					Namespace: "my-namespace",
@@ -152,10 +150,8 @@ var _ = Describe("SecretBinding Validation Tests", func() {
 
 		BeforeEach(func() {
 			secretBinding = &core.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "profile",
-					Namespace: "garden",
-				},
+				Name:      "profile",
+				Namespace: "garden",
 				SecretRef: corev1.SecretReference{
 					Name:      "my-secret",
 					Namespace: "my-namespace",

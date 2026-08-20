@@ -103,10 +103,8 @@ func New(
 		waitTimeout:         waitTimeout,
 
 		worker: &extensionsv1alpha1.Worker{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      values.Name,
-				Namespace: values.Namespace,
-			},
+			Name:      values.Name,
+			Namespace: values.Namespace,
 		},
 	}
 }
@@ -282,9 +280,7 @@ func (w *worker) deploy(ctx context.Context, operation string) (extensionsv1alph
 		metav1.SetMetaDataAnnotation(&w.worker.ObjectMeta, v1beta1constants.GardenerTimestamp, TimeNow().UTC().Format(time.RFC3339Nano))
 
 		w.worker.Spec = extensionsv1alpha1.WorkerSpec{
-			DefaultSpec: extensionsv1alpha1.DefaultSpec{
-				Type: w.values.Type,
-			},
+			Type:   w.values.Type,
 			Region: w.values.Region,
 			SecretRef: corev1.SecretReference{
 				Name:      v1beta1constants.SecretNameCloudProvider,

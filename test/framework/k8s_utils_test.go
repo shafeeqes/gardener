@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -42,14 +41,10 @@ var _ = Describe("Kubernetes Utils", func() {
 
 		It("should return all nodes when no worker pool is specified", func() {
 			node1 := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "node1",
-				},
+				Name: "node1",
 			}
 			node2 := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "node2",
-				},
+				Name: "node2",
 			}
 
 			Expect(fakeClient.Create(ctx, node1)).To(Succeed())
@@ -65,16 +60,12 @@ var _ = Describe("Kubernetes Utils", func() {
 		It("should return nodes belonging to a specific worker pool", func() {
 			workerPool = "worker-pool-1"
 			node1 := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "node1",
-					Labels: map[string]string{"worker.gardener.cloud/pool": workerPool},
-				},
+				Name:   "node1",
+				Labels: map[string]string{"worker.gardener.cloud/pool": workerPool},
 			}
 			node2 := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "node2",
-					Labels: map[string]string{"worker.gardener.cloud/pool": "worker-pool-2"},
-				},
+				Name:   "node2",
+				Labels: map[string]string{"worker.gardener.cloud/pool": "worker-pool-2"},
 			}
 
 			Expect(fakeClient.Create(ctx, node1)).To(Succeed())
@@ -89,10 +80,8 @@ var _ = Describe("Kubernetes Utils", func() {
 		It("should return an empty list if no nodes match the worker pool", func() {
 			workerPool = "non-existent-pool"
 			node := &corev1.Node{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "node1",
-					Labels: map[string]string{"worker.gardener.cloud/pool": "worker-pool-1"},
-				},
+				Name:   "node1",
+				Labels: map[string]string{"worker.gardener.cloud/pool": "worker-pool-1"},
 			}
 
 			Expect(fakeClient.Create(ctx, node)).To(Succeed())
@@ -116,9 +105,7 @@ var _ = Describe("Kubernetes Utils", func() {
 
 		BeforeEach(func() {
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Generation: 1,
-				},
+				Generation: 1,
 				Spec: gardencorev1beta1.ShootSpec{
 					Provider: gardencorev1beta1.Provider{
 						Workers: []gardencorev1beta1.Worker{

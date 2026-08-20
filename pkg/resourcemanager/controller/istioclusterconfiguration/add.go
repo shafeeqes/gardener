@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -101,7 +100,7 @@ func (r *Reconciler) MapDestinationRuleToNamespace(_ context.Context, obj client
 	if obj == nil {
 		return nil
 	}
-	return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: obj.GetNamespace()}}}
+	return []reconcile.Request{{Name: obj.GetNamespace()}}
 }
 
 // MapServiceToNamespaces maps a Service change to all source namespaces that have DestinationRules referencing it.
@@ -128,7 +127,7 @@ func (r *Reconciler) MapServiceToNamespaces(ctx context.Context, obj client.Obje
 	var requests []reconcile.Request
 
 	for _, namespace := range namespaces.UnsortedList() {
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespace}})
+		requests = append(requests, reconcile.Request{Name: namespace})
 	}
 
 	return requests
@@ -160,7 +159,7 @@ func (r *Reconciler) MapNamespaceToSourceNamespaces(ctx context.Context, obj cli
 	var requests []reconcile.Request
 
 	for _, namespace := range namespaces.UnsortedList() {
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: namespace}})
+		requests = append(requests, reconcile.Request{Name: namespace})
 	}
 
 	return requests

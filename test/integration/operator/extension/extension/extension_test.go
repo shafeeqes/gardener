@@ -46,11 +46,9 @@ var _ = Describe("Extension controller tests", func() {
 		DeferCleanup(test.WithVar(&extensioncontroller.RequeueGardenResourceNotReady, 100*time.Millisecond))
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        gardenName,
-				Labels:      map[string]string{testID: testRunID},
-				Annotations: map[string]string{v1beta1constants.AnnotationKeyGenericTokenKubeconfigSecretName: "foo-kubeconfig"},
-			},
+			Name:        gardenName,
+			Labels:      map[string]string{testID: testRunID},
+			Annotations: map[string]string{v1beta1constants.AnnotationKeyGenericTokenKubeconfigSecretName: "foo-kubeconfig"},
 			Spec: operatorv1alpha1.GardenSpec{
 				RuntimeCluster: operatorv1alpha1.RuntimeCluster{
 					Networking: operatorv1alpha1.RuntimeNetworking{
@@ -95,10 +93,8 @@ var _ = Describe("Extension controller tests", func() {
 			},
 		}
 		extensionBar = &operatorv1alpha1.Extension{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "provider-bar",
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "provider-bar",
+			Labels: map[string]string{testID: testRunID},
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -116,10 +112,8 @@ var _ = Describe("Extension controller tests", func() {
 				},
 				Deployment: &operatorv1alpha1.Deployment{
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &ociRepositoryProviderLocalChart,
-							},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &ociRepositoryProviderLocalChart,
 						},
 					},
 				},
@@ -127,10 +121,8 @@ var _ = Describe("Extension controller tests", func() {
 		}
 		extensionFoo = &operatorv1alpha1.Extension{
 			TypeMeta: metav1.TypeMeta{},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "provider-foo",
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:     "provider-foo",
+			Labels:   map[string]string{testID: testRunID},
 			Spec: operatorv1alpha1.ExtensionSpec{
 				Resources: []gardencorev1beta1.ControllerResource{
 					{
@@ -179,10 +171,8 @@ var _ = Describe("Extension controller tests", func() {
 						Values: &apiextensionsv1.JSON{Raw: []byte(`{"admissionToken":"{{ .resources.creds.data.token }}"}`)},
 					},
 					ExtensionDeployment: &operatorv1alpha1.ExtensionDeploymentSpec{
-						DeploymentSpec: operatorv1alpha1.DeploymentSpec{
-							Helm: &operatorv1alpha1.ExtensionHelm{
-								OCIRepository: &ociRepositoryProviderLocalChart,
-							},
+						Helm: &operatorv1alpha1.ExtensionHelm{
+							OCIRepository: &ociRepositoryProviderLocalChart,
 						},
 						Values:               &apiextensionsv1.JSON{Raw: []byte(`{"endpoint":"{{ .resources.cfg.data.endpoint }}"}`)},
 						RuntimeClusterValues: &apiextensionsv1.JSON{Raw: []byte(`{"runtimeEndpoint":"{{ .resources.cfg.data.endpoint }}"}`)},
@@ -192,47 +182,37 @@ var _ = Describe("Extension controller tests", func() {
 		}
 
 		managedResourceRuntimeBar = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-provider-bar-garden",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "extension-provider-bar-garden",
+			Namespace: testNamespace.Name,
 		}
 
 		managedResourceRuntimeFoo = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-provider-foo-garden",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "extension-provider-foo-garden",
+			Namespace: testNamespace.Name,
 		}
 
 		managedResourceRegistrationBar = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-registration-provider-bar",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "extension-registration-provider-bar",
+			Namespace: testNamespace.Name,
 		}
 
 		managedResourceRegistrationFoo = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-registration-provider-foo",
-				Namespace: testNamespace.Name,
-			},
+			Name:      "extension-registration-provider-foo",
+			Namespace: testNamespace.Name,
 		}
 
-		priorityClass := &schedulingv1.PriorityClass{ObjectMeta: metav1.ObjectMeta{Name: "gardener-garden-system-200"}}
+		priorityClass := &schedulingv1.PriorityClass{Name: "gardener-garden-system-200"}
 		Expect(testClient.Create(ctx, priorityClass)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(testClient.Delete(ctx, priorityClass)).To(Succeed())
 		})
 
 		referencedSecret := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-creds",
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-				},
+			Name:      "extension-creds",
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 			},
 			Data: map[string][]byte{"token": []byte("s3cret-t0ken")},
 		}
@@ -242,13 +222,11 @@ var _ = Describe("Extension controller tests", func() {
 		})
 
 		referencedConfigMap := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "extension-cfg",
-				Namespace: testNamespace.Name,
-				Labels: map[string]string{
-					testID:                      testRunID,
-					v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-				},
+			Name:      "extension-cfg",
+			Namespace: testNamespace.Name,
+			Labels: map[string]string{
+				testID:                      testRunID,
+				v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 			},
 			Data: map[string]string{"endpoint": "https://example.com"},
 		}
@@ -378,13 +356,11 @@ var _ = Describe("Extension controller tests", func() {
 			g.Expect(testClient.Get(ctx, client.ObjectKeyFromObject(managedResourceRegistrationFoo), managedResourceRegistrationFoo)).To(Succeed())
 			g.Expect(managedResourceRegistrationFoo).To(registrationContains(
 				&corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "provider-foo-extension-cfg",
-						Namespace: v1beta1constants.GardenNamespace,
-						Labels: map[string]string{
-							testID:                      testRunID,
-							v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
-						},
+					Name:      "provider-foo-extension-cfg",
+					Namespace: v1beta1constants.GardenNamespace,
+					Labels: map[string]string{
+						testID:                      testRunID,
+						v1beta1constants.GardenRole: v1beta1constants.GardenRoleResourceReference,
 					},
 					Data: map[string]string{"endpoint": "https://example.com"},
 				},

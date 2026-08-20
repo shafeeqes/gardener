@@ -108,8 +108,8 @@ spec:
 		Context("#ApplyManifest", func() {
 			It("should create non-existent objects", func() {
 				cm := corev1.ConfigMap{
-					TypeMeta:   configMapTypeMeta,
-					ObjectMeta: metav1.ObjectMeta{Name: "c", Namespace: "n"},
+					TypeMeta: configMapTypeMeta,
+					Name:     "c", Namespace: "n",
 				}
 				manifest := mkManifest(&cm)
 				manifestReader := kubernetes.NewManifestReader(manifest)
@@ -135,14 +135,10 @@ spec:
 
 			It("should retain secret information for service account", func() {
 				oldServiceAccount := corev1.ServiceAccount{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "ServiceAccount",
-						APIVersion: "v1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-serviceaccount",
-						Namespace: "test-ns",
-					},
+					Kind:       "ServiceAccount",
+					APIVersion: "v1",
+					Name:       "test-serviceaccount",
+					Namespace:  "test-ns",
 					Secrets: []corev1.ObjectReference{
 						{
 							Name: "test-secret",
@@ -173,16 +169,12 @@ spec:
 
 				BeforeEach(func() {
 					oldService = &corev1.Service{
-						TypeMeta: metav1.TypeMeta{
-							Kind:       "Service",
-							APIVersion: "v1",
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-service",
-							Namespace: "test-ns",
-							Annotations: map[string]string{
-								"loadbalancer.openstack.org/load-balancer-id": "09199d61-4cca-4c7d-8d9c-405ba7680dbe",
-							},
+						Kind:       "Service",
+						APIVersion: "v1",
+						Name:       "test-service",
+						Namespace:  "test-ns",
+						Annotations: map[string]string{
+							"loadbalancer.openstack.org/load-balancer-id": "09199d61-4cca-4c7d-8d9c-405ba7680dbe",
 						},
 						Spec: corev1.ServiceSpec{
 							ClusterIP: "1.2.3.4",
@@ -615,14 +607,10 @@ spec:
 
 				BeforeEach(func() {
 					oldDeployment = &appsv1.Deployment{
-						TypeMeta: metav1.TypeMeta{
-							Kind:       "Deployment",
-							APIVersion: "apps/v1",
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-deploy",
-							Namespace: "test-ns",
-						},
+						Kind:       "Deployment",
+						APIVersion: "apps/v1",
+						Name:       "test-deploy",
+						Namespace:  "test-ns",
 					}
 
 					newDeployment = oldDeployment.DeepCopy()
@@ -682,8 +670,8 @@ spec:
 
 			It("should create objects with namespace", func() {
 				cm := corev1.ConfigMap{
-					TypeMeta:   configMapTypeMeta,
-					ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+					TypeMeta: configMapTypeMeta,
+					Name:     "test", Namespace: "test",
 				}
 				manifest := mkManifest(&cm)
 				manifestReader := kubernetes.NewManifestReader(manifest)
@@ -702,34 +690,22 @@ spec:
 
 			BeforeEach(func() {
 				existingServiceAccount := &corev1.ServiceAccount{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "ServiceAccount",
-						APIVersion: "v1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-serviceaccount",
-						Namespace: "test-ns",
-					},
+					Kind:       "ServiceAccount",
+					APIVersion: "v1",
+					Name:       "test-serviceaccount",
+					Namespace:  "test-ns",
 				}
 				existingConfigMap := &corev1.ConfigMap{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "ConfigMap",
-						APIVersion: "v1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "test-cm",
-						Namespace: "test-ns",
-					},
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+					Name:       "test-cm",
+					Namespace:  "test-ns",
 				}
 				notDeletedConfigMap := &corev1.ConfigMap{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "ConfigMap",
-						APIVersion: "v1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "should-not-be-deleted-cm",
-						Namespace: "test-ns",
-					},
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+					Name:       "should-not-be-deleted-cm",
+					Namespace:  "test-ns",
 				}
 				Expect(c.Create(context.TODO(), existingServiceAccount)).To(Succeed())
 				Expect(c.Create(context.TODO(), existingConfigMap)).To(Succeed())

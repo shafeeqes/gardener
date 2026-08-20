@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -29,10 +28,8 @@ var _ = Describe("CRD", func() {
 		fakeClient client.Client
 
 		readyCRD = &apiextensionsv1.CustomResourceDefinition{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            "myresources.mygroup.example.com",
-				ResourceVersion: "",
-			},
+			Name:            "myresources.mygroup.example.com",
+			ResourceVersion: "",
 			Status: apiextensionsv1.CustomResourceDefinitionStatus{
 				Conditions: []apiextensionsv1.CustomResourceDefinitionCondition{
 					{Type: apiextensionsv1.Established, Status: apiextensionsv1.ConditionTrue},
@@ -194,7 +191,7 @@ spec:
 			Expect(err).NotTo(HaveOccurred())
 			Expect(crdDeployer).NotTo(BeNil())
 
-			Expect(fakeClient.Create(ctx, &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: readyCRD.Name}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &apiextensionsv1.CustomResourceDefinition{Name: readyCRD.Name})).To(Succeed())
 
 			Expect(crdDeployer.Destroy(ctx)).To(Succeed())
 
@@ -206,7 +203,7 @@ spec:
 			Expect(err).NotTo(HaveOccurred())
 			Expect(crdDeployer).NotTo(BeNil())
 
-			Expect(fakeClient.Create(ctx, &apiextensionsv1.CustomResourceDefinition{ObjectMeta: metav1.ObjectMeta{Name: crd1Name}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &apiextensionsv1.CustomResourceDefinition{Name: crd1Name})).To(Succeed())
 
 			Eventually(crdDeployer.Destroy).WithArguments(ctx).Should(Succeed())
 

@@ -24,10 +24,8 @@ var _ = Describe("Quota Validation Tests ", func() {
 
 		BeforeEach(func() {
 			quota = &core.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "quota-1",
-					Namespace: "my-namespace",
-				},
+				Name:      "quota-1",
+				Namespace: "my-namespace",
 				Spec: core.QuotaSpec{
 					Scope: corev1.ObjectReference{
 						APIVersion: "v1",

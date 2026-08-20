@@ -31,9 +31,7 @@ func SyncClusterResourceToSeed(
 ) error {
 	var (
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: clusterName,
-			},
+			Name: clusterName,
 		}
 
 		cloudProfileObj *gardencorev1beta1.CloudProfile

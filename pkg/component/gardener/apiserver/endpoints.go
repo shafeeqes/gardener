@@ -11,11 +11,9 @@ import (
 
 func (g *gardenerAPIServer) endpoints(clusterIP string) *corev1.Endpoints {
 	return &corev1.Endpoints{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceName,
-			Namespace: metav1.NamespaceSystem,
-			Labels:    GetLabels(),
-		},
+		Name:      serviceName,
+		Namespace: metav1.NamespaceSystem,
+		Labels:    GetLabels(),
 		Subsets: []corev1.EndpointSubset{{
 			Ports: []corev1.EndpointPort{{
 				Port:     servicePort,

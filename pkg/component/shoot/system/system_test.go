@@ -60,11 +60,9 @@ var _ = Describe("ShootSystem", func() {
 		extension1        = "some-extension"
 		extension2        = "some-other-extension"
 		shootObj          = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      shootName,
-				Namespace: projectNamespace,
-				UID:       uid,
-			},
+			Name:      shootName,
+			Namespace: projectNamespace,
+			UID:       uid,
 			Spec: gardencorev1beta1.ShootSpec{
 				Kubernetes: gardencorev1beta1.Kubernetes{
 					Version: kubernetesVersion,
@@ -111,16 +109,12 @@ var _ = Describe("ShootSystem", func() {
 		component = New(c, namespace, values)
 
 		managedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceName,
+			Namespace: namespace,
 		}
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "managedresource-" + managedResource.Name,
-				Namespace: namespace,
-			},
+			Name:      "managedresource-" + managedResource.Name,
+			Namespace: namespace,
 		}
 	})
 
@@ -133,12 +127,10 @@ var _ = Describe("ShootSystem", func() {
 
 			Expect(c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 			expectedMr := &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            managedResource.Name,
-					Namespace:       managedResource.Namespace,
-					ResourceVersion: "1",
-					Labels:          map[string]string{"origin": "gardener"},
-				},
+				Name:            managedResource.Name,
+				Namespace:       managedResource.Namespace,
+				ResourceVersion: "1",
+				Labels:          map[string]string{"origin": "gardener"},
 				Spec: resourcesv1alpha1.ManagedResourceSpec{
 					InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 					SecretRefs: []corev1.LocalObjectReference{{
@@ -162,10 +154,8 @@ var _ = Describe("ShootSystem", func() {
 
 			BeforeEach(func() {
 				configMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "shoot-info",
-						Namespace: "kube-system",
-					},
+					Name:      "shoot-info",
+					Namespace: "kube-system",
 					Data: map[string]string{
 						"domain":            domain,
 						"extensions":        extension1 + `,` + extension2,
@@ -249,12 +239,10 @@ var _ = Describe("ShootSystem", func() {
 
 			var (
 				networkPolicyDenyAll = &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener.cloud--deny-all",
-						Namespace: "kube-system",
-						Annotations: map[string]string{
-							"gardener.cloud/description": "Disables all ingress and egress traffic into/from this namespace.",
-						},
+					Name:      "gardener.cloud--deny-all",
+					Namespace: "kube-system",
+					Annotations: map[string]string{
+						"gardener.cloud/description": "Disables all ingress and egress traffic into/from this namespace.",
 					},
 					Spec: networkingv1.NetworkPolicySpec{
 						PodSelector: metav1.LabelSelector{},
@@ -267,12 +255,10 @@ var _ = Describe("ShootSystem", func() {
 					},
 				}
 				networkPolicyToAPIServer = &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener.cloud--allow-to-apiserver",
-						Namespace: "kube-system",
-						Annotations: map[string]string{
-							"gardener.cloud/description": "Allows traffic to the API server in TCP port 443 for pods labeled with 'networking.gardener.cloud/to-apiserver=allowed'.",
-						},
+					Name:      "gardener.cloud--allow-to-apiserver",
+					Namespace: "kube-system",
+					Annotations: map[string]string{
+						"gardener.cloud/description": "Allows traffic to the API server in TCP port 443 for pods labeled with 'networking.gardener.cloud/to-apiserver=allowed'.",
 					},
 					Spec: networkingv1.NetworkPolicySpec{
 						PodSelector: metav1.LabelSelector{
@@ -297,12 +283,10 @@ var _ = Describe("ShootSystem", func() {
 				}
 
 				networkPolicyToDNS = &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener.cloud--allow-to-dns",
-						Namespace: "kube-system",
-						Annotations: map[string]string{
-							"gardener.cloud/description": "Allows egress traffic from pods labeled with 'networking.gardener.cloud/to-dns=allowed' to DNS running in the 'kube-system' namespace.",
-						},
+					Name:      "gardener.cloud--allow-to-dns",
+					Namespace: "kube-system",
+					Annotations: map[string]string{
+						"gardener.cloud/description": "Allows egress traffic from pods labeled with 'networking.gardener.cloud/to-dns=allowed' to DNS running in the 'kube-system' namespace.",
 					},
 					Spec: networkingv1.NetworkPolicySpec{
 						PodSelector: metav1.LabelSelector{
@@ -379,12 +363,10 @@ var _ = Describe("ShootSystem", func() {
 				}
 
 				networkPolicyToKubelet = &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener.cloud--allow-to-kubelet",
-						Namespace: "kube-system",
-						Annotations: map[string]string{
-							"gardener.cloud/description": "Allows egress traffic to kubelet in TCP port 10250 for pods labeled with 'networking.gardener.cloud/to-kubelet=allowed'.",
-						},
+					Name:      "gardener.cloud--allow-to-kubelet",
+					Namespace: "kube-system",
+					Annotations: map[string]string{
+						"gardener.cloud/description": "Allows egress traffic to kubelet in TCP port 10250 for pods labeled with 'networking.gardener.cloud/to-kubelet=allowed'.",
 					},
 					Spec: networkingv1.NetworkPolicySpec{
 						PodSelector: metav1.LabelSelector{
@@ -409,12 +391,10 @@ var _ = Describe("ShootSystem", func() {
 				}
 
 				networkPolicyToPublicNetworks = &networkingv1.NetworkPolicy{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "gardener.cloud--allow-to-public-networks",
-						Namespace: "kube-system",
-						Annotations: map[string]string{
-							"gardener.cloud/description": "Allows egress traffic to all networks for pods labeled with 'networking.gardener.cloud/to-public-networks=allowed'.",
-						},
+					Name:      "gardener.cloud--allow-to-public-networks",
+					Namespace: "kube-system",
+					Annotations: map[string]string{
+						"gardener.cloud/description": "Allows egress traffic to all networks for pods labeled with 'networking.gardener.cloud/to-public-networks=allowed'.",
 					},
 					Spec: networkingv1.NetworkPolicySpec{
 						PodSelector: metav1.LabelSelector{
@@ -537,9 +517,7 @@ var _ = Describe("ShootSystem", func() {
 
 				It("should successfully deploy the related RBAC resources", func() {
 					clusterRole := &rbacv1.ClusterRole{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardener.cloud:system:read-only",
-						},
+						Name: "gardener.cloud:system:read-only",
 						Rules: []rbacv1.PolicyRule{
 							{
 								APIGroups: []string{""},
@@ -580,9 +558,7 @@ var _ = Describe("ShootSystem", func() {
 
 				It("should successfully deploy all gardenadm RBAC resources", func() {
 					expectedClusterRole := &rbacv1.ClusterRole{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardener.cloud:gardenadm",
-						},
+						Name: "gardener.cloud:gardenadm",
 						Rules: []rbacv1.PolicyRule{
 							{
 								APIGroups:     []string{"extensions.gardener.cloud"},
@@ -614,9 +590,7 @@ var _ = Describe("ShootSystem", func() {
 					}
 
 					expectedClusterRoleBinding := &rbacv1.ClusterRoleBinding{
-						ObjectMeta: metav1.ObjectMeta{
-							Name: "gardener.cloud:gardenadm",
-						},
+						Name: "gardener.cloud:gardenadm",
 						RoleRef: rbacv1.RoleRef{
 							APIGroup: "rbac.authorization.k8s.io",
 							Kind:     "ClusterRole",
@@ -643,12 +617,12 @@ var _ = Describe("ShootSystem", func() {
 
 				expectedConfigMap = func(caBundle string) *corev1.ConfigMap {
 					return &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{Name: "registry-ca-bundle", Namespace: "kube-system"},
-						Data:       map[string]string{"bundle.crt": base64.StdEncoding.EncodeToString([]byte(caBundle))},
+						Name: "registry-ca-bundle", Namespace: "kube-system",
+						Data: map[string]string{"bundle.crt": base64.StdEncoding.EncodeToString([]byte(caBundle))},
 					}
 				}
 				expectedRole = &rbacv1.Role{
-					ObjectMeta: metav1.ObjectMeta{Name: "registry-ca-bundle", Namespace: "kube-system"},
+					Name: "registry-ca-bundle", Namespace: "kube-system",
 					Rules: []rbacv1.PolicyRule{{
 						APIGroups:     []string{""},
 						Resources:     []string{"configmaps"},
@@ -657,9 +631,9 @@ var _ = Describe("ShootSystem", func() {
 					}},
 				}
 				expectedRoleBinding = &rbacv1.RoleBinding{
-					ObjectMeta: metav1.ObjectMeta{Name: "registry-ca-bundle", Namespace: "kube-system"},
-					Subjects:   []rbacv1.Subject{{Kind: "Group", Name: "system:bootstrappers", APIGroup: "rbac.authorization.k8s.io"}},
-					RoleRef:    rbacv1.RoleRef{APIGroup: "rbac.authorization.k8s.io", Kind: "Role", Name: "registry-ca-bundle"},
+					Name: "registry-ca-bundle", Namespace: "kube-system",
+					Subjects: []rbacv1.Subject{{Kind: "Group", Name: "system:bootstrappers", APIGroup: "rbac.authorization.k8s.io"}},
+					RoleRef:  rbacv1.RoleRef{APIGroup: "rbac.authorization.k8s.io", Kind: "Role", Name: "registry-ca-bundle"},
 				}
 			)
 
@@ -748,11 +722,9 @@ var _ = Describe("ShootSystem", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -775,11 +747,9 @@ var _ = Describe("ShootSystem", func() {
 				fakeOps.MaxAttempts = 2
 
 				Expect(c.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -830,9 +800,7 @@ func expectPriorityClasses(mr *resourcesv1alpha1.ManagedResource, contain func(.
 	expectedPriorityClasses := make([]client.Object, 0, len(expected))
 	for _, pc := range expected {
 		expectedPriorityClasses = append(expectedPriorityClasses, &schedulingv1.PriorityClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: pc.name,
-			},
+			Name:        pc.name,
 			Description: pc.description,
 			Value:       pc.value,
 		})

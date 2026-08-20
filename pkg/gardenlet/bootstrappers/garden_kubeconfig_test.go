@@ -19,7 +19,6 @@ import (
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
-	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	fakekubernetes "github.com/gardener/gardener/pkg/client/kubernetes/fake"
 	gardenletbootstraputil "github.com/gardener/gardener/pkg/gardenlet/bootstrap/util"
@@ -52,11 +51,7 @@ var _ = Describe("GardenKubeconfig", func() {
 				},
 			},
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: seedName,
-					},
-				},
+				Name: seedName,
 			},
 		}
 		result = &KubeconfigBootstrapResult{}
@@ -111,11 +106,9 @@ var _ = Describe("GardenKubeconfig", func() {
 
 				BeforeEach(func() {
 					restConfig = &rest.Config{
-						Host: "testhost",
-						TLSClientConfig: rest.TLSClientConfig{
-							Insecure: false,
-							CAData:   []byte("foo"),
-						},
+						Host:     "testhost",
+						Insecure: false,
+						CAData:   []byte("foo"),
 					}
 
 					var err error
@@ -123,20 +116,16 @@ var _ = Describe("GardenKubeconfig", func() {
 					Expect(err).ToNot(HaveOccurred())
 
 					secret := &corev1.Secret{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      secretName,
-							Namespace: secretNamespace,
-						},
-						Data: map[string][]byte{"kubeconfig": existingKubeconfig},
+						Name:      secretName,
+						Namespace: secretNamespace,
+						Data:      map[string][]byte{"kubeconfig": existingKubeconfig},
 					}
 					Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
 					gardenFakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.GardenScheme).Build()
 					Expect(gardenFakeClient.Create(ctx, &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-root-ca.crt",
-							Namespace: "gardener-system-public",
-						},
+						Name:      "kube-root-ca.crt",
+						Namespace: "gardener-system-public",
 						Data: map[string]string{
 							"ca.crt": string(restConfig.CAData),
 						},
@@ -158,10 +147,8 @@ var _ = Describe("GardenKubeconfig", func() {
 					newCAData := "bar"
 
 					Expect(gardenFakeClient.Update(ctx, &corev1.ConfigMap{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "kube-root-ca.crt",
-							Namespace: "gardener-system-public",
-						},
+						Name:      "kube-root-ca.crt",
+						Namespace: "gardener-system-public",
 						Data: map[string]string{
 							"ca.crt": newCAData,
 						},
@@ -204,11 +191,9 @@ var _ = Describe("GardenKubeconfig", func() {
 						}
 
 						restConfig = &rest.Config{
-							Host: "testhost",
-							TLSClientConfig: rest.TLSClientConfig{
-								Insecure: false,
-								CAData:   []byte("foo"),
-							},
+							Host:     "testhost",
+							Insecure: false,
+							CAData:   []byte("foo"),
 						}
 					})
 
@@ -219,10 +204,8 @@ var _ = Describe("GardenKubeconfig", func() {
 
 					It("should return an error when the bootstrap kubeconfig secret exists but does not contain a kubeconfig", func() {
 						secret := &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      bootstrapSecretName,
-								Namespace: bootstrapSecretNamespace,
-							},
+							Name:      bootstrapSecretName,
+							Namespace: bootstrapSecretNamespace,
 						}
 						Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -237,19 +220,15 @@ var _ = Describe("GardenKubeconfig", func() {
 						Expect(err).ToNot(HaveOccurred())
 
 						secret := &corev1.Secret{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      bootstrapSecretName,
-								Namespace: bootstrapSecretNamespace,
-							},
-							Data: map[string][]byte{"kubeconfig": []byte("bootstrap-kubeconfig")},
+							Name:      bootstrapSecretName,
+							Namespace: bootstrapSecretNamespace,
+							Data:      map[string][]byte{"kubeconfig": []byte("bootstrap-kubeconfig")},
 						}
 						Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
 						Expect(gardenFakeClient.Create(ctx, &corev1.ConfigMap{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:      "kube-root-ca.crt",
-								Namespace: "gardener-system-public",
-							},
+							Name:      "kube-root-ca.crt",
+							Namespace: "gardener-system-public",
 							Data: map[string]string{
 								"ca.crt": string(restConfig.CAData),
 							},

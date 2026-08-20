@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils/kubernetes/health"
 )
@@ -21,7 +20,7 @@ var _ = Describe("ReplicaSet", func() {
 			Expect(err).To(matcher)
 		},
 		Entry("not observed at latest version", &appsv1.ReplicaSet{
-			ObjectMeta: metav1.ObjectMeta{Generation: 1},
+			Generation: 1,
 		}, HaveOccurred()),
 		Entry("not enough ready replicas", &appsv1.ReplicaSet{
 			Spec:   appsv1.ReplicaSetSpec{Replicas: new(int32(2))},

@@ -11,7 +11,6 @@ import (
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -100,17 +99,13 @@ func (w *workerDelegate) generateMachineConfig(ctx context.Context) error {
 			)
 
 			machineClassSecrets = append(machineClassSecrets, &corev1.Secret{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: corev1.SchemeGroupVersion.String(),
-					Kind:       "Secret",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      className,
-					Namespace: w.worker.Namespace,
-					Labels:    map[string]string{v1beta1constants.GardenerPurpose: v1beta1constants.GardenPurposeMachineClass},
-				},
-				Type: corev1.SecretTypeOpaque,
-				Data: map[string][]byte{"userData": userData},
+				APIVersion: corev1.SchemeGroupVersion.String(),
+				Kind:       "Secret",
+				Name:       className,
+				Namespace:  w.worker.Namespace,
+				Labels:     map[string]string{v1beta1constants.GardenerPurpose: v1beta1constants.GardenPurposeMachineClass},
+				Type:       corev1.SecretTypeOpaque,
+				Data:       map[string][]byte{"userData": userData},
 			})
 
 			providerConfig := map[string]any{
@@ -135,14 +130,10 @@ func (w *workerDelegate) generateMachineConfig(ctx context.Context) error {
 			arch := ptr.Deref(pool.Architecture, v1beta1constants.ArchitectureAMD64)
 
 			machineClass := &machinev1alpha1.MachineClass{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: machinev1alpha1.SchemeGroupVersion.String(),
-					Kind:       "MachineClass",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      className,
-					Namespace: w.worker.Namespace,
-				},
+				APIVersion: machinev1alpha1.SchemeGroupVersion.String(),
+				Kind:       "MachineClass",
+				Name:       className,
+				Namespace:  w.worker.Namespace,
 				SecretRef: &corev1.SecretReference{
 					Name:      className,
 					Namespace: w.worker.Namespace,

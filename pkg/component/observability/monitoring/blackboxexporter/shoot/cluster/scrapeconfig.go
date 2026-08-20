@@ -34,8 +34,8 @@ func ScrapeConfig(namespace string) []*monitoringv1alpha1.ScrapeConfig {
 			// This is needed because we do not fetch the correct cluster CA bundle right now
 			TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 			Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{Name: shootprometheus.AccessSecretName},
-				Key:                  resourcesv1alpha1.DataKeyToken,
+				Name: shootprometheus.AccessSecretName,
+				Key:  resourcesv1alpha1.DataKeyToken,
 			}},
 			KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 				Role:       monitoringv1alpha1.KubernetesRoleService,
@@ -44,8 +44,8 @@ func ScrapeConfig(namespace string) []*monitoringv1alpha1.ScrapeConfig {
 				// This is needed because we do not fetch the correct cluster CA bundle right now
 				TLSConfig: &monitoringv1.SafeTLSConfig{InsecureSkipVerify: new(true)},
 				Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{Name: shootprometheus.AccessSecretName},
-					Key:                  resourcesv1alpha1.DataKeyToken,
+					Name: shootprometheus.AccessSecretName,
+					Key:  resourcesv1alpha1.DataKeyToken,
 				}},
 			}},
 			RelabelConfigs: []monitoringv1.RelabelConfig{

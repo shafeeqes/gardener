@@ -224,10 +224,8 @@ func mustBootstrapGardenerResourceManager(ctx context.Context, c client.Client, 
 	}
 
 	managedResource := &resourcesv1alpha1.ManagedResource{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      resourcemanager.ManagedResourceName,
-			Namespace: namespace,
-		},
+		Name:      resourcemanager.ManagedResourceName,
+		Namespace: namespace,
 	}
 
 	if err := c.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource); err != nil {

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -40,7 +39,7 @@ var _ = Describe("Add", func() {
 				},
 			},
 		}
-		shoot = &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: "shoot", Namespace: "namespace"}}
+		shoot = &gardencorev1beta1.Shoot{Name: "shoot", Namespace: "namespace"}
 	})
 
 	Describe("#EventHandler", func() {
@@ -54,7 +53,7 @@ var _ = Describe("Add", func() {
 		BeforeEach(func() {
 			hdlr = reconciler.EventHandler()
 			queue = &test.FakeQueue[reconcile.Request]{}
-			req = reconcile.Request{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}}
+			req = reconcile.Request{Name: shoot.Name, Namespace: shoot.Namespace}
 		})
 
 		It("should enqueue the object for Create events according to the calculated duration", func() {

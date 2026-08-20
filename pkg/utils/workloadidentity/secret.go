@@ -51,11 +51,9 @@ type Secret struct {
 func NewSecret(name, namespace string, opts ...SecretOption) (*Secret, error) {
 	workloadIdentitySecret := &Secret{
 		secret: &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
-			Data: make(map[string][]byte),
+			Name:      name,
+			Namespace: namespace,
+			Data:      make(map[string][]byte),
 		},
 	}
 

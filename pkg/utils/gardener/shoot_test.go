@@ -54,7 +54,7 @@ var _ = Describe("Shoot", func() {
 			BeFalse()),
 		Entry("don't respect overwrite but garden namespace",
 			false,
-			&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Namespace: v1beta1constants.GardenNamespace, Name: "foo"}},
+			&gardencorev1beta1.Shoot{Namespace: v1beta1constants.GardenNamespace, Name: "foo"},
 			BeTrue()),
 	)
 
@@ -65,11 +65,11 @@ var _ = Describe("Shoot", func() {
 
 		Entry("respect overwrite with annotation",
 			true,
-			&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.ShootIgnore: "true"}}},
+			&gardencorev1beta1.Shoot{Annotations: map[string]string{v1beta1constants.ShootIgnore: "true"}},
 			BeTrue()),
 		Entry("respect overwrite with wrong annotation",
 			true,
-			&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.ShootIgnore: "foo"}}},
+			&gardencorev1beta1.Shoot{Annotations: map[string]string{v1beta1constants.ShootIgnore: "foo"}},
 			BeFalse()),
 		Entry("respect overwrite with no annotation",
 			true,
@@ -96,7 +96,7 @@ var _ = Describe("Shoot", func() {
 			BeFalse()),
 		Entry("with last operation in failed state but not at latest generation",
 			&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 				Status: gardencorev1beta1.ShootStatus{
 					LastOperation: &gardencorev1beta1.LastOperation{
 						State: gardencorev1beta1.LastOperationStateFailed,
@@ -137,7 +137,7 @@ var _ = Describe("Shoot", func() {
 
 		Entry("not at observed generation",
 			&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Generation: 1},
+				Generation: 1,
 			},
 			BeFalse()),
 		Entry("last operation state not succeeded",
@@ -182,27 +182,21 @@ var _ = Describe("Shoot", func() {
 			true,
 			1*time.Second,
 			&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{v1beta1constants.ShootSyncPeriod: "foo"},
-				},
+				Annotations: map[string]string{v1beta1constants.ShootSyncPeriod: "foo"},
 			},
 			1*time.Second),
 		Entry("respect overwrite but overwrite too short",
 			true,
 			2*time.Second,
 			&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{v1beta1constants.ShootSyncPeriod: (1 * time.Second).String()},
-				},
+				Annotations: map[string]string{v1beta1constants.ShootSyncPeriod: (1 * time.Second).String()},
 			},
 			2*time.Second),
 		Entry("respect overwrite with longer overwrite",
 			true,
 			2*time.Second,
 			&gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{v1beta1constants.ShootSyncPeriod: (3 * time.Second).String()},
-				},
+				Annotations: map[string]string{v1beta1constants.ShootSyncPeriod: (3 * time.Second).String()},
 			},
 			3*time.Second),
 	)
@@ -262,9 +256,7 @@ var _ = Describe("Shoot", func() {
 	DescribeTable("#GetShootNameFromOwnerReferences",
 		func(ownerRefs []metav1.OwnerReference, expectedName string) {
 			obj := &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					OwnerReferences: ownerRefs,
-				},
+				OwnerReferences: ownerRefs,
 			}
 			name := GetShootNameFromOwnerReferences(obj)
 			Expect(name).To(Equal(expectedName))
@@ -438,7 +430,7 @@ var _ = Describe("Shoot", func() {
 		DescribeTable("default name/namespace",
 			func(prefix string) {
 				Expect(NewShootAccessSecret(prefix+name, namespace)).To(Equal(&AccessSecret{
-					Secret:             &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "shoot-access-" + name, Namespace: namespace}},
+					Secret:             &corev1.Secret{Name: "shoot-access-" + name, Namespace: namespace},
 					ServiceAccountName: name,
 					Class:              "shoot",
 				}))
@@ -453,7 +445,7 @@ var _ = Describe("Shoot", func() {
 				WithNameOverride("other-name").
 				WithNamespaceOverride("other-namespace"),
 			).To(Equal(&AccessSecret{
-				Secret:             &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "other-name", Namespace: "other-namespace"}},
+				Secret:             &corev1.Secret{Name: "other-name", Namespace: "other-namespace"},
 				ServiceAccountName: name,
 				Class:              "shoot",
 			}))
@@ -473,10 +465,8 @@ var _ = Describe("Shoot", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetesscheme.Scheme).Build()
 			accessSecret = &AccessSecret{
 				Secret: &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "access-secret",
-						Namespace: "namespace",
-					},
+					Name:      "access-secret",
+					Namespace: "namespace",
 				},
 				ServiceAccountName: serviceAccountName,
 				Class:              "foo",
@@ -668,33 +658,27 @@ var _ = Describe("Shoot", func() {
 
 			Expect(podSpec.Volumes).To(ContainElement(corev1.Volume{
 				Name: "kubeconfig",
-				VolumeSource: corev1.VolumeSource{
-					Projected: &corev1.ProjectedVolumeSource{
-						DefaultMode: new(int32(420)),
-						Sources: []corev1.VolumeProjection{
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: genericTokenKubeconfigSecretName,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  "kubeconfig",
-										Path: "kubeconfig",
-									}},
-									Optional: new(false),
-								},
+				Projected: &corev1.ProjectedVolumeSource{
+					DefaultMode: new(int32(420)),
+					Sources: []corev1.VolumeProjection{
+						{
+							Secret: &corev1.SecretProjection{
+								Name: genericTokenKubeconfigSecretName,
+								Items: []corev1.KeyToPath{{
+									Key:  "kubeconfig",
+									Path: "kubeconfig",
+								}},
+								Optional: new(false),
 							},
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: tokenSecretName,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  "token",
-										Path: "token",
-									}},
-									Optional: new(false),
-								},
+						},
+						{
+							Secret: &corev1.SecretProjection{
+								Name: tokenSecretName,
+								Items: []corev1.KeyToPath{{
+									Key:  "token",
+									Path: "token",
+								}},
+								Optional: new(false),
 							},
 						},
 					},
@@ -719,33 +703,27 @@ var _ = Describe("Shoot", func() {
 
 			volume = corev1.Volume{
 				Name: volumeName,
-				VolumeSource: corev1.VolumeSource{
-					Projected: &corev1.ProjectedVolumeSource{
-						DefaultMode: new(int32(420)),
-						Sources: []corev1.VolumeProjection{
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: genericTokenKubeconfigSecretName,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  "kubeconfig",
-										Path: "kubeconfig",
-									}},
-									Optional: new(false),
-								},
+				Projected: &corev1.ProjectedVolumeSource{
+					DefaultMode: new(int32(420)),
+					Sources: []corev1.VolumeProjection{
+						{
+							Secret: &corev1.SecretProjection{
+								Name: genericTokenKubeconfigSecretName,
+								Items: []corev1.KeyToPath{{
+									Key:  "kubeconfig",
+									Path: "kubeconfig",
+								}},
+								Optional: new(false),
 							},
-							{
-								Secret: &corev1.SecretProjection{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: accessSecretName,
-									},
-									Items: []corev1.KeyToPath{{
-										Key:  "token",
-										Path: "token",
-									}},
-									Optional: new(false),
-								},
+						},
+						{
+							Secret: &corev1.SecretProjection{
+								Name: accessSecretName,
+								Items: []corev1.KeyToPath{{
+									Key:  "token",
+									Path: "token",
+								}},
+								Optional: new(false),
 							},
 						},
 					},
@@ -1064,9 +1042,7 @@ var _ = Describe("Shoot", func() {
 				dnsSecretData = map[string][]byte{"foo": []byte("bar")}
 
 				shoot = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-					},
+					Namespace: namespace,
 					Spec: gardencorev1beta1.ShootSpec{
 						DNS: &gardencorev1beta1.DNS{
 							Domain: &domain,
@@ -1086,8 +1062,8 @@ var _ = Describe("Shoot", func() {
 				}
 			)
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: dnsSecretName, Namespace: namespace},
-				Data:       dnsSecretData,
+				Name: dnsSecretName, Namespace: namespace,
+				Data: dnsSecretData,
 			}
 			Expect(fakeClient.Create(ctx, secret)).To(Succeed())
 
@@ -1103,9 +1079,7 @@ var _ = Describe("Shoot", func() {
 
 		It("returns the unmanaged external domain for self-hosted shoots", func(ctx SpecContext) {
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-				},
+				Namespace: namespace,
 				Spec: gardencorev1beta1.ShootSpec{
 					DNS: &gardencorev1beta1.DNS{
 						Domain: &domain,
@@ -1187,9 +1161,7 @@ var _ = Describe("Shoot", func() {
 			var (
 				workloadIdentityName = "workload-identity-1"
 				shoot                = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-					},
+					Namespace: namespace,
 					Spec: gardencorev1beta1.ShootSpec{
 						DNS: &gardencorev1beta1.DNS{
 							Domain: &domain,
@@ -1206,10 +1178,8 @@ var _ = Describe("Shoot", func() {
 					},
 				}
 				workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-						Name:      workloadIdentityName,
-					},
+					Namespace: namespace,
+					Name:      workloadIdentityName,
 				}
 			)
 
@@ -1228,9 +1198,7 @@ var _ = Describe("Shoot", func() {
 			var (
 				configMapName = "config-map-1"
 				shoot         = &gardencorev1beta1.Shoot{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-					},
+					Namespace: namespace,
 					Spec: gardencorev1beta1.ShootSpec{
 						DNS: &gardencorev1beta1.DNS{
 							Domain: &domain,
@@ -1247,10 +1215,8 @@ var _ = Describe("Shoot", func() {
 					},
 				}
 				configMap = &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: namespace,
-						Name:      configMapName,
-					},
+					Namespace: namespace,
+					Name:      configMapName,
 				}
 			)
 
@@ -1888,9 +1854,7 @@ var _ = Describe("Shoot", func() {
 		BeforeEach(func() {
 			projectName = "project-a"
 			shoot = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
-				},
+				Name: "test",
 			}
 		})
 
@@ -1916,11 +1880,9 @@ var _ = Describe("Shoot", func() {
 
 		JustBeforeEach(func() {
 			namespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "shoot--foo--bar",
-					Labels: map[string]string{
-						v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot,
-					},
+				Name: "shoot--foo--bar",
+				Labels: map[string]string{
+					v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot,
 				},
 			}
 
@@ -2136,19 +2098,15 @@ var _ = Describe("Shoot", func() {
 			BeTrue()),
 		Entry("AuthorizeWithSelectors feature is true",
 			&gardencorev1beta1.KubeAPIServerConfig{
-				KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-					FeatureGates: map[string]bool{
-						"AuthorizeWithSelectors": true,
-					},
+				FeatureGates: map[string]bool{
+					"AuthorizeWithSelectors": true,
 				},
 			},
 			BeTrue()),
 		Entry("AuthorizeWithSelectors feature is false",
 			&gardencorev1beta1.KubeAPIServerConfig{
-				KubernetesConfig: gardencorev1beta1.KubernetesConfig{
-					FeatureGates: map[string]bool{
-						"AuthorizeWithSelectors": false,
-					},
+				FeatureGates: map[string]bool{
+					"AuthorizeWithSelectors": false,
 				},
 			},
 			BeFalse()),

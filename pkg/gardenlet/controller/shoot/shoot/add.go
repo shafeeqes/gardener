@@ -8,7 +8,6 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/ptr"
@@ -77,16 +76,14 @@ func (r *Reconciler) EventHandler(log logr.Logger) handler.EventHandler {
 				"namespace", shoot.Namespace, "name", shoot.Name,
 				"enqueueAfter", enqueueAfter, "nextReconciliation", nextReconciliation)
 
-			q.AddAfter(reconcile.Request{NamespacedName: types.NamespacedName{
+			q.AddAfter(reconcile.Request{
 				Name:      e.Object.GetName(),
-				Namespace: e.Object.GetNamespace(),
-			}}, enqueueAfter)
+				Namespace: e.Object.GetNamespace()}, enqueueAfter)
 		},
 		UpdateFunc: func(_ context.Context, e event.UpdateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-			req := reconcile.Request{NamespacedName: types.NamespacedName{
+			req := reconcile.Request{
 				Name:      e.ObjectNew.GetName(),
-				Namespace: e.ObjectNew.GetNamespace(),
-			}}
+				Namespace: e.ObjectNew.GetNamespace()}
 
 			// If the shoot's deletion timestamp is set then we want to forget about the potentially established exponential
 			// backoff and enqueue it faster.

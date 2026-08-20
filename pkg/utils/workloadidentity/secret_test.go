@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,32 +74,28 @@ var _ = Describe("#Secret", func() {
 
 		Expect(secret.Reconcile(ctx, fakeClient)).To(Succeed())
 		got := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-			},
+			Name:      secretName,
+			Namespace: secretNamespace,
 		}
 
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(got), got)).To(Succeed())
 		Expect(got).To(Equal(&corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-				Annotations: map[string]string{
-					"foo": "bar",
-					"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
-					"workloadidentity.security.gardener.cloud/name":           "wi-foo",
-					"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-					"workloadidentity.security.gardener.cloud/provider": "provider",
-					"foo":                    "bar",
-					"gardener.cloud/purpose": "cloudprovider",
-				},
-				ResourceVersion: "1",
+			Name:      secretName,
+			Namespace: secretNamespace,
+			Annotations: map[string]string{
+				"foo": "bar",
+				"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
+				"workloadidentity.security.gardener.cloud/name":           "wi-foo",
+				"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
 			},
-			Type: corev1.SecretTypeOpaque,
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+				"workloadidentity.security.gardener.cloud/provider": "provider",
+				"foo":                    "bar",
+				"gardener.cloud/purpose": "cloudprovider",
+			},
+			ResourceVersion: "1",
+			Type:            corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
 				"config": []byte(`{"foo":"bar"}`),
 			},
@@ -109,21 +104,19 @@ var _ = Describe("#Secret", func() {
 
 	It("should correctly patch an existing secret", func() {
 		existing := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-				Annotations: map[string]string{
-					"foo": "bar",
-					"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
-					"workloadidentity.security.gardener.cloud/name":           "wi-foo",
-					"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-					"workloadidentity.security.gardener.cloud/provider": "provider",
-					"foo":                    "bar",
-					"gardener.cloud/purpose": "cloudprovider",
-				},
+			Name:      secretName,
+			Namespace: secretNamespace,
+			Annotations: map[string]string{
+				"foo": "bar",
+				"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
+				"workloadidentity.security.gardener.cloud/name":           "wi-foo",
+				"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
+			},
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+				"workloadidentity.security.gardener.cloud/provider": "provider",
+				"foo":                    "bar",
+				"gardener.cloud/purpose": "cloudprovider",
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
@@ -156,30 +149,26 @@ var _ = Describe("#Secret", func() {
 
 		Expect(secret.Reconcile(ctx, fakeClient)).To(Succeed())
 		got := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-			},
+			Name:      secretName,
+			Namespace: secretNamespace,
 		}
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(got), got)).To(Succeed())
 		Expect(got).To(Equal(&corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-				Annotations: map[string]string{
-					"new-foo": "new-bar",
-					"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"new-name","namespace":"new-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
-					"workloadidentity.security.gardener.cloud/name":           "new-name",
-					"workloadidentity.security.gardener.cloud/namespace":      "new-namespace",
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-					"workloadidentity.security.gardener.cloud/provider": "new-provider",
-					"new-foo": "new-bar",
-				},
-				ResourceVersion: "2",
+			Name:      secretName,
+			Namespace: secretNamespace,
+			Annotations: map[string]string{
+				"new-foo": "new-bar",
+				"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"new-name","namespace":"new-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
+				"workloadidentity.security.gardener.cloud/name":           "new-name",
+				"workloadidentity.security.gardener.cloud/namespace":      "new-namespace",
 			},
-			Type: corev1.SecretTypeOpaque,
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+				"workloadidentity.security.gardener.cloud/provider": "new-provider",
+				"new-foo": "new-bar",
+			},
+			ResourceVersion: "2",
+			Type:            corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
 				"config": []byte(`{"foo":"bar"}`),
 				"token":  []byte("token"),
@@ -189,21 +178,19 @@ var _ = Describe("#Secret", func() {
 
 	It("should remove unneeded info from an existing secret", func() {
 		existing := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-				Annotations: map[string]string{
-					"foo": "bar",
-					"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
-					"workloadidentity.security.gardener.cloud/name":           "wi-foo",
-					"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-					"workloadidentity.security.gardener.cloud/provider": "provider",
-					"foo":                    "bar",
-					"gardener.cloud/purpose": "cloudprovider",
-				},
+			Name:      secretName,
+			Namespace: secretNamespace,
+			Annotations: map[string]string{
+				"foo": "bar",
+				"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
+				"workloadidentity.security.gardener.cloud/name":           "wi-foo",
+				"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
+			},
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+				"workloadidentity.security.gardener.cloud/provider": "provider",
+				"foo":                    "bar",
+				"gardener.cloud/purpose": "cloudprovider",
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
@@ -223,27 +210,23 @@ var _ = Describe("#Secret", func() {
 
 		Expect(secret.Reconcile(ctx, fakeClient)).To(Succeed())
 		got := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-			},
+			Name:      secretName,
+			Namespace: secretNamespace,
 		}
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(got), got)).To(Succeed())
 		Expect(got).To(Equal(&corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-				Annotations: map[string]string{
-					"workloadidentity.security.gardener.cloud/name":      "new-name",
-					"workloadidentity.security.gardener.cloud/namespace": "new-namespace",
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-					"workloadidentity.security.gardener.cloud/provider": "new-provider",
-				},
-				ResourceVersion: "2",
+			Name:      secretName,
+			Namespace: secretNamespace,
+			Annotations: map[string]string{
+				"workloadidentity.security.gardener.cloud/name":      "new-name",
+				"workloadidentity.security.gardener.cloud/namespace": "new-namespace",
 			},
-			Type: corev1.SecretTypeOpaque,
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+				"workloadidentity.security.gardener.cloud/provider": "new-provider",
+			},
+			ResourceVersion: "2",
+			Type:            corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
 				"token": []byte("token"),
 			},
@@ -259,10 +242,8 @@ var _ = Describe("#Secret", func() {
 
 		Expect(secret.Reconcile(ctx, fakeClient)).To(Succeed())
 		got := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-			},
+			Name:      secretName,
+			Namespace: secretNamespace,
 		}
 
 		Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(got), got)).To(Succeed())
@@ -271,20 +252,18 @@ var _ = Describe("#Secret", func() {
 
 	It("should compare existing secret with the generated one", func() {
 		existing := &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-				Annotations: map[string]string{
-					"foo": "bar",
-					"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
-					"workloadidentity.security.gardener.cloud/name":           "wi-foo",
-					"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
-				},
-				Labels: map[string]string{
-					"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
-					"workloadidentity.security.gardener.cloud/provider": "provider",
-					"foo": "bar",
-				},
+			Name:      secretName,
+			Namespace: secretNamespace,
+			Annotations: map[string]string{
+				"foo": "bar",
+				"workloadidentity.security.gardener.cloud/context-object": `{"kind":"Shoot","apiVersion":"core.gardener.cloud/v1beta1","name":"shoot-name","namespace":"shoot-namespace","uid":"12345678-94af-4960-9774-0e9987654321"}`,
+				"workloadidentity.security.gardener.cloud/name":           "wi-foo",
+				"workloadidentity.security.gardener.cloud/namespace":      "wi-ns",
+			},
+			Labels: map[string]string{
+				"security.gardener.cloud/purpose":                   "workload-identity-token-requestor",
+				"workloadidentity.security.gardener.cloud/provider": "provider",
+				"foo": "bar",
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
@@ -344,10 +323,8 @@ var _ = Describe("#Secret", func() {
 			ctx = context.Background()
 
 			workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      wiName,
-					Namespace: wiNamespace,
-				},
+				Name:      wiName,
+				Namespace: wiNamespace,
 				Spec: securityv1alpha1.WorkloadIdentitySpec{
 					Audiences: []string{"aud1", "aud2"},
 					TargetSystem: securityv1alpha1.TargetSystem{
@@ -360,11 +337,9 @@ var _ = Describe("#Secret", func() {
 			}
 
 			referringObj = &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-shoot",
-					Namespace: "garden-test",
-					UID:       "shoot-uid-12345",
-				},
+				Name:      "test-shoot",
+				Namespace: "garden-test",
+				UID:       "shoot-uid-12345",
 			}
 		})
 
@@ -422,15 +397,13 @@ var _ = Describe("#Secret", func() {
 		It("should update an existing secret", func() {
 			// Create an initial secret
 			existing := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: secretNamespace,
-					Annotations: map[string]string{
-						"old-annotation": "old-value",
-					},
-					Labels: map[string]string{
-						"old-label": "old-value",
-					},
+				Name:      secretName,
+				Namespace: secretNamespace,
+				Annotations: map[string]string{
+					"old-annotation": "old-value",
+				},
+				Labels: map[string]string{
+					"old-label": "old-value",
 				},
 				Data: map[string][]byte{
 					"old-key": []byte("old-data"),
@@ -495,10 +468,8 @@ var _ = Describe("#Secret", func() {
 
 		It("should include context object without namespace for cluster-scoped referring object", func() {
 			clusterScopedObj := &gardencorev1beta1.Seed{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test-seed",
-					UID:  "seed-uid-67890",
-				},
+				Name: "test-seed",
+				UID:  "seed-uid-67890",
 			}
 
 			err := workloadidentity.Deploy(ctx, fakeClient, workloadIdentity, secretName, secretNamespace, nil, nil, clusterScopedObj)

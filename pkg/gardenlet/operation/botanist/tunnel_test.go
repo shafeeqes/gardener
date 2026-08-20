@@ -40,11 +40,9 @@ var _ = Describe("Tunnel", func() {
 			log = logr.Discard()
 			tunnelName = "vpn-shoot"
 			tunnelPod = corev1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: metav1.NamespaceSystem,
-					Name:      tunnelName,
-					Labels:    map[string]string{"app": tunnelName},
-				},
+				Namespace: metav1.NamespaceSystem,
+				Name:      tunnelName,
+				Labels:    map[string]string{"app": tunnelName},
 			}
 
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.ShootScheme).WithStatusSubresource(&corev1.Pod{}).Build()

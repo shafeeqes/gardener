@@ -51,10 +51,8 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 
 		namespacedCloudProfileValidator = validator.NewNamespacedCloudProfileValidator(fakeManager)
 		namespacedCloudProfile = &core.NamespacedCloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "profile-1",
-				Namespace: namespace,
-			},
+			Name:      "profile-1",
+			Namespace: namespace,
 			Spec: core.NamespacedCloudProfileSpec{
 				Parent: core.CloudProfileReference{
 					Name: "cloud-profile",
@@ -66,9 +64,7 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 			},
 		}
 		cloudProfile = &v1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "cloud-profile",
-			},
+			Name: "cloud-profile",
 		}
 	})
 
@@ -101,11 +97,11 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 			namespacedCloudProfile.Spec.MachineImages = []core.MachineImage{
 				{
 					Name:     "image-1",
-					Versions: []core.MachineImageVersion{{ExpirableVersion: core.ExpirableVersion{Version: "1.1"}}},
+					Versions: []core.MachineImageVersion{{Version: "1.1"}},
 				},
 				{
 					Name:     "image-2",
-					Versions: []core.MachineImageVersion{{ExpirableVersion: core.ExpirableVersion{Version: "2.0"}}},
+					Versions: []core.MachineImageVersion{{Version: "2.0"}},
 				},
 			}
 			Expect(fakeClient.Create(ctx, cloudProfile)).To(Succeed())
@@ -124,7 +120,7 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 
 		It("should fail for NamespacedCloudProfile trying to override an already existing machine image version", func() {
 			cloudProfile.Spec.MachineImages = []v1beta1.MachineImage{
-				{Name: "image-1", Versions: []v1beta1.MachineImageVersion{{ExpirableVersion: v1beta1.ExpirableVersion{Version: "1.0"}}}},
+				{Name: "image-1", Versions: []v1beta1.MachineImageVersion{{Version: "1.0"}}},
 			}
 
 			namespacedCloudProfile.Spec.ProviderConfig = &runtime.RawExtension{Raw: []byte(`{
@@ -137,7 +133,7 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 				{
 					Name: "image-1",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "1.0"}},
+						{Version: "1.0"},
 					},
 				},
 			}
@@ -163,12 +159,12 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 				{
 					Name: "image-1",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "1.2"}},
+						{Version: "1.2"},
 					},
 				},
 				{
 					Name:     "image-3",
-					Versions: []core.MachineImageVersion{{ExpirableVersion: core.ExpirableVersion{Version: "3.0"}}},
+					Versions: []core.MachineImageVersion{{Version: "3.0"}},
 				},
 			}
 			Expect(fakeClient.Create(ctx, cloudProfile)).To(Succeed())
@@ -205,13 +201,13 @@ var _ = Describe("NamespacedCloudProfile Validator", func() {
 				{
 					Name: "image-1",
 					Versions: []core.MachineImageVersion{
-						{ExpirableVersion: core.ExpirableVersion{Version: "1.1"}},
-						{ExpirableVersion: core.ExpirableVersion{Version: "1.2"}},
+						{Version: "1.1"},
+						{Version: "1.2"},
 					},
 				},
 				{
 					Name:     "image-3",
-					Versions: []core.MachineImageVersion{{ExpirableVersion: core.ExpirableVersion{Version: "3.0"}}},
+					Versions: []core.MachineImageVersion{{Version: "3.0"}},
 				},
 			}
 			Expect(fakeClient.Create(ctx, cloudProfile)).To(Succeed())

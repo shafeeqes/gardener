@@ -13,7 +13,6 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -56,11 +55,9 @@ func GetCloudProfile(ctx context.Context, reader client.Reader, shoot *gardencor
 			return nil, err
 		}
 		cloudProfile = &gardencorev1beta1.CloudProfile{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      cloudProfileReference.Name,
-				Namespace: shoot.Namespace,
-			},
-			Spec: namespacedCloudProfile.Status.CloudProfileSpec,
+			Name:      cloudProfileReference.Name,
+			Namespace: shoot.Namespace,
+			Spec:      namespacedCloudProfile.Status.CloudProfileSpec,
 		}
 	}
 	return cloudProfile, nil

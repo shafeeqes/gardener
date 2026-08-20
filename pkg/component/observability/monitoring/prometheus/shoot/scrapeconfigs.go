@@ -27,9 +27,7 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 	out := []*monitoringv1alpha1.ScrapeConfig{
 		// We fetch kubelet metrics from seed's kube-system Prometheus and filter the metrics in shoot's namespace.
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "kube-kubelet-seed",
-			},
+			Name: "kube-kubelet-seed",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorTimestamps: new(false),
 				MetricsPath:     new("/federate"),
@@ -68,9 +66,7 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 			},
 		},
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "annotated-seed-service-endpoints",
-			},
+			Name: "annotated-seed-service-endpoints",
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
@@ -136,9 +132,7 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 			},
 		},
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "prometheus-" + Label,
-			},
+			Name: "prometheus-" + Label,
 			Spec: monitoringv1alpha1.ScrapeConfigSpec{
 				HonorLabels: new(false),
 				StaticConfigs: []monitoringv1alpha1.StaticConfig{{
@@ -166,20 +160,18 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 	if !isWorkerless {
 		out = append(out,
 			&monitoringv1alpha1.ScrapeConfig{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "cadvisor",
-				},
+				Name: "cadvisor",
 				Spec: monitoringv1alpha1.ScrapeConfigSpec{
 					HonorLabels:     new(false),
 					HonorTimestamps: new(false),
 					Scheme:          new(monitoringv1.SchemeHTTPS),
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-						Key:                  resourcesv1alpha1.DataKeyToken,
+						Name: AccessSecretName,
+						Key:  resourcesv1alpha1.DataKeyToken,
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-						Key:                  secretsutils.DataKeyCertificateBundle,
+						Name: clusterCASecretName,
+						Key:  secretsutils.DataKeyCertificateBundle,
 					}}},
 					KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 						Role:            monitoringv1alpha1.KubernetesRoleNode,
@@ -187,12 +179,12 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 						Namespaces:      &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 						FollowRedirects: new(false),
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-							Key:                  resourcesv1alpha1.DataKeyToken,
+							Name: AccessSecretName,
+							Key:  resourcesv1alpha1.DataKeyToken,
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-							Key:                  secretsutils.DataKeyCertificateBundle,
+							Name: clusterCASecretName,
+							Key:  secretsutils.DataKeyCertificateBundle,
 						}}},
 					}},
 					RelabelConfigs: []monitoringv1.RelabelConfig{
@@ -287,19 +279,17 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 				},
 			},
 			&monitoringv1alpha1.ScrapeConfig{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "kube-kubelet",
-				},
+				Name: "kube-kubelet",
 				Spec: monitoringv1alpha1.ScrapeConfigSpec{
 					HonorLabels: new(false),
 					Scheme:      new(monitoringv1.SchemeHTTPS),
 					Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-						Key:                  resourcesv1alpha1.DataKeyToken,
+						Name: AccessSecretName,
+						Key:  resourcesv1alpha1.DataKeyToken,
 					}},
 					TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-						Key:                  secretsutils.DataKeyCertificateBundle,
+						Name: clusterCASecretName,
+						Key:  secretsutils.DataKeyCertificateBundle,
 					}}},
 					KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 						Role:            monitoringv1alpha1.KubernetesRoleNode,
@@ -307,12 +297,12 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 						FollowRedirects: new(true),
 						Namespaces:      &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-							Key:                  resourcesv1alpha1.DataKeyToken,
+							Name: AccessSecretName,
+							Key:  resourcesv1alpha1.DataKeyToken,
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-							Key:                  secretsutils.DataKeyCertificateBundle,
+							Name: clusterCASecretName,
+							Key:  secretsutils.DataKeyCertificateBundle,
 						}}},
 					}},
 					RelabelConfigs: []monitoringv1.RelabelConfig{
@@ -368,19 +358,17 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 			nodeMetricsURL := fmt.Sprintf("/api/v1/nodes/${1}:%d/proxy/metrics", otelcomponent.MetricsPort)
 			out = append(out,
 				&monitoringv1alpha1.ScrapeConfig{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "opentelemetry-collector-nodes",
-					},
+					Name: "opentelemetry-collector-nodes",
 					Spec: monitoringv1alpha1.ScrapeConfigSpec{
 						HonorLabels: new(false),
 						Scheme:      new(monitoringv1.SchemeHTTPS),
 						Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-							Key:                  resourcesv1alpha1.DataKeyToken,
+							Name: AccessSecretName,
+							Key:  resourcesv1alpha1.DataKeyToken,
 						}},
 						TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-							Key:                  secretsutils.DataKeyCertificateBundle,
+							Name: clusterCASecretName,
+							Key:  secretsutils.DataKeyCertificateBundle,
 						}}},
 						KubernetesSDConfigs: []monitoringv1alpha1.KubernetesSDConfig{{
 							Role:            monitoringv1alpha1.KubernetesRoleNode,
@@ -388,12 +376,12 @@ func CentralScrapeConfigs(namespace, clusterCASecretName string, isWorkerless bo
 							FollowRedirects: new(true),
 							Namespaces:      &monitoringv1alpha1.NamespaceDiscovery{Names: []string{metav1.NamespaceSystem}},
 							Authorization: &monitoringv1.SafeAuthorization{Credentials: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: AccessSecretName},
-								Key:                  resourcesv1alpha1.DataKeyToken,
+								Name: AccessSecretName,
+								Key:  resourcesv1alpha1.DataKeyToken,
 							}},
 							TLSConfig: &monitoringv1.SafeTLSConfig{CA: monitoringv1.SecretOrConfigMap{Secret: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: clusterCASecretName},
-								Key:                  secretsutils.DataKeyCertificateBundle,
+								Name: clusterCASecretName,
+								Key:  secretsutils.DataKeyCertificateBundle,
 							}}},
 						}},
 						RelabelConfigs: []monitoringv1.RelabelConfig{

@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -62,19 +61,15 @@ var _ = Describe("Controller", func() {
 
 	BeforeEach(func() {
 		gardenSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-secret",
-				Namespace: gardenNamespaceName,
-			},
+			Name:      "test-secret",
+			Namespace: gardenNamespaceName,
 			Data: map[string][]byte{
 				"foo": []byte("bar"),
 			},
 		}
 		workloadIdentity = &securityv1alpha1.WorkloadIdentity{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-workload-identity",
-				Namespace: gardenNamespaceName,
-			},
+			Name:      "test-workload-identity",
+			Namespace: gardenNamespaceName,
 			Spec: securityv1alpha1.WorkloadIdentitySpec{
 				Audiences: []string{"test"},
 				TargetSystem: securityv1alpha1.TargetSystem{
@@ -84,10 +79,8 @@ var _ = Describe("Controller", func() {
 		}
 
 		backupBucket = &gardencorev1beta1.BackupBucket{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:       "foo",
-				Generation: 1,
-			},
+			Name:       "foo",
+			Generation: 1,
 			Spec: gardencorev1beta1.BackupBucketSpec{
 				Provider: gardencorev1beta1.BackupBucketProvider{
 					Type:   "provider-type",
@@ -107,10 +100,8 @@ var _ = Describe("Controller", func() {
 		}
 
 		backupEntry = &gardencorev1beta1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "bar",
-				Namespace: testNamespaceName,
-			},
+			Name:      "bar",
+			Namespace: testNamespaceName,
 			Spec: gardencorev1beta1.BackupEntrySpec{
 				BucketName: backupBucket.Name,
 				SeedName:   new(seedName),
@@ -146,16 +137,12 @@ var _ = Describe("Controller", func() {
 
 		now = fakeClock.Now().UTC()
 		extensionSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "entry-" + backupEntry.Name,
-				Namespace: gardenNamespaceName,
-			},
+			Name:      "entry-" + backupEntry.Name,
+			Namespace: gardenNamespaceName,
 		}
 
 		extensionBackupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: backupEntry.Name,
-			},
+			Name: backupEntry.Name,
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type:           backupBucket.Spec.Provider.Type,
@@ -180,10 +167,8 @@ var _ = Describe("Controller", func() {
 		}
 
 		request = reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Name:      backupEntry.Name,
-				Namespace: backupEntry.Namespace,
-			},
+			Name:      backupEntry.Name,
+			Namespace: backupEntry.Namespace,
 		}
 	})
 
@@ -197,7 +182,7 @@ var _ = Describe("Controller", func() {
 			}
 			Expect(gardenClient.Create(ctx, backupBucket)).To(Succeed())
 			Expect(gardenClient.Create(ctx, backupEntry)).To(Succeed())
-			gardenSecret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}}
+			gardenSecret := corev1.Secret{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}
 			Expect(gardenClient.Get(ctx, client.ObjectKeyFromObject(&gardenSecret), &gardenSecret)).To(BeNotFoundError())
 
 			result, err := reconciler.Reconcile(ctx, request)
@@ -215,7 +200,7 @@ var _ = Describe("Controller", func() {
 			}
 			Expect(gardenClient.Create(ctx, backupBucket)).To(Succeed())
 			Expect(gardenClient.Create(ctx, backupEntry)).To(Succeed())
-			gardenConfigMap := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}}
+			gardenConfigMap := corev1.ConfigMap{Namespace: backupBucket.Spec.CredentialsRef.Namespace, Name: backupBucket.Spec.CredentialsRef.Name}
 			Expect(gardenClient.Create(ctx, &gardenConfigMap)).To(Succeed())
 
 			result, err := reconciler.Reconcile(ctx, request)
@@ -323,10 +308,8 @@ var _ = Describe("Controller", func() {
 
 		It("should use the backupBucket.status.generatedSecret as credentials", func() {
 			generatedGardenSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "generated-secret",
-					Namespace: gardenNamespaceName,
-				},
+				Name:      "generated-secret",
+				Namespace: gardenNamespaceName,
 				Data: map[string][]byte{
 					"generatedSecret1": []byte("generatedValue1"),
 					"generatedSecret2": []byte("generatedValue2"),

@@ -40,11 +40,9 @@ var _ = Describe("Secrets", func() {
 			fakeClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 			fileSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "file-secret",
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{fileSecretDataKey: fileSecretContent},
+				Name:      "file-secret",
+				Namespace: namespace,
+				Data:      map[string][]byte{fileSecretDataKey: fileSecretContent},
 			}
 
 			Expect(fakeClient.Create(ctx, fileSecret)).To(Succeed())
@@ -53,15 +51,13 @@ var _ = Describe("Secrets", func() {
 			})
 
 			osc = &extensionsv1alpha1.OperatingSystemConfig{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:            "osc-name",
-					Namespace:       namespace,
-					ResourceVersion: "1",
-					UID:             "foo",
-					OwnerReferences: []metav1.OwnerReference{{}},
-					Labels:          map[string]string{"foo": "bar"},
-					Annotations:     map[string]string{"bar": "foo"},
-				},
+				Name:            "osc-name",
+				Namespace:       namespace,
+				ResourceVersion: "1",
+				UID:             "foo",
+				OwnerReferences: []metav1.OwnerReference{{}},
+				Labels:          map[string]string{"foo": "bar"},
+				Annotations:     map[string]string{"bar": "foo"},
 				Spec: extensionsv1alpha1.OperatingSystemConfigSpec{
 					CRIConfig: &extensionsv1alpha1.CRIConfig{
 						Name: "containerd",
@@ -105,16 +101,14 @@ var _ = Describe("Secrets", func() {
 			secret, err := OperatingSystemConfigSecret(ctx, fakeClient, osc, secretName, workerPoolName, true)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(secret).To(Equal(&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: "kube-system",
-					Annotations: map[string]string{
-						"checksum/data-script": "e92163ba634e290c2e13de35a778007114e201e168c0a27149d05ab5592e4d36",
-					},
-					Labels: map[string]string{
-						"gardener.cloud/role":        "operating-system-config",
-						"worker.gardener.cloud/pool": workerPoolName,
-					},
+				Name:      secretName,
+				Namespace: "kube-system",
+				Annotations: map[string]string{
+					"checksum/data-script": "e92163ba634e290c2e13de35a778007114e201e168c0a27149d05ab5592e4d36",
+				},
+				Labels: map[string]string{
+					"gardener.cloud/role":        "operating-system-config",
+					"worker.gardener.cloud/pool": workerPoolName,
 				},
 				Data: map[string][]byte{"osc.yaml": []byte(`apiVersion: extensions.gardener.cloud/v1alpha1
 kind: OperatingSystemConfig

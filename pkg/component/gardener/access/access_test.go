@@ -13,7 +13,6 @@ import (
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -43,9 +42,7 @@ var _ = Describe("Access", func() {
 		namespace = "shoot--foo--bar"
 
 		gardenerSystemClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:gardener",
-			},
+			Name: "gardener.cloud:system:gardener",
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
@@ -66,11 +63,9 @@ var _ = Describe("Access", func() {
 		}
 
 		systemViewersClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:viewers",
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:system:viewers",
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -85,11 +80,9 @@ var _ = Describe("Access", func() {
 		}
 
 		projectViewersClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:project:viewers",
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:project:viewers",
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -104,11 +97,9 @@ var _ = Describe("Access", func() {
 		}
 
 		systemAdminClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:system:admins",
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:system:admins",
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -123,11 +114,9 @@ var _ = Describe("Access", func() {
 		}
 
 		projectAdminClusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener.cloud:project:admins",
-				Annotations: map[string]string{
-					"resources.gardener.cloud/delete-on-invalid-update": "true",
-				},
+			Name: "gardener.cloud:project:admins",
+			Annotations: map[string]string{
+				"resources.gardener.cloud/delete-on-invalid-update": "true",
 			},
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
@@ -161,7 +150,7 @@ var _ = Describe("Access", func() {
 		consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 
 		By("Create secrets managed outside of this package for whose secretsmanager.Get() will be called")
-		Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: namespace}})).To(Succeed())
+		Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "ca", Namespace: namespace})).To(Succeed())
 
 		access = New(fakeClient, namespace, sm, Values{
 			ServerOutOfCluster:    serverOutOfCluster,
@@ -171,18 +160,16 @@ var _ = Describe("Access", func() {
 		})
 
 		expectedGardenerSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            gardenerSecretName,
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "gardener",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
+			Name:            gardenerSecretName,
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "gardener",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
+			},
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{"kubeconfig": []byte(`apiVersion: v1
@@ -204,18 +191,16 @@ users:
 		}
 
 		expectedGardenerInternalSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            gardenerInternalSecretName,
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Annotations: map[string]string{
-					"serviceaccount.resources.gardener.cloud/name":      "gardener-internal",
-					"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
-				},
-				Labels: map[string]string{
-					"resources.gardener.cloud/purpose": "token-requestor",
-					"resources.gardener.cloud/class":   "shoot",
-				},
+			Name:            gardenerInternalSecretName,
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Annotations: map[string]string{
+				"serviceaccount.resources.gardener.cloud/name":      "gardener-internal",
+				"serviceaccount.resources.gardener.cloud/namespace": "kube-system",
+			},
+			Labels: map[string]string{
+				"resources.gardener.cloud/purpose": "token-requestor",
+				"resources.gardener.cloud/class":   "shoot",
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{"kubeconfig": []byte(`apiVersion: v1
@@ -237,20 +222,16 @@ users:
 		}
 
 		managedResourceSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      managedResourceSecretName,
-				Namespace: namespace,
-			},
+			Name:      managedResourceSecretName,
+			Namespace: namespace,
 		}
 		expectedManagedResource = &resourcesv1alpha1.ManagedResource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:            managedResourceName,
-				Namespace:       namespace,
-				ResourceVersion: "1",
-				Labels: map[string]string{
-					"origin": "gardener",
-					"foo":    "bar",
-				},
+			Name:            managedResourceName,
+			Namespace:       namespace,
+			ResourceVersion: "1",
+			Labels: map[string]string{
+				"origin": "gardener",
+				"foo":    "bar",
 			},
 			Spec: resourcesv1alpha1.ManagedResourceSpec{
 				SecretRefs:   []corev1.LocalObjectReference{},
@@ -271,7 +252,7 @@ users:
 		It("should successfully deploy all resources", func() {
 			Expect(access.Deploy(ctx)).To(Succeed())
 
-			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: namespace}}
+			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledManagedResource), reconciledManagedResource)).To(Succeed())
 			expectedManagedResource.Spec.SecretRefs = []corev1.LocalObjectReference{{Name: reconciledManagedResource.Spec.SecretRefs[0].Name}}
 			utilruntime.Must(references.InjectAnnotations(expectedManagedResource))
@@ -284,41 +265,37 @@ users:
 				projectAdminClusterRoleBinding,
 			))
 
-			reconciledGardenerSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenerSecretName, Namespace: namespace}}
+			reconciledGardenerSecret := &corev1.Secret{Name: gardenerSecretName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledGardenerSecret), reconciledGardenerSecret)).To(Succeed())
 			Expect(reconciledGardenerSecret).To(DeepEqual(expectedGardenerSecret))
 
-			reconciledGardenerInternalSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenerInternalSecretName, Namespace: namespace}}
+			reconciledGardenerInternalSecret := &corev1.Secret{Name: gardenerInternalSecretName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledGardenerInternalSecret), reconciledGardenerInternalSecret)).To(Succeed())
 			Expect(reconciledGardenerInternalSecret).To(DeepEqual(expectedGardenerInternalSecret))
 		})
 
 		It("should remove legacy secret data", func() {
 			oldGardenerSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      expectedGardenerSecret.Name,
-					Namespace: expectedGardenerSecret.Namespace,
-				},
+				Name:      expectedGardenerSecret.Name,
+				Namespace: expectedGardenerSecret.Namespace,
 			}
 			Expect(fakeClient.Create(ctx, oldGardenerSecret)).To(Succeed())
 			expectedGardenerSecret.ResourceVersion = "2"
 
 			oldGardenerInternalSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      expectedGardenerInternalSecret.Name,
-					Namespace: expectedGardenerInternalSecret.Namespace,
-				},
+				Name:      expectedGardenerInternalSecret.Name,
+				Namespace: expectedGardenerInternalSecret.Namespace,
 			}
 			Expect(fakeClient.Create(ctx, oldGardenerInternalSecret)).To(Succeed())
 			expectedGardenerInternalSecret.ResourceVersion = "2"
 
 			Expect(access.Deploy(ctx)).To(Succeed())
 
-			reconciledGardenerSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenerSecretName, Namespace: namespace}}
+			reconciledGardenerSecret := &corev1.Secret{Name: gardenerSecretName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledGardenerSecret), reconciledGardenerSecret)).To(Succeed())
 			Expect(reconciledGardenerSecret).To(DeepEqual(expectedGardenerSecret))
 
-			reconciledGardenerInternalSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: gardenerInternalSecretName, Namespace: namespace}}
+			reconciledGardenerInternalSecret := &corev1.Secret{Name: gardenerInternalSecretName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledGardenerInternalSecret), reconciledGardenerInternalSecret)).To(Succeed())
 			Expect(reconciledGardenerInternalSecret).To(DeepEqual(expectedGardenerInternalSecret))
 		})
@@ -332,7 +309,7 @@ users:
 			})
 			Expect(access.Deploy(ctx)).To(Succeed())
 
-			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{Name: managedResourceName, Namespace: namespace}}
+			reconciledManagedResource := &resourcesv1alpha1.ManagedResource{Name: managedResourceName, Namespace: namespace}
 			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(reconciledManagedResource), reconciledManagedResource)).To(Succeed())
 			Expect(reconciledManagedResource).To(consistOf(gardenerSystemClusterRoleBinding))
 			Expect(reconciledManagedResource).ToNot(consistOf(
@@ -388,11 +365,9 @@ users:
 				fakeOps.MaxAttempts = 2
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{
@@ -415,11 +390,9 @@ users:
 				fakeOps.MaxAttempts = 2
 
 				Expect(fakeClient.Create(ctx, &resourcesv1alpha1.ManagedResource{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       managedResourceName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       managedResourceName,
+					Namespace:  namespace,
+					Generation: 1,
 					Status: resourcesv1alpha1.ManagedResourceStatus{
 						ObservedGeneration: 1,
 						Conditions: []gardencorev1beta1.Condition{

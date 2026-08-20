@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -33,7 +32,7 @@ var _ = Describe("scale", func() {
 	Context("ScaleStatefulSet", func() {
 		It("sets scale to 2", func() {
 			Expect(fakeClient.Create(ctx, &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace},
+				Name: key.Name, Namespace: key.Namespace,
 			})).To(Succeed())
 
 			Expect(ScaleStatefulSet(ctx, fakeClient, key, 2)).To(Succeed())
@@ -47,7 +46,7 @@ var _ = Describe("scale", func() {
 	Context("ScaleDeployment", func() {
 		It("sets scale to 2", func() {
 			Expect(fakeClient.Create(ctx, &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace},
+				Name: key.Name, Namespace: key.Namespace,
 			})).To(Succeed())
 
 			Expect(ScaleDeployment(ctx, fakeClient, key, 2)).To(Succeed())
@@ -61,8 +60,8 @@ var _ = Describe("scale", func() {
 	Describe("#WaitUntilDeploymentScaledToDesiredReplicas", func() {
 		It("should wait until deployment was scaled", func() {
 			Expect(fakeClient.Create(ctx, &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace, Generation: 2},
-				Spec:       appsv1.DeploymentSpec{Replicas: new(int32(2))},
+				Name: key.Name, Namespace: key.Namespace, Generation: 2,
+				Spec: appsv1.DeploymentSpec{Replicas: new(int32(2))},
 				Status: appsv1.DeploymentStatus{
 					ObservedGeneration: 2,
 					Replicas:           2,
@@ -77,8 +76,8 @@ var _ = Describe("scale", func() {
 	Describe("#WaitUntilStatefulSetScaledToDesiredReplicas", func() {
 		It("should wait until statefulset was scaled", func() {
 			Expect(fakeClient.Create(ctx, &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace, Generation: 2},
-				Spec:       appsv1.StatefulSetSpec{Replicas: new(int32(2))},
+				Name: key.Name, Namespace: key.Namespace, Generation: 2,
+				Spec: appsv1.StatefulSetSpec{Replicas: new(int32(2))},
 				Status: appsv1.StatefulSetStatus{
 					ObservedGeneration: 2,
 					Replicas:           2,
@@ -105,8 +104,8 @@ var _ = Describe("scale", func() {
 			}).Build()
 
 			Expect(fakeClient.Create(ctx, &appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace, Generation: 2},
-				Spec:       appsv1.StatefulSetSpec{Replicas: new(int32(2))},
+				Name: key.Name, Namespace: key.Namespace, Generation: 2,
+				Spec: appsv1.StatefulSetSpec{Replicas: new(int32(2))},
 				Status: appsv1.StatefulSetStatus{
 					ObservedGeneration: 2,
 					Replicas:           2,

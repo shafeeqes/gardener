@@ -109,14 +109,12 @@ var _ = Describe("OperatingSystemConfig controller serial reconciliation tests",
 		Expect(err).NotTo(HaveOccurred())
 
 		oscSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      oscSecretName,
-				Namespace: metav1.NamespaceSystem,
-				Labels:    map[string]string{testID: testRunID},
-				Annotations: map[string]string{
-					"checksum/data-script":                                utils.ComputeSHA256Hex(oscRaw),
-					"reconciliation.osc.node-agent.gardener.cloud/serial": "true",
-				},
+			Name:      oscSecretName,
+			Namespace: metav1.NamespaceSystem,
+			Labels:    map[string]string{testID: testRunID},
+			Annotations: map[string]string{
+				"checksum/data-script":                                utils.ComputeSHA256Hex(oscRaw),
+				"reconciliation.osc.node-agent.gardener.cloud/serial": "true",
 			},
 			Data: map[string][]byte{"osc.yaml": oscRaw},
 		}
@@ -151,7 +149,7 @@ var _ = Describe("OperatingSystemConfig controller serial reconciliation tests",
 			Expect(testClient.Delete(ctx, oscSecret)).To(Succeed())
 		})
 
-		lease := &coordinationv1.Lease{ObjectMeta: metav1.ObjectMeta{Name: oscSecret.Name, Namespace: oscSecret.Namespace}}
+		lease := &coordinationv1.Lease{Name: oscSecret.Name, Namespace: oscSecret.Namespace}
 
 		By("Wait until first leader is elected")
 		var leader1 string
@@ -224,12 +222,10 @@ func startNewOperatingSystemConfigControllerInstance(hostName, oscSecretName str
 	GinkgoHelper()
 
 	node := &corev1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: hostName,
-			Labels: map[string]string{
-				testID:                   testRunID,
-				"kubernetes.io/hostname": hostName,
-			},
+		Name: hostName,
+		Labels: map[string]string{
+			testID:                   testRunID,
+			"kubernetes.io/hostname": hostName,
 		},
 	}
 	By("Create Node")

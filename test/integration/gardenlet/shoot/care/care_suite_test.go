@@ -159,12 +159,10 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "garden-" + testRunID,
-			Labels: map[string]string{
-				testID:                       testRunID,
-				v1beta1constants.ProjectName: projectName,
-			},
+		Name: "garden-" + testRunID,
+		Labels: map[string]string{
+			testID:                       testRunID,
+			v1beta1constants.ProjectName: projectName,
 		},
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
@@ -179,12 +177,10 @@ var _ = BeforeSuite(func() {
 	// The namespace must also carry a ProjectName label so the operation builder can resolve it to a Project.
 	By("Create garden Namespace")
 	gardenNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: v1beta1constants.GardenNamespace,
-			Labels: map[string]string{
-				testID:                       testRunID,
-				v1beta1constants.ProjectName: selfHostedProjectName,
-			},
+		Name: v1beta1constants.GardenNamespace,
+		Labels: map[string]string{
+			testID:                       testRunID,
+			v1beta1constants.ProjectName: selfHostedProjectName,
 		},
 	}
 	// The garden namespace may already exist in the envtest environment; ignore AlreadyExists.
@@ -206,10 +202,8 @@ var _ = BeforeSuite(func() {
 	gardenNamespaceName := gardenNamespace.Name
 	By("Create self-hosted Project")
 	selfHostedProject := &gardencorev1beta1.Project{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   selfHostedProjectName,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   selfHostedProjectName,
+		Labels: map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.ProjectSpec{
 			Namespace: &gardenNamespaceName,
 		},
@@ -225,10 +219,8 @@ var _ = BeforeSuite(func() {
 	selfHostedCPNamespaceName := "cp-" + testRunID
 	By("Create self-hosted control plane Namespace")
 	selfHostedCPNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   selfHostedCPNamespaceName,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   selfHostedCPNamespaceName,
+		Labels: map[string]string{testID: testRunID},
 	}
 	Expect(testClient.Create(ctx, selfHostedCPNamespace)).To(Succeed())
 	log.Info("Created self-hosted control plane Namespace for test", "namespaceName", selfHostedCPNamespace.Name)
@@ -239,10 +231,8 @@ var _ = BeforeSuite(func() {
 	})
 
 	project = &gardencorev1beta1.Project{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   projectName,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   projectName,
+		Labels: map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.ProjectSpec{
 			Namespace: &testNamespace.Name,
 		},
@@ -259,12 +249,10 @@ var _ = BeforeSuite(func() {
 
 	By("Create Internal Domain Secret")
 	internalDomainSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "internal-domain-secret",
-			Namespace: testNamespace.Name,
-			Labels: map[string]string{
-				testID: testRunID,
-			},
+		Name:      "internal-domain-secret",
+		Namespace: testNamespace.Name,
+		Labels: map[string]string{
+			testID: testRunID,
 		},
 	}
 	Expect(testClient.Create(ctx, internalDomainSecret)).To(Succeed())
@@ -276,10 +264,8 @@ var _ = BeforeSuite(func() {
 	})
 
 	seed = &gardencorev1beta1.Seed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   seedName,
-			Labels: map[string]string{testID: testRunID},
-		},
+		Name:   seedName,
+		Labels: map[string]string{testID: testRunID},
 		Spec: gardencorev1beta1.SeedSpec{
 			Provider: gardencorev1beta1.SeedProvider{
 				Region: "region",
@@ -362,8 +348,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	shootClientMap = fakeclientmap.NewClientMapBuilder().
-		WithClientSetForKey(keys.ForShoot(&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: testNamespace.Name}}), testClientSet).
-		WithClientSetForKey(keys.ForShoot(&gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: shootName, Namespace: v1beta1constants.GardenNamespace}}), testClientSet).
+		WithClientSetForKey(keys.ForShoot(&gardencorev1beta1.Shoot{Name: shootName, Namespace: testNamespace.Name}), testClientSet).
+		WithClientSetForKey(keys.ForShoot(&gardencorev1beta1.Shoot{Name: shootName, Namespace: v1beta1constants.GardenNamespace}), testClientSet).
 		Build()
 	fakeClock = testclock.NewFakeClock(time.Now().Round(time.Second))
 
@@ -378,11 +364,7 @@ var _ = BeforeSuite(func() {
 				},
 			},
 			SeedConfig: &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: seedName,
-					},
-				},
+				Name: seedName,
 			},
 		},
 		Clock:    fakeClock,

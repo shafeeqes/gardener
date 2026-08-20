@@ -9,7 +9,6 @@ import (
 	"maps"
 
 	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/cluster"
@@ -73,7 +72,7 @@ func (r *Reconciler) MapWorkerToShoot(log logr.Logger) handler.MapFunc {
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: shoot.Name, Namespace: shoot.Namespace}}}
+		return []reconcile.Request{{Name: shoot.Name, Namespace: shoot.Namespace}}
 	}
 }
 

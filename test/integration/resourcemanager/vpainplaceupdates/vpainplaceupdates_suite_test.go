@@ -87,9 +87,7 @@ var _ = BeforeSuite(func() {
 
 	By("Create test Namespace")
 	testNamespace = &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: testNamespaceName,
-		},
+		Name: testNamespaceName,
 	}
 	Expect(testClient.Create(ctx, testNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "namespaceName", testNamespace.Name)
@@ -143,13 +141,9 @@ var _ = BeforeSuite(func() {
 func getMutatingWebhookConfigurations(namespaceName string) []*admissionregistrationv1.MutatingWebhookConfiguration {
 	return []*admissionregistrationv1.MutatingWebhookConfiguration{
 		{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
-				Kind:       "MutatingWebhookConfiguration",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "gardener-resource-manager",
-			},
+			APIVersion: admissionregistrationv1.SchemeGroupVersion.String(),
+			Kind:       "MutatingWebhookConfiguration",
+			Name:       "gardener-resource-manager",
 			Webhooks: []admissionregistrationv1.MutatingWebhook{
 				resourcemanager.NewInPlaceUpdatesWebhook(&metav1.LabelSelector{
 					MatchLabels: map[string]string{corev1.LabelMetadataName: namespaceName},

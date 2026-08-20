@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -48,7 +47,7 @@ var _ = Describe("Add", func() {
 
 		It("should map the ControllerInstallation to the Seed", func() {
 			Expect(reconciler.MapControllerInstallationToSeed(ctx, controllerInstallation)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: controllerInstallation.Spec.SeedRef.Name}},
+				reconcile.Request{Name: controllerInstallation.Spec.SeedRef.Name},
 			))
 		})
 	})

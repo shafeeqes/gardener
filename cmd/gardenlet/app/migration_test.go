@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	. "github.com/gardener/gardener/cmd/gardenlet/app"
@@ -161,7 +160,7 @@ var _ = Describe("Migration", func() {
 // and carries the UsesUnifiedHTTPProxyPort constraint with status 'True', i.e. a Shoot which does not block the migration.
 func shootUsingUnifiedPort(name, seedName string) *gardencorev1beta1.Shoot {
 	return &gardencorev1beta1.Shoot{
-		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: "garden-proj"},
+		Name: name, Namespace: "garden-proj",
 		Spec: gardencorev1beta1.ShootSpec{
 			SeedName: &seedName,
 			Provider: gardencorev1beta1.Provider{

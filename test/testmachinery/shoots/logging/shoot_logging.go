@@ -161,19 +161,15 @@ epFdd1fXLwuwn7fvPMmJqD3HtLalX1AZmPk+BI8ezfAiVcVqnTJQMXlYPpYe9A==
 	}, shootGetLogsFromValiTimeout, framework.WithCAfterTest(func(ctx context.Context) {
 		ginkgo.By("Cleanup logger app resources")
 		loggerDeploymentToDelete := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: shootFramework.ShootSeedNamespace(),
-				Name:      fullLoggerName,
-			},
+			Namespace: shootFramework.ShootSeedNamespace(),
+			Name:      fullLoggerName,
 		}
 		err := kubernetesutils.DeleteObject(ctx, shootFramework.SeedClient.Client(), loggerDeploymentToDelete)
 		framework.ExpectNoError(err)
 
 		ginkgo.By("Cleanup vali's MutatingWebhook and the additional label")
 		webhookToDelete := &admissionregistrationv1.ValidatingWebhookConfiguration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "block-vali-updates",
-			},
+			Name: "block-vali-updates",
 		}
 		err = kubernetesutils.DeleteObject(ctx, shootFramework.SeedClient.Client(), webhookToDelete)
 		framework.ExpectNoError(err)

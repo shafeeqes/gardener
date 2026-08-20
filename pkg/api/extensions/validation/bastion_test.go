@@ -21,10 +21,8 @@ var _ = Describe("Bastion validation tests", func() {
 
 	BeforeEach(func() {
 		bastion = &extensionsv1alpha1.Bastion{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-bastion",
-				Namespace: "test-namespace",
-			},
+			Name:      "test-bastion",
+			Namespace: "test-namespace",
 			Spec: extensionsv1alpha1.BastionSpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: "provider",

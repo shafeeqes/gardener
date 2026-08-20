@@ -206,9 +206,9 @@ func conditionMapToConditions(m map[gardencorev1beta1.ConditionType]gardencorev1
 
 func newObj(req Request) client.Object {
 	if req.IsSelfHostedShoot {
-		return &gardencorev1beta1.Shoot{ObjectMeta: metav1.ObjectMeta{Name: req.Name, Namespace: req.Namespace}}
+		return &gardencorev1beta1.Shoot{Name: req.Name, Namespace: req.Namespace}
 	}
-	return &gardencorev1beta1.Seed{ObjectMeta: metav1.ObjectMeta{Name: req.Name}}
+	return &gardencorev1beta1.Seed{Name: req.Name}
 }
 
 func conditions(o client.Object) []gardencorev1beta1.Condition {

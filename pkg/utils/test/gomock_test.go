@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/pkg/utils/test"
@@ -24,10 +23,8 @@ var _ = Describe("gomock Matchers", func() {
 
 		BeforeEach(func() {
 			expected = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "bar",
-				},
+				Name:      "foo",
+				Namespace: "bar",
 			}
 			matcher = test.HasObjectKeyOf(expected)
 		})
@@ -43,10 +40,8 @@ var _ = Describe("gomock Matchers", func() {
 			})
 			It("return false for non-objects", func() {
 				notAnObject := corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-					},
+					Name:      "foo",
+					Namespace: "bar",
 				}
 				Expect(matcher.Matches(notAnObject)).To(BeFalse())
 			})

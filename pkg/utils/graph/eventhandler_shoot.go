@@ -245,7 +245,7 @@ func (g *graph) HandleShootCreateOrUpdate(ctx context.Context, shoot *gardencore
 	g.addEdge(shootStateVertex, shootVertex)
 
 	if v1beta1helper.HasManagedIssuer(shoot) {
-		namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: shoot.Namespace}}
+		namespace := &corev1.Namespace{Name: shoot.Namespace}
 		if err := g.client.Get(ctx, client.ObjectKeyFromObject(namespace), namespace); err == nil {
 			if projectName, ok := namespace.Labels[v1beta1constants.ProjectName]; ok {
 				saPublicKeysSecretName := gardenerutils.ComputeManagedShootIssuerSecretName(projectName, shoot.UID)

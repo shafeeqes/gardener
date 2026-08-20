@@ -112,15 +112,11 @@ func (a *actuator) Restore(ctx context.Context, log logr.Logger, infrastructure 
 
 func namespace(technicalID string) *corev1.Namespace {
 	return &corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Namespace",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: NamespaceName(technicalID),
-			Labels: map[string]string{
-				v1beta1constants.GardenRole: local.GardenRoleInfra,
-			},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Namespace",
+		Name:       NamespaceName(technicalID),
+		Labels: map[string]string{
+			v1beta1constants.GardenRole: local.GardenRoleInfra,
 		},
 	}
 }

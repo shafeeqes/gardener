@@ -13,7 +13,6 @@ import (
 
 	. "github.com/gardener/gardener/pkg/api/config/gardenlet/v1alpha1/helper"
 	gardenletconfigv1alpha1 "github.com/gardener/gardener/pkg/apis/config/gardenlet/v1alpha1"
-	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/features"
 	"github.com/gardener/gardener/pkg/utils/test"
 )
@@ -28,11 +27,7 @@ var _ = Describe("helper", func() {
 			seedName := "some-name"
 
 			config := &gardenletconfigv1alpha1.SeedConfig{
-				SeedTemplate: gardencorev1beta1.SeedTemplate{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: seedName,
-					},
-				},
+				Name: seedName,
 			}
 			Expect(SeedNameFromSeedConfig(config)).To(Equal(seedName))
 		})

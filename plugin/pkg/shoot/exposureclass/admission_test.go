@@ -40,19 +40,15 @@ var _ = Describe("exposureclass", func() {
 			admissionHandler.SetCoreInformerFactory(gardenCoreInformerFactory)
 
 			shoot = &core.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test",
-					Namespace: "test",
-				},
+				Name:      "test",
+				Namespace: "test",
 				Spec: core.ShootSpec{
 					ExposureClassName: &exposureClassName,
 				},
 			}
 
 			exposureClass = &gardencorev1beta1.ExposureClass{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: exposureClassName,
-				},
+				Name:       exposureClassName,
 				Scheduling: &gardencorev1beta1.ExposureClassScheduling{},
 			}
 		})

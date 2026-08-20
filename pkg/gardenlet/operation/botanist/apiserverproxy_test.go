@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/clock"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -37,10 +36,8 @@ var _ = Describe("APIServerProxy", func() {
 		advertiseIPAddress := "10.2.170.21"
 
 		shoot = &gardencorev1beta1.Shoot{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "bar",
-				Namespace: "foo",
-			},
+			Name:      "bar",
+			Namespace: "foo",
 			Spec: gardencorev1beta1.ShootSpec{
 				Networking: &gardencorev1beta1.Networking{
 					IPFamilies: []gardencorev1beta1.IPFamily{"IPv4"},

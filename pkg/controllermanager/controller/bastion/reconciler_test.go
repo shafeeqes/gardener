@@ -53,7 +53,7 @@ var _ = Describe("Controller", func() {
 
 	Describe("Reconciler", func() {
 		It("should return nil because object not found", func() {
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -69,7 +69,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, nil)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result.RequeueAfter).To(BeNumerically("~", requeueAfter, 1*time.Second))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -85,7 +85,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &now, &expires)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result.RequeueAfter).To(BeNumerically("~", remaining, 1*time.Second))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -101,7 +101,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, &expires)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result.RequeueAfter).To(BeNumerically("~", 10*time.Minute, 1*time.Second))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -111,7 +111,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, nil)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -128,7 +128,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, nil)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -144,7 +144,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, &expires)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -159,7 +159,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, nil)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -177,7 +177,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, &expires)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -193,7 +193,7 @@ var _ = Describe("Controller", func() {
 			bastion := newBastion(namespace, bastionName, shootName, &seedName, &created, &expires)
 			Expect(fakeClient.Create(ctx, &bastion)).To(Succeed())
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKey{Namespace: namespace, Name: bastionName}})
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{Namespace: namespace, Name: bastionName})
 			Expect(result).To(Equal(reconcile.Result{}))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -204,10 +204,8 @@ var _ = Describe("Controller", func() {
 
 func newBastion(namespace string, name string, shootName string, seedName *string, createdAt *time.Time, expiresAt *time.Time) operationsv1alpha1.Bastion {
 	bastion := operationsv1alpha1.Bastion{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: operationsv1alpha1.BastionSpec{
 			ShootRef: corev1.LocalObjectReference{
 				Name: shootName,
@@ -230,10 +228,8 @@ func newBastion(namespace string, name string, shootName string, seedName *strin
 
 func newShoot(namespace string, name string, seedName *string) gardencorev1beta1.Shoot {
 	shoot := gardencorev1beta1.Shoot{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: gardencorev1beta1.ShootSpec{
 			SeedName: seedName,
 		},

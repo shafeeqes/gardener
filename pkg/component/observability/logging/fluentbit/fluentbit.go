@@ -85,10 +85,8 @@ func (f *fluentBit) Deploy(ctx context.Context) error {
 		registry = managedresources.NewRegistry(kubernetes.SeedScheme, kubernetes.SeedCodec, kubernetes.SeedSerializer)
 
 		configMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      v1beta1constants.ConfigMapNameFluentBitLua,
-				Namespace: f.namespace,
-			},
+			Name:      v1beta1constants.ConfigMapNameFluentBitLua,
+			Namespace: f.namespace,
 			Data: map[string]string{
 				"modify_severity.lua":           modify_severity_lua,
 				"add_tag_to_record.lua":         add_tag_to_record_lua,
@@ -372,11 +370,9 @@ func (f *fluentBit) getFluentBit() *fluentbitv1alpha2.FluentBit {
 	}
 
 	return &fluentbitv1alpha2.FluentBit{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%v-%v", v1beta1constants.DaemonSetNameFluentBit, utils.ComputeSHA256Hex(fmt.Appendf(nil, "%v%v", getLabels(), annotations))[:5]),
-			Namespace: f.namespace,
-			Labels:    getLabels(),
-		},
+		Name:      fmt.Sprintf("%v-%v", v1beta1constants.DaemonSetNameFluentBit, utils.ComputeSHA256Hex(fmt.Appendf(nil, "%v%v", getLabels(), annotations))[:5]),
+		Namespace: f.namespace,
+		Labels:    getLabels(),
 		Spec: fluentbitv1alpha2.FluentBitSpec{
 			FluentBitConfigName: fluentBitConfigName,
 			EnvVars: []corev1.EnvVar{
@@ -414,20 +410,16 @@ func (f *fluentBit) getFluentBit() *fluentbitv1alpha2.FluentBit {
 				},
 			},
 			ReadinessProbe: &corev1.Probe{
-				ProbeHandler: corev1.ProbeHandler{
-					HTTPGet: &corev1.HTTPGetAction{
-						Path: "/api/v1/metrics/prometheus",
-						Port: intstr.FromInt32(2020),
-					},
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: "/api/v1/metrics/prometheus",
+					Port: intstr.FromInt32(2020),
 				},
 				PeriodSeconds: 10,
 			},
 			LivenessProbe: &corev1.Probe{
-				ProbeHandler: corev1.ProbeHandler{
-					HTTPGet: &corev1.HTTPGetAction{
-						Path: "/healthz",
-						Port: intstr.FromInt32(2021),
-					},
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: "/healthz",
+					Port: intstr.FromInt32(2021),
 				},
 				PeriodSeconds:       60,
 				InitialDelaySeconds: 120,
@@ -445,25 +437,19 @@ func (f *fluentBit) getFluentBit() *fluentbitv1alpha2.FluentBit {
 			Volumes: []corev1.Volume{
 				{
 					Name: "runlogjournal",
-					VolumeSource: corev1.VolumeSource{
-						HostPath: &corev1.HostPathVolumeSource{
-							Path: "/run/log/journal",
-						},
+					HostPath: &corev1.HostPathVolumeSource{
+						Path: "/run/log/journal",
 					},
 				},
 				{
 					Name: "varfluent",
-					VolumeSource: corev1.VolumeSource{
-						HostPath: &corev1.HostPathVolumeSource{
-							Path: "/var/fluentbit",
-						},
+					HostPath: &corev1.HostPathVolumeSource{
+						Path: "/var/fluentbit",
 					},
 				},
 				{
-					Name: "plugins",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
+					Name:     "plugins",
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
 				},
 			},
 			VolumesMounts: []corev1.VolumeMount{
@@ -528,11 +514,9 @@ func (f *fluentBit) getFluentBit() *fluentbitv1alpha2.FluentBit {
 
 func (f *fluentBit) getClusterFluentBitConfig() *fluentbitv1alpha2.ClusterFluentBitConfig {
 	return &fluentbitv1alpha2.ClusterFluentBitConfig{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fluentBitConfigName,
-			Labels: map[string]string{
-				"app.kubernetes.io/name": v1beta1constants.DaemonSetNameFluentBit,
-			},
+		Name: fluentBitConfigName,
+		Labels: map[string]string{
+			"app.kubernetes.io/name": v1beta1constants.DaemonSetNameFluentBit,
 		},
 		Spec: fluentbitv1alpha2.FluentBitConfigSpec{
 			Service: &fluentbitv1alpha2.Service{

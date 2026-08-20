@@ -10,7 +10,6 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	monitoringv1alpha1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/component/observability/monitoring/prometheus/aggregate"
 	monitoringutils "github.com/gardener/gardener/pkg/component/observability/monitoring/utils"
@@ -39,9 +38,7 @@ func AdditionalScrapeConfigs() []string {
 // CentralScrapeConfigs returns the central ScrapeConfig resources for the garden prometheus.
 func CentralScrapeConfigs(prometheusAggregateTargets []monitoringv1alpha1.Target, prometheusAggregateIngressTargets []monitoringv1alpha1.Target, globalMonitoringSecret *corev1.Secret) []*monitoringv1alpha1.ScrapeConfig {
 	out := []*monitoringv1alpha1.ScrapeConfig{{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "prometheus-" + Label,
-		},
+		Name: "prometheus-" + Label,
 		Spec: monitoringv1alpha1.ScrapeConfigSpec{
 			StaticConfigs: []monitoringv1alpha1.StaticConfig{{
 				Targets: []monitoringv1alpha1.Target{"localhost:9090"},
@@ -70,7 +67,7 @@ func CentralScrapeConfigs(prometheusAggregateTargets []monitoringv1alpha1.Target
 
 func newScrapeConfigForFederation(federation federationConfig) *monitoringv1alpha1.ScrapeConfig {
 	config := &monitoringv1alpha1.ScrapeConfig{
-		ObjectMeta: metav1.ObjectMeta{Name: federation.name},
+		Name: federation.name,
 		Spec: monitoringv1alpha1.ScrapeConfigSpec{
 			HonorLabels:     new(true),
 			HonorTimestamps: new(false),

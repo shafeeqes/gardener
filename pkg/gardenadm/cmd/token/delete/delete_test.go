@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -51,7 +50,7 @@ var _ = Describe("Delete", func() {
 
 	Describe("#RunE", func() {
 		It("should delete the bootstrap tokens whilst ignoring non-existent secrets", func() {
-			Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "bootstrap-token-987654", Namespace: "kube-system"}})).To(Succeed())
+			Expect(fakeClient.Create(ctx, &corev1.Secret{Name: "bootstrap-token-987654", Namespace: "kube-system"})).To(Succeed())
 
 			Expect(command.RunE(command, []string{"foo123", "bootstrap-token-123abc", "987654.abcdef0123456789"})).To(Succeed())
 

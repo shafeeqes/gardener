@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gardener/gardener/pkg/utils"
 )
@@ -28,13 +27,11 @@ func (p *prometheus) secretAdditionalScrapeConfigs() *corev1.Secret {
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.name() + secretNameSuffixAdditionalScrapeConfigs,
-			Namespace: p.namespace,
-			Labels:    p.getLabels(),
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{dataKeyAdditionalScrapeConfigs: []byte(scrapeConfigs.String())},
+		Name:      p.name() + secretNameSuffixAdditionalScrapeConfigs,
+		Namespace: p.namespace,
+		Labels:    p.getLabels(),
+		Type:      corev1.SecretTypeOpaque,
+		Data:      map[string][]byte{dataKeyAdditionalScrapeConfigs: []byte(scrapeConfigs.String())},
 	}
 }
 
@@ -65,13 +62,11 @@ tls_config:
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.name() + secretNameSuffixAdditionalAlertmanagerConfigs,
-			Namespace: p.namespace,
-			Labels:    p.getLabels(),
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{dataKeyAdditionalAlertmanagerConfigs: []byte(config)},
+		Name:      p.name() + secretNameSuffixAdditionalAlertmanagerConfigs,
+		Namespace: p.namespace,
+		Labels:    p.getLabels(),
+		Type:      corev1.SecretTypeOpaque,
+		Data:      map[string][]byte{dataKeyAdditionalAlertmanagerConfigs: []byte(config)},
 	}
 }
 
@@ -81,12 +76,10 @@ func (p *prometheus) secretRemoteWriteBasicAuth() *corev1.Secret {
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.name() + secretNameSuffixRemoteWriteBasicAuth,
-			Namespace: p.namespace,
-			Labels:    p.getLabels(),
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: p.values.RemoteWrite.GlobalShootRemoteWriteSecret.Data,
+		Name:      p.name() + secretNameSuffixRemoteWriteBasicAuth,
+		Namespace: p.namespace,
+		Labels:    p.getLabels(),
+		Type:      corev1.SecretTypeOpaque,
+		Data:      p.values.RemoteWrite.GlobalShootRemoteWriteSecret.Data,
 	}
 }

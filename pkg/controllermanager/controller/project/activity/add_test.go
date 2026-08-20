@@ -13,7 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
 	"k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,18 +40,14 @@ var _ = Describe("Add", func() {
 		c = testing.NewFakeClock(time.Now())
 		reconciler = &Reconciler{Clock: c}
 		secretSecretBindingRef = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				CreationTimestamp: metav1.Time{Time: c.Now().Add(-10 * time.Minute)},
-				Namespace:         "garden-project",
-				Labels:            map[string]string{"reference.gardener.cloud/secretbinding": "true"},
-			},
+			CreationTimestamp: metav1.Time{Time: c.Now().Add(-10 * time.Minute)},
+			Namespace:         "garden-project",
+			Labels:            map[string]string{"reference.gardener.cloud/secretbinding": "true"},
 		}
 		secretCredentialsBindingRef = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				CreationTimestamp: metav1.Time{Time: c.Now().Add(-10 * time.Minute)},
-				Namespace:         "garden-project",
-				Labels:            map[string]string{"reference.gardener.cloud/credentialsbinding": "true"},
-			},
+			CreationTimestamp: metav1.Time{Time: c.Now().Add(-10 * time.Minute)},
+			Namespace:         "garden-project",
+			Labels:            map[string]string{"reference.gardener.cloud/credentialsbinding": "true"},
 		}
 	})
 
@@ -200,9 +195,7 @@ var _ = Describe("Add", func() {
 			reconciler.Client = fakeClient
 
 			project = &gardencorev1beta1.Project{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "project",
-				},
+				Name: "project",
 			}
 		})
 
@@ -221,7 +214,7 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, project)).To(Succeed())
 
 			Expect(reconciler.MapObjectToProject(log)(ctx, secretSecretBindingRef)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: project.Name}},
+				reconcile.Request{Name: project.Name},
 			))
 		})
 	})

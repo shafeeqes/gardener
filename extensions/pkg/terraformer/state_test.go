@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -53,9 +52,9 @@ var _ = Describe("terraformer", func() {
 		)
 
 		BeforeEach(func() {
-			state = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: stateName}}
-			config = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: configName}}
-			variable = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: variableName}}
+			state = &corev1.ConfigMap{Namespace: namespace, Name: stateName}
+			config = &corev1.ConfigMap{Namespace: namespace, Name: configName}
+			variable = &corev1.Secret{Namespace: namespace, Name: variableName}
 		})
 
 		DescribeTable(

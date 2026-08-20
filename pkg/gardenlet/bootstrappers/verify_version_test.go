@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apimachineryversion "k8s.io/apimachinery/pkg/version"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -32,7 +31,7 @@ var _ = Describe("VerifyVersion", func() {
 
 	BeforeEach(func() {
 		log = logr.Discard()
-		configMap = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "gardener-info", Namespace: "gardener-system-public"}}
+		configMap = &corev1.ConfigMap{Name: "gardener-info", Namespace: "gardener-system-public"}
 		fakeClient = fakeclient.NewClientBuilder().Build()
 	})
 

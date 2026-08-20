@@ -24,10 +24,8 @@ var _ = Describe("Project Stale controller tests", func() {
 
 	BeforeEach(func() {
 		project = &gardencorev1beta1.Project{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5],
-				Labels: map[string]string{testID: testRunID},
-			},
+			Name:   "test-" + utils.ComputeSHA256Hex([]byte(testRunID + CurrentSpecReport().LeafNodeLocation.String()))[:5],
+			Labels: map[string]string{testID: testRunID},
 			Spec: gardencorev1beta1.ProjectSpec{
 				Namespace: &testNamespace.Name,
 			},
@@ -92,11 +90,9 @@ var _ = Describe("Project Stale controller tests", func() {
 
 		It("project in use by a Shoot", func() {
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.ShootSpec{
 					SecretBindingName: new("mysecretbinding"),
 					CloudProfileName:  new("cloudprofile1"),
@@ -138,11 +134,9 @@ var _ = Describe("Project Stale controller tests", func() {
 
 		It("project in use by a BackupEntry", func() {
 			backupEntry := &gardencorev1beta1.BackupEntry{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.BackupEntrySpec{
 					BucketName: "foo",
 					SeedName:   new("bar"),
@@ -157,13 +151,11 @@ var _ = Describe("Project Stale controller tests", func() {
 
 		It("project in use by a Secret through SecretBinding", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels: map[string]string{
-						testID:                                   testRunID,
-						"reference.gardener.cloud/secretbinding": "true",
-					},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels: map[string]string{
+					testID:                                   testRunID,
+					"reference.gardener.cloud/secretbinding": "true",
 				},
 			}
 
@@ -173,11 +165,9 @@ var _ = Describe("Project Stale controller tests", func() {
 			})
 
 			secretBinding := &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels:       map[string]string{testID: testRunID},
 				SecretRef: corev1.SecretReference{
 					Name:      secret.Name,
 					Namespace: secret.Namespace,
@@ -195,13 +185,11 @@ var _ = Describe("Project Stale controller tests", func() {
 
 		It("project in use by a Secret through CredentialsBinding", func() {
 			secret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels: map[string]string{
-						testID: testRunID,
-						"reference.gardener.cloud/credentialsbinding": "true",
-					},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels: map[string]string{
+					testID: testRunID,
+					"reference.gardener.cloud/credentialsbinding": "true",
 				},
 			}
 
@@ -211,11 +199,9 @@ var _ = Describe("Project Stale controller tests", func() {
 			})
 
 			credentialsBinding := &securityv1alpha1.CredentialsBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels:       map[string]string{testID: testRunID},
 				CredentialsRef: corev1.ObjectReference{
 					APIVersion: "v1",
 					Kind:       "Secret",
@@ -235,11 +221,9 @@ var _ = Describe("Project Stale controller tests", func() {
 
 		It("project in use by a Quota", func() {
 			quota := &gardencorev1beta1.Quota{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels:       map[string]string{testID: testRunID},
 				Spec: gardencorev1beta1.QuotaSpec{
 					Scope: corev1.ObjectReference{
 						APIVersion: "v1",
@@ -254,11 +238,9 @@ var _ = Describe("Project Stale controller tests", func() {
 			})
 
 			secretBinding := &gardencorev1beta1.SecretBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: "test-",
-					Namespace:    testNamespace.Name,
-					Labels:       map[string]string{testID: testRunID},
-				},
+				GenerateName: "test-",
+				Namespace:    testNamespace.Name,
+				Labels:       map[string]string{testID: testRunID},
 				SecretRef: corev1.SecretReference{
 					Name:      "foo",
 					Namespace: "foo",

@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -40,9 +39,9 @@ var _ = Describe("ResourceConfig", func() {
 	)
 
 	BeforeEach(func() {
-		obj1 = &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "configmap"}}
-		obj2 = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "secret"}}
-		obj3 = &corev1.Service{ObjectMeta: metav1.ObjectMeta{Name: "service"}}
+		obj1 = &corev1.ConfigMap{Name: "configmap"}
+		obj2 = &corev1.Secret{Name: "secret"}
+		obj3 = &corev1.Service{Name: "service"}
 
 		rc1 = ResourceConfig{Obj: obj1, Class: Runtime}
 		rc2 = ResourceConfig{Obj: obj2, Class: Application}
@@ -93,16 +92,12 @@ var _ = Describe("ResourceConfig", func() {
 
 			consistOf = NewManagedResourceConsistOfObjectsMatcher(fakeClient)
 			managedResource = &resourcesv1alpha1.ManagedResource{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      managedResourceName,
-					Namespace: namespace,
-				},
+				Name:      managedResourceName,
+				Namespace: namespace,
 			}
 			managedResourceSecret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "managedresource-" + managedResource.Name,
-					Namespace: namespace,
-				},
+				Name:      "managedresource-" + managedResource.Name,
+				Namespace: namespace,
 			}
 		})
 
@@ -120,12 +115,10 @@ var _ = Describe("ResourceConfig", func() {
 
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 					expectedMr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            managedResourceName,
-							Namespace:       namespace,
-							Labels:          utils.MergeStringMaps(map[string]string{"gardener.cloud/role": "seed-system-component"}, managedResourceLabels),
-							ResourceVersion: "1",
-						},
+						Name:            managedResourceName,
+						Namespace:       namespace,
+						Labels:          utils.MergeStringMaps(map[string]string{"gardener.cloud/role": "seed-system-component"}, managedResourceLabels),
+						ResourceVersion: "1",
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							Class: new("seed"),
 							SecretRefs: []corev1.LocalObjectReference{{
@@ -168,12 +161,10 @@ var _ = Describe("ResourceConfig", func() {
 
 					Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource)).To(Succeed())
 					expectedMr := &resourcesv1alpha1.ManagedResource{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:            managedResourceName,
-							Namespace:       namespace,
-							ResourceVersion: "1",
-							Labels:          map[string]string{"origin": "gardener"},
-						},
+						Name:            managedResourceName,
+						Namespace:       namespace,
+						ResourceVersion: "1",
+						Labels:          map[string]string{"origin": "gardener"},
 						Spec: resourcesv1alpha1.ManagedResourceSpec{
 							InjectLabels: map[string]string{"shoot.gardener.cloud/no-cleanup": "true"},
 							SecretRefs: []corev1.LocalObjectReference{{

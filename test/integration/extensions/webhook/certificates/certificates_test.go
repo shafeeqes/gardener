@@ -93,9 +93,7 @@ var _ = Describe("Certificates tests", func() {
 	BeforeEach(func() {
 		By("Create test Namespaces")
 		extensionNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "webhook-certs-test-",
-			},
+			GenerateName: "webhook-certs-test-",
 		}
 		Expect(testClient.Create(ctx, extensionNamespace)).To(Succeed())
 		log.Info("Created extension Namespace for test", "namespaceName", extensionNamespace.Name)
@@ -106,12 +104,10 @@ var _ = Describe("Certificates tests", func() {
 		})
 
 		shootNamespaceTemplate = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "shoot--foo--",
-				Labels: utils.MergeStringMaps(shootNamespaceSelector, map[string]string{
-					"gardener.cloud/role": "shoot",
-				}),
-			},
+			GenerateName: "shoot--foo--",
+			Labels: utils.MergeStringMaps(shootNamespaceSelector, map[string]string{
+				"gardener.cloud/role": "shoot",
+			}),
 		}
 		shootNamespace = shootNamespaceTemplate.DeepCopy()
 		Expect(testClient.Create(ctx, shootNamespace)).To(Succeed())
@@ -141,9 +137,7 @@ var _ = Describe("Certificates tests", func() {
 		fakeClock = testclock.NewFakeClock(time.Now())
 
 		cluster = &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: shootNamespace.Name,
-			},
+			Name: shootNamespace.Name,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				CloudProfile: runtime.RawExtension{Object: &gardencorev1beta1.CloudProfile{}},
 				Seed:         &runtime.RawExtension{Object: &gardencorev1beta1.Seed{}},
@@ -158,7 +152,7 @@ var _ = Describe("Certificates tests", func() {
 			},
 			Rules: []admissionregistrationv1.RuleWithOperations{
 				{
-					Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts"}, Scope: &scope},
+					APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts"}, Scope: &scope,
 					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 				},
 			},
@@ -178,7 +172,7 @@ var _ = Describe("Certificates tests", func() {
 			},
 			Rules: []admissionregistrationv1.RuleWithOperations{
 				{
-					Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts"}, Scope: &scope},
+					APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"serviceaccounts"}, Scope: &scope,
 					Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 				},
 			},
@@ -193,12 +187,12 @@ var _ = Describe("Certificates tests", func() {
 
 		shootWebhookConfig = &extensionswebhook.Configs{
 			MutatingWebhookConfig: &admissionregistrationv1.MutatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{Name: "gardener-extension-" + extensionName + "-shoot"},
-				Webhooks:   []admissionregistrationv1.MutatingWebhook{shootMutatingWebhook},
+				Name:     "gardener-extension-" + extensionName + "-shoot",
+				Webhooks: []admissionregistrationv1.MutatingWebhook{shootMutatingWebhook},
 			},
 			ValidatingWebhookConfig: &admissionregistrationv1.ValidatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{Name: "gardener-extension-" + extensionName + "-shoot"},
-				Webhooks:   []admissionregistrationv1.ValidatingWebhook{shootValidatingWebhook},
+				Name:     "gardener-extension-" + extensionName + "-shoot",
+				Webhooks: []admissionregistrationv1.ValidatingWebhook{shootValidatingWebhook},
 			},
 		}
 	})
@@ -376,7 +370,7 @@ var _ = Describe("Certificates tests", func() {
 				},
 				Rules: []admissionregistrationv1.RuleWithOperations{
 					{
-						Rule:       admissionregistrationv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"}, Scope: &scope},
+						APIGroups: []string{""}, APIVersions: []string{"v1"}, Resources: []string{"services"}, Scope: &scope,
 						Operations: []admissionregistrationv1.OperationType{admissionregistrationv1.Create, admissionregistrationv1.Update},
 					},
 				},
@@ -393,8 +387,8 @@ var _ = Describe("Certificates tests", func() {
 			}
 
 			seedWebhookConfig = &admissionregistrationv1.MutatingWebhookConfiguration{
-				ObjectMeta: metav1.ObjectMeta{Name: "gardener-extension-" + extensionName},
-				Webhooks:   []admissionregistrationv1.MutatingWebhook{seedWebhook},
+				Name:     "gardener-extension-" + extensionName,
+				Webhooks: []admissionregistrationv1.MutatingWebhook{seedWebhook},
 			}
 		})
 
@@ -664,16 +658,15 @@ func newCodec(scheme *runtime.Scheme, codec serializer.CodecFactory, serializer 
 }
 
 func getShootWebhookConfig(codec runtime.Codec, shootWebhookConfig *extensionswebhook.Configs, namespace string) error {
-	managedResource := &resourcesv1alpha1.ManagedResource{ObjectMeta: metav1.ObjectMeta{
+	managedResource := &resourcesv1alpha1.ManagedResource{
 		Name:      shootWebhookManagedResourceName,
-		Namespace: namespace,
-	}}
+		Namespace: namespace}
 
 	if err := testClient.Get(ctx, client.ObjectKeyFromObject(managedResource), managedResource); err != nil {
 		return err
 	}
 
-	managedResourceSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: namespace}}
+	managedResourceSecret := &corev1.Secret{Name: managedResource.Spec.SecretRefs[0].Name, Namespace: namespace}
 	if err := testClient.Get(ctx, client.ObjectKeyFromObject(managedResourceSecret), managedResourceSecret); err != nil {
 		return err
 	}

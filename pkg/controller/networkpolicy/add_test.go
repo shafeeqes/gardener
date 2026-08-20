@@ -12,8 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -35,10 +33,8 @@ var _ = Describe("Add", func() {
 
 	BeforeEach(func() {
 		networkPolicy = &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: "bar",
-			},
+			Name:      "foo",
+			Namespace: "bar",
 		}
 		reconciler = &Reconciler{}
 	})
@@ -51,7 +47,7 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			p = reconciler.NetworkPolicyPredicate()
-			networkPolicy = &networkingv1.NetworkPolicy{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "kubernetes"}}
+			networkPolicy = &networkingv1.NetworkPolicy{Namespace: "default", Name: "kubernetes"}
 		})
 
 		It("should return true because the NetworkPolicy has name 'allow-to-runtime-apiserver'", func() {
@@ -91,42 +87,30 @@ var _ = Describe("Add", func() {
 			reconciler.RuntimeClient = fakeClient
 
 			gardenNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "garden",
-					Labels: map[string]string{"kubernetes.io/metadata.name": "garden"},
-				},
+				Name:   "garden",
+				Labels: map[string]string{"kubernetes.io/metadata.name": "garden"},
 			}
 			istioSystemNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "istio-system-123a4",
-					Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioSystem},
-				},
+				Name:   "istio-system-123a4",
+				Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioSystem},
 			}
 			istioIngressNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "istio-ingress-123a4",
-					Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress},
-				},
+				Name:   "istio-ingress-123a4",
+				Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleIstioIngress},
 			}
 			istioExposureClassNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "istio-ingress-handler-foo-123a4",
-					Labels: map[string]string{v1beta1constants.LabelExposureClassHandlerName: ""},
-				},
+				Name:   "istio-ingress-handler-foo-123a4",
+				Labels: map[string]string{v1beta1constants.LabelExposureClassHandlerName: ""},
 			}
 			shootNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "shoot--bar",
-					Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot},
-				},
+				Name:   "shoot--bar",
+				Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleShoot},
 			}
 			extensionNamespace = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   "extension-baz",
-					Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleExtension},
-				},
+				Name:   "extension-baz",
+				Labels: map[string]string{v1beta1constants.GardenRole: v1beta1constants.GardenRoleExtension},
 			}
-			fooNamespace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			fooNamespace = &corev1.Namespace{Name: "foo"}
 		})
 
 		It("should return a request with the relevant namespaces' names", func() {
@@ -139,12 +123,12 @@ var _ = Describe("Add", func() {
 			Expect(fakeClient.Create(ctx, fooNamespace)).To(Succeed())
 
 			Expect(reconciler.MapToNamespaces(log)(ctx, nil)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: gardenNamespace.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: istioSystemNamespace.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: istioIngressNamespace.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: istioExposureClassNamespace.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: shootNamespace.Name}},
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: extensionNamespace.Name}},
+				reconcile.Request{Name: gardenNamespace.Name},
+				reconcile.Request{Name: istioSystemNamespace.Name},
+				reconcile.Request{Name: istioIngressNamespace.Name},
+				reconcile.Request{Name: istioExposureClassNamespace.Name},
+				reconcile.Request{Name: shootNamespace.Name},
+				reconcile.Request{Name: extensionNamespace.Name},
 			))
 		})
 	})
@@ -152,7 +136,7 @@ var _ = Describe("Add", func() {
 	Describe("#MapObjectToName", func() {
 		It("should return a request with the networkpolicy's name", func() {
 			Expect(reconciler.MapObjectToName(ctx, networkPolicy)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: networkPolicy.Name}},
+				reconcile.Request{Name: networkPolicy.Name},
 			))
 		})
 	})
@@ -160,7 +144,7 @@ var _ = Describe("Add", func() {
 	Describe("#MapObjectToNamespace", func() {
 		It("should return a request with the namespace's name", func() {
 			Expect(reconciler.MapObjectToNamespace(ctx, networkPolicy)).To(ConsistOf(
-				reconcile.Request{NamespacedName: types.NamespacedName{Name: networkPolicy.Namespace}},
+				reconcile.Request{Name: networkPolicy.Namespace},
 			))
 		})
 	})
@@ -173,7 +157,7 @@ var _ = Describe("Add", func() {
 
 		BeforeEach(func() {
 			p = reconciler.IsKubernetesEndpoint()
-			endpoint = &corev1.Endpoints{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "kubernetes"}}
+			endpoint = &corev1.Endpoints{Namespace: "default", Name: "kubernetes"}
 		})
 
 		It("should return true because the endpoint is the Kubernetes endpoint", func() {

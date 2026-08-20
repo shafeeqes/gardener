@@ -60,12 +60,10 @@ var _ = Describe("BackupEntry", func() {
 
 		By("Create test Namespace")
 		testNamespace = &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
-				GenerateName: "shoot--foo--",
-				Annotations: map[string]string{
-					v1beta1constants.ShootUID: testShootUID,
-				},
+			// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
+			GenerateName: "shoot--foo--",
+			Annotations: map[string]string{
+				v1beta1constants.ShootUID: testShootUID,
 			},
 		}
 
@@ -78,9 +76,7 @@ var _ = Describe("BackupEntry", func() {
 		})
 
 		cluster := &extensionsv1alpha1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testNamespace.Name,
-			},
+			Name: testNamespace.Name,
 			Spec: extensionsv1alpha1.ClusterSpec{
 				CloudProfile: runtime.RawExtension{Raw: []byte("{}")},
 				Seed:         &runtime.RawExtension{Raw: []byte("{}")},
@@ -100,17 +96,13 @@ var _ = Describe("BackupEntry", func() {
 		backupEntryName := testNamespace.Name + "--" + testShootUID
 
 		backupEntrySecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "entry-" + backupEntryName,
-				Namespace: testNamespace.Name,
-			},
+			Name:      "entry-" + backupEntryName,
+			Namespace: testNamespace.Name,
 		}
 
 		backupEntry = &extensionsv1alpha1.BackupEntry{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   backupEntryName,
-				Labels: map[string]string{testID: testNamespace.Name},
-			},
+			Name:   backupEntryName,
+			Labels: map[string]string{testID: testNamespace.Name},
 			Spec: extensionsv1alpha1.BackupEntrySpec{
 				DefaultSpec: extensionsv1alpha1.DefaultSpec{
 					Type: extensionsintegrationtest.Type,

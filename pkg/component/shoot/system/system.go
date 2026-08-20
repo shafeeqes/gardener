@@ -159,12 +159,10 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 
 	if versionutils.ConstraintK8sGreaterEqual133.Check(s.values.KubernetesVersion) {
 		networkPolicyDenyAll := &networkingv1.NetworkPolicy{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gardener.cloud--deny-all",
-				Namespace: metav1.NamespaceSystem,
-				Annotations: map[string]string{
-					v1beta1constants.GardenerDescription: "Disables all ingress and egress traffic into/from this namespace.",
-				},
+			Name:      "gardener.cloud--deny-all",
+			Namespace: metav1.NamespaceSystem,
+			Annotations: map[string]string{
+				v1beta1constants.GardenerDescription: "Disables all ingress and egress traffic into/from this namespace.",
 			},
 			Spec: networkingv1.NetworkPolicySpec{
 				PodSelector: metav1.LabelSelector{},
@@ -192,14 +190,12 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 			protocolTCP = corev1.ProtocolTCP
 
 			networkPolicyAllowToShootAPIServer = &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud--allow-to-apiserver",
-					Namespace: metav1.NamespaceSystem,
-					Annotations: map[string]string{
-						v1beta1constants.GardenerDescription: fmt.Sprintf("Allows traffic to the API server in TCP "+
-							"port 443 for pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyShootToAPIServer,
-							v1beta1constants.LabelNetworkPolicyAllowed),
-					},
+				Name:      "gardener.cloud--allow-to-apiserver",
+				Namespace: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					v1beta1constants.GardenerDescription: fmt.Sprintf("Allows traffic to the API server in TCP "+
+						"port 443 for pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyShootToAPIServer,
+						v1beta1constants.LabelNetworkPolicyAllowed),
 				},
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{MatchLabels: map[string]string{v1beta1constants.LabelNetworkPolicyShootToAPIServer: v1beta1constants.LabelNetworkPolicyAllowed}},
@@ -208,14 +204,12 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 				},
 			}
 			networkPolicyAllowToDNS = &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud--allow-to-dns",
-					Namespace: metav1.NamespaceSystem,
-					Annotations: map[string]string{
-						v1beta1constants.GardenerDescription: fmt.Sprintf("Allows egress traffic from pods labeled "+
-							"with '%s=%s' to DNS running in the '%s' namespace.", v1beta1constants.LabelNetworkPolicyToDNS,
-							v1beta1constants.LabelNetworkPolicyAllowed, metav1.NamespaceSystem),
-					},
+				Name:      "gardener.cloud--allow-to-dns",
+				Namespace: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					v1beta1constants.GardenerDescription: fmt.Sprintf("Allows egress traffic from pods labeled "+
+						"with '%s=%s' to DNS running in the '%s' namespace.", v1beta1constants.LabelNetworkPolicyToDNS,
+						v1beta1constants.LabelNetworkPolicyAllowed, metav1.NamespaceSystem),
 				},
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{MatchLabels: map[string]string{v1beta1constants.LabelNetworkPolicyToDNS: v1beta1constants.LabelNetworkPolicyAllowed}},
@@ -264,14 +258,12 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 				},
 			}
 			networkPolicyAllowToKubelet = &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud--allow-to-kubelet",
-					Namespace: metav1.NamespaceSystem,
-					Annotations: map[string]string{
-						v1beta1constants.GardenerDescription: fmt.Sprintf("Allows egress traffic to kubelet in TCP "+
-							"port 10250 for pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyShootToKubelet,
-							v1beta1constants.LabelNetworkPolicyAllowed),
-					},
+				Name:      "gardener.cloud--allow-to-kubelet",
+				Namespace: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					v1beta1constants.GardenerDescription: fmt.Sprintf("Allows egress traffic to kubelet in TCP "+
+						"port 10250 for pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyShootToKubelet,
+						v1beta1constants.LabelNetworkPolicyAllowed),
 				},
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{MatchLabels: map[string]string{v1beta1constants.LabelNetworkPolicyShootToKubelet: v1beta1constants.LabelNetworkPolicyAllowed}},
@@ -280,14 +272,12 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 				},
 			}
 			networkPolicyAllowToPublicNetworks = &networkingv1.NetworkPolicy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "gardener.cloud--allow-to-public-networks",
-					Namespace: metav1.NamespaceSystem,
-					Annotations: map[string]string{
-						v1beta1constants.GardenerDescription: fmt.Sprintf("Allows egress traffic to all networks for "+
-							"pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyToPublicNetworks,
-							v1beta1constants.LabelNetworkPolicyAllowed),
-					},
+				Name:      "gardener.cloud--allow-to-public-networks",
+				Namespace: metav1.NamespaceSystem,
+				Annotations: map[string]string{
+					v1beta1constants.GardenerDescription: fmt.Sprintf("Allows egress traffic to all networks for "+
+						"pods labeled with '%s=%s'.", v1beta1constants.LabelNetworkPolicyToPublicNetworks,
+						v1beta1constants.LabelNetworkPolicyAllowed),
 				},
 				Spec: networkingv1.NetworkPolicySpec{
 					PodSelector: metav1.LabelSelector{MatchLabels: map[string]string{v1beta1constants.LabelNetworkPolicyToPublicNetworks: v1beta1constants.LabelNetworkPolicyAllowed}},
@@ -315,11 +305,9 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 	}
 
 	shootInfoConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      v1beta1constants.ConfigMapNameShootInfo,
-			Namespace: metav1.NamespaceSystem,
-		},
-		Data: s.shootInfoData(),
+		Name:      v1beta1constants.ConfigMapNameShootInfo,
+		Namespace: metav1.NamespaceSystem,
+		Data:      s.shootInfoData(),
 	}
 
 	if err := registry.Add(
@@ -341,11 +329,11 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 	if !s.values.IsWorkerless && s.values.RegistryCABundle != nil {
 		const name = "registry-ca-bundle"
 		configMap := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: metav1.NamespaceSystem},
-			Data:       map[string]string{secretsutils.DataKeyCertificateBundle: base64.StdEncoding.EncodeToString([]byte(*s.values.RegistryCABundle))},
+			Name: name, Namespace: metav1.NamespaceSystem,
+			Data: map[string]string{secretsutils.DataKeyCertificateBundle: base64.StdEncoding.EncodeToString([]byte(*s.values.RegistryCABundle))},
 		}
 		role := &rbacv1.Role{
-			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: metav1.NamespaceSystem},
+			Name: name, Namespace: metav1.NamespaceSystem,
 			Rules: []rbacv1.PolicyRule{{
 				APIGroups:     []string{""},
 				Resources:     []string{"configmaps"},
@@ -354,9 +342,9 @@ func (s *shootSystem) computeResourcesData() (map[string][]byte, error) {
 			}},
 		}
 		roleBinding := &rbacv1.RoleBinding{
-			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: metav1.NamespaceSystem},
-			Subjects:   []rbacv1.Subject{{Kind: rbacv1.GroupKind, Name: "system:bootstrappers", APIGroup: rbacv1.GroupName}},
-			RoleRef:    rbacv1.RoleRef{APIGroup: rbacv1.GroupName, Kind: "Role", Name: name},
+			Name: name, Namespace: metav1.NamespaceSystem,
+			Subjects: []rbacv1.Subject{{Kind: rbacv1.GroupKind, Name: "system:bootstrappers", APIGroup: rbacv1.GroupName}},
+			RoleRef:  rbacv1.RoleRef{APIGroup: rbacv1.GroupName, Kind: "Role", Name: name},
 		}
 		if err := registry.Add(configMap, role, roleBinding); err != nil {
 			return nil, err
@@ -383,9 +371,7 @@ func priorityClassResources() []client.Object {
 
 	for _, class := range gardenletManagedPriorityClasses {
 		out = append(out, &schedulingv1.PriorityClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: class.name,
-			},
+			Name:          class.name,
 			Description:   class.description,
 			GlobalDefault: false,
 			Value:         class.value,
@@ -479,9 +465,7 @@ func (s *shootSystem) readOnlyClusterRole() client.Object {
 	slices.Sort(allAPIGroups)
 
 	clusterRole := &rbacv1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: v1beta1constants.ShootReadOnlyClusterRoleName,
-		},
+		Name:  v1beta1constants.ShootReadOnlyClusterRoleName,
 		Rules: make([]rbacv1.PolicyRule, 0, len(allAPIGroups)),
 	}
 
@@ -522,9 +506,7 @@ func (s *shootSystem) selfHostedShootResources() []client.Object {
 		rbacName = "gardener.cloud:gardenadm"
 
 		clusterRole = &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: rbacName,
-			},
+			Name: rbacName,
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups:     []string{extensionsv1alpha1.SchemeGroupVersion.Group},
@@ -555,9 +537,7 @@ func (s *shootSystem) selfHostedShootResources() []client.Object {
 			},
 		}
 		clusterRoleBinding = &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: rbacName,
-			},
+			Name: rbacName,
 			RoleRef: rbacv1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",

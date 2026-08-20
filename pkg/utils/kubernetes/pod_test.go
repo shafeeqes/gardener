@@ -204,10 +204,8 @@ var _ = Describe("Pod Utils", func() {
 		BeforeEach(func() {
 			volume = corev1.Volume{
 				Name: "volume",
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: "secret",
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: "secret",
 				},
 			}
 		})
@@ -400,8 +398,8 @@ var _ = Describe("Pod Utils", func() {
 		)
 
 		BeforeEach(func() {
-			deployment = &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "deployment", Namespace: namespace}}
-			replicaSet = &appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{Name: "replicaset", Namespace: namespace, OwnerReferences: []metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "Deployment", Name: deployment.Name}}}}
+			deployment = &appsv1.Deployment{Name: "deployment", Namespace: namespace}
+			replicaSet = &appsv1.ReplicaSet{Name: "replicaset", Namespace: namespace, OwnerReferences: []metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "Deployment", Name: deployment.Name}}}
 		})
 
 		It("should return nil because pod has no owner reference to a ReplicaSet", func() {
@@ -447,14 +445,14 @@ var _ = Describe("Pod Utils", func() {
 		It("should delete the stale pods", func() {
 			var (
 				normalPod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{Name: "normal", Namespace: "default"},
+					Name: "normal", Namespace: "default",
 				}
 				stalePod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{Name: "stale", Namespace: "default"},
-					Status:     corev1.PodStatus{Reason: "Evicted"},
+					Name: "stale", Namespace: "default",
+					Status: corev1.PodStatus{Reason: "Evicted"},
 				}
 				preemptedPod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{Name: "preempted", Namespace: "default"},
+					Name: "preempted", Namespace: "default",
 					Status: corev1.PodStatus{
 						Phase: corev1.PodSucceeded,
 						Conditions: []corev1.PodCondition{
@@ -463,32 +461,26 @@ var _ = Describe("Pod Utils", func() {
 					},
 				}
 				failedReplicaSetPod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "failed-replicaset-owned",
-						Namespace: "default",
-						OwnerReferences: []metav1.OwnerReference{
-							{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "foo", Controller: new(true)},
-						},
+					Name:      "failed-replicaset-owned",
+					Namespace: "default",
+					OwnerReferences: []metav1.OwnerReference{
+						{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "foo", Controller: new(true)},
 					},
 					Status: corev1.PodStatus{Phase: corev1.PodFailed},
 				}
 				succeededReplicaSetPod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "succeeded-replicaset-owned",
-						Namespace: "default",
-						OwnerReferences: []metav1.OwnerReference{
-							{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "foo", Controller: new(true)},
-						},
+					Name:      "succeeded-replicaset-owned",
+					Namespace: "default",
+					OwnerReferences: []metav1.OwnerReference{
+						{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "foo", Controller: new(true)},
 					},
 					Status: corev1.PodStatus{Phase: corev1.PodSucceeded},
 				}
 				failedJobPod = &corev1.Pod{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "failed-job-owned",
-						Namespace: "default",
-						OwnerReferences: []metav1.OwnerReference{
-							{APIVersion: "batch/v1", Kind: "Job", Name: "foo", Controller: new(true)},
-						},
+					Name:      "failed-job-owned",
+					Namespace: "default",
+					OwnerReferences: []metav1.OwnerReference{
+						{APIVersion: "batch/v1", Kind: "Job", Name: "foo", Controller: new(true)},
 					},
 					Status: corev1.PodStatus{Phase: corev1.PodFailed},
 				}

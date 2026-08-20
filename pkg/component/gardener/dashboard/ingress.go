@@ -11,7 +11,6 @@ import (
 	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
 	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -46,7 +45,7 @@ func (g *gardenerDashboard) istioResources(ctx context.Context, secretCARuntime 
 		}
 		tlsSecret = ingressTLSSecret
 	} else {
-		tlsSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: tlsSecretName, Namespace: g.namespace}}
+		tlsSecret = &corev1.Secret{Name: tlsSecretName, Namespace: g.namespace}
 		if err := g.client.Get(ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret); err != nil {
 			return nil, fmt.Errorf("failed to get TLS secret %q: %w", tlsSecretName, err)
 		}
@@ -54,15 +53,13 @@ func (g *gardenerDashboard) istioResources(ctx context.Context, secretCARuntime 
 
 	// Istio expects the secret in the istio ingress gateway namespace => copy certificate to istio namespace
 	tlsSecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%s", g.namespace, deploymentName, tlsSecret.Name),
-			Namespace: istioIngressGatewayNamespace,
-			Labels:    GetLabels(),
-		},
-		Data: tlsSecret.Data,
+		Name:      fmt.Sprintf("%s-%s-%s", g.namespace, deploymentName, tlsSecret.Name),
+		Namespace: istioIngressGatewayNamespace,
+		Labels:    GetLabels(),
+		Data:      tlsSecret.Data,
 	}
 
-	gateway := &istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: g.namespace}}
+	gateway := &istionetworkingv1beta1.Gateway{Name: gatewayName, Namespace: g.namespace}
 	if err := istio.GatewayWithTLSTermination(
 		gateway,
 		GetLabels(),
@@ -74,7 +71,7 @@ func (g *gardenerDashboard) istioResources(ctx context.Context, secretCARuntime 
 	}
 
 	destinationHost := kubernetesutils.FQDNForService(serviceName, g.namespace)
-	virtualService := &istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: g.namespace}}
+	virtualService := &istionetworkingv1beta1.VirtualService{Name: gatewayName, Namespace: g.namespace}
 	if err := istio.VirtualServiceForTLSTermination(
 		virtualService,
 		GetLabels(),
@@ -90,17 +87,15 @@ func (g *gardenerDashboard) istioResources(ctx context.Context, secretCARuntime 
 	}
 
 	tlsCASecretInIstioNamespace := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-tls-ca", g.namespace, deploymentName),
-			Namespace: istioIngressGatewayNamespace,
-			Labels:    GetLabels(),
-		},
+		Name:      fmt.Sprintf("%s-%s-tls-ca", g.namespace, deploymentName),
+		Namespace: istioIngressGatewayNamespace,
+		Labels:    GetLabels(),
 		Data: map[string][]byte{
 			"cacert": secretCARuntime.Data[secretsutils.DataKeyCertificateBundle],
 		},
 	}
 
-	destinationRule := &istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: gatewayName, Namespace: g.namespace}}
+	destinationRule := &istionetworkingv1beta1.DestinationRule{Name: gatewayName, Namespace: g.namespace}
 	if err := istio.DestinationRuleWithLocalityPreferenceAndTLS(
 		destinationRule,
 		GetLabels(),

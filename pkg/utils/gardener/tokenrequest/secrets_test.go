@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -78,60 +77,50 @@ var _ = Describe("Secrets", func() {
 			var (
 				relevantSecrets = []*corev1.Secret{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret1",
-							Namespace:   namespace,
-							Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"resources.gardener.cloud/purpose": "token-requestor",
-								"resources.gardener.cloud/class":   "shoot",
-							},
+						Name:        "secret1",
+						Namespace:   namespace,
+						Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"resources.gardener.cloud/purpose": "token-requestor",
+							"resources.gardener.cloud/class":   "shoot",
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret2",
-							Namespace:   namespace,
-							Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"resources.gardener.cloud/purpose": "token-requestor",
-								"resources.gardener.cloud/class":   "shoot",
-							},
+						Name:        "secret2",
+						Namespace:   namespace,
+						Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"resources.gardener.cloud/purpose": "token-requestor",
+							"resources.gardener.cloud/class":   "shoot",
 						},
 					},
 				}
 				irrelevantSecrets = []*corev1.Secret{
 					{
 						// doesn't have the token-requestor label
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret3",
-							Namespace:   namespace,
-							Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels:      map[string]string{"resources.gardener.cloud/class": "shoot"},
-						},
+						Name:        "secret3",
+						Namespace:   namespace,
+						Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels:      map[string]string{"resources.gardener.cloud/class": "shoot"},
 					},
 					{
 						// in another namespace
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret4",
-							Namespace:   namespace + "-other",
-							Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"resources.gardener.cloud/purpose": "token-requestor",
-								"resources.gardener.cloud/class":   "shoot",
-							},
+						Name:        "secret4",
+						Namespace:   namespace + "-other",
+						Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"resources.gardener.cloud/purpose": "token-requestor",
+							"resources.gardener.cloud/class":   "shoot",
 						},
 					},
 					{
 						// different class
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret5",
-							Namespace:   namespace,
-							Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"resources.gardener.cloud/purpose": "token-requestor",
-								"resources.gardener.cloud/class":   "garden",
-							},
+						Name:        "secret5",
+						Namespace:   namespace,
+						Annotations: map[string]string{"serviceaccount.resources.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"resources.gardener.cloud/purpose": "token-requestor",
+							"resources.gardener.cloud/class":   "garden",
 						},
 					},
 				}
@@ -166,45 +155,37 @@ var _ = Describe("Secrets", func() {
 			var (
 				relevantSecrets = []*corev1.Secret{
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret1",
-							Namespace:   namespace,
-							Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"security.gardener.cloud/purpose": "workload-identity-token-requestor",
-							},
+						Name:        "secret1",
+						Namespace:   namespace,
+						Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"security.gardener.cloud/purpose": "workload-identity-token-requestor",
 						},
 					},
 					{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret2",
-							Namespace:   namespace,
-							Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"security.gardener.cloud/purpose": "workload-identity-token-requestor",
-							},
+						Name:        "secret2",
+						Namespace:   namespace,
+						Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"security.gardener.cloud/purpose": "workload-identity-token-requestor",
 						},
 					},
 				}
 				irrelevantSecrets = []*corev1.Secret{
 					{
 						// doesn't have the token-requestor label
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret3",
-							Namespace:   namespace,
-							Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
-						},
+						Name:        "secret3",
+						Namespace:   namespace,
+						Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
 					},
 					{
 						// in another namespace
-						ObjectMeta: metav1.ObjectMeta{
-							Name:        "secret4",
-							Namespace:   namespace + "-other",
-							Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
-							Labels: map[string]string{
-								"resources.gardener.cloud/purpose": "token-requestor",
-								"resources.gardener.cloud/class":   "shoot",
-							},
+						Name:        "secret4",
+						Namespace:   namespace + "-other",
+						Annotations: map[string]string{"workloadidentity.security.gardener.cloud/token-renew-timestamp": "foo"},
+						Labels: map[string]string{
+							"resources.gardener.cloud/purpose": "token-requestor",
+							"resources.gardener.cloud/class":   "shoot",
 						},
 					},
 				}

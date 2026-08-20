@@ -335,14 +335,12 @@ func newShoot(managedSeedSet *seedmanagementv1alpha1.ManagedSeedSet, ordinal int
 
 	// Initialize shoot
 	shoot := &gardencorev1beta1.Shoot{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   managedSeedSet.Namespace,
-			Labels:      managedSeedSet.Spec.ShootTemplate.Labels,
-			Annotations: managedSeedSet.Spec.ShootTemplate.Annotations,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(managedSeedSet, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeedSet")),
-			},
+		Name:        name,
+		Namespace:   managedSeedSet.Namespace,
+		Labels:      managedSeedSet.Spec.ShootTemplate.Labels,
+		Annotations: managedSeedSet.Spec.ShootTemplate.Annotations,
+		OwnerReferences: []metav1.OwnerReference{
+			*metav1.NewControllerRef(managedSeedSet, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeedSet")),
 		},
 		Spec: managedSeedSet.Spec.ShootTemplate.Spec,
 	}
@@ -359,14 +357,12 @@ func newManagedSeed(managedSeedSet *seedmanagementv1alpha1.ManagedSeedSet, ordin
 
 	// Initialize managed seed
 	managedSeed := &seedmanagementv1alpha1.ManagedSeed{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   managedSeedSet.Namespace,
-			Labels:      managedSeedSet.Spec.Template.Labels,
-			Annotations: managedSeedSet.Spec.Template.Annotations,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(managedSeedSet, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeedSet")),
-			},
+		Name:        name,
+		Namespace:   managedSeedSet.Namespace,
+		Labels:      managedSeedSet.Spec.Template.Labels,
+		Annotations: managedSeedSet.Spec.Template.Annotations,
+		OwnerReferences: []metav1.OwnerReference{
+			*metav1.NewControllerRef(managedSeedSet, seedmanagementv1alpha1.SchemeGroupVersion.WithKind("ManagedSeedSet")),
 		},
 		Spec: seedmanagementv1alpha1.ManagedSeedSpec{
 			Shoot: &seedmanagementv1alpha1.Shoot{

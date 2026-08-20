@@ -124,19 +124,19 @@ lIwEl8tStnO9u1JUK4w1e+lC37zI2v5k4WMQmJcolUEMwmZjnCR/
 
 	BeforeEach(func() {
 		caClusterSecret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: name + ".ca-cluster", Namespace: namespace},
+			Name: name + ".ca-cluster", Namespace: namespace,
 			Data: map[string][]byte{
 				"ca.crt": clusterCACert,
 			},
 		}
 		caClusterConfigMap = &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{Name: name + ".ca-cluster", Namespace: namespace},
+			Name: name + ".ca-cluster", Namespace: namespace,
 			Data: map[string]string{
 				"ca.crt": string(clusterCACert),
 			},
 		}
 		caClientSecret = &gardencorev1beta1.InternalSecret{
-			ObjectMeta: metav1.ObjectMeta{Name: name + ".ca-client", Namespace: namespace},
+			Name: name + ".ca-client", Namespace: namespace,
 			Data: map[string][]byte{
 				"ca.crt": clientCACert,
 				"ca.key": clientCAKey,
@@ -145,7 +145,7 @@ lIwEl8tStnO9u1JUK4w1e+lC37zI2v5k4WMQmJcolUEMwmZjnCR/
 
 		createValidation = func(_ context.Context, _ runtime.Object) error { return nil }
 		shoot = &gardencore.Shoot{
-			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
+			Name: name, Namespace: namespace,
 			Status: gardencore.ShootStatus{
 				AdvertisedAddresses: []gardencore.ShootAdvertisedAddress{
 					{

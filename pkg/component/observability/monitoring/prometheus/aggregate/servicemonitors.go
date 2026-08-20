@@ -16,7 +16,7 @@ import (
 func CentralServiceMonitors() []*monitoringv1.ServiceMonitor {
 	return []*monitoringv1.ServiceMonitor{
 		{
-			ObjectMeta: metav1.ObjectMeta{Name: "shoot-prometheus"},
+			Name: "shoot-prometheus",
 			Spec: monitoringv1.ServiceMonitorSpec{
 				Selector: metav1.LabelSelector{MatchLabels: map[string]string{
 					v1beta1constants.LabelApp:  "prometheus",

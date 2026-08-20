@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -364,6 +363,6 @@ func (r *Reconciler) MapSeedToManagedSeedSet(log logr.Logger) handler.MapFunc {
 			return nil
 		}
 
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Namespace: managedSeedSet.Namespace, Name: managedSeedSet.Name}}}
+		return []reconcile.Request{{Namespace: managedSeedSet.Namespace, Name: managedSeedSet.Name}}
 	}
 }

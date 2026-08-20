@@ -10,8 +10,6 @@ import (
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -37,9 +35,7 @@ var _ = Describe("Add", func() {
 		runtimeClient = fakeclient.NewClientBuilder().WithScheme(operatorclient.RuntimeScheme).Build()
 
 		garden = &operatorv1alpha1.Garden{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: gardenName,
-			},
+			Name: gardenName,
 		}
 
 		reconciler = &Reconciler{
@@ -54,7 +50,7 @@ var _ = Describe("Add", func() {
 
 		Context("when Garden reconciliation is not processing", func() {
 			It("should return a request with the garden name", func() {
-				Expect(reconciler.MapManagedResourceToGarden(logr.Discard())(ctx, nil)).To(ConsistOf(reconcile.Request{NamespacedName: types.NamespacedName{Name: gardenName}}))
+				Expect(reconciler.MapManagedResourceToGarden(logr.Discard())(ctx, nil)).To(ConsistOf(reconcile.Request{Name: gardenName}))
 			})
 		})
 

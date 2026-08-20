@@ -117,11 +117,9 @@ var _ = Describe("StatefulSet", func() {
 		Context("when spec.replicas is nil (defaults to 1) and ready replicas is 1", func() {
 			BeforeEach(func() {
 				sts := &appsv1.StatefulSet{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       statefulSetName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       statefulSetName,
+					Namespace:  namespace,
+					Generation: 1,
 					Spec: appsv1.StatefulSetSpec{
 						Replicas: nil, // defaults to 1
 						Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},
@@ -146,11 +144,9 @@ var _ = Describe("StatefulSet", func() {
 		Context("when spec.replicas is nil (defaults to 1) and ready replicas is 0", func() {
 			BeforeEach(func() {
 				sts := &appsv1.StatefulSet{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:       statefulSetName,
-						Namespace:  namespace,
-						Generation: 1,
-					},
+					Name:       statefulSetName,
+					Namespace:  namespace,
+					Generation: 1,
 					Spec: appsv1.StatefulSetSpec{
 						Replicas: nil, // defaults to 1
 						Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},
@@ -270,11 +266,9 @@ var _ = Describe("StatefulSet", func() {
 
 func newHealthyStatefulSet() *appsv1.StatefulSet {
 	return &appsv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:       "test-statefulset",
-			Namespace:  "test-namespace",
-			Generation: 1,
-		},
+		Name:       "test-statefulset",
+		Namespace:  "test-namespace",
+		Generation: 1,
 		Spec: appsv1.StatefulSetSpec{
 			Replicas: new(int32(3)),
 			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},

@@ -63,19 +63,19 @@ var _ = Describe("Secrets", func() {
 		It("should copy all secrets from kube-system", func() {
 			var (
 				secret1 = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "kube-system", Finalizers: []string{"hugo"}},
-					Type:       corev1.SecretTypeOpaque,
-					Data:       map[string][]byte{"foo": []byte("bar")},
+					Name: "s1", Namespace: "kube-system", Finalizers: []string{"hugo"},
+					Type: corev1.SecretTypeOpaque,
+					Data: map[string][]byte{"foo": []byte("bar")},
 				}
 				secret2 = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "default"},
-					Type:       corev1.SecretTypeOpaque,
-					Data:       map[string][]byte{"bar": []byte("foo")},
+					Name: "s1", Namespace: "default",
+					Type: corev1.SecretTypeOpaque,
+					Data: map[string][]byte{"bar": []byte("foo")},
 				}
 				secret3 = &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "s2", Namespace: "kube-system", OwnerReferences: []metav1.OwnerReference{{}}},
-					Type:       corev1.SecretTypeOpaque,
-					Data:       map[string][]byte{"baz": []byte("bar")},
+					Name: "s2", Namespace: "kube-system", OwnerReferences: []metav1.OwnerReference{{}},
+					Type: corev1.SecretTypeOpaque,
+					Data: map[string][]byte{"baz": []byte("bar")},
 				}
 
 				secretList = &corev1.SecretList{}
@@ -93,30 +93,30 @@ var _ = Describe("Secrets", func() {
 			Expect(fakeClient2.List(ctx, secretList)).To(Succeed())
 			Expect(secretList.Items).To(HaveExactElements(
 				corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "kube-system", ResourceVersion: "1"},
-					Type:       corev1.SecretTypeOpaque,
-					Data:       map[string][]byte{"foo": []byte("bar")},
+					Name: "s1", Namespace: "kube-system", ResourceVersion: "1",
+					Type: corev1.SecretTypeOpaque,
+					Data: map[string][]byte{"foo": []byte("bar")},
 				},
 				corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{Name: "s2", Namespace: "kube-system", ResourceVersion: "1"},
-					Type:       corev1.SecretTypeOpaque,
-					Data:       map[string][]byte{"baz": []byte("bar")},
+					Name: "s2", Namespace: "kube-system", ResourceVersion: "1",
+					Type: corev1.SecretTypeOpaque,
+					Data: map[string][]byte{"baz": []byte("bar")},
 				},
 			))
 		})
 
 		It("should tolerate already existing secrets in the target", func() {
 			existingSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "kube-system"},
-				Type:       corev1.SecretTypeOpaque,
-				Data:       map[string][]byte{"old": []byte("data")},
+				Name: "s1", Namespace: "kube-system",
+				Type: corev1.SecretTypeOpaque,
+				Data: map[string][]byte{"old": []byte("data")},
 			}
 			Expect(fakeClient2.Create(ctx, existingSecret)).To(Succeed())
 
 			sourceSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "s1", Namespace: "kube-system"},
-				Type:       corev1.SecretTypeOpaque,
-				Data:       map[string][]byte{"foo": []byte("bar")},
+				Name: "s1", Namespace: "kube-system",
+				Type: corev1.SecretTypeOpaque,
+				Data: map[string][]byte{"foo": []byte("bar")},
 			}
 			Expect(fakeClient1.Create(ctx, sourceSecret)).To(Succeed())
 
@@ -133,7 +133,7 @@ var _ = Describe("Secrets", func() {
 			fakeSeedClient = fakeclient.NewClientBuilder().WithScheme(kubernetes.SeedScheme).Build()
 
 			shoot := &gardencorev1beta1.Shoot{
-				ObjectMeta: metav1.ObjectMeta{Name: "my-shoot", Namespace: "garden-my-project"},
+				Name: "my-shoot", Namespace: "garden-my-project",
 			}
 
 			b.FS = afero.Afero{Fs: afero.NewMemMapFs()}
@@ -148,34 +148,30 @@ var _ = Describe("Secrets", func() {
 
 		It("should persist all secrets into a ShootState file", func() {
 			caSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "ca-cluster",
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						secretsmanager.LabelKeyPersist:   secretsmanager.LabelValueTrue,
-						secretsmanager.LabelKeyManagedBy: secretsmanager.LabelValueSecretsManager,
-					},
+				Name:      "ca-cluster",
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					secretsmanager.LabelKeyPersist:   secretsmanager.LabelValueTrue,
+					secretsmanager.LabelKeyManagedBy: secretsmanager.LabelValueSecretsManager,
 				},
 				Type: corev1.SecretTypeTLS,
 				Data: map[string][]byte{"tls.crt": []byte("cert"), "tls.key": []byte("key")},
 			}
 			derivedSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "kube-apiserver-server",
-					Namespace: "kube-system",
-					Labels: map[string]string{
-						secretsmanager.LabelKeyManagedBy: secretsmanager.LabelValueSecretsManager,
-					},
+				Name:      "kube-apiserver-server",
+				Namespace: "kube-system",
+				Labels: map[string]string{
+					secretsmanager.LabelKeyManagedBy: secretsmanager.LabelValueSecretsManager,
 				},
 				Type: corev1.SecretTypeTLS,
 				Data: map[string][]byte{"tls.crt": []byte("server-cert"), "tls.key": []byte("server-key")},
 			}
 			emptyDataSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "empty-data", Namespace: "kube-system"},
+				Name: "empty-data", Namespace: "kube-system",
 			}
 			otherNSSecret := &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: "default"},
-				Data:       map[string][]byte{"key": []byte("val")},
+				Name: "other", Namespace: "default",
+				Data: map[string][]byte{"key": []byte("val")},
 			}
 
 			Expect(fakeSeedClient.Create(ctx, caSecret)).To(Succeed())
