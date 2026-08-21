@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"uuid"
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	"github.com/go-logr/logr"
 	"github.com/spf13/afero"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"k8s.io/component-base/version"
 	"k8s.io/utils/clock"
@@ -353,7 +353,7 @@ func initializeShootResource(resources gardenadm.Resources, fs afero.Afero, runs
 	} else {
 		// For `gardenadm bootstrap`, we don't need a stable UID. We generate a random one instead, because we might not be
 		// able to persist the generated UID in /var/lib/gardenadm (e.g., when running `gardenadm bootstrap` on macOS).
-		shoot.Status.UID = uuid.NewUUID()
+		shoot.Status.UID = types.UID(uuid.New().String())
 	}
 
 	return nil
@@ -375,7 +375,7 @@ func shootUID(fs afero.Afero) (types.UID, error) {
 			return "", fmt.Errorf("failed creating directory %q: %w", filepath.Dir(path), err)
 		}
 
-		content = []byte(uuid.NewUUID())
+		content = []byte(uuid.New().String())
 		if err := fs.WriteFile(path, content, permissions); err != nil {
 			return "", fmt.Errorf("failed writing file %q: %w", path, err)
 		}

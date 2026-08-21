@@ -7,9 +7,10 @@ package workloadidentity
 import (
 	"context"
 	"strings"
+	"uuid"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/storage/names"
 
@@ -38,7 +39,7 @@ func (s workloadIdentityStrategy) PrepareForCreate(_ context.Context, obj runtim
 
 	wi := obj.(*security.WorkloadIdentity)
 	if string(wi.GetUID()) == "" {
-		wi.SetUID(uuid.NewUUID())
+		wi.SetUID(types.UID(uuid.New().String()))
 	}
 
 	if wi.GetName() == "" {
