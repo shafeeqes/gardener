@@ -27,6 +27,10 @@ linters:
           deny:
             - pkg: "k8s.io/utils/pointer"
               desc: "k8s.io/utils/pointer shall no longer be used, please use k8s.io/utils/ptr."
+            - pkg: "github.com/google/uuid"
+              desc: "github.com/google/uuid shall no longer be used, please use the stdlib uuid package."
+            - pkg: "k8s.io/apimachinery/pkg/util/uuid"
+              desc: "k8s.io/apimachinery/pkg/util/uuid shall no longer be used, please use the stdlib uuid package."
     embeddedstructfieldcheck:
       # Checks that sync.Mutex and sync.RWMutex are not used as embedded fields.
       forbid-mutex: true
