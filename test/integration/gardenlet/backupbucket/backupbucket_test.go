@@ -6,13 +6,13 @@ package backupbucket_test
 
 import (
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -97,7 +97,7 @@ var _ = Describe("BackupBucket controller tests", func() {
 			ExpectWithOffset(1, testClient.Status().Patch(ctx, extensionBackupBucket, patch)).To(Succeed())
 		}
 
-		resourceName = "bucket-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:12]
+		resourceName = "bucket-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:12]
 
 		By("Create BackupBucket secret in garden")
 		gardenSecret = &corev1.Secret{

@@ -7,6 +7,7 @@ package highavailabilityconfig_test
 import (
 	"fmt"
 	"strings"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -15,7 +16,6 @@ import (
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -31,11 +31,11 @@ var _ = Describe("HighAvailabilityConfig tests", func() {
 
 	BeforeEach(func() {
 		namespace = &corev1.Namespace{
-			Name: testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name: testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 		}
 
 		objectMeta = metav1.ObjectMeta{
-			Name:      testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name:      testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 			Namespace: namespace.Name,
 		}
 	})
@@ -102,7 +102,7 @@ var _ = Describe("HighAvailabilityConfig tests", func() {
 			}
 
 			hpa = &autoscalingv2.HorizontalPodAutoscaler{
-				Name:      testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+				Name:      testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 				Namespace: namespace.Name,
 				Spec: autoscalingv2.HorizontalPodAutoscalerSpec{
 					MaxReplicas: 5,

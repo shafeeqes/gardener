@@ -5,13 +5,14 @@
 package managedseed_test
 
 import (
+	"uuid"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
@@ -74,7 +75,7 @@ var _ = Describe("ManagedSeed controller test", func() {
 			g.Expect(mgrClient.Get(ctx, client.ObjectKeyFromObject(gardenNamespaceGarden), &corev1.Namespace{})).To(Succeed())
 		}).Should(Succeed())
 
-		backupSecretName = "backup-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		backupSecretName = "backup-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 		backupSecret = &corev1.Secret{
 			Name:      backupSecretName,

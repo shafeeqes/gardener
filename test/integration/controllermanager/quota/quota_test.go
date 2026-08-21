@@ -6,11 +6,11 @@ package quota_test
 
 import (
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -33,7 +33,7 @@ var _ = Describe("Quota controller tests", func() {
 
 	BeforeEach(func() {
 		providerType = "provider-type"
-		resourceName = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 		objectKey = client.ObjectKey{Namespace: testNamespace.Name, Name: resourceName}
 
 		secret = &corev1.Secret{

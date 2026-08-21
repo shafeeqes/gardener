@@ -8,13 +8,13 @@ import (
 	"context"
 	"slices"
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -61,7 +61,7 @@ var _ = Describe("Seed Tests", Label("Seed", "default"), func() {
 			ItShouldInitializeSeedClient(s)
 
 			seedNamespace = gardenerutils.ComputeGardenNamespace(s.Seed.Name)
-			gardenAccessName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+			gardenAccessName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 			accessSecret = &corev1.Secret{
 				Name:      gardenAccessName,
 				Namespace: v1beta1constants.GardenNamespace,

@@ -7,11 +7,11 @@ package node_test
 import (
 	"context"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -37,7 +37,7 @@ var (
 	testEnv    *envtest.Environment
 	testClient client.Client
 
-	testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 )
 
 var _ = BeforeSuite(func() {

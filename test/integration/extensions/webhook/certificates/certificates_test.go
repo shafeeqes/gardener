@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -23,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -132,7 +132,7 @@ var _ = Describe("Certificates tests", func() {
 		})
 
 		// use unique extension name for each test,for unique webhook config name
-		extensionName = "provider-test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		extensionName = "provider-test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 		fakeClock = testclock.NewFakeClock(time.Now())
 

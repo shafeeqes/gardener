@@ -8,12 +8,12 @@ import (
 	"context"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -88,7 +88,7 @@ var _ = BeforeSuite(func() {
 		Expect(testClient.Delete(ctx, testNamespace)).To(Or(Succeed(), BeNotFoundError()))
 	})
 
-	nodeName = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	nodeName = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	fakeClock = testclock.NewFakeClock(time.Now().UTC())
 	leaseDurationSeconds = 3
 

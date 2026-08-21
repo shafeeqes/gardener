@@ -8,12 +8,12 @@ import (
 	"context"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -78,7 +78,7 @@ var _ = BeforeSuite(func() {
 	testClient, err = client.New(restConfig, client.Options{Scheme: kubernetes.GardenScheme})
 	Expect(err).NotTo(HaveOccurred())
 
-	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	log.Info("Using test run ID for test", "testRunID", testRunID)
 
 	By("Setup manager")

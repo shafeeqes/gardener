@@ -7,13 +7,13 @@ package tokenrequestor_test
 import (
 	"fmt"
 	"time"
+	"uuid"
 
 	"github.com/go-jose/go-jose/v4"
 	"github.com/go-jose/go-jose/v4/jwt"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	securityv1alpha1 "github.com/gardener/gardener/pkg/apis/security/v1alpha1"
@@ -42,7 +42,7 @@ var _ = Describe("WorkloadIdentity TokenRequestor tests", func() {
 			}).Should(BeNotFoundError())
 		})
 
-		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 		secret = &corev1.Secret{
 			Name:      resourceName,

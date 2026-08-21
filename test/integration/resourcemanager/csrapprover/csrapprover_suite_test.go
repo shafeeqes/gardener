@@ -8,13 +8,13 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	userpkg "k8s.io/apiserver/pkg/authentication/user"
 	kubernetesclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -87,7 +87,7 @@ var _ = BeforeSuite(func() {
 	})
 
 	By("Create test clients")
-	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:16]
+	testRunID = utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:16]
 	log.Info("Using test run ID for test", "testRunID", testRunID)
 
 	machineName = "machine-" + testRunID

@@ -6,6 +6,7 @@ package bastion_test
 
 import (
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -13,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -37,7 +37,7 @@ var _ = Describe("Bastion controller tests", func() {
 	BeforeEach(func() {
 		fakeClock.SetTime(time.Now())
 
-		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 		objectKey = client.ObjectKey{Namespace: testNamespace.Name, Name: resourceName}
 
 		providerType := "foo-provider"

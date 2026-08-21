@@ -6,13 +6,13 @@ package status_test
 
 import (
 	"fmt"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -38,7 +38,7 @@ var _ = Describe("Shoot Status controller tests", func() {
 		DeferCleanup(test.WithFeatureGate(features.DefaultFeatureGate, features.InPlaceNodeUpdates, true))
 
 		By("Create Shoot")
-		shootName := "shoot-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		shootName := "shoot-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 		shoot = &gardencorev1beta1.Shoot{
 			Name:      shootName,
 			Namespace: projectNamespace.Name,

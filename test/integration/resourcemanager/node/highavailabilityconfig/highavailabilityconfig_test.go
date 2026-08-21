@@ -5,12 +5,13 @@
 package highavailabilityconfig_test
 
 import (
+	"uuid"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -25,7 +26,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 
 	BeforeEach(func() {
 		namespace = &corev1.Namespace{
-			Name: testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name: testIDPrefix + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 			Labels: map[string]string{
 				resourcesv1alpha1.HighAvailabilityConfigConsider: "true",
 			},
@@ -48,7 +49,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 
 	test := func(obj client.Object, getTSC func() []corev1.TopologySpreadConstraint) {
 		By("Create first node")
-		node1 := &corev1.Node{Name: testIDPrefix + "-node-1-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]}
+		node1 := &corev1.Node{Name: testIDPrefix + "-node-1-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]}
 		Expect(testClient.Create(ctx, node1)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(testClient.Delete(ctx, node1)).To(Succeed())
@@ -63,7 +64,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 		Expect(getTSC()).To(ContainElement(HaveField("WhenUnsatisfiable", corev1.ScheduleAnyway)))
 
 		By("Create second node (controller should patch, webhook switches to DoNotSchedule)")
-		node2 := &corev1.Node{Name: testIDPrefix + "-node-2-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]}
+		node2 := &corev1.Node{Name: testIDPrefix + "-node-2-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]}
 		Expect(testClient.Create(ctx, node2)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(client.IgnoreNotFound(testClient.Delete(ctx, node2))).To(Succeed())
@@ -83,7 +84,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 
 	It("should update topology spread constraints for Deployments when node count crosses the single-node threshold", func() {
 		deployment := &appsv1.Deployment{
-			Name:      "deploy-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name:      "deploy-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 			Namespace: namespace.Name,
 			Labels: map[string]string{
 				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
@@ -112,7 +113,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 
 	It("should update topology spread constraints for StatefulSets when node count crosses the single-node threshold", func() {
 		statefulSet := &appsv1.StatefulSet{
-			Name:      "sts-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name:      "sts-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 			Namespace: namespace.Name,
 			Labels: map[string]string{
 				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
@@ -141,7 +142,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 
 	It("should not patch Deployments without topology spread constraints", func() {
 		By("Create first node")
-		node1 := &corev1.Node{Name: testIDPrefix + "-node-1-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]}
+		node1 := &corev1.Node{Name: testIDPrefix + "-node-1-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]}
 		Expect(testClient.Create(ctx, node1)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(testClient.Delete(ctx, node1)).To(Succeed())
@@ -150,7 +151,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 		By("Create Deployment without HA type label (webhook does not add TSCs)")
 		noTSCLabels := map[string]string{"app": "test-no-tsc"}
 		noTSCDeployment := &appsv1.Deployment{
-			Name:      "deploy-no-tsc-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name:      "deploy-no-tsc-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 			Namespace: namespace.Name,
 			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{MatchLabels: noTSCLabels},
@@ -174,7 +175,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 		By("Create multi-replica Deployment with HA type (webhook adds TSCs with ScheduleAnyway for single-node)")
 		multiReplicaLabels := map[string]string{"app": "test-multi"}
 		multiReplicaDeployment := &appsv1.Deployment{
-			Name:      "deploy-multi-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8],
+			Name:      "deploy-multi-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8],
 			Namespace: namespace.Name,
 			Labels: map[string]string{
 				resourcesv1alpha1.HighAvailabilityConfigType: resourcesv1alpha1.HighAvailabilityConfigTypeServer,
@@ -203,7 +204,7 @@ var _ = Describe("Node HighAvailabilityConfig controller", func() {
 		resourceVersionBefore := noTSCDeployment.ResourceVersion
 
 		By("Create second node (controller should only patch multi-replica Deployment)")
-		node2 := &corev1.Node{Name: testIDPrefix + "-node-2-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]}
+		node2 := &corev1.Node{Name: testIDPrefix + "-node-2-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]}
 		Expect(testClient.Create(ctx, node2)).To(Succeed())
 		DeferCleanup(func() {
 			Expect(testClient.Delete(ctx, node2)).To(Succeed())

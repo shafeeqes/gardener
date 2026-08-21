@@ -6,6 +6,7 @@ package garbagecollector_test
 
 import (
 	"fmt"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,7 +15,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	resourcesv1alpha1 "github.com/gardener/gardener/pkg/apis/resources/v1alpha1"
@@ -31,7 +31,7 @@ var _ = Describe("Garbage collector tests", func() {
 	)
 
 	BeforeEach(func() {
-		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 		garbageCollectableObjects = make([]client.Object, 0, 18)
 
 		for i := 0; i < cap(garbageCollectableObjects)/2; i++ {

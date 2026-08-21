@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -17,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
 	testclock "k8s.io/utils/clock/testing"
@@ -105,7 +105,7 @@ var _ = BeforeSuite(func() {
 	testClient, err = client.New(restConfig, client.Options{Scheme: testScheme})
 	Expect(err).NotTo(HaveOccurred())
 
-	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	log.Info("Using test run ID for test", "testRunID", testRunID)
 
 	By("Create test Namespace")

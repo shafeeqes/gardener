@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -16,7 +17,6 @@ import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,7 +58,7 @@ var _ = BeforeSuite(func() {
 	logf.SetLogger(logger.MustNewZapLogger(logger.DebugLevel, logger.FormatJSON, zap.WriteTo(GinkgoWriter)))
 	log = logf.Log.WithName(testID)
 
-	testNamespaceName := testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testNamespaceName := testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 	By("Start test environment")
 	testEnv = &envtest.Environment{

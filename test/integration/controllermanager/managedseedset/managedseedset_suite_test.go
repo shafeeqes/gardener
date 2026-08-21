@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -15,7 +16,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -87,7 +87,7 @@ var _ = BeforeSuite(func() {
 	Expect(testClient.Create(ctx, gardenNamespace)).To(Succeed())
 	log.Info("Created Namespace for test", "gardenNamespace", client.ObjectKeyFromObject(gardenNamespace))
 
-	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	log.Info("Using test run ID for test", "testRunID", testRunID)
 
 	By("Setup manager")

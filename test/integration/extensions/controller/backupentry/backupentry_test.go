@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -17,7 +18,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -56,7 +56,7 @@ var _ = Describe("BackupEntry", func() {
 	)
 
 	BeforeEach(OncePerOrdered, func() {
-		testShootUID := string(uuid.NewUUID())
+		testShootUID := uuid.New().String()
 
 		By("Create test Namespace")
 		testNamespace = &corev1.Namespace{

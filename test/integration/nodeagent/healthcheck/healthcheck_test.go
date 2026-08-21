@@ -11,13 +11,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,7 +45,7 @@ var _ = Describe("Healthcheck controller tests", func() {
 	)
 
 	BeforeEach(func() {
-		testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 		By("Setup manager")
 		mgr, err := manager.New(restConfig, manager.Options{

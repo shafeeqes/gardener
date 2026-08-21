@@ -6,12 +6,12 @@ package tokenrequestor_test
 
 import (
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	clientcmdv1 "k8s.io/client-go/tools/clientcmd/api/v1"
@@ -31,7 +31,7 @@ var _ = Describe("TokenRequestor tests", func() {
 	)
 
 	BeforeEach(func() {
-		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 		secret = &corev1.Secret{
 			Name:      resourceName,

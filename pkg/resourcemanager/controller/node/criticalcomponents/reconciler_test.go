@@ -6,6 +6,7 @@ package criticalcomponents_test
 
 import (
 	"context"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -16,9 +17,9 @@ import (
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/tools/events"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -440,7 +441,7 @@ func daemonPodFor(daemonSet *appsv1.DaemonSet) corev1.Pod {
 		Namespace: daemonSet.Namespace,
 	}
 
-	daemonSet.UID = uuid.NewUUID()
+	daemonSet.UID = types.UID(uuid.New().String())
 	Expect(controllerutil.SetControllerReference(daemonSet, &pod, scheme)).To(Succeed())
 	return pod
 }

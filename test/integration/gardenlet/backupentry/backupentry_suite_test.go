@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -16,7 +17,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
 	testclock "k8s.io/utils/clock/testing"
@@ -110,11 +110,11 @@ var _ = BeforeSuite(func() {
 	testClient, err = client.New(restConfig, client.Options{Scheme: testScheme})
 	Expect(err).NotTo(HaveOccurred())
 
-	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	log.Info("Using test run ID for test", "testRunID", testRunID)
 
 	By("Create test Namespace")
-	projectName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:5]
+	projectName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:5]
 	testNamespace = &corev1.Namespace{
 		// create dedicated namespace for each test run, so that we can run multiple tests concurrently for stress tests
 		Name: "garden-" + projectName,

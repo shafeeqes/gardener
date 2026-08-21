@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"uuid"
 
 	druidcorev1alpha1 "github.com/gardener/etcd-druid/api/core/v1alpha1"
 	druidcorecrds "github.com/gardener/etcd-druid/api/core/v1alpha1/crds"
@@ -21,7 +22,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -151,9 +151,9 @@ var _ = BeforeSuite(func() {
 	testClient, err = client.New(restConfig, client.Options{Scheme: testScheme})
 	Expect(err).NotTo(HaveOccurred())
 
-	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	projectName = "p-" + testRunID
-	selfHostedProjectName = "p-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	selfHostedProjectName = "p-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 	seedName = "seed-" + testRunID
 	shootName = "shoot-" + testRunID
 

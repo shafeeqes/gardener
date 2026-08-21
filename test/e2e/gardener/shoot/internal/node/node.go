@@ -8,6 +8,7 @@ import (
 	"context"
 	"slices"
 	"time"
+	"uuid"
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
@@ -16,7 +17,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/imagevector"
@@ -232,7 +232,7 @@ func patchCSINodeObjectWithRequiredDriver(ctx context.Context, shootClient clien
 	csiNode.Spec.Drivers = []storagev1.CSINodeDriver{
 		{
 			Name:   driverName,
-			NodeID: string(uuid.NewUUID()),
+			NodeID: uuid.New().String(),
 		},
 	}
 

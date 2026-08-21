@@ -7,6 +7,7 @@ package backupentry_test
 import (
 	"fmt"
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,7 +15,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -191,7 +191,7 @@ var _ = Describe("BackupEntry controller tests", func() {
 		})
 
 		By("Create Shoot")
-		shootName := "shoot-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		shootName := "shoot-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 		shoot = &gardencorev1beta1.Shoot{
 			Name:      shootName,
 			Namespace: testNamespace.Name,

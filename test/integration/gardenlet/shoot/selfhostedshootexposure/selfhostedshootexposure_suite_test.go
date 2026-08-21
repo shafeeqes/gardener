@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -17,7 +18,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -106,7 +106,7 @@ var _ = BeforeSuite(func() {
 	testClient, err = client.New(restConfig, client.Options{Scheme: testScheme})
 	Expect(err).NotTo(HaveOccurred())
 
-	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 	By("Ensure garden Namespace exists (self-hosted shoots must live in the garden namespace)")
 	Expect(testClient.Create(ctx, &corev1.Namespace{Name: v1beta1constants.GardenNamespace})).To(Or(Succeed(), MatchError(apierrors.IsAlreadyExists, "already exists")))

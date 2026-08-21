@@ -8,13 +8,13 @@ import (
 	"context"
 	"sync/atomic"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/afero"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -46,7 +46,7 @@ var (
 	testEnv    *envtest.Environment
 	testClient client.Client
 
-	testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 	testFS       afero.Afero
 	cancelCalled atomic.Bool

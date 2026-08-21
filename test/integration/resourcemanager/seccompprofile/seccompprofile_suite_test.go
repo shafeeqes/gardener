@@ -8,6 +8,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -15,7 +16,6 @@ import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,7 +58,7 @@ var _ = BeforeSuite(func() {
 	log = logf.Log.WithName(testID)
 
 	// determine a unique namespace name to add a corresponding namespaceSelector to the webhook config
-	testNamespaceName := testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testNamespaceName := testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 	By("Start test environment")
 	testEnv = &envtest.Environment{

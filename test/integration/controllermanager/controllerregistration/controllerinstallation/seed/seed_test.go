@@ -5,12 +5,13 @@
 package seed_test
 
 import (
+	"uuid"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener/pkg/apis/core"
@@ -453,7 +454,7 @@ var _ = Describe("ControllerInstallation-Seed controller test", func() {
 		)
 
 		BeforeEach(func() {
-			selfHostedSeedName = "sh-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+			selfHostedSeedName = "sh-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 			selfHostedProviderType = "self-hosted-provider"
 
 			By("Create garden namespace")

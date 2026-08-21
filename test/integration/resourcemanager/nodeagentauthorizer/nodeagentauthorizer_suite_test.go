@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -20,7 +21,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	apiserverv1beta1 "k8s.io/apiserver/pkg/apis/apiserver/v1beta1"
 	"k8s.io/client-go/rest"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
@@ -80,7 +80,7 @@ var (
 var _ = BeforeSuite(func() {
 	logf.SetLogger(logger.MustNewZapLogger(logger.DebugLevel, logger.FormatJSON, zap.WriteTo(GinkgoWriter)))
 	log = logf.Log.WithName(testID)
-	testRunID = utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:16]
+	testRunID = utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:16]
 
 	// determine a unique namespace name for test environment
 	testNamespaceName := testID + "-" + testRunID[:8]

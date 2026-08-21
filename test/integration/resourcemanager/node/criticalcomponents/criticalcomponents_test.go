@@ -5,13 +5,14 @@
 package criticalcomponents_test
 
 import (
+	"uuid"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -28,7 +29,7 @@ var _ = Describe("CriticalComponents tests", func() {
 	)
 
 	BeforeEach(func() {
-		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 		node = &corev1.Node{
 			Name:   resourceName,
@@ -255,7 +256,7 @@ func createRequiredCSINodeObject(nodeName, driverName string) {
 			Drivers: []storagev1.CSINodeDriver{
 				{
 					Name:   driverName,
-					NodeID: string(uuid.NewUUID()),
+					NodeID: uuid.New().String(),
 				},
 			},
 		},

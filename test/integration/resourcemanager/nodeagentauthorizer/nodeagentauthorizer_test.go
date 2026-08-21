@@ -9,6 +9,7 @@ import (
 	"crypto/x509/pkix"
 	"fmt"
 	"time"
+	"uuid"
 
 	machinev1alpha1 "github.com/gardener/machine-controller-manager/pkg/apis/machine/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
@@ -18,7 +19,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	eventsv1 "k8s.io/api/events/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/tools/events"
 	certutil "k8s.io/client-go/util/cert"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -126,7 +126,7 @@ var _ = Describe("NodeAgentAuthorizer tests", func() {
 
 			BeforeEach(func() {
 				recorder = mgrNode.GetEventRecorder("nodeagentauthorizer-test")
-				node.Name = fmt.Sprintf("event-node-%s", utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:16])
+				node.Name = fmt.Sprintf("event-node-%s", utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:16])
 				createNode(node, machine)
 			})
 

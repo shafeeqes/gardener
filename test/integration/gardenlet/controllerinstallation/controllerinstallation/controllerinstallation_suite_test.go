@@ -8,6 +8,7 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -15,7 +16,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,7 +55,7 @@ const (
 var (
 	// Prevent testRunID from being able to be interpreted as number, see https://github.com/gardener/gardener/issues/6786
 	// for more details about the reasoning.
-	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 	ctx = context.Background()
 	log logr.Logger

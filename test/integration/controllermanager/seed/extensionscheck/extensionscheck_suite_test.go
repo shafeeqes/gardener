@@ -8,13 +8,13 @@ import (
 	"context"
 	"testing"
 	"time"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	testclock "k8s.io/utils/clock/testing"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -48,7 +48,7 @@ const (
 )
 
 var (
-	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = testID + "-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 
 	ctx = context.Background()
 	log logr.Logger

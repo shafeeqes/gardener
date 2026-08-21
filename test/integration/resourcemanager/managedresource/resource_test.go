@@ -7,6 +7,7 @@ package managedresource_test
 import (
 	"encoding/json"
 	"time"
+	"uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -17,7 +18,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -55,7 +55,7 @@ var _ = Describe("ManagedResource controller tests", func() {
 		// test all cases in a clean environment to make sure we don't have any unintended dependencies between test code.
 		// We could also use GenerateName for this purpose, but then we would need an extra call to update the name of the
 		// marshalled ConfigMap in the already created Secret.
-		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+		resourceName = "test-" + utils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 		objectKey = client.ObjectKey{Namespace: testNamespace.Name, Name: resourceName}
 
 		configMap = &corev1.ConfigMap{

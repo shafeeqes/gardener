@@ -7,13 +7,13 @@ package seed_test
 import (
 	"context"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -188,7 +188,7 @@ var _ = BeforeSuite(func() {
 		}).Should(BeNotFoundError())
 	})
 
-	seedName = "seed-ctrl-reg-test-" + utils.ComputeSHA256Hex([]byte(testID + uuid.NewUUID()))[:8]
+	seedName = "seed-ctrl-reg-test-" + utils.ComputeSHA256Hex([]byte(testID + uuid.New().String()))[:8]
 	seedNamespace = &corev1.Namespace{
 		Name: gardenerutils.ComputeGardenNamespace(seedName),
 	}

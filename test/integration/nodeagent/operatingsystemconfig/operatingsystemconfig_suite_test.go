@@ -8,6 +8,7 @@ import (
 	"context"
 	"io"
 	"testing"
+	"uuid"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
@@ -18,7 +19,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -50,7 +50,7 @@ var (
 	testClient client.Client
 	mgrClient  client.Client
 
-	testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.NewUUID()))[:8]
+	testRunID = "test-" + gardenerutils.ComputeSHA256Hex([]byte(uuid.New().String()))[:8]
 )
 
 func init() {
