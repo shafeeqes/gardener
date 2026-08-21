@@ -45,10 +45,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := app.Run(s, driver); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+	err = app.Run(s, driver)
+	fmt.Fprintf(os.Stderr, "%v\n", err)
+	os.Exit(1)
 }
 
 func newDriver(kubeconfig string) (driver.Driver, error) {

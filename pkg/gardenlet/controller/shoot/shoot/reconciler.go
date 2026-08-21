@@ -1080,7 +1080,6 @@ func (r *Reconciler) isHibernationActive(ctx context.Context, clusterName string
 }
 
 func lastErrorsOperationInitializationFailure(lastErrors []gardencorev1beta1.LastError, err error) []gardencorev1beta1.LastError {
-
 	if _, ok := errors.AsType[*gardenerutils.IncompleteDNSConfigError](err); ok {
 		return v1beta1helper.UpsertLastError(lastErrors, gardencorev1beta1.LastError{
 			TaskID:      new(taskID),

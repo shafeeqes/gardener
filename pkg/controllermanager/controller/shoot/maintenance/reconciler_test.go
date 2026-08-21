@@ -1662,9 +1662,9 @@ var _ = Describe("Shoot Maintenance", func() {
 		)
 
 		BeforeEach(func() {
-			defer test.WithVar(
+			DeferCleanup(test.WithVar(
 				&IsFeatureGateSupported, isFeatureGateSupported,
-			)
+			))
 
 			shoot = &gardencorev1beta1.Shoot{
 				Name: "shoot",
@@ -1795,9 +1795,9 @@ var _ = Describe("Shoot Maintenance", func() {
 		)
 
 		BeforeEach(func() {
-			defer test.WithVar(
+			DeferCleanup(test.WithVar(
 				&IsAdmissionPluginSupported, isAdmissionPluginSupported,
-			)
+			))
 
 			shoot = &gardencorev1beta1.Shoot{
 				Name: "shoot",
