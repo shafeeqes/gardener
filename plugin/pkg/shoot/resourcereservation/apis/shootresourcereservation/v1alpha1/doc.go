@@ -7,4 +7,4 @@
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=shootresourcereservation.admission.gardener.cloud
 
-package v1alpha1 // import "github.com/gardener/gardener/plugin/pkg/shoot/resourcereservation/apis/shootresourcereservation/v1alpha1"
+package v1alpha1

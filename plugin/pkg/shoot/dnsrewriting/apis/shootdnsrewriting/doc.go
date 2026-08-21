@@ -5,4 +5,4 @@
 // +k8s:deepcopy-gen=package
 // +groupName=shootdnsrewriting.admission.gardener.cloud
 
-package shootdnsrewriting // import "github.com/gardener/gardener/plugin/pkg/shoot/dnsrewriting/apis/shootdnsrewriting"
+package shootdnsrewriting

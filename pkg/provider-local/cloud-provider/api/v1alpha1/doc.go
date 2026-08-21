@@ -6,4 +6,4 @@
 
 // Package v1alpha1 contains the local cloud-provider config API resources.
 // +groupName=local.provider.gardener.cloud
-package v1alpha1 // import "github.com/gardener/gardener/pkg/provider-local/cloud-provider/api/v1alpha1"
+package v1alpha1

@@ -5,4 +5,4 @@
 // +k8s:deepcopy-gen=package
 // +groupName=shoottolerationrestriction.admission.gardener.cloud
 
-package shoottolerationrestriction // import "github.com/gardener/gardener/plugin/pkg/shoot/tolerationrestriction/apis/shoottolerationrestriction"
+package shoottolerationrestriction

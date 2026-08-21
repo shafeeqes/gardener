@@ -11,4 +11,4 @@
 
 // Package v1alpha1 contains the local provider API resources.
 // +groupName=local.provider.extensions.gardener.cloud
-package v1alpha1 // import "github.com/gardener/gardener/pkg/provider-local/apis/local/v1alpha1"
+package v1alpha1

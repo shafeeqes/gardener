@@ -57,8 +57,7 @@ func ExtractErrorCodes(err error) []gardencorev1beta1.ErrorCode {
 	var codes []gardencorev1beta1.ErrorCode
 
 	for _, err := range errorsutils.Errors(err) {
-		var coder Coder
-		if errors.As(err, &coder) {
+		if coder, ok := errors.AsType[Coder](err); ok {
 			codes = append(codes, coder.Codes()...)
 		}
 	}

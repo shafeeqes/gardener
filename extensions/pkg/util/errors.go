@@ -20,8 +20,7 @@ func DetermineError(err error, knownCodes map[gardencorev1beta1.ErrorCode]func(s
 	}
 
 	// try to re-use codes from error
-	var coder v1beta1helper.Coder
-	if errors.As(err, &coder) {
+	if _, ok := errors.AsType[v1beta1helper.Coder](err); ok {
 		return err
 	}
 

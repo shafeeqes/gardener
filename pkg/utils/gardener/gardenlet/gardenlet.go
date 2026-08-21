@@ -103,8 +103,8 @@ func ShootMetaFromBootstrapToken(ctx context.Context, reader client.Reader, boot
 func extractShootMetaFromBootstrapToken(bootstrapTokenSecret *corev1.Secret) (types.NamespacedName, bool, error) {
 	description := string(bootstrapTokenSecret.Data[bootstraptokenapi.BootstrapTokenDescriptionKey])
 
-	if strings.HasPrefix(description, bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix) {
-		parts := strings.Fields(strings.TrimPrefix(description, bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix))
+	if after, ok := strings.CutPrefix(description, bootstraptoken.SelfHostedShootBootstrapTokenSecretDescriptionPrefix); ok {
+		parts := strings.Fields(after)
 		if len(parts) == 0 {
 			return types.NamespacedName{}, false, fmt.Errorf("could not extract shoot meta from bootstrap token description: %s", description)
 		}

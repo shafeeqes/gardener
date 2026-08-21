@@ -5,4 +5,4 @@
 // +k8s:deepcopy-gen=package
 // +groupName=shootresourcereservation.admission.gardener.cloud
 
-package shootresourcereservation // import "github.com/gardener/gardener/plugin/pkg/shoot/resourcereservation/apis/shootresourcereservation"
+package shootresourcereservation

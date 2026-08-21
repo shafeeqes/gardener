@@ -7,4 +7,4 @@
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=shootdnsrewriting.admission.gardener.cloud
 
-package v1alpha1 // import "github.com/gardener/gardener/plugin/pkg/shoot/dnsrewriting/apis/shootdnsrewriting/v1alpha1"
+package v1alpha1

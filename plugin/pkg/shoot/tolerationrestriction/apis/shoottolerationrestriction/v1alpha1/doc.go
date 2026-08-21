@@ -7,4 +7,4 @@
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=shoottolerationrestriction.admission.gardener.cloud
 
-package v1alpha1 // import "github.com/gardener/gardener/plugin/pkg/shoot/tolerationrestriction/apis/shoottolerationrestriction/v1alpha1"
+package v1alpha1

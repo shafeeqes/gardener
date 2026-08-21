@@ -229,7 +229,7 @@ func unmountKubeletSubFolders(log logr.Logger, fs afero.Afero) error {
 	}
 
 	var errs []error
-	for _, mount := range strings.Split(string(mounts), "\n") {
+	for mount := range strings.SplitSeq(string(mounts), "\n") {
 		// Looking for entries like "tmpfs /var/lib/kubelet/pods/..."
 		words := strings.Split(mount, " ")
 		if len(words) < 2 || !strings.HasPrefix(words[1], kubeletFolderPrefix) {
