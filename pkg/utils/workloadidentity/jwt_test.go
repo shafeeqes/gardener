@@ -13,9 +13,10 @@ import (
 	"fmt"
 	"time"
 
+	"uuid"
+
 	"github.com/go-jose/go-jose/v4"
 	"github.com/go-jose/go-jose/v4/jwt"
-	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/util/keyutil"
@@ -48,7 +49,7 @@ var _ = Describe("#JWT", func() {
 			return time.Date(2024, time.July, 9, 2, 0, 0, 0, time.UTC)
 		})
 
-		workloadidentity.SetNewUUID(uuid.NewRandom)
+		workloadidentity.SetNewUUID(uuid.New)
 	})
 
 	Context("#getKeyID", func() {
@@ -346,8 +347,8 @@ wQIDAQAB
 				durationSeconds = int64(time.Hour.Seconds()) * 2
 			)
 
-			workloadidentity.SetNewUUID(func() (uuid.UUID, error) {
-				return staticUUID, nil
+			workloadidentity.SetNewUUID(func() uuid.UUID {
+				return staticUUID
 			})
 
 			token1, exp1, err := t.IssueToken(sub, audiences, durationSeconds)
@@ -371,8 +372,8 @@ wQIDAQAB
 				durationSeconds = int64(time.Hour.Seconds()) * 2
 			)
 
-			workloadidentity.SetNewUUID(func() (uuid.UUID, error) {
-				return staticUUID, nil
+			workloadidentity.SetNewUUID(func() uuid.UUID {
+				return staticUUID
 			})
 
 			token1, exp1, err := t.IssueToken(sub, audiences, durationSeconds)
@@ -396,18 +397,6 @@ wQIDAQAB
 
 			Expect(token2).ToNot(BeEmpty())
 			Expect(token2).ToNot(Equal(token1))
-		})
-
-		It("should fail to issue token when uuid generation fails", func() {
-			workloadidentity.SetNewUUID(func() (uuid.UUID, error) {
-				return uuid.UUID{}, fmt.Errorf("failed to generate uuid")
-			})
-
-			token, exp, err := t.IssueToken(sub, audiences, int64(time.Hour.Seconds())*2)
-			Expect(err).To(HaveOccurred())
-			Expect(err).To(MatchError("failed to generate UUID for the jti claim: failed to generate uuid"))
-			Expect(exp).To(BeNil())
-			Expect(token).To(BeEmpty())
 		})
 	})
 })

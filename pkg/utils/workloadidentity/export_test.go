@@ -6,8 +6,7 @@ package workloadidentity
 
 import (
 	"time"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 // Functions exported for testing.
@@ -28,7 +27,7 @@ func Now() func() time.Time {
 	return now
 }
 
-func SetNewUUID(u func() (uuid.UUID, error)) {
+func SetNewUUID(u func() uuid.UUID) {
 	newUUID = u
 }
 
