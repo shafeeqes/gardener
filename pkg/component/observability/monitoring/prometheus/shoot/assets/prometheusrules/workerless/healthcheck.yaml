@@ -51,14 +51,17 @@ spec:
             task: rule_evaluation:first_cycle
 
         # healthcheck{task="cadvisor:control_plane:absent"} is present when the cAdvisor metrics from the control plane are missing.
+        # The metric is federated from the seed's cache Prometheus, so a momentary federation gap (e.g. after a
+        # Prometheus restart during credentials rotation) must not trip an instantaneous absent() check. The 5m
+        # grace window fires only if the metric is absent for the whole window.
         - record: healthcheck
-          expr: absent(container_cpu_usage_seconds_total{pod="prometheus-shoot-0"})
+          expr: absent_over_time(container_cpu_usage_seconds_total{pod="prometheus-shoot-0"}[5m])
           labels:
             task: cadvisor:control_plane:absent
 
         # healthcheck{task="kube_state_metrics:control_plane:absent"} is present when the kube-state-metrics metrics from the control plane are missing.
         - record: healthcheck
-          expr: absent(kube_pod_container_resource_requests{pod="prometheus-shoot-0"})
+          expr: absent_over_time(kube_pod_container_resource_requests{pod="prometheus-shoot-0"}[5m])
           labels:
             task: kube_state_metrics:control_plane:absent
 
@@ -70,7 +73,7 @@ spec:
 
         # healthcheck{task="federate:metering:absent"} is present when federated metering metrics are missing.
         - record: healthcheck
-          expr: absent(metering:cpu_requests:sum_by_namespace)
+          expr: absent_over_time(metering:cpu_requests:sum_by_namespace[5m])
           labels:
             task: federate:metering:absent
 

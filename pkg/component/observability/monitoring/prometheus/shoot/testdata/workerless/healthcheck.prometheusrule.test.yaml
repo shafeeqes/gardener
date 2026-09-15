@@ -184,17 +184,17 @@ tests:
         values: 0     1     2     3     4     5     6     7     8     9     10
 
       - series: container_cpu_usage_seconds_total{pod="prometheus-shoot-0"}
-        values: 1     1     stale 1     1     1     1     1     1     1     1
+        values: 1     stale 1     stale stale stale stale stale stale 1     1
       - series: expected_healthcheck:up{task="cadvisor:control_plane:absent"}
-        values: stale stale 0     stale stale stale stale stale stale stale stale
+        values: stale stale stale stale stale stale stale 0     0     stale stale
 
       - series: kube_pod_container_resource_requests{pod="prometheus-shoot-0"}
-        values: 1     1     1     1     stale 1     1     1     1     1     1
+        values: 1     stale 1     stale stale stale stale stale stale 1     1
       - series: expected_healthcheck:up{task="kube_state_metrics:control_plane:absent"}
-        values: stale stale stale stale 0     stale stale stale stale stale stale
+        values: stale stale stale stale stale stale stale 0     0     stale stale
 
       - series: expected_healthcheck:up
-        values: 1     1     stale 1     stale 1     1     1     1     1     1
+        values: 1     1     1     1     1     1     1     stale stale 1     1
 
       - series: apiserver_request_total
         values: 1x10
@@ -234,8 +234,8 @@ tests:
 
   # The focus of this test are the metering time series.
   #
-  # This test shows that healthcheck:up will report an unhealthy state
-  # if the metering metrics are missing.
+  # This test shows that healthcheck:up tolerates a momentary gap (the 5m grace window of absent_over_time)
+  # but still reports an unhealthy state if the metering metrics are missing for longer than the grace window.
   - input_series:
       - series: indentation
         values: stale stale stale stale stale stale stale stale stale stale stale
@@ -243,12 +243,12 @@ tests:
         values: 0     1     2     3     4     5     6     7     8     9     10
 
       - series: metering:cpu_requests:sum_by_namespace
-        values: 1     1     1     1     stale 1     1     stale 1     1     1
+        values: 1     stale 1     stale stale stale stale stale stale 1     1
       - series: expected_healthcheck:up{task="federate:metering:absent"}
-        values: stale stale stale stale 0     stale stale 0     stale stale stale
+        values: stale stale stale stale stale stale stale 0     0     stale stale
 
       - series: expected_healthcheck:up
-        values: 1     1     1     1     stale 1     1     stale 1     1     1
+        values: 1     1     1     1     1     1     1     stale stale 1     1
 
       - series: container_cpu_usage_seconds_total{pod="prometheus-shoot-0"}
         values: 100x10
