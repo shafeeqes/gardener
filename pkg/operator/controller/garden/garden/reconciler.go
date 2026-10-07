@@ -702,6 +702,8 @@ func getValidVolumeSize(volume *operatorv1alpha1.Volume, size string) string {
 }
 
 func valiEnabled(networking operatorv1alpha1.RuntimeNetworking) (bool, error) {
+	return false, nil
+
 	for _, cidr := range networking.Pods {
 		if _, ipNet, err := net.ParseCIDR(cidr); err != nil {
 			return false, fmt.Errorf("failed parsing %q as CIDR: %w", networking.Pods, err)
