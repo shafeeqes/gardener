@@ -79,101 +79,169 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 
 		sourceEtcdReadyForPeerJoin = g.Add(flow.Task{
 			Name: "Making source etcd ready for peer join",
-			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceEtcdPreparedForPeerJoin, flow.Sequential(
-				func(ctx context.Context) error {
-					return shootstate.Deploy(ctx, botanist.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(),
-						botanist.Shoot.GetInfo(), botanist.Shoot.ControlPlaneNamespace, false)
+			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceEtcdPreparedForPeerJoin,
+				flow.Task{
+					Name: "Persisting shoot state",
+					Fn: func(ctx context.Context) error {
+						return shootstate.Deploy(ctx, botanist.Clock, botanist.GardenClient, botanist.SeedClientSet.Client(), botanist.Shoot.GetInfo(), botanist.Shoot.ControlPlaneNamespace, false)
+					},
 				},
-				botanist.DeployEtcdPeerExposure,
-				botanist.InitializeSecretsManagement,
-				botanist.DeployEtcd,
-				botanist.WaitUntilEtcdsReady,
-				botanist.Shoot.Components.BackupEntry.Migrate,
-				botanist.Shoot.Components.BackupEntry.WaitMigrate,
-			)),
+				flow.Task{
+					Name: "Deploying etcd peer exposure",
+					Fn:   botanist.DeployEtcdPeerExposure,
+				},
+				flow.Task{
+					Name: "Initializing secrets management",
+					Fn:   botanist.InitializeSecretsManagement,
+				},
+				flow.Task{
+					Name: "Deploying etcd",
+					Fn:   botanist.DeployEtcd,
+				},
+				flow.Task{
+					Name: "Waiting until etcds are ready",
+					Fn:   botanist.WaitUntilEtcdsReady,
+				},
+				flow.Task{
+					Name: "Migrating backup entry",
+					Fn:   botanist.Shoot.Components.BackupEntry.Migrate,
+				},
+				flow.Task{
+					Name: "Waiting until backup entry has been migrated",
+					Fn:   botanist.Shoot.Components.BackupEntry.WaitMigrate,
+				},
+			),
 		})
 
 		destinationEtcdJoined = g.Add(flow.Task{
 			Name: "Joining destination etcd to the source cluster",
-			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined, flow.Sequential(
-				botanist.DeployControlPlaneNamespace,
-				botanist.InitializeSecretsManagement,
-				botanist.DeployEtcdPeerExposure,
+			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined,
+				flow.Task{
+					Name: "Deploying control plane namespace",
+					Fn:   botanist.DeployControlPlaneNamespace,
+				},
+				flow.Task{
+					Name: "Initializing secrets management",
+					Fn:   botanist.InitializeSecretsManagement,
+				},
+				flow.Task{
+					Name: "Deploying etcd peer exposure",
+					Fn:   botanist.DeployEtcdPeerExposure,
+				},
 				// The source backup entry is deployed to ensure that the data in the source seed's backup bucket
 				// is properly cleaned up at a later stage of the flow.
-				botanist.DeploySourceBackupEntry,
-				botanist.Shoot.Components.SourceBackupEntry.Wait,
-				func(ctx context.Context) error {
-					return botanist.Shoot.Components.BackupEntry.Restore(ctx, nil)
+				flow.Task{
+					Name: "Deploying source backup entry",
+					Fn:   botanist.DeploySourceBackupEntry,
 				},
-				botanist.Shoot.Components.BackupEntry.Wait,
-				botanist.DeployEtcd,
-				botanist.WaitUntilEtcdsReady,
-			)),
+				flow.Task{
+					Name: "Waiting until source backup entry is ready",
+					Fn:   botanist.Shoot.Components.SourceBackupEntry.Wait,
+				},
+				flow.Task{
+					Name: "Restoring backup entry",
+					Fn: func(ctx context.Context) error {
+						return botanist.Shoot.Components.BackupEntry.Restore(ctx, nil)
+					},
+				},
+				flow.Task{
+					Name: "Waiting until backup entry is ready",
+					Fn:   botanist.Shoot.Components.BackupEntry.Wait,
+				},
+				flow.Task{
+					Name: "Deploying etcd",
+					Fn:   botanist.DeployEtcd,
+				},
+				flow.Task{
+					Name: "Waiting until etcds are ready",
+					Fn:   botanist.WaitUntilEtcdsReady,
+				},
+			),
 			Dependencies: flow.NewTaskIDs(sourceEtcdReadyForPeerJoin),
 		})
 
 		destinationKubeAPIServerReady = g.Add(flow.Task{
 			Name: "Deploying destination control plane and temporary VPN",
-			Fn: r.exectuteStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, func(ctx context.Context, b *botanistpkg.Botanist) error {
+			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady,
 				// The destination deploys its control plane against the (already replicated) etcd and waits for the
 				// kube-apiserver to become ready. The etcd data is already present via the joint cluster, so no data
 				// copy is required.
-				if err := b.DeployControlPlaneNamespace(ctx); err != nil {
-					return fmt.Errorf("failed to deploy control plane namespace: %w", err)
-				}
-				if err := b.DeployGardenerResourceManager(ctx); err != nil {
-					return fmt.Errorf("failed to deploy gardener-resource-manager: %w", err)
-				}
-				if err := b.DeployExtensionsBeforeKubeAPIServer(ctx); err != nil {
-					return fmt.Errorf("failed to deploy extensions before kube-apiserver: %w", err)
-				}
-				if err := b.DeployKubeAPIServer(ctx); err != nil {
-					return fmt.Errorf("failed to deploy kube-apiserver: %w", err)
-				}
-				if err := b.Shoot.Components.ControlPlane.KubeAPIServer.Wait(ctx); err != nil {
-					return fmt.Errorf("failed to wait until kube-apiserver is ready: %w", err)
-				}
-				if err := b.DeployKubeControllerManager(ctx); err != nil {
-					return fmt.Errorf("failed to deploy kube-controller-manager: %w", err)
-				}
+				flow.Task{
+					Name: "Deploying control plane namespace",
+					Fn:   botanist.DeployControlPlaneNamespace,
+				},
+				flow.Task{
+					Name: "Deploying gardener-resource-manager",
+					Fn:   botanist.DeployGardenerResourceManager,
+				},
+				flow.Task{
+					Name: "Deploying extensions before kube-apiserver",
+					Fn:   botanist.DeployExtensionsBeforeKubeAPIServer,
+				},
+				flow.Task{
+					Name: "Deploying kube-apiserver",
+					Fn:   botanist.DeployKubeAPIServer,
+				},
+				flow.Task{
+					Name: "Waiting until kube-apiserver is ready",
+					Fn:   botanist.Shoot.Components.ControlPlane.KubeAPIServer.Wait,
+				},
+				flow.Task{
+					Name: "Deploying kube-controller-manager",
+					Fn:   botanist.DeployKubeControllerManager,
+				},
 				// Deploy the temporary VPN so admission webhooks can reach the destination from the shoot cluster
 				// before the DNS cutover.
-				if err := b.DeployVPNServer(ctx); err != nil {
-					return fmt.Errorf("failed to deploy destination VPN server: %w", err)
-				}
-				if err := b.DeployTemporaryVPNExposure(ctx); err != nil {
-					return fmt.Errorf("failed to deploy temporary VPN exposure: %w", err)
-				}
-				if err := b.DeployLiveMigrationVPNDNSRecord(ctx); err != nil {
-					return fmt.Errorf("failed to deploy live migration VPN DNS record: %w", err)
-				}
-				return b.DeployTemporaryVPNShoot(ctx)
-			}),
+				flow.Task{
+					Name: "Deploying destination VPN server",
+					Fn:   botanist.DeployVPNServer,
+				},
+				flow.Task{
+					Name: "Deploying temporary VPN exposure",
+					Fn:   botanist.DeployTemporaryVPNExposure,
+				},
+				flow.Task{
+					Name: "Deploying live migration VPN DNS record",
+					Fn:   botanist.DeployLiveMigrationVPNDNSRecord,
+				},
+				flow.Task{
+					Name: "Deploying temporary VPN shoot client",
+					Fn:   botanist.DeployTemporaryVPNShoot,
+				},
+			),
 			Dependencies: flow.NewTaskIDs(destinationEtcdJoined),
 		})
 
 		_ = g.Add(flow.Task{
 			Name: "Completing live migration",
-			Fn: r.exectuteStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted, func(ctx context.Context, b *botanistpkg.Botanist) error {
+			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted,
 				// Deploy the regular vpn-shoot first so the permanent tunnel to the destination is established before
 				// the temporary one is torn down, ensuring uninterrupted connectivity.
-				if err := b.DeployVPNShoot(ctx); err != nil {
-					return fmt.Errorf("failed to redeploy VPN shoot to destination: %w", err)
-				}
-				if err := b.DestroyTemporaryVPNShoot(ctx); err != nil {
-					return fmt.Errorf("failed to destroy temporary VPN shoot client: %w", err)
-				}
-				if err := b.DestroyLiveMigrationVPNDNSRecord(ctx); err != nil {
-					return fmt.Errorf("failed to destroy live migration VPN DNS record: %w", err)
-				}
-				if err := b.DestroyTemporaryVPNExposure(ctx); err != nil {
-					return fmt.Errorf("failed to destroy temporary VPN Istio exposure: %w", err)
-				}
+				flow.Task{
+					Name: "Deploying VPN shoot client to destination",
+					Fn:   botanist.DeployVPNShoot,
+				},
+				flow.Task{
+					Name: "Destroying temporary VPN shoot client",
+					Fn:   botanist.DestroyTemporaryVPNShoot,
+				},
+				flow.Task{
+					Name: "Destroying live migration VPN DNS record",
+					Fn:   botanist.DestroyLiveMigrationVPNDNSRecord,
+				},
+				flow.Task{
+					Name: "Destroying temporary VPN Istio exposure",
+					Fn:   botanist.DestroyTemporaryVPNExposure,
+				},
 				// Finalize the migration: set status.seedName to the destination and clear the live-migration state
 				// and the intent annotation so the shoot returns to normal reconciliation on the destination seed.
-				return r.finalizeLiveMigration(ctx, b.Shoot.GetInfo())
-			}),
+				flow.Task{
+					Name: "Finalizing live migration",
+					Fn: func(ctx context.Context) error {
+						return r.finalizeLiveMigration(ctx, botanist.Shoot.GetInfo())
+					},
+				},
+			),
 			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
 		})
 
@@ -193,8 +261,17 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 	return nil
 }
 
-func (r *Reconciler) executeStepOrWait(botanist *botanistpkg.Botanist, role v1beta1helper.LiveMigrationRole, conditionType gardencorev1beta1.ConditionType, fn flow.TaskFn) flow.TaskFn {
+// executeStepOrWait returns a TaskFn that either executes the given steps sequentially (if this gardenlet owns the
+// step) or waits for the peer gardenlet to complete it. The task names serve as documentation of the individual steps.
+func (r *Reconciler) executeStepOrWait(botanist *botanistpkg.Botanist, role v1beta1helper.LiveMigrationRole, conditionType gardencorev1beta1.ConditionType, steps ...flow.Task) flow.TaskFn {
 	owner := liveMigrationStepOwners[conditionType]
+
+	fns := make([]flow.TaskFn, 0, len(steps))
+	for _, step := range steps {
+		fns = append(fns, step.Fn)
+	}
+	fn := flow.Sequential(fns...)
+
 	return flow.TaskFn(func(ctx context.Context) error {
 		if role != owner {
 			return r.waitForLiveMigrationPeerStep(ctx, botanist, conditionType)
@@ -202,13 +279,11 @@ func (r *Reconciler) executeStepOrWait(botanist *botanistpkg.Botanist, role v1be
 		if err := r.setLiveMigrationStepCondition(ctx, botanist.Shoot.GetInfo(), conditionType, false); err != nil {
 			return err
 		}
-		if fn != nil {
-			if err := fn(ctx); err != nil {
-				if conditionErr := r.setLiveMigrationStepConditionError(ctx, botanist.Shoot.GetInfo(), conditionType, err); conditionErr != nil {
-					botanist.Logger.Error(conditionErr, "Failed to set error condition for live migration step", "step", conditionType)
-				}
-				return err
+		if err := fn(ctx); err != nil {
+			if conditionErr := r.setLiveMigrationStepConditionError(ctx, botanist.Shoot.GetInfo(), conditionType, err); conditionErr != nil {
+				botanist.Logger.Error(conditionErr, "Failed to set error condition for live migration step", "step", conditionType)
 			}
+			return err
 		}
 		return r.setLiveMigrationStepCondition(ctx, botanist.Shoot.GetInfo(), conditionType, true)
 	}).RetryUntilTimeout(liveMigrationStepInterval, liveMigrationStepTimeout)
