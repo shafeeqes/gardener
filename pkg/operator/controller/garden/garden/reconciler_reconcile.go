@@ -124,8 +124,7 @@ func (r *Reconciler) reconcile(
 
 	log.Info("Instantiating component deployers")
 
-	enableVali, err := valiEnabled(garden.Spec.RuntimeCluster.Networking)
-	if err != nil {
+	if _, err := valiEnabled(garden.Spec.RuntimeCluster.Networking); err != nil {
 		return err
 	}
 
@@ -386,6 +385,7 @@ func (r *Reconciler) reconcile(
 			Name:         "Deploying Gardener Scheduler",
 			Fn:           component.OpWait(c.gardenerScheduler).Deploy,
 			Dependencies: flow.NewTaskIDs(waitUntilGardenerAPIServerReady),
+			SkipIf:       true,
 		})
 		_ = g.Add(flow.Task{
 			Name: "Deploying Gardener Discovery Server",
@@ -396,6 +396,7 @@ func (r *Reconciler) reconcile(
 				return component.OpWait(c.gardenerDiscoveryServer).Deploy(ctx)
 			},
 			Dependencies: flow.NewTaskIDs(waitUntilGardenerAPIServerReady),
+			SkipIf:       true,
 		})
 
 		_ = g.Add(flow.Task{
@@ -464,11 +465,13 @@ func (r *Reconciler) reconcile(
 				return r.deployGardenerDashboard(ctx, c.gardenerDashboard, garden, secretsManager, virtualClusterClient)
 			},
 			Dependencies: flow.NewTaskIDs(waitUntilGardenerAPIServerReady, initializeVirtualClusterClient),
+			SkipIf:       true,
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Reconciling Gardener Dashboard web terminal controller manager",
 			Fn:           c.terminalControllerManager.Deploy,
 			Dependencies: flow.NewTaskIDs(waitUntilGardenerAPIServerReady),
+			SkipIf:       true,
 		})
 
 		generateAndReplicateGlobalObservabilityIngressPassword = g.Add(flow.Task{
@@ -684,40 +687,39 @@ func (r *Reconciler) reconcile(
 		})
 
 		_ = g.Add(flow.Task{
-			Name: "Deploying fluent-operator",
-			Fn:   c.fluentOperator.Deploy,
+			Name:   "Deploying fluent-operator",
+			Fn:     c.fluentOperator.Deploy,
+			SkipIf: true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying fluent-operator CustomResources",
-			Fn:   c.fluentOperatorCustomResources.Deploy,
+			Name:   "Deploying fluent-operator CustomResources",
+			Fn:     c.fluentOperatorCustomResources.Deploy,
+			SkipIf: true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying fluent-bit",
-			Fn:   c.fluentBit.Deploy,
+			Name:   "Deploying fluent-bit",
+			Fn:     c.fluentBit.Deploy,
+			SkipIf: true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying VictoriaLogs",
-			Fn:   c.victoriaLogs.Deploy,
-			// TODO(rrhubenov): the `enableVali` flag is false only if the runtime cluster is running in an IPv6 environment.
-			// When we completely remove `Vali`, this needs to be reviewed and VictoriaLogs introduced to IPv6 environments as well.
-			// For now, IPv6 clusters remain without a logging backend.
-			SkipIf: !enableVali,
+			Name:   "Deploying VictoriaLogs",
+			Fn:     c.victoriaLogs.Deploy,
+			SkipIf: true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying Vali",
-			Fn:   c.vali.Deploy,
-			// TODO(rrhubenov): the `enableVali` flag is false only if the runtime cluster is running in an IPv6 environment.
-			// When we completely remove `Vali`, this needs to be reviewed and VictoriaLogs introduced to IPv6 environments as well.
-			// For now, IPv6 clusters remain without a logging backend.
-			SkipIf: !enableVali,
+			Name:   "Deploying Vali",
+			Fn:     c.vali.Deploy,
+			SkipIf: true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying prometheus-operator",
-			Fn:   c.prometheusOperator.Deploy,
+			Name:   "Deploying prometheus-operator",
+			Fn:     c.prometheusOperator.Deploy,
+			SkipIf: true,
 		})
 		deployOpenTelemetryOperator = g.Add(flow.Task{
-			Name: "Deploying OpenTelemetry Operator",
-			Fn:   c.openTelemetryOperator.Deploy,
+			Name:   "Deploying OpenTelemetry Operator",
+			Fn:     c.openTelemetryOperator.Deploy,
+			SkipIf: true,
 		})
 		deployAlertmanager = g.Add(flow.Task{
 			Name: "Deploying Alertmanager",
@@ -726,11 +728,13 @@ func (r *Reconciler) reconcile(
 				return c.alertManager.Deploy(ctx)
 			},
 			Dependencies: flow.NewTaskIDs(generateObservabilityIngressPassword),
+			SkipIf:       true,
 		})
 		waitUntilAlertmanagerReady = g.Add(flow.Task{
 			Name:         "Waiting until Alertmanager is ready",
 			Fn:           c.alertManager.Wait,
 			Dependencies: flow.NewTaskIDs(deployAlertmanager),
+			SkipIf:       true,
 		})
 		deployPrometheusGarden = g.Add(flow.Task{
 			Name: "Deploying Garden Prometheus",
@@ -739,16 +743,18 @@ func (r *Reconciler) reconcile(
 				if err != nil {
 					return err
 				}
-				discoveryServerEnabled := garden.Spec.VirtualCluster.Gardener.DiscoveryServer != nil
+				discoveryServerEnabled := false
 				dashboardDomain := helper.PrimaryDashboardDomain(garden)
 				return r.deployGardenPrometheus(ctx, c.prometheusGarden, virtualClusterClient, aggregatePrometheusHost, dashboardDomain, discoveryServerEnabled)
 			},
 			Dependencies: flow.NewTaskIDs(waitUntilGardenerAPIServerReady, initializeVirtualClusterClient, generateAndReplicateGlobalObservabilityIngressPassword),
+			SkipIf:       true,
 		})
 		waitUntilPrometheusGardenReady = g.Add(flow.Task{
 			Name:         "Waiting until Garden Prometheus is ready",
 			Fn:           c.prometheusGarden.Wait,
 			Dependencies: flow.NewTaskIDs(deployPrometheusGarden),
+			SkipIf:       true,
 		})
 		deployPrometheusLongTerm = g.Add(flow.Task{
 			Name: "Deploying long-term Prometheus",
@@ -756,52 +762,62 @@ func (r *Reconciler) reconcile(
 				return r.deployLongTermPrometheus(ctx, c.prometheusLongTerm)
 			},
 			Dependencies: flow.NewTaskIDs(deployPrometheusGarden),
+			SkipIf:       true,
 		})
 		waitUntilPrometheusLongTermReady = g.Add(flow.Task{
 			Name:         "Waiting until long-term Prometheus is ready",
 			Fn:           c.prometheusLongTerm.Wait,
 			Dependencies: flow.NewTaskIDs(deployPrometheusLongTerm),
+			SkipIf:       true,
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying OpenTelemetry Collector",
 			Fn:           c.openTelemetryCollector.Deploy,
 			Dependencies: flow.NewTaskIDs(deployOpenTelemetryOperator),
+			SkipIf:       true,
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying blackbox-exporter",
 			Fn:           c.blackboxExporter.Deploy,
 			Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerIsReady, deployPrometheusGarden),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Kube State Metrics",
 			Fn:           c.kubeStateMetrics.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Gardener Metrics Exporter",
 			Fn:           c.gardenerMetricsExporter.Deploy,
 			Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerIsReady, waitUntilGardenerAPIServerReady),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		deployPlutono = g.Add(flow.Task{
 			Name:         "Deploying Plutono",
 			Fn:           c.plutono.Deploy,
 			Dependencies: flow.NewTaskIDs(generateObservabilityIngressPassword),
+			SkipIf:       true,
 		})
 		waitUntilPlutonoReady = g.Add(flow.Task{
 			Name:         "Waiting until Plutono is ready",
 			Fn:           c.plutono.Wait,
 			Dependencies: flow.NewTaskIDs(deployPlutono),
+			SkipIf:       true,
 		})
 		deployPerses = g.Add(flow.Task{
 			Name:         "Deploying Perses",
 			Fn:           c.perses.Deploy,
 			Dependencies: flow.NewTaskIDs(generateObservabilityIngressPassword),
+			SkipIf:       true,
 		})
 		waitUntilPersesReady = g.Add(flow.Task{
 			Name:         "Waiting until Perses is ready",
 			Fn:           c.perses.Wait,
 			Dependencies: flow.NewTaskIDs(deployPerses),
+			SkipIf:       true,
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying istio-basic-auth-server",
@@ -809,12 +825,14 @@ func (r *Reconciler) reconcile(
 			Dependencies: flow.NewTaskIDs(waitUntilAlertmanagerReady, waitUntilPrometheusGardenReady, waitUntilPrometheusLongTermReady, waitUntilPlutonoReady, waitUntilPersesReady),
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying perses-operator",
-			Fn:   c.persesOperator.Deploy,
+			Name:   "Deploying perses-operator",
+			Fn:     c.persesOperator.Deploy,
+			SkipIf: true,
 		})
 		_ = g.Add(flow.Task{
-			Name: "Deploying victoria-operator",
-			Fn:   c.victoriaOperator.Deploy,
+			Name:   "Deploying victoria-operator",
+			Fn:     c.victoriaOperator.Deploy,
+			SkipIf: true,
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying pvc-autoscaler",

@@ -9,3 +9,6 @@ spec:
   region: local
   provider:
     type: local
+  seedName: local
+  hibernation:
+    enabled: true

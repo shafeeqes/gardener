@@ -74,12 +74,12 @@ func (b *Botanist) DefaultEtcd(ctx context.Context, role string, class etcd.Clas
 		if etcd := b.Shoot.GetInfo().Spec.Kubernetes.ETCD; etcd != nil && etcd.Main != nil && etcd.Main.Autoscaling != nil {
 			values.Autoscaling.MinAllowed = etcd.Main.Autoscaling.MinAllowed
 		}
-		values.StorageCapacity = b.GetValidVolumeSize("25Gi")
+		values.StorageCapacity = b.GetValidVolumeSize("5Gi")
 	case v1beta1constants.ETCDRoleEvents:
 		if etcd := b.Shoot.GetInfo().Spec.Kubernetes.ETCD; etcd != nil && etcd.Events != nil && etcd.Events.Autoscaling != nil {
 			values.Autoscaling.MinAllowed = etcd.Events.Autoscaling.MinAllowed
 		}
-		values.StorageCapacity = b.GetValidVolumeSize("10Gi")
+		values.StorageCapacity = b.GetValidVolumeSize("1Gi")
 	}
 
 	if b.Shoot.RunsControlPlane() {

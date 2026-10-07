@@ -34,7 +34,7 @@ spec:
       topologyAwareRouting:
         enabled: false
       persistentVolumeClaimAutoscaler:
-        enabled: true
+        enabled: false
   virtualCluster:
     dns:
       domains:

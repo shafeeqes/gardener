@@ -13,7 +13,7 @@ spec:
     featureGates:
       DefaultSeccompProfile: true
       VPNBondingModeRoundRobin: true
-      PrometheusHealthChecks: true
+      PrometheusHealthChecks: false
       VictoriaLogsBackend: true
       RemoveHTTPProxyLegacyPort: true
       LiveControlPlaneMigration: true
@@ -27,17 +27,16 @@ spec:
       featureGates:
         UpgradeEtcdVersion: true
     logging:
-      enabled: true
+      enabled: false
       vali:
-        enabled: true
+        enabled: false
       victoriaLogs:
-        enabled: true
+        enabled: false
       shootNodeLogging:
         shootPurposes:
           - infrastructure
           - production
           - development
-          - evaluation
     seedConfig:
       spec:
         backup:
@@ -99,4 +98,9 @@ spec:
           verticalPodAutoscaler:
             enabled: false
           persistentVolumeClaimAutoscaler:
-            enabled: true
+            enabled: false
+          dependencyWatchdog:
+            weeder:
+              enabled: false
+            prober:
+              enabled: false
