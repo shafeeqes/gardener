@@ -375,11 +375,13 @@ func (r *Reconciler) runReconcileSeedFlow(
 			Name:         "Deploying dependency-watchdog-weeder",
 			Fn:           c.dwdWeeder.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: dependency-watchdog disabled
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying dependency-watchdog-prober",
 			Fn:           c.dwdProber.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: dependency-watchdog disabled
 		})
 		_ = g.Add(flow.Task{
 			Name: "Renewing garden access secrets",
@@ -458,105 +460,115 @@ func (r *Reconciler) runReconcileSeedFlow(
 			Name:         "Deploying kube-state-metrics",
 			Fn:           c.kubeStateMetrics.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying OpenTelemetry Operator",
 			Fn:           c.openTelemetryOperator.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying OpenTelemetry Collector",
 			Fn:           c.openTelemetryCollector.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		deployFluentOperator = g.Add(flow.Task{
 			Name:         "Deploying Fluent Operator",
 			Fn:           c.fluentOperator.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Fluent Bit",
 			Fn:           c.fluentBit.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents, deployFluentOperator),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Fluent Operator custom resources",
 			Fn:           c.fluentOperatorCustomResources.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents, deployFluentOperator),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		deployPlutono = g.Add(flow.Task{
 			Name:         "Deploying Plutono",
 			Fn:           c.plutono.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		waitUntilPlutonoReady = g.Add(flow.Task{
 			Name:         "Waiting until Plutono is ready",
 			Fn:           c.plutono.Wait,
 			Dependencies: flow.NewTaskIDs(deployPlutono),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying VictoriaLogs",
 			Fn:           c.victoriaLogs.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Vali",
 			Fn:           c.vali.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Prometheus Operator",
 			Fn:           c.prometheusOperator.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying cache Prometheus",
 			Fn:           c.cachePrometheus.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying seed Prometheus",
 			Fn:           c.seedPrometheus.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		deployAggregatePrometheus = g.Add(flow.Task{
 			Name:         "Deploying aggregate Prometheus",
 			Fn:           c.aggregatePrometheus.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		waitUntilAggregatePrometheusReady = g.Add(flow.Task{
 			Name:         "Waiting until aggregate Prometheus is ready",
 			Fn:           c.aggregatePrometheus.Wait,
 			Dependencies: flow.NewTaskIDs(deployAggregatePrometheus),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Alertmanager",
 			Fn:           c.alertManager.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying Perses Operator",
 			Fn:           c.persesOperator.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		deployPerses = g.Add(flow.Task{
 			Name:         "Deploying Perses",
 			Fn:           c.perses.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		waitUntilPersesReady = g.Add(flow.Task{
 			Name:         "Waiting until Perses is ready",
 			Fn:           c.perses.Wait,
 			Dependencies: flow.NewTaskIDs(deployPerses),
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Deploying istio-basic-auth-server",
@@ -567,7 +579,7 @@ func (r *Reconciler) runReconcileSeedFlow(
 			Name:         "Deploying Victoria Operator",
 			Fn:           c.victoriaOperator.Deploy,
 			Dependencies: flow.NewTaskIDs(syncPointReadyForSystemComponents),
-			SkipIf:       seedIsGarden,
+			SkipIf:       true, // local testing: skip monitoring stack
 		})
 		deleteStaleExtensionResources = g.Add(flow.Task{
 			Name:         "Deleting stale extension resources",

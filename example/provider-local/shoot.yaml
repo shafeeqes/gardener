@@ -5,7 +5,6 @@ metadata:
   namespace: garden-local
   annotations:
     shoot.gardener.cloud/cloud-config-execution-max-delay-seconds: "0"
-    authentication.gardener.cloud/issuer: "managed"
 spec:
   cloudProfile:
     name: local
@@ -21,6 +20,12 @@ spec:
     providerConfig:
       typha:
         enabled: false
+  controlPlane:
+    highAvailability:
+      failureTolerance:
+        type: node
+  seedName: local
+  purpose: testing
   provider:
     type: local
     workers:
@@ -30,10 +35,12 @@ spec:
       cri:
         name: containerd
       minimum: 1
-      maximum: 2
+      maximum: 1
       maxSurge: 1
       maxUnavailable: 0
-  kubernetes:
+  kubernetes:  
+    verticalPodAutoscaler:
+      enabled: false
     kubelet:
       seccompDefault: true
       serializeImagePulls: false
