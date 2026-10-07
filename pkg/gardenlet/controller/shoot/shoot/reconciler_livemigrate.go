@@ -233,18 +233,15 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 					Name: "Destroying temporary VPN Istio exposure",
 					Fn:   botanist.DestroyTemporaryVPNExposure,
 				},
-				// Finalize the migration: set status.seedName to the destination and clear the live-migration state
-				// and the intent annotation so the shoot returns to normal reconciliation on the destination seed.
-				flow.Task{
-					Name: "Finalizing live migration",
-					Fn: func(ctx context.Context) error {
-						return r.finalizeLiveMigration(ctx, botanist.Shoot.GetInfo())
-					},
-				},
 			),
 			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
 		})
 
+		_ = g.Add(flow.Task{
+			Fn: func(ctx context.Context) error {
+				return fmt.Errorf("reached end of flow")
+			},
+		})
 		// TODO(GEP-39): Future PRs will add the remaining steps (extension migration, DNS cutover, source cleanup) as the topic progresses.
 	)
 
