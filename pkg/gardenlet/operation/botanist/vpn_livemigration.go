@@ -6,23 +6,15 @@ package botanist
 
 import (
 	"context"
-	"fmt"
 
-	"google.golang.org/protobuf/types/known/durationpb"
-	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
-	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"github.com/gardener/gardener/imagevector"
 	extensionsv1alpha1helper "github.com/gardener/gardener/pkg/api/extensions/v1alpha1/helper"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	extensionsdnsrecord "github.com/gardener/gardener/pkg/component/extensions/dnsrecord"
 	vpnseedserver "github.com/gardener/gardener/pkg/component/networking/vpn/seedserver"
 	vpnshoot "github.com/gardener/gardener/pkg/component/networking/vpn/shoot"
-	"github.com/gardener/gardener/pkg/controllerutils"
-	"github.com/gardener/gardener/imagevector"
 	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
 	imagevectorutils "github.com/gardener/gardener/pkg/utils/imagevector"
-	kubernetesutils "github.com/gardener/gardener/pkg/utils/kubernetes"
 )
 
 const dnsRecordLiveMigrationVPNName = "live-migration-vpn"
@@ -87,107 +79,14 @@ func (b *Botanist) DestroyLiveMigrationVPNDNSRecord(ctx context.Context) error {
 	return b.Shoot.Components.Extensions.LiveMigrationVPNDNSRecord.WaitCleanup(ctx)
 }
 
-const vpnTmpIstioResourceName = "vpn-seed-server-tmp"
-
-// DeployTemporaryVPNExposure creates the Istio Gateway, VirtualService and DestinationRule that expose the
-// destination vpn-seed-server at vpn-tmp.<internalDomain>:8443 during live control plane migration. The Gateway
-// uses TLS PASSTHROUGH so that OpenVPN's mTLS is preserved end-to-end.
-func (b *Botanist) DeployTemporaryVPNExposure(ctx context.Context) error {
-	host := LiveMigrationTemporaryVPNDNSName(*b.Shoot.InternalClusterDomain)
-	istioNS := b.IstioNamespace()
-	istioLabels := b.IstioLabels()
-
-	// Gateway lives in the Istio namespace so the ingress gateway controller picks it up.
-	gateway := &istionetworkingv1beta1.Gateway{
-		ObjectMeta: metav1.ObjectMeta{Name: vpnTmpIstioResourceName, Namespace: istioNS},
-	}
-	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), gateway, func() error {
-		gateway.Spec = istioapinetworkingv1beta1.Gateway{
-			Selector: istioLabels,
-			Servers: []*istioapinetworkingv1beta1.Server{{
-				Hosts: []string{host},
-				Port: &istioapinetworkingv1beta1.Port{
-					Number:   uint32(vpnseedserver.HTTPProxyGatewayPort),
-					Name:     "tls-vpn-tmp",
-					Protocol: "TLS",
-				},
-				Tls: &istioapinetworkingv1beta1.ServerTLSSettings{
-					Mode: istioapinetworkingv1beta1.ServerTLSSettings_PASSTHROUGH,
-				},
-			}},
-		}
-		return nil
-	}); err != nil {
-		return fmt.Errorf("failed to reconcile Istio gateway for temporary VPN exposure: %w", err)
-	}
-
-	// VirtualService and DestinationRule live in the control-plane namespace so they can reference the
-	// vpn-seed-server Service directly.
-	virtualService := &istionetworkingv1beta1.VirtualService{
-		ObjectMeta: metav1.ObjectMeta{Name: vpnTmpIstioResourceName, Namespace: b.Shoot.ControlPlaneNamespace},
-	}
-	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), virtualService, func() error {
-		virtualService.Spec = istioapinetworkingv1beta1.VirtualService{
-			ExportTo: []string{istioNS},
-			Hosts:    []string{host},
-			Gateways: []string{gateway.Name},
-			Tls: []*istioapinetworkingv1beta1.TLSRoute{{
-				Match: []*istioapinetworkingv1beta1.TLSMatchAttributes{{
-					Port:     uint32(vpnseedserver.HTTPProxyGatewayPort),
-					SniHosts: []string{host},
-				}},
-				Route: []*istioapinetworkingv1beta1.RouteDestination{{
-					Destination: &istioapinetworkingv1beta1.Destination{
-						Host: kubernetesutils.FQDNForService(vpnseedserver.ServiceName, b.Shoot.ControlPlaneNamespace),
-						Port: &istioapinetworkingv1beta1.PortSelector{Number: uint32(vpnseedserver.EnvoyPort)},
-					},
-				}},
-			}},
-		}
-		return nil
-	}); err != nil {
-		return fmt.Errorf("failed to reconcile Istio virtual service for temporary VPN exposure: %w", err)
-	}
-
-	destinationRule := &istionetworkingv1beta1.DestinationRule{
-		ObjectMeta: metav1.ObjectMeta{Name: vpnTmpIstioResourceName, Namespace: b.Shoot.ControlPlaneNamespace},
-	}
-	if _, err := controllerutils.GetAndCreateOrMergePatch(ctx, b.SeedClientSet.Client(), destinationRule, func() error {
-		destinationRule.Spec = istioapinetworkingv1beta1.DestinationRule{
-			ExportTo: []string{istioNS},
-			Host:     kubernetesutils.FQDNForService(vpnseedserver.ServiceName, b.Shoot.ControlPlaneNamespace),
-			TrafficPolicy: &istioapinetworkingv1beta1.TrafficPolicy{
-				ConnectionPool: &istioapinetworkingv1beta1.ConnectionPoolSettings{
-					Tcp: &istioapinetworkingv1beta1.ConnectionPoolSettings_TCPSettings{
-						MaxConnections: 5000,
-						TcpKeepalive: &istioapinetworkingv1beta1.ConnectionPoolSettings_TCPSettings_TcpKeepalive{
-							Interval: &durationpb.Duration{Seconds: 75},
-							Time:     &durationpb.Duration{Seconds: 7200},
-						},
-					},
-				},
-			},
-		}
-		return nil
-	}); err != nil {
-		return fmt.Errorf("failed to reconcile Istio destination rule for temporary VPN exposure: %w", err)
-	}
-
-	return nil
-}
-
-// DestroyTemporaryVPNExposure removes the three Istio objects created by DeployTemporaryVPNExposure.
-func (b *Botanist) DestroyTemporaryVPNExposure(ctx context.Context) error {
-	return kubernetesutils.DeleteObjects(ctx, b.SeedClientSet.Client(),
-		&istionetworkingv1beta1.Gateway{ObjectMeta: metav1.ObjectMeta{Name: vpnTmpIstioResourceName, Namespace: b.IstioNamespace()}},
-		&istionetworkingv1beta1.VirtualService{ObjectMeta: metav1.ObjectMeta{Name: vpnTmpIstioResourceName, Namespace: b.Shoot.ControlPlaneNamespace}},
-		&istionetworkingv1beta1.DestinationRule{ObjectMeta: metav1.ObjectMeta{Name: vpnTmpIstioResourceName, Namespace: b.Shoot.ControlPlaneNamespace}},
-	)
-}
-
-// DefaultTemporaryVPNShoot returns a non-HA vpn-shoot-tmp component that tunnels to the destination seed via
-// the dedicated vpn-tmp.<internalDomain> endpoint. It is deployed on the destination during live migration
-// so extension admission webhooks in the shoot cluster are reachable from the destination kube-apiserver.
+// DefaultTemporaryVPNShoot returns a vpn-shoot-tmp component that tunnels to the destination seed via the
+// dedicated vpn-tmp.<internalDomain> endpoint. It is deployed on the destination during live migration so
+// extension admission webhooks in the shoot cluster are reachable from the destination kube-apiserver. The
+// only difference from DefaultVPNShoot is the endpoint (vpn-tmp.<internalDomain> instead of
+// api.<internalDomain>) and the "tmp" name suffix; the HA settings mirror the shoot so the temporary tunnel
+// matches the destination vpn-seed-server topology. Routing to the right seed server (per-index in HA) is
+// handled by the global http-proxy EnvoyFilter on the ingress gateway via the X-Gardener-Destination header,
+// exactly as for the regular vpn-shoot, so no per-shoot Istio exposure is required.
 func (b *Botanist) DefaultTemporaryVPNShoot() (vpnshoot.Interface, error) {
 	endpoint := LiveMigrationTemporaryVPNDNSName(*b.Shoot.InternalClusterDomain)
 
@@ -207,9 +106,9 @@ func (b *Botanist) DefaultTemporaryVPNShoot() (vpnshoot.Interface, error) {
 				Endpoint:   endpoint + ".",
 				IPFamilies: b.Shoot.GetInfo().Spec.Networking.IPFamilies,
 			},
-			HighAvailabilityEnabled:              false,
-			HighAvailabilityNumberOfSeedServers:  1,
-			HighAvailabilityNumberOfShootClients: 1,
+			HighAvailabilityEnabled:              b.Shoot.VPNHighAvailabilityEnabled,
+			HighAvailabilityNumberOfSeedServers:  b.Shoot.VPNHighAvailabilityNumberOfSeedServers,
+			HighAvailabilityNumberOfShootClients: b.Shoot.VPNHighAvailabilityNumberOfShootClients,
 			SeedPodNetwork:                       b.Seed.GetInfo().Spec.Networks.Pods,
 			NameSuffix:                           "tmp",
 		},

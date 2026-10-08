@@ -505,6 +505,54 @@ func (b *Botanist) ReconcileExtensionsBeforeKubeAPIServerTaskGroup(skipReadiness
 	return g
 }
 
+// TaskGroupReconcileKubeAPIServer is a flow.TaskID for a logical flow.TaskGroup.
+const TaskGroupReconcileKubeAPIServer flow.TaskID = "TaskGroupReconcileKubeAPIServer"
+
+// ReconcileKubeAPIServerTaskGroup returns the flow.TaskGroup that deploys the kube-apiserver and waits for its
+// readiness, then deploys the SNI resources and cleans up stale load balancing services. The kube-apiserver Service
+// is intentionally not part of this group: its readiness is a dependency of other interleaved tasks (advertised
+// addresses, DNS records), so callers deploy it separately and wire it in via WithDependencies. deployTimeout is the
+// timeout for the kube-apiserver deployment (callers may raise it, e.g. kubeapiserver.TimeoutWaitForDeployment).
+//
+// The SNI resources must be deployed before any component that uses the generic token kubeconfig (e.g.
+// gardener-resource-manager, kube-controller-manager): with Istio TLS termination the generic kubeconfig targets the
+// external api.<domain> address and the pod-kube-apiserver-load-balancing webhook only injects the host alias
+// redirecting it to the local istio-ingressgateway if the SNI ConfigMap exists. Downstream groups therefore depend
+// on this whole group, not just on the kube-apiserver readiness.
+func (b *Botanist) ReconcileKubeAPIServerTaskGroup(skipReadiness bool, deployTimeout time.Duration) flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskGroupReconcileKubeAPIServer)
+
+		deployKubeAPIServer = g.Add(flow.Task{
+			Name: "Deploying Kubernetes API server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return b.DeployKubeAPIServer(ctx)
+			}).RetryUntilTimeout(defaultInterval, deployTimeout),
+			SkipIf: b.Shoot.IsSelfHosted(),
+		})
+		waitUntilKubeAPIServerIsReady = g.Add(flow.Task{
+			Name:         "Waiting until Kubernetes API server rolled out",
+			Fn:           b.Shoot.Components.ControlPlane.KubeAPIServer.Wait,
+			SkipIf:       b.Shoot.HibernationEnabled || skipReadiness || b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployKubeAPIServer),
+		})
+		deployKubeAPIServerServiceSNISettings = g.Add(flow.Task{
+			Name:         "Deploying and waiting for Kubernetes API server service SNI settings in the Seed cluster",
+			Fn:           flow.TaskFn(b.DeployKubeAPIServerSNI).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerIsReady),
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Cleaning up stale Kubernetes API server services in the Seed cluster",
+			Fn:           flow.TaskFn(b.CleanupKubeAPIServerLoadBalancingServices).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       b.ShootUsesIstioTLSTermination(),
+			Dependencies: flow.NewTaskIDs(deployKubeAPIServerServiceSNISettings),
+		})
+	)
+
+	return g
+}
+
 // TaskGroupReconcileExtensionsAfterKubeAPIServer is a flow.TaskID for a logical flow.TaskGroup.
 const TaskGroupReconcileExtensionsAfterKubeAPIServer flow.TaskID = "TaskGroupReconcileExtensionsAfterKubeAPIServer"
 

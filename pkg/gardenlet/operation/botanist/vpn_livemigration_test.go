@@ -13,11 +13,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
-	istioapinetworkingv1beta1 "istio.io/api/networking/v1beta1"
-	istionetworkingv1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -27,7 +24,6 @@ import (
 	"github.com/gardener/gardener/pkg/client/kubernetes"
 	fakekubernetes "github.com/gardener/gardener/pkg/client/kubernetes/fake"
 	mockdnsrecord "github.com/gardener/gardener/pkg/component/extensions/dnsrecord/mock"
-	vpnseedserver "github.com/gardener/gardener/pkg/component/networking/vpn/seedserver"
 	mockvpnshoot "github.com/gardener/gardener/pkg/component/networking/vpn/shoot/mock"
 	"github.com/gardener/gardener/pkg/gardenlet/operation"
 	. "github.com/gardener/gardener/pkg/gardenlet/operation/botanist"
@@ -35,8 +31,6 @@ import (
 	seedpkg "github.com/gardener/gardener/pkg/gardenlet/operation/seed"
 	shootpkg "github.com/gardener/gardener/pkg/gardenlet/operation/shoot"
 	gardenerutils "github.com/gardener/gardener/pkg/utils/gardener"
-	kubernetesutils "github.com/gardener/gardener/pkg/utils/kubernetes"
-	. "github.com/gardener/gardener/pkg/utils/test/matchers"
 )
 
 var _ = Describe("VPN LiveMigration", func() {
@@ -189,78 +183,6 @@ var _ = Describe("VPN LiveMigration", func() {
 				fakeErr := errors.New("destroy-failed")
 				mockDNS.EXPECT().Destroy(ctx).Return(fakeErr)
 				Expect(b.DestroyLiveMigrationVPNDNSRecord(ctx)).To(MatchError(fakeErr))
-			})
-		})
-
-		Describe("#DeployTemporaryVPNExposure", func() {
-			It("should create the Istio Gateway, VirtualService and DestinationRule with correct specs", func() {
-				Expect(b.DeployTemporaryVPNExposure(ctx)).To(Succeed())
-
-				host := "vpn-tmp." + internalDomainS
-				cpFQDN := kubernetesutils.FQDNForService(vpnseedserver.ServiceName, controlPlaneNS)
-
-				gw := &istionetworkingv1beta1.Gateway{}
-				Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "vpn-seed-server-tmp", Namespace: istioNS}, gw)).To(Succeed())
-				Expect(gw.Spec.Selector).To(Equal(map[string]string{
-					"app":        "istio-ingressgateway",
-					"istio":      "ingressgateway",
-					"istio-role": "seed",
-				}))
-				Expect(gw.Spec.Servers).To(HaveLen(1))
-				srv := gw.Spec.Servers[0]
-				Expect(srv.Hosts).To(ConsistOf(host))
-				Expect(srv.Port.Number).To(Equal(uint32(vpnseedserver.HTTPProxyGatewayPort)))
-				Expect(srv.Port.Protocol).To(Equal("TLS"))
-				Expect(srv.Tls.Mode).To(Equal(istioapinetworkingv1beta1.ServerTLSSettings_PASSTHROUGH))
-
-				vs := &istionetworkingv1beta1.VirtualService{}
-				Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "vpn-seed-server-tmp", Namespace: controlPlaneNS}, vs)).To(Succeed())
-				Expect(vs.Spec.Hosts).To(ConsistOf(host))
-				Expect(vs.Spec.Gateways).To(ConsistOf("vpn-seed-server-tmp"))
-				Expect(vs.Spec.Tls).To(HaveLen(1))
-				tlsRoute := vs.Spec.Tls[0]
-				Expect(tlsRoute.Match).To(HaveLen(1))
-				Expect(tlsRoute.Match[0].Port).To(Equal(uint32(vpnseedserver.HTTPProxyGatewayPort)))
-				Expect(tlsRoute.Match[0].SniHosts).To(ConsistOf(host))
-				Expect(tlsRoute.Route).To(HaveLen(1))
-				Expect(tlsRoute.Route[0].Destination.Host).To(Equal(cpFQDN))
-				Expect(tlsRoute.Route[0].Destination.Port.Number).To(Equal(uint32(vpnseedserver.EnvoyPort)))
-
-				dr := &istionetworkingv1beta1.DestinationRule{}
-				Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "vpn-seed-server-tmp", Namespace: controlPlaneNS}, dr)).To(Succeed())
-				Expect(dr.Spec.Host).To(Equal(cpFQDN))
-				Expect(dr.Spec.TrafficPolicy).NotTo(BeNil())
-				Expect(dr.Spec.TrafficPolicy.ConnectionPool).NotTo(BeNil())
-				Expect(dr.Spec.TrafficPolicy.ConnectionPool.Tcp).NotTo(BeNil())
-				Expect(dr.Spec.TrafficPolicy.ConnectionPool.Tcp.MaxConnections).To(Equal(int32(5000)))
-				Expect(dr.Spec.TrafficPolicy.ConnectionPool.Tcp.TcpKeepalive).NotTo(BeNil())
-			})
-
-			It("should be idempotent (second call updates in place)", func() {
-				Expect(b.DeployTemporaryVPNExposure(ctx)).To(Succeed())
-				Expect(b.DeployTemporaryVPNExposure(ctx)).To(Succeed())
-
-				gwList := &istionetworkingv1beta1.GatewayList{}
-				Expect(fakeClient.List(ctx, gwList)).To(Succeed())
-				Expect(gwList.Items).To(HaveLen(1))
-			})
-		})
-
-		Describe("#DestroyTemporaryVPNExposure", func() {
-			It("should delete the Gateway, VirtualService and DestinationRule", func() {
-				Expect(b.DeployTemporaryVPNExposure(ctx)).To(Succeed())
-				Expect(b.DestroyTemporaryVPNExposure(ctx)).To(Succeed())
-
-				Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "vpn-seed-server-tmp", Namespace: istioNS},
-					&istionetworkingv1beta1.Gateway{})).To(BeNotFoundError())
-				Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "vpn-seed-server-tmp", Namespace: controlPlaneNS},
-					&istionetworkingv1beta1.VirtualService{})).To(BeNotFoundError())
-				Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "vpn-seed-server-tmp", Namespace: controlPlaneNS},
-					&istionetworkingv1beta1.DestinationRule{})).To(BeNotFoundError())
-			})
-
-			It("should succeed even when objects do not exist", func() {
-				Expect(b.DestroyTemporaryVPNExposure(ctx)).To(Succeed())
 			})
 		})
 

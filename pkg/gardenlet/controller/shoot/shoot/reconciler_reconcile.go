@@ -284,42 +284,19 @@ func (r *Reconciler) setupShootReconciliationFlow(ctx context.Context, b *botani
 			Dependencies: flow.NewTaskIDs(destroySourceBackupEntry),
 		})
 		waitUntilExtensionResourcesBeforeKAPIReady = g.AddGroup(b.ReconcileExtensionsBeforeKubeAPIServerTaskGroup(flowCtx.skipReadiness))
-		deployKubeAPIServer                        = g.Add(flow.Task{
-			Name: "Deploying Kubernetes API server",
-			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return b.DeployKubeAPIServer(ctx)
-			}).RetryUntilTimeout(defaultInterval, flowCtx.deployKubeAPIServerTaskTimeout),
-			SkipIf: b.Shoot.IsSelfHosted(),
-			Dependencies: flow.NewTaskIDs(
+		reconcileKubeAPIServer                     = g.AddGroup(b.ReconcileKubeAPIServerTaskGroup(flowCtx.skipReadiness, flowCtx.deployKubeAPIServerTaskTimeout).
+								WithDependencies(
 				initializeSecretsManagement,
 				waitUntilEtcdReady,
 				waitUntilKubeAPIServerServiceIsReady,
 				waitUntilExtensionResourcesBeforeKAPIReady,
-			).InsertIf(!flowCtx.hasNodesCIDR, waitUntilInfrastructureReady),
-		})
-		waitUntilKubeAPIServerIsReady = g.Add(flow.Task{
-			Name:         "Waiting until Kubernetes API server rolled out",
-			Fn:           b.Shoot.Components.ControlPlane.KubeAPIServer.Wait,
-			SkipIf:       b.Shoot.HibernationEnabled || flowCtx.skipReadiness || b.Shoot.IsSelfHosted(),
-			Dependencies: flow.NewTaskIDs(deployKubeAPIServer),
-		})
-		deployKubeAPIServerServiceSNISettings = g.Add(flow.Task{
-			Name:         "Deploying and waiting for Kubernetes API server service SNI settings in the Seed cluster",
-			Fn:           flow.TaskFn(b.DeployKubeAPIServerSNI).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       b.Shoot.IsSelfHosted(),
-			Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerIsReady),
-		})
-		_ = g.Add(flow.Task{
-			Name:         "Cleaning up stale Kubernetes API server services in the Seed cluster",
-			Fn:           flow.TaskFn(b.CleanupKubeAPIServerLoadBalancingServices).RetryUntilTimeout(defaultInterval, defaultTimeout),
-			SkipIf:       b.ShootUsesIstioTLSTermination(),
-			Dependencies: flow.NewTaskIDs(deployKubeAPIServerServiceSNISettings),
-		})
+			).
+			WithDependenciesIf(!flowCtx.hasNodesCIDR, waitUntilInfrastructureReady))
 		scaleEtcdAfterRestore = g.Add(flow.Task{
 			Name:         "Scaling main and events etcd after kube-apiserver is ready",
 			Fn:           flow.TaskFn(b.ScaleUpETCD).RetryUntilTimeout(defaultInterval, helper.GetEtcdDeployTimeout(b.Shoot, defaultTimeout)),
 			SkipIf:       !flowCtx.isRestoringHAControlPlane || b.Shoot.IsSelfHosted(),
-			Dependencies: flow.NewTaskIDs(waitUntilEtcdReady, waitUntilKubeAPIServerIsReady),
+			Dependencies: flow.NewTaskIDs(waitUntilEtcdReady, reconcileKubeAPIServer),
 		})
 		waitUntilEtcdScaledAfterRestore = g.Add(flow.Task{
 			Name:         "Waiting until main and events etcd scaled up after kube-apiserver is ready",
@@ -327,7 +304,7 @@ func (r *Reconciler) setupShootReconciliationFlow(ctx context.Context, b *botani
 			SkipIf:       !flowCtx.isRestoringHAControlPlane || flowCtx.skipReadiness || b.Shoot.IsSelfHosted(),
 			Dependencies: flow.NewTaskIDs(scaleEtcdAfterRestore),
 		})
-		waitUntilGardenerResourceManagerReady = g.AddGroup(b.ReconcileGardenerResourceManagerTaskGroup(true, flowCtx.skipReadiness).WithDependencies(waitUntilKubeAPIServerIsReady))
+		waitUntilGardenerResourceManagerReady = g.AddGroup(b.ReconcileGardenerResourceManagerTaskGroup(true, flowCtx.skipReadiness).WithDependencies(reconcileKubeAPIServer))
 		reconcileStaticControlPlanePods       = g.AddGroup(b.ReconcileStaticControlPlanePodsTaskGroup(false))
 		waitUntilControlPlaneReady            = g.AddGroup(b.ReconcileControlPlaneTaskGroup(flowCtx.skipReadiness))
 		_                                     = g.Add(flow.Task{

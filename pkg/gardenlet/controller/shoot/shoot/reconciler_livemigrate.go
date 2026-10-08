@@ -16,6 +16,7 @@ import (
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/gardenlet/operation"
 	botanistpkg "github.com/gardener/gardener/pkg/gardenlet/operation/botanist"
+	"github.com/gardener/gardener/pkg/gardenlet/operation/shoot"
 	errorsutils "github.com/gardener/gardener/pkg/utils/errors"
 	"github.com/gardener/gardener/pkg/utils/flow"
 	shootstate "github.com/gardener/gardener/pkg/utils/gardener/shootstate"
@@ -72,6 +73,18 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		}),
 	); err != nil {
 		return v1beta1helper.NewWrappedLastErrors(v1beta1helper.FormatLastErrDescription(err), err)
+	}
+
+	// The live migration flow deploys the shoot control plane on the destination seed without running the
+	// infrastructure reconciliation that normally populates o.Shoot.Networks (see WaitForInfrastructure). Compute
+	// the networks here from the shoot's spec and status so control plane components (e.g. kube-apiserver, VPN) can
+	// read the CIDRs. This mirrors the regular reconcile and migrate flows.
+	if o.Shoot.GetInfo().Spec.Networking != nil && o.Shoot.GetInfo().Spec.Networking.Nodes != nil {
+		networks, err := shoot.ToNetworks(o.Shoot.GetInfo(), o.Shoot.IsWorkerless)
+		if err != nil {
+			return v1beta1helper.NewWrappedLastErrors(v1beta1helper.FormatLastErrDescription(err), err)
+		}
+		o.Shoot.Networks = networks
 	}
 
 	var (
@@ -163,58 +176,44 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		destinationKubeAPIServerReady = g.Add(flow.Task{
 			Name: "Deploying destination control plane and temporary VPN",
 			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady,
-				// The destination deploys its control plane against the (already replicated) etcd and waits for the
-				// kube-apiserver to become ready. The etcd data is already present via the joint cluster, so no data
-				// copy is required.
-				flow.Task{
-					Name: "Deploying control plane namespace",
-					Fn:   botanist.DeployControlPlaneNamespace,
-				},
-				flow.Task{
-					Name: "Deploying gardener-resource-manager",
-					Fn:   botanist.DeployGardenerResourceManager,
-				},
-				flow.Task{
-					Name: "Deploying extensions before kube-apiserver",
-					Fn:   botanist.DeployExtensionsBeforeKubeAPIServer,
-				},
-				flow.Task{
-					Name: "Deploying kube-apiserver",
-					Fn:   botanist.DeployKubeAPIServer,
-				},
-				flow.Task{
-					Name: "Waiting until kube-apiserver is ready",
-					Fn:   botanist.Shoot.Components.ControlPlane.KubeAPIServer.Wait,
-				},
-				flow.Task{
-					Name: "Deploying kube-controller-manager",
-					Fn:   botanist.DeployKubeControllerManager,
-				},
-				// Deploy the temporary VPN so admission webhooks can reach the destination from the shoot cluster
-				// before the DNS cutover.
-				flow.Task{
-					Name: "Deploying destination VPN server",
-					Fn:   botanist.DeployVPNServer,
-				},
-				flow.Task{
-					Name: "Deploying temporary VPN exposure",
-					Fn:   botanist.DeployTemporaryVPNExposure,
-				},
-				flow.Task{
-					Name: "Deploying live migration VPN DNS record",
-					Fn:   botanist.DeployLiveMigrationVPNDNSRecord,
-				},
-				flow.Task{
-					Name: "Deploying temporary VPN shoot client",
-					Fn:   botanist.DeployTemporaryVPNShoot,
-				},
-			),
+				destinationControlPlaneSteps(botanist)...),
 			Dependencies: flow.NewTaskIDs(destinationEtcdJoined),
 		})
 
-		_ = g.Add(flow.Task{
+		dnsRecordsMigrated = g.Add(flow.Task{
+			Name: "Migrating DNS records to the destination seed",
+			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrateDNSRecords,
+				// The source seed releases its internal and external DNSRecords (the cloud entries are kept in place)
+				// so the destination can take them over in the next step and re-point api.<domain> to its own Istio
+				// load balancer.
+				flow.Task{
+					Name: "Migrating internal DNS record",
+					Fn:   botanist.MigrateInternalDNSRecord,
+				},
+				flow.Task{
+					Name: "Migrating external DNS record",
+					Fn:   botanist.MigrateExternalDNSRecord,
+				},
+			),
+			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
+		})
+
+		liveMigrationCompletion = g.Add(flow.Task{
 			Name: "Completing live migration",
 			Fn: r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted,
+				// The kube-apiserver Service's Wait (in destinationControlPlaneSteps) already pointed the internal and
+				// external DNSRecord components at the destination's Istio load balancer (b.APIServerAddress) via its
+				// ingress callback. Deploy them now - after the source released them in the preceding
+				// dnsRecordsMigrated step - so api.<domain> resolves to the destination before the regular vpn-shoot
+				// (whose endpoint is api.<internalDomain>) is brought up.
+				flow.Task{
+					Name: "Deploying internal DNS record targeting the destination",
+					Fn:   botanist.DeployOrDestroyInternalDNSRecord,
+				},
+				flow.Task{
+					Name: "Deploying external DNS record targeting the destination",
+					Fn:   botanist.DeployOrDestroyExternalDNSRecord,
+				},
 				// Deploy the regular vpn-shoot first so the permanent tunnel to the destination is established before
 				// the temporary one is torn down, ensuring uninterrupted connectivity.
 				flow.Task{
@@ -229,20 +228,17 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 					Name: "Destroying live migration VPN DNS record",
 					Fn:   botanist.DestroyLiveMigrationVPNDNSRecord,
 				},
-				flow.Task{
-					Name: "Destroying temporary VPN Istio exposure",
-					Fn:   botanist.DestroyTemporaryVPNExposure,
-				},
 			),
-			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
+			Dependencies: flow.NewTaskIDs(dnsRecordsMigrated),
 		})
 
 		_ = g.Add(flow.Task{
 			Fn: func(ctx context.Context) error {
 				return fmt.Errorf("reached end of flow")
 			},
+			Dependencies: flow.NewTaskIDs(liveMigrationCompletion),
 		})
-		// TODO(GEP-39): Future PRs will add the remaining steps (extension migration, DNS cutover, source cleanup) as the topic progresses.
+		// TODO(GEP-39): Future PRs will add the remaining steps (extension migration, source cleanup) as the topic progresses.
 	)
 
 	f := g.Compile()
@@ -258,6 +254,47 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 	return nil
 }
 
+// destinationControlPlaneSteps returns the ordered tasks that bring up the destination control plane and the
+// temporary VPN during live migration. It reuses the regular reconcile task groups, flattened into a sequential
+// list, so the live migration mirrors the normal control plane bring-up ordering: extensions needed before the
+// kube-apiserver, the kube-apiserver itself (service, apiserver, SNI), gardener-resource-manager, and finally
+// kube-controller-manager and the temporary VPN. skipReadiness is false here because the destination must be fully
+// ready before the DNS cutover.
+func destinationControlPlaneSteps(b *botanistpkg.Botanist) []flow.Task {
+	// The istio-internal-load-balancing ConfigMap gates the pod-kube-apiserver-load-balancing webhook, which injects
+	// the hostAlias redirecting api.<internalDomain> to the local istio-ingressgateway. Without it, control plane pods
+	// that use the generic-token-kubeconfig (e.g. gardener-resource-manager) resolve api.<internalDomain> to the
+	// source seed's apiserver and fail authentication (401). The regular reconcile/migrate/delete flows reconcile it
+	// up front; mirror that here so it exists before any such pod is created.
+	steps := []flow.Task{{
+		Name: "Reconciling istio internal load balancing configmap",
+		Fn:   b.ReconcileIstioInternalLoadBalancingConfigMap,
+	}}
+	steps = append(steps, b.ReconcileExtensionsBeforeKubeAPIServerTaskGroup(false).Tasks()...)
+	// The kube-apiserver Service is not part of ReconcileKubeAPIServerTaskGroup (in reconcile its readiness gates
+	// other interleaved tasks), so deploy it inline first. It provides the in-cluster "kube-apiserver" endpoint the
+	// control plane components connect to, and its Wait resolves the Istio load balancer address into
+	// b.APIServerAddress, which the live migration VPN DNS record relies on.
+	steps = append(steps,
+		flow.Task{Name: "Deploying kube-apiserver service", Fn: b.Shoot.Components.ControlPlane.KubeAPIServerService.Deploy},
+		flow.Task{Name: "Waiting until kube-apiserver service is ready", Fn: b.Shoot.Components.ControlPlane.KubeAPIServerService.Wait},
+	)
+	steps = append(steps, b.ReconcileKubeAPIServerTaskGroup(false, defaultTimeout).Tasks()...)
+	steps = append(steps, b.ReconcileGardenerResourceManagerTaskGroup(true, false).Tasks()...)
+	steps = append(steps,
+		flow.Task{Name: "Deploying kube-controller-manager", Fn: b.DeployKubeControllerManager},
+		// Deploy the temporary VPN so admission webhooks can reach the destination from the shoot cluster
+		// before the DNS cutover. Routing to the (per-index, in HA) vpn-seed-server is handled by the global
+		// http-proxy EnvoyFilter on the ingress gateway via the X-Gardener-Destination header, so only the
+		// vpn-tmp DNS record (pointing at the destination's Istio load balancer) and the vpn-shoot client are
+		// needed - no per-shoot Istio exposure.
+		flow.Task{Name: "Deploying destination VPN server", Fn: b.DeployVPNServer},
+		flow.Task{Name: "Deploying live migration VPN DNS record", Fn: b.DeployLiveMigrationVPNDNSRecord},
+		flow.Task{Name: "Deploying temporary VPN shoot client", Fn: b.DeployTemporaryVPNShoot},
+	)
+	return steps
+}
+
 // executeStepOrWait returns a TaskFn that either executes the given steps sequentially (if this gardenlet owns the
 // step) or waits for the peer gardenlet to complete it. The task names serve as documentation of the individual steps.
 func (r *Reconciler) executeStepOrWait(botanist *botanistpkg.Botanist, role v1beta1helper.LiveMigrationRole, conditionType gardencorev1beta1.ConditionType, steps ...flow.Task) flow.TaskFn {
@@ -265,6 +302,11 @@ func (r *Reconciler) executeStepOrWait(botanist *botanistpkg.Botanist, role v1be
 
 	fns := make([]flow.TaskFn, 0, len(steps))
 	for _, step := range steps {
+		// SkipIf is honored here because the flattened reconcile task groups carry per-task SkipIf conditions
+		// (e.g. readiness waits). flow.Sequential has no notion of SkipIf, so drop skipped tasks up front.
+		if step.SkipIf {
+			continue
+		}
 		fns = append(fns, step.Fn)
 	}
 	fn := flow.Sequential(fns...)

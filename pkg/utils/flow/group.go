@@ -62,6 +62,18 @@ func (g TaskGroup) TaskIDs() []TaskID {
 	return taskIDs.TaskIDs()
 }
 
+// Tasks returns the group's tasks in the order they were added. It is useful for flattening a group into an
+// already-ordered sequential list of tasks (e.g. inside a single flow step), where the group-level dependency
+// wiring and alias namespacing performed by `Graph.AddGroup` are not needed because ordering already guarantees
+// that intra-group dependencies run before their dependents.
+func (g TaskGroup) Tasks() []Task {
+	tasks := make([]Task, 0, len(g.taskOrder))
+	for _, id := range g.taskOrder {
+		tasks = append(tasks, g.tasks[id])
+	}
+	return tasks
+}
+
 // AddAll adds all given tasks to the group and returns the group for chaining.
 // It panics if any of the tasks has an id that is already present in the group.
 func (g TaskGroup) AddAll(tasks ...Task) TaskGroup {
