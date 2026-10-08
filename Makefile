@@ -359,7 +359,7 @@ seed-% seed2-%: export SKAFFOLD_FILENAME = $(DEV_SETUP)/skaffold-seed.yaml
 seed-up seed-dev seed-debug seed-down: $(SKAFFOLD) $(HELM) $(KUBECTL)
 	$(DEV_SETUP)/seed.sh $(subst seed-,,$@)
 seed2-%: export KUBECONFIG = $(KUBECONFIG_SEED2_CLUSTER)
-seed2-up seed2-down: $(SKAFFOLD) $(HELM) $(KUBECTL)
+seed2-up seed2-dev seed2-debug seed2-down: $(SKAFFOLD) $(HELM) $(KUBECTL)
 	$(DEV_SETUP)/seed.sh $(subst seed2-,,$@)
 
 # gardener-{up,dev,down}
