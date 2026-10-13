@@ -515,6 +515,18 @@ var _ = Describe("Etcd", func() {
 
 					Expect(botanist.DeployEtcd(ctx)).To(Succeed())
 				})
+
+				It("should never take the snapshot-restore path for a live-migration destination (GEP-39)", func() {
+					// The destination joins the live source cluster via BootstrapWithExistingCluster, so even though
+					// IsRestorePhase() is true for it, isRestorationOfMultiNodeMainEtcdRequired must return false without
+					// inspecting the etcd (no Get, no replica dance) - just a plain Deploy.
+					botanist.Shoot.LiveMigrationRole = v1beta1helper.LiveMigrationRoleDestination
+
+					etcdMain.EXPECT().Deploy(ctx)
+					etcdEvents.EXPECT().Deploy(ctx)
+
+					Expect(botanist.DeployEtcd(ctx)).To(Succeed())
+				})
 			})
 		})
 
