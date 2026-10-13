@@ -481,8 +481,8 @@ images:
   # Shoot core addons
   - name: vpn-client
     sourceRepository: github.com/gardener/vpn2
-    repository: europe-docker.pkg.dev/gardener-project/releases/gardener/vpn-client
-    tag: "0.51.0"
+    repository: shafeequees758/vpn-client
+    tag: "0.53.1-dev"
   - name: coredns
     sourceRepository: github.com/coredns/coredns
     repository: registry.k8s.io/coredns/coredns
