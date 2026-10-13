@@ -14,6 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/gardener/gardener/pkg/component"
 	"github.com/gardener/gardener/pkg/component/autoscaling/clusterautoscaler"
@@ -104,6 +105,7 @@ type Shoot struct {
 	VPNHighAvailabilityEnabled              bool
 	VPNHighAvailabilityNumberOfSeedServers  int
 	VPNHighAvailabilityNumberOfShootClients int
+	VPNHighAvailabilityTotalShootClients    int
 	VPNVPAUpdateDisabled                    bool
 	VPNAutoMTU                              *bool
 	NodeLocalDNSEnabled                     bool
@@ -117,6 +119,10 @@ type Shoot struct {
 	EncryptedResources                      []string
 	ServiceAccountIssuerHostname            *string
 	StorageVersionMigratorEnabled           bool
+
+	// LiveMigrationRole is the role this gardenlet's seed plays in a live control plane migration (GEP-39), or
+	// LiveMigrationRoleNone outside of a live migration. It is set at the start of the live migration flow.
+	LiveMigrationRole v1beta1helper.LiveMigrationRole
 
 	Components *Components
 }
@@ -182,6 +188,8 @@ type Extensions struct {
 	OperatingSystemConfig   operatingsystemconfig.Interface
 	SelfHostedShootExposure *selfhostedshootexposure.SelfHostedShootExposure
 	Worker                  worker.Interface
+	// LiveMigrationVPNDNSRecord is non-nil only on the destination seed during live control plane migration (GEP-39).
+	LiveMigrationVPNDNSRecord dnsrecord.Interface
 }
 
 // SystemComponents contains references to system components.
@@ -198,6 +206,8 @@ type SystemComponents struct {
 	NodeExporter        component.DeployWaiter
 	Resources           shootsystem.Interface
 	VPNShoot            vpnshoot.Interface
+	// TemporaryVPNShoot is non-nil only on the destination seed during live control plane migration (GEP-39).
+	TemporaryVPNShoot vpnshoot.Interface
 }
 
 // Addons contains references for the addons.

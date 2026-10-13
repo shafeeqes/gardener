@@ -285,6 +285,13 @@ func (b *Builder) Build(ctx context.Context, seedClientSet kubernetes.Interface,
 	shoot.VPNHighAvailabilityEnabled = v1beta1helper.IsHAVPNEnabled(shoot.GetInfo())
 	shoot.VPNHighAvailabilityNumberOfSeedServers = vpnseedserver.HighAvailabilityReplicaCount
 	shoot.VPNHighAvailabilityNumberOfShootClients = vpnseedserver.HighAvailabilityReplicaCount
+	// The destination seed during GEP-39 live migration must size its vpn-seed-server and kube-apiserver vpn-client
+	// sidecars for both the permanent (0..N-1) and the temporary (N..2N-1) vpn-shoot clients. vpn-shoot itself stays at
+	// N on both source and destination; only the seed-side capacity doubles.
+	shoot.VPNHighAvailabilityTotalShootClients = vpnseedserver.HighAvailabilityReplicaCount
+	if b.seed != nil && v1beta1helper.GetLiveMigrationRole(shootObject, b.seed.Name) == v1beta1helper.LiveMigrationRoleDestination {
+		shoot.VPNHighAvailabilityTotalShootClients = 2 * vpnseedserver.HighAvailabilityReplicaCount
+	}
 	if vpnVPAUpdateDisabled, err := strconv.ParseBool(shoot.GetInfo().GetAnnotations()[v1beta1constants.ShootAlphaControlPlaneVPNVPAUpdateDisabled]); err == nil {
 		shoot.VPNVPAUpdateDisabled = vpnVPAUpdateDisabled
 	}
@@ -754,7 +761,16 @@ func (s *Shoot) HasExtensionExposure() bool {
 	return v1beta1helper.HasExtensionExposure(s.GetInfo())
 }
 
-// IsRestorePhase returns true when the shoot is in phase 'restore'.
+// IsRestorePhase returns true when the shoot is in phase 'restore'. During a live control plane migration (GEP-39) the
+// destination seed also restores all migrated resources from the ShootState, so it reports the restore phase as well -
+// except for the etcd join, which must not take the snapshot-restore path (see isRestorationOfMultiNodeMainEtcdRequired).
 func (s *Shoot) IsRestorePhase() bool {
-	return v1beta1helper.ShootHasOperationType(s.GetInfo().Status.LastOperation, gardencorev1beta1.LastOperationTypeRestore)
+	return v1beta1helper.ShootHasOperationType(s.GetInfo().Status.LastOperation, gardencorev1beta1.LastOperationTypeRestore) ||
+		s.IsLiveMigrationDestination()
+}
+
+// IsLiveMigrationDestination returns true when this gardenlet's seed is the destination of a live control plane
+// migration (GEP-39) of the shoot.
+func (s *Shoot) IsLiveMigrationDestination() bool {
+	return s.LiveMigrationRole == v1beta1helper.LiveMigrationRoleDestination
 }
