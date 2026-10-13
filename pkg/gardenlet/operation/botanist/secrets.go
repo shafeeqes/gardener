@@ -40,14 +40,11 @@ func (b *Botanist) InitializeSecretsManagement(ctx context.Context) error {
 	// manager. Hence, if we restore a shoot control plane then let's fetch the existing data from the ShootState and
 	// create corresponding secrets in the shoot namespace in the seed before initializing it. Note that this is
 	// explicitly only done in case of restoration to prevent split-brain situations as described in
-	// https://github.com/gardener/gardener/issues/5377.
+	// https://github.com/gardener/gardener/issues/5377. During a live control plane migration (GEP-39) IsRestorePhase()
+	// is true for the destination as well; the live migration flow refreshes the in-memory ShootState before this runs
+	// (RefreshShootStateForLiveMigration), since the source creates it only after the destination botanist is built.
 	if b.Shoot.IsRestorePhase() {
 		if err := b.restoreSecretsFromShootState(ctx); err != nil {
-			return err
-		}
-	} else if b.Seed != nil && v1beta1helper.GetLiveMigrationRole(b.Shoot.GetInfo(), b.Seed.GetInfo().Name) ==
-		v1beta1helper.LiveMigrationRoleDestination {
-		if err := b.restoreSecretsFromShootStateForLiveMigration(ctx); err != nil {
 			return err
 		}
 	}
@@ -108,18 +105,6 @@ func (b *Botanist) lastSecretRotationStartTimes() map[string]time.Time {
 
 func (b *Botanist) restoreSecretsFromShootState(ctx context.Context) error {
 	return b.restoreSecretsFromGardenerResourceData(ctx, b.Shoot.GetShootState().Spec.Gardener)
-}
-
-func (b *Botanist) restoreSecretsFromShootStateForLiveMigration(ctx context.Context) error {
-	// Fetch the ShootState fresh from the API rather than using b.Shoot.GetShootState(): the botanist is
-	// created once at the start of the live migration flow, before the source gardenlet creates the ShootState.
-	// The in-memory copy is therefore nil at this point.
-	shootState := &gardencorev1beta1.ShootState{}
-	if err := b.GardenClient.Get(ctx, client.ObjectKeyFromObject(b.Shoot.GetInfo()), shootState); err != nil {
-		return fmt.Errorf("failed to fetch ShootState for live migration secret restoration: %w", err)
-	}
-
-	return b.restoreSecretsFromGardenerResourceData(ctx, shootState.Spec.Gardener)
 }
 
 func (b *Botanist) restoreSecretsFromGardenerResourceData(ctx context.Context, gardenerResourceData []gardencorev1beta1.GardenerResourceData) error {
