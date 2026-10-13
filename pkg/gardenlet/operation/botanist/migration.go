@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/component"
 	"github.com/gardener/gardener/pkg/controllerutils"
@@ -26,6 +27,20 @@ import (
 func (b *Botanist) PersistShootState(ctx context.Context) error {
 	return shootstate.Deploy(ctx, b.Clock, b.GardenClient, b.SeedClientSet.Client(),
 		b.Shoot.GetInfo(), b.Shoot.ControlPlaneNamespace, false)
+}
+
+// RefreshShootStateForLiveMigration fetches the current ShootState from the garden cluster and stores it on the
+// in-memory Shoot so that the restore branches (gated on IsRestorePhase) can read it. During a live control plane
+// migration the source gardenlet creates and updates the ShootState while the flow runs, so the destination must
+// refresh its copy before each restore step rather than relying on the copy loaded at operation startup (which is nil,
+// since the ShootState does not exist yet when the destination botanist is created).
+func (b *Botanist) RefreshShootStateForLiveMigration(ctx context.Context) error {
+	shootState := &gardencorev1beta1.ShootState{}
+	if err := b.GardenClient.Get(ctx, client.ObjectKeyFromObject(b.Shoot.GetInfo()), shootState); err != nil {
+		return fmt.Errorf("failed to fetch ShootState for live migration: %w", err)
+	}
+	b.Shoot.SetShootState(shootState)
+	return nil
 }
 
 // MigrateExtensionResourcesInParallel migrates extension CRs.
