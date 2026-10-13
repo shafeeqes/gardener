@@ -13,8 +13,10 @@ import (
 
 	v1beta1helper "github.com/gardener/gardener/pkg/api/core/v1beta1/helper"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
+	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/gardenlet/operation"
 	botanistpkg "github.com/gardener/gardener/pkg/gardenlet/operation/botanist"
+	"github.com/gardener/gardener/pkg/gardenlet/operation/shoot"
 	errorsutils "github.com/gardener/gardener/pkg/utils/errors"
 	"github.com/gardener/gardener/pkg/utils/flow"
 	"github.com/gardener/gardener/pkg/utils/gardener/shootstate"
@@ -73,6 +75,23 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		return v1beta1helper.NewWrappedLastErrors(v1beta1helper.FormatLastErrDescription(err), err)
 	}
 
+	// IsRestorePhase() keys off this so the destination restores all migrated resources from the ShootState (the etcd
+	// join is carved out separately). Setting it here, before the graph runs, keeps the restore branches consistent
+	// across every task.
+	o.Shoot.LiveMigrationRole = role
+
+	// The live migration flow deploys the shoot control plane on the destination seed without running the
+	// infrastructure reconciliation that normally populates o.Shoot.Networks (see WaitForInfrastructure). Compute
+	// the networks here from the shoot's spec and status so control plane components (e.g. kube-apiserver, VPN) can
+	// read the CIDRs. This mirrors the regular reconcile and migrate flows.
+	if o.Shoot.GetInfo().Spec.Networking != nil && o.Shoot.GetInfo().Spec.Networking.Nodes != nil {
+		networks, err := shoot.ToNetworks(o.Shoot.GetInfo(), o.Shoot.IsWorkerless)
+		if err != nil {
+			return v1beta1helper.NewWrappedLastErrors(v1beta1helper.FormatLastErrDescription(err), err)
+		}
+		o.Shoot.Networks = networks
+	}
+
 	var (
 		g = flow.NewGraph("Shoot control plane live migration")
 
@@ -81,13 +100,53 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn:   r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceEtcdPreparedForPeerJoin, sourceEtcdPreparedForPeerJoinTaskGroup(botanist)),
 		})
 
-		_ = g.Add(flow.Task{
+		destinationEtcdJoined = g.Add(flow.Task{
 			Name:         "Joining destination etcd to the source cluster",
 			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined, destinationEtcdPeersJoinedTaskGroup(botanist)),
 			Dependencies: flow.NewTaskIDs(sourceEtcdReadyForPeerJoin),
 		})
 
-		// TODO(GEP-39): Future PRs will add other steps as the topic progresses.
+		// The source migrates its "before kube-apiserver" extensions (a graceful handoff, not a deletion) and must finish
+		// before the destination restores them in DestinationKubeAPIServerReadyTaskGroup.
+		migrateExtensionsBeforeKubeAPIServer = g.Add(flow.Task{
+			Name:         "Migrating source extensions needed before kube-apiserver",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrateExtensionsNeededBeforeKubeAPIServer, botanist.MigrateExtensionsBeforeKubeAPIServerTaskGroup()),
+			Dependencies: flow.NewTaskIDs(destinationEtcdJoined),
+		})
+
+		destinationKubeAPIServerReady = g.Add(flow.Task{
+			Name:         "Deploying destination control plane and temporary VPN",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, botanist.DestinationKubeAPIServerReadyTaskGroup()),
+			Dependencies: flow.NewTaskIDs(migrateExtensionsBeforeKubeAPIServer),
+		})
+
+		dnsRecordsMigrated = g.Add(flow.Task{
+			Name:         "Migrating DNS records to the destination seed",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrateDNSRecords, botanist.MigrateDNSRecordsTaskGroup()),
+			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
+		})
+
+		sourceSeedCleanup = g.Add(flow.Task{
+			Name:         "Cleaning up the source seed",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedCleanup, botanist.SourceSeedCleanupTaskGroup()),
+			Dependencies: flow.NewTaskIDs(dnsRecordsMigrated),
+		})
+
+		liveMigrationCompletion = g.Add(flow.Task{
+			Name:         "Completing live migration",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted, botanist.DestinationCompletionTaskGroup()),
+			Dependencies: flow.NewTaskIDs(sourceSeedCleanup),
+		})
+
+		_ = g.Add(flow.Task{
+			Fn: func(ctx context.Context) error {
+				return fmt.Errorf("reached end of flow")
+			},
+			Dependencies: flow.NewTaskIDs(liveMigrationCompletion),
+		})
+		// TODO(GEP-39): Two steps remain unimplemented: EtcdMigrationComplete (destination removes the source etcd
+		// members and scales back to the final member count - no flow task yet, member removal is pending) and the
+		// SourceSeedCleanup body (currently a no-op placeholder, see above).
 	)
 
 	f := g.Compile()
@@ -103,8 +162,11 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 	return nil
 }
 
-// executeStepOrWait returns a TaskFn that either executes the tasks in the given group sequentially (if this
-// gardenlet owns the step) or waits for the peer gardenlet to complete it.
+// executeStepOrWait returns a TaskFn that either executes the given groups (if this gardenlet owns the step) or waits
+// for the peer gardenlet to complete it. The groups run sequentially: every task of a group depends on all tasks of the
+// previous group, while each group keeps its own internal parallelism. Groups are flattened via Tasks() rather than
+// AddGroup so the reused reconcile groups' group-level dependency aliases on prerequisite groups (secrets management,
+// infrastructure, ...) - which the live migration flow does not run - are dropped.
 func (r *Reconciler) executeStepOrWait(botanist *botanistpkg.Botanist, role v1beta1helper.LiveMigrationRole, conditionType gardencorev1beta1.ConditionType, group flow.TaskGroup) flow.TaskFn {
 	owner := liveMigrationStepOwners[conditionType]
 	return flow.TaskFn(func(ctx context.Context) error {
@@ -156,6 +218,22 @@ func (r *Reconciler) setLiveMigrationStepConditionError(ctx context.Context, sho
 	condition := v1beta1helper.GetOrInitConditionWithClock(r.Clock, v1beta1helper.GetLiveMigrationConditions(shoot), conditionType)
 	condition = v1beta1helper.UpdatedConditionWithClock(r.Clock, condition, gardencorev1beta1.ConditionFalse, "StepFailed", err.Error())
 	return r.patchLiveMigrationConditions(ctx, shoot, condition)
+}
+
+// finalizeLiveMigration switches the shoot's status.seedName to the destination seed and clears the live-migration
+// state and intent annotation, returning the shoot to normal reconciliation on the destination seed.
+func (r *Reconciler) finalizeLiveMigration(ctx context.Context, shoot *gardencorev1beta1.Shoot) error {
+	patch := client.MergeFrom(shoot.DeepCopy())
+	delete(shoot.Annotations, v1beta1constants.AnnotationMigrationLiveMigrate)
+	if err := r.GardenClient.Patch(ctx, shoot, patch); err != nil {
+		return fmt.Errorf("failed to remove live migration annotation: %w", err)
+	}
+
+	statusPatch := client.StrategicMergeFrom(shoot.DeepCopy())
+	shoot.Status.SeedName = shoot.Spec.SeedName
+	shoot.Status.LiveMigration = nil
+	shoot.Status.MigrationStartTime = nil
+	return r.GardenClient.Status().Patch(ctx, shoot, statusPatch)
 }
 
 func (r *Reconciler) patchLiveMigrationConditions(ctx context.Context, shoot *gardencorev1beta1.Shoot, conditions ...gardencorev1beta1.Condition) error {
