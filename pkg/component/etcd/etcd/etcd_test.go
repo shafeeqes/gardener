@@ -2292,6 +2292,40 @@ var _ = Describe("Etcd", func() {
 		})
 	})
 
+	Describe("#RemoveSourceMembers", func() {
+		It("should return an error when the etcd resource does not exist", func() {
+			Expect(etcd.RemoveSourceMembers(ctx)).To(BeNotFoundError())
+		})
+
+		It("should be idempotent and not set the operation annotation when no bootstrap config is present", func() {
+			existingEtcd := &druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace}}
+			Expect(c.Create(ctx, existingEtcd)).To(Succeed())
+
+			Expect(etcd.RemoveSourceMembers(ctx)).To(Succeed())
+
+			updated := &druidcorev1alpha1.Etcd{}
+			Expect(c.Get(ctx, client.ObjectKeyFromObject(existingEtcd), updated)).To(Succeed())
+			Expect(updated.Spec.Etcd.BootstrapWithExistingCluster).To(BeNil())
+			Expect(updated.Annotations).NotTo(HaveKey(v1beta1constants.GardenerOperation))
+		})
+
+		It("should clear the bootstrap config and trigger a reconcile when it is present", func() {
+			existingEtcd := &druidcorev1alpha1.Etcd{ObjectMeta: metav1.ObjectMeta{Name: etcdName, Namespace: testNamespace}}
+			existingEtcd.Spec.Etcd.BootstrapWithExistingCluster = &druidcorev1alpha1.BootstrapWithExistingCluster{
+				Members:         []druidcorev1alpha1.BootstrapExistingMember{{Name: "source-etcd-main-0", PeerURLs: []string{"https://source:2380"}}},
+				ClientEndpoints: []string{"https://source:2379"},
+			}
+			Expect(c.Create(ctx, existingEtcd)).To(Succeed())
+
+			Expect(etcd.RemoveSourceMembers(ctx)).To(Succeed())
+
+			updated := &druidcorev1alpha1.Etcd{}
+			Expect(c.Get(ctx, client.ObjectKeyFromObject(existingEtcd), updated)).To(Succeed())
+			Expect(updated.Spec.Etcd.BootstrapWithExistingCluster).To(BeNil())
+			Expect(updated.Annotations).To(HaveKeyWithValue(v1beta1constants.GardenerOperation, v1beta1constants.GardenerOperationReconcile))
+		})
+	})
+
 	Describe("#Name", func() {
 		It("should return the expected name", func() {
 			Expect(Name("foo")).To(Equal("etcd-foo"))

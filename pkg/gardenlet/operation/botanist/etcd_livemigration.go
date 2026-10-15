@@ -151,6 +151,12 @@ func (b *Botanist) DestroyEtcdMemberExposure(ctx context.Context) error {
 	return b.Shoot.Components.ControlPlane.EtcdMemberExposure.Destroy(ctx)
 }
 
+// RemoveSourceEtcdMembers removes the source cluster's members from the joined etcd-main cluster, scaling it back to the
+// final member count. Only etcd-main is live migrated (see setLiveMigrationEtcdValues), so only its members are removed.
+func (b *Botanist) RemoveSourceEtcdMembers(ctx context.Context) error {
+	return b.Shoot.Components.ControlPlane.EtcdMain.RemoveSourceMembers(ctx)
+}
+
 // etcdPodFQDN returns the in-cluster DNS subdomain for an etcd StatefulSet pod through the headless peer Service.
 func etcdPodFQDN(role string, ordinal int, namespace string) string {
 	etcdName := etcd.Name(role)

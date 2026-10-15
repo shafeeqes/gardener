@@ -126,27 +126,23 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
 		})
 
-		sourceSeedCleanup = g.Add(flow.Task{
-			Name:         "Cleaning up the source seed",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedCleanup, botanist.SourceSeedCleanupTaskGroup()),
+		etcdMigrationComplete = g.Add(flow.Task{
+			Name:         "Removing source etcd members from the joined cluster",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationEtcdMigrationComplete, botanist.EtcdMigrationCompleteTaskGroup()),
 			Dependencies: flow.NewTaskIDs(dnsRecordsMigrated),
 		})
 
-		liveMigrationCompletion = g.Add(flow.Task{
+		sourceSeedCleanup = g.Add(flow.Task{
+			Name:         "Cleaning up the source seed",
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedCleanup, botanist.SourceSeedCleanupTaskGroup()),
+			Dependencies: flow.NewTaskIDs(etcdMigrationComplete),
+		})
+
+		_ = g.Add(flow.Task{
 			Name:         "Completing live migration",
 			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted, botanist.DestinationCompletionTaskGroup()),
 			Dependencies: flow.NewTaskIDs(sourceSeedCleanup),
 		})
-
-		_ = g.Add(flow.Task{
-			Fn: func(ctx context.Context) error {
-				return fmt.Errorf("reached end of flow")
-			},
-			Dependencies: flow.NewTaskIDs(liveMigrationCompletion),
-		})
-		// TODO(GEP-39): Two steps remain unimplemented: EtcdMigrationComplete (destination removes the source etcd
-		// members and scales back to the final member count - no flow task yet, member removal is pending) and the
-		// SourceSeedCleanup body (currently a no-op placeholder, see above).
 	)
 
 	f := g.Compile()

@@ -1412,10 +1412,25 @@ func (b *Botanist) DestinationKubeAPIServerReadyTaskGroup() flow.TaskGroup {
 		Fn:           b.DeployTemporaryVPNShoot,
 		Dependencies: flow.NewTaskIDs(deployVPNDNSRecord),
 	})
+	// GardenerAccess deploys the "gardener-internal" kubeconfig secret (and the ManagedResource whose token GRM injects)
+	// that InitializeDesiredShootClients reads to build the shoot client; without it the shoot client build fails with
+	// "Secret gardener-internal not found".
+	deployGardenerAccess := g.Add(flow.Task{
+		Name:         "Deploying Gardener shoot access resources",
+		Fn:           flow.TaskFn(b.Shoot.Components.GardenerAccess.Deploy).RetryUntilTimeout(defaultInterval, defaultTimeout),
+		Dependencies: flow.NewTaskIDs(reconcileGardenerResourceManager),
+	})
+	// WaitUntilTemporaryTunnelConnectionExists lists pods through b.ShootClientSet, which is nil until the shoot client
+	// is initialized against the freshly deployed destination kube-apiserver.
+	initializeShootClients := g.Add(flow.Task{
+		Name:         "Initializing connection to shoot",
+		Fn:           flow.TaskFn(b.InitializeDesiredShootClients).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+		Dependencies: flow.NewTaskIDs(deployGardenerAccess),
+	})
 	g.Add(flow.Task{
 		Name:         "Waiting until the temporary VPN tunnel connection to the destination is established",
 		Fn:           b.WaitUntilTemporaryTunnelConnectionExists,
-		Dependencies: flow.NewTaskIDs(deployTemporaryVPNShoot),
+		Dependencies: flow.NewTaskIDs(initializeShootClients, deployTemporaryVPNShoot),
 	})
 
 	return g
@@ -1436,6 +1451,29 @@ func (b *Botanist) MigrateDNSRecordsTaskGroup() flow.TaskGroup {
 		_ = g.Add(flow.Task{
 			Name: "Migrating external DNS record",
 			Fn:   b.MigrateExternalDNSRecord,
+		})
+	)
+
+	return g
+}
+
+// TaskGroupEtcdMigrationComplete is a flow.TaskID for a logical flow.TaskGroup.
+const TaskGroupEtcdMigrationComplete flow.TaskID = "TaskGroupEtcdMigrationComplete"
+
+// EtcdMigrationCompleteTaskGroup removes the source cluster's etcd members from the joined cluster, scaling etcd-main
+// back to its final member count, and waits until the destination etcd is ready again.
+func (b *Botanist) EtcdMigrationCompleteTaskGroup() flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskGroupEtcdMigrationComplete)
+
+		removeSourceMembers = g.Add(flow.Task{
+			Name: "Removing source etcd members from the joined cluster",
+			Fn:   b.RemoveSourceEtcdMembers,
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Waiting until etcds are ready",
+			Fn:           b.WaitUntilEtcdsReady,
+			Dependencies: flow.NewTaskIDs(removeSourceMembers),
 		})
 	)
 
@@ -1731,20 +1769,27 @@ func (b *Botanist) DestinationCompletionRestoreTaskGroup() flow.TaskGroup {
 			Fn:           b.InitializeDesiredShootClients,
 			Dependencies: flow.NewTaskIDs(deployGardenerAccess),
 		})
-		destroyTemporaryVPNShoot = g.Add(flow.Task{
-			Name:         "Destroying temporary VPN shoot client",
-			Fn:           b.DestroyTemporaryVPNShoot,
-			Dependencies: flow.NewTaskIDs(initializeShootClients),
-		})
+		// Confirm the permanent tunnel actually carries traffic to the shoot BEFORE tearing down the
+		// temporary VPN. Otherwise the temp path is removed while the permanent one may not yet be
+		// established end-to-end (VPNShoot.Wait only checks pod/ManagedResource health, not tunnel
+		// reachability), briefly black-holing apiserver->shoot traffic - webhooks, logs, exec.
+		// ponytail: this port-forward probe may still traverse the temp tunnel if seed-side routing
+		// prefers it, so it confirms shoot reachability rather than the permanent tunnel in isolation;
+		// a permanent-tunnel-scoped probe would be the full guarantee.
 		waitTunnelConnection = g.Add(flow.Task{
 			Name:         "Waiting until the permanent VPN tunnel connection to the destination is established",
 			Fn:           b.WaitUntilTunnelConnectionExists,
-			Dependencies: flow.NewTaskIDs(destroyTemporaryVPNShoot),
+			Dependencies: flow.NewTaskIDs(initializeShootClients),
+		})
+		destroyTemporaryVPNShoot = g.Add(flow.Task{
+			Name:         "Destroying temporary VPN shoot client",
+			Fn:           b.DestroyTemporaryVPNShoot,
+			Dependencies: flow.NewTaskIDs(waitTunnelConnection),
 		})
 		_ = g.Add(flow.Task{
 			Name:         "Destroying live migration VPN DNS record",
 			Fn:           b.DestroyLiveMigrationVPNDNSRecord,
-			Dependencies: flow.NewTaskIDs(waitTunnelConnection),
+			Dependencies: flow.NewTaskIDs(destroyTemporaryVPNShoot),
 		})
 	)
 

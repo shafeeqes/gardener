@@ -102,6 +102,9 @@ type Interface interface {
 	MarkAsPeerCARolloutCompleted(context.Context) error
 	// UnmarkAsPeerCARolloutCompleted removes the credentials.gardener.cloud/peer-ca-rolled-out annotation from the Etcd resource.
 	UnmarkAsPeerCARolloutCompleted(context.Context) error
+	// RemoveSourceMembers clears the spec.etcd.bootstrapWithExistingCluster field, which triggers etcd-druid to remove
+	// the source cluster's members from the joined cluster during a live control plane migration (GEP-39).
+	RemoveSourceMembers(context.Context) error
 	// GetValues returns the current configuration values of the deployer.
 	GetValues() Values
 	// GetReplicas gets the Replicas field in the Values.
@@ -1067,6 +1070,22 @@ func (e *etcd) UnmarkAsPeerCARolloutCompleted(ctx context.Context) error {
 
 	patch := client.MergeFrom(e.etcd.DeepCopy())
 	delete(e.etcd.Annotations, secretsrotation.AnnotationKeyPeerCARolledOut)
+	return e.client.Patch(ctx, e.etcd, patch)
+}
+
+func (e *etcd) RemoveSourceMembers(ctx context.Context) error {
+	if err := e.client.Get(ctx, client.ObjectKeyFromObject(e.etcd), e.etcd); err != nil {
+		return err
+	}
+
+	if e.etcd.Spec.Etcd.BootstrapWithExistingCluster == nil {
+		return nil
+	}
+
+	patch := client.MergeFrom(e.etcd.DeepCopy())
+	e.etcd.Spec.Etcd.BootstrapWithExistingCluster = nil
+	metav1.SetMetaDataAnnotation(&e.etcd.ObjectMeta, v1beta1constants.GardenerOperation, v1beta1constants.GardenerOperationReconcile)
+	metav1.SetMetaDataAnnotation(&e.etcd.ObjectMeta, v1beta1constants.GardenerTimestamp, TimeNow().UTC().Format(time.RFC3339Nano))
 	return e.client.Patch(ctx, e.etcd, patch)
 }
 
