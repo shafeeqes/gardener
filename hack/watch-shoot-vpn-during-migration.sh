@@ -59,14 +59,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Force a reconnect after this many seconds of unbroken silence: a stall shorter than this is just
+# reported, a longer one means the stream is wedged (half-open after a tunnel break) so we tear it
+# down and reconnect. Derived from THRESHOLD so --threshold scales it.
+RECONNECT=$(( THRESHOLD * 3 ))
+
 k() { kubectl ${KUBECONFIG_SHOOT:+--kubeconfig "$KUBECONFIG_SHOOT"} "$@"; }
 
-# stream emits the raw log lines. Overridden in --self-test.
-stream() { k -n "$NAMESPACE" logs -f --tail=1 "$POD"; }
+# stream emits the raw log lines on stdout (kubectl errors stay on the terminal, so an error line
+# never looks like a heartbeat). exec replaces the backgrounded subshell with kubectl so $! is
+# kubectl's own PID and the main loop can kill a wedged stream directly. Overridden in --self-test.
+stream() { exec kubectl ${KUBECONFIG_SHOOT:+--kubeconfig "$KUBECONFIG_SHOOT"} -n "$NAMESPACE" logs -f --tail=1 "$POD"; }
 
-# monitor reads lines from stdin and updates the global counters. It returns when the
-# stream closes (EOF) so the caller can reconnect; a long gap between lines (whether a
-# stall within one stream or across a reconnect) is counted as a single disruption.
+# monitor reads lines from stdin and updates the global counters. It returns so the caller can
+# reconnect either on stream EOF or after RECONNECT seconds of unbroken silence - the latter
+# recovers from a half-open stream (tunnel black-holed mid-stream, no EOF ever arrives). A long
+# gap between lines, within one stream or across a reconnect, is counted once because LAST is
+# global and survives the reconnect.
 monitor() {
   local line rc now gap
   while true; do
@@ -81,7 +90,9 @@ monitor() {
     else
       rc=$?
       (( rc > 128 )) || return 0   # read error that is not a timeout => EOF, reconnect
-      printf '.. stall: %ss without logs (since %s)\n' "$(( $(date +%s) - LAST ))" "$(date -u +%H:%M:%S)"
+      gap=$(( $(date +%s) - LAST ))
+      printf '.. stall: %ss without logs (since %s)\n' "$gap" "$(date -u +%H:%M:%S)"
+      (( gap >= RECONNECT )) && return 0   # half-open stream never EOFs => force a reconnect
     fi
   done
 }
@@ -98,6 +109,7 @@ summary() {
 }
 
 cleanup() {
+  [[ -n "${FIFO:-}" ]] && rm -f "$FIFO"
   if (( DEPLOY && ! KEEP )); then
     k delete namespace "$NAMESPACE" --wait=false >/dev/null 2>&1 || true
   fi
@@ -137,10 +149,15 @@ fi
 trap 'summary; cleanup; exit 0' INT TERM
 trap cleanup EXIT
 
-echo "watching $NAMESPACE/$POD (threshold ${THRESHOLD}s). Ctrl-C to stop."
+echo "watching $NAMESPACE/$POD (threshold ${THRESHOLD}s, reconnect after ${RECONNECT}s silence). Ctrl-C to stop."
+FIFO=$(mktemp -u "${TMPDIR:-/tmp}/vpn-heartbeat.XXXXXX") && mkfifo "$FIFO"
 LAST=$(date +%s)
 while true; do
-  monitor < <(stream) || true
+  stream > "$FIFO" &
+  spid=$!
+  monitor < "$FIFO"            # returns on EOF or on a RECONNECT-long stall
+  kill "$spid" 2>/dev/null     # stream is exec'd => $! is kubectl itself, so this frees a wedged stream
+  wait "$spid" 2>/dev/null
   echo "-- log stream ended, reconnecting --"
   sleep 1
 done
