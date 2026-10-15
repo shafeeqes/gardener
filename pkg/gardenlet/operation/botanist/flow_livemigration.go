@@ -433,6 +433,11 @@ func (b *Botanist) SourceSeedCleanupTaskGroup() flow.TaskGroup {
 			Fn:           b.Shoot.Components.Extensions.ControlPlane.WaitCleanup,
 			Dependencies: flow.NewTaskIDs(deleteControlPlane),
 		})
+		_ = g.Add(flow.Task{
+			Name:         "Deleting vpn-seed-server from the source namespace",
+			Fn:           b.DestroyVPNServer,
+			Dependencies: flow.NewTaskIDs(waitControlPlaneDeleted),
+		})
 		// The source kube-apiserver is deliberately left running: the DNS cutover happens later, so tearing it down now
 		// would break api.<internalDomain> until the destination record propagates. It is removed with the source namespace.
 		deleteExtensionsAfterKubeAPIServer = g.Add(flow.Task{
