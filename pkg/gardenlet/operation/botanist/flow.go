@@ -1659,12 +1659,19 @@ func (b *Botanist) DestinationCompletionRestoreTaskGroup() flow.TaskGroup {
 			Fn:           b.DeployOrDestroyExternalDNSRecord,
 			Dependencies: flow.NewTaskIDs(deployInternalDNSRecord),
 		})
+		// Give upstream DNS caches time to pick up the destination targets before bringing up the permanent vpn-shoot
+		// (whose endpoint resolves via api.<internalDomain>) and the other components that resolve these names.
+		waitDNSCacheSync = g.Add(flow.Task{
+			Name:         "Waiting for DNS caches to sync to the destination",
+			Fn:           b.WaitForLiveMigrationDNSCacheSync,
+			Dependencies: flow.NewTaskIDs(deployExternalDNSRecord),
+		})
 		// The destination never ran the regular reconcile, so deploy the cloud provider secret before the extensions
 		// that build provider clients from it.
 		deployCloudProviderSecret = g.Add(flow.Task{
 			Name:         "Deploying cloud provider secret",
 			Fn:           b.DeployCloudProviderSecret,
-			Dependencies: flow.NewTaskIDs(deployExternalDNSRecord),
+			Dependencies: flow.NewTaskIDs(waitDNSCacheSync),
 		})
 		deployReferencedResources = g.Add(flow.Task{
 			Name:         "Deploying referenced resources",
