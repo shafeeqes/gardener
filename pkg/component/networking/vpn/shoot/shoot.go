@@ -327,7 +327,7 @@ func (v *vpnShoot) Deploy(ctx context.Context) error {
 		})
 	} else {
 		for i := 0; i < v.values.HighAvailabilityNumberOfShootClients; i++ {
-			config.Name = fmt.Sprintf("vpn-shoot-client-%d", i)
+			config.Name = fmt.Sprintf("%s-%d", v.values.clientCertName(), i)
 			config.CommonName = config.Name
 			secret, err := v.secretsManager.Generate(ctx, config, secretsmanager.SignedByCA(signingCA), secretsmanager.Rotate(secretsmanager.InPlace))
 			if err != nil {
