@@ -2246,6 +2246,11 @@ const (
 	// ShootLiveMigrationMigrationCompleted indicates that the live control plane migration
 	// has completed successfully.
 	ShootLiveMigrationMigrationCompleted ConditionType = "MigrationCompleted"
+	// ShootLiveMigrationSourceVPNServerCleanup indicates that the vpn-seed-server in the source
+	// seed has been deleted. This step runs after MigrationCompleted so the permanent vpn-shoot
+	// is connected to the destination before the source server is torn down, preventing the
+	// reconnect loop that would otherwise flush shared kernel routing state and disrupt vpn-shoot-tmp.
+	ShootLiveMigrationSourceVPNServerCleanup ConditionType = "SourceVPNServerCleanup"
 )
 
 // ShootPurpose is a type alias for string.
