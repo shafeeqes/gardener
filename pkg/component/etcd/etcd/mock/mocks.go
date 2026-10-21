@@ -144,6 +144,20 @@ func (mr *MockInterfaceMockRecorder) MarkAsPeerCARolloutCompleted(arg0 any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkAsPeerCARolloutCompleted", reflect.TypeOf((*MockInterface)(nil).MarkAsPeerCARolloutCompleted), arg0)
 }
 
+// RemoveSourceMembers mocks base method.
+func (m *MockInterface) RemoveSourceMembers(arg0 context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveSourceMembers", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveSourceMembers indicates an expected call of RemoveSourceMembers.
+func (mr *MockInterfaceMockRecorder) RemoveSourceMembers(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveSourceMembers", reflect.TypeOf((*MockInterface)(nil).RemoveSourceMembers), arg0)
+}
+
 // RolloutPeerCA mocks base method.
 func (m *MockInterface) RolloutPeerCA(arg0 context.Context) error {
 	m.ctrl.T.Helper()
