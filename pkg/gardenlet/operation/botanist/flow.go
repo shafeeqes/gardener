@@ -542,6 +542,86 @@ func (b *Botanist) ReconcileExtensionsBeforeKubeAPIServerTaskGroup(skipReadiness
 	return g
 }
 
+// TaskGroupReconcileKubeAPIServer is a flow.TaskID for a logical flow.TaskGroup.
+const TaskGroupReconcileKubeAPIServer flow.TaskID = "TaskGroupReconcileKubeAPIServer"
+
+// ReconcileKubeAPIServerTaskGroup returns the flow.TaskGroup for deploying the kube-apiserver,
+// SNI resources, and cleaning up stale load-balancing services.
+func (b *Botanist) ReconcileKubeAPIServerTaskGroup(skipReadiness bool, deployTimeout time.Duration) flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskGroupReconcileKubeAPIServer)
+
+		deployKubeAPIServer = g.Add(flow.Task{
+			Name: "Deploying Kubernetes API server",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return b.DeployKubeAPIServer(ctx)
+			}).RetryUntilTimeout(defaultInterval, deployTimeout),
+			SkipIf: b.Shoot.IsSelfHosted(),
+		})
+		waitUntilKubeAPIServerIsReady = g.Add(flow.Task{
+			Name:         "Waiting until Kubernetes API server rolled out",
+			Fn:           b.Shoot.Components.ControlPlane.KubeAPIServer.Wait,
+			SkipIf:       b.Shoot.HibernationEnabled || skipReadiness || b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployKubeAPIServer),
+		})
+		deployKubeAPIServerServiceSNISettings = g.Add(flow.Task{
+			Name:         "Deploying and waiting for Kubernetes API server service SNI settings in the Seed cluster",
+			Fn:           flow.TaskFn(b.DeployKubeAPIServerSNI).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(waitUntilKubeAPIServerIsReady),
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Cleaning up stale Kubernetes API server services in the Seed cluster",
+			Fn:           flow.TaskFn(b.CleanupKubeAPIServerLoadBalancingServices).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf:       b.ShootUsesIstioTLSTermination(),
+			Dependencies: flow.NewTaskIDs(deployKubeAPIServerServiceSNISettings),
+		})
+	)
+
+	return g
+}
+
+// TaskGroupReconcileControlPlaneComponents is a flow.TaskID for a logical flow.TaskGroup.
+const TaskGroupReconcileControlPlaneComponents flow.TaskID = "TaskGroupReconcileControlPlaneComponents"
+
+// ReconcileControlPlaneComponentsTaskGroup deploys kube-controller-manager, kube-scheduler,
+// vertical-pod-autoscaler, and dependency-watchdog.
+func (b *Botanist) ReconcileControlPlaneComponentsTaskGroup(shootIsGarden bool) flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskGroupReconcileControlPlaneComponents).
+			WithDependencies(
+				TaskGroupInitializeSecretsManagement,
+				TaskGroupReconcileGardenerResourceManager,
+			)
+
+		_ = g.Add(flow.Task{
+			Name:         "Deploying Kubernetes controller manager",
+			Fn:           flow.TaskFn(b.DeployKubeControllerManager).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Dependencies: flow.NewTaskIDs(TaskGroupDeployCloudProviderSecret),
+			SkipIf:       b.Shoot.IsSelfHosted(),
+		})
+		_ = g.Add(flow.Task{
+			Name: "Deploying Kubernetes scheduler",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return b.Shoot.Components.ControlPlane.KubeScheduler.Deploy(ctx)
+			}).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf: b.Shoot.IsWorkerless || b.Shoot.IsSelfHosted(),
+		})
+		_ = g.Add(flow.Task{
+			Name:   "Reconciling Kubernetes vertical pod autoscaler",
+			Fn:     flow.TaskFn(b.DeployVerticalPodAutoscaler).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf: b.Shoot.IsWorkerless || shootIsGarden,
+		})
+		_ = g.Add(flow.Task{
+			Name:   "Deploying dependency-watchdog shoot access resources",
+			Fn:     flow.TaskFn(b.DeployDependencyWatchdogAccess).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			SkipIf: b.Shoot.IsWorkerless || b.Shoot.IsSelfHosted(),
+		})
+	)
+
+	return g
+}
+
 // TaskGroupReconcileExtensionsAfterKubeAPIServer is a flow.TaskID for a logical flow.TaskGroup.
 const TaskGroupReconcileExtensionsAfterKubeAPIServer flow.TaskID = "TaskGroupReconcileExtensionsAfterKubeAPIServer"
 
@@ -1343,6 +1423,51 @@ func (b *Botanist) MigrateAndDeleteManagedResourcesTaskGroup(cleanupShootResourc
 
 	return g
 }
+
+// TaskGroupMigrateAndDeleteInfrastructure is a flow.TaskID for a logical flow.TaskGroup.
+const TaskGroupMigrateAndDeleteInfrastructure flow.TaskID = "TaskGroupMigrateAndDeleteInfrastructure"
+
+// MigrateAndDeleteInfrastructureTaskGroup handles the migration and deletion of the shoot infrastructure.
+func (b *Botanist) MigrateAndDeleteInfrastructureTaskGroup() flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskGroupMigrateAndDeleteInfrastructure)
+
+		migrateInfrastructure = g.Add(flow.Task{
+			Name: "Migrating shoot infrastructure",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return b.Shoot.Components.Extensions.Infrastructure.Migrate(ctx)
+			}),
+			SkipIf: b.Shoot.IsWorkerless,
+		})
+		waitUntilInfrastructureMigrated = g.Add(flow.Task{
+			Name: "Waiting until shoot infrastructure has been migrated",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return b.Shoot.Components.Extensions.Infrastructure.WaitMigrate(ctx)
+			}),
+			SkipIf:       b.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(migrateInfrastructure),
+		})
+		deleteInfrastructure = g.Add(flow.Task{
+			Name: "Deleting shoot infrastructure",
+			Fn: flow.TaskFn(func(ctx context.Context) error {
+				return b.Shoot.Components.Extensions.Infrastructure.Destroy(ctx)
+			}),
+			SkipIf:       b.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(waitUntilInfrastructureMigrated),
+		})
+		_ = g.Add(flow.Task{
+			Name: "Waiting until shoot infrastructure has been deleted",
+			Fn: func(ctx context.Context) error {
+				return b.Shoot.Components.Extensions.Infrastructure.WaitCleanup(ctx)
+			},
+			SkipIf:       b.Shoot.IsWorkerless,
+			Dependencies: flow.NewTaskIDs(deleteInfrastructure),
+		})
+	)
+
+	return g
+}
+
 // TaskGroupMigrateAndDeleteControlPlane is a flow.TaskID for a logical flow.TaskGroup.
 const TaskGroupMigrateAndDeleteControlPlane flow.TaskID = "TaskGroupMigrateAndDeleteControlPlane"
 
@@ -1378,6 +1503,45 @@ func (b *Botanist) MigrateAndDeleteControlPlaneTaskGroup() flow.TaskGroup {
 
 	return g
 }
+
+// TaskMigrateAndDeleteExtensionsAfterKubeAPIServer is a flow.TaskID for a logical flow.TaskGroup.
+const TaskMigrateAndDeleteExtensionsAfterKubeAPIServer flow.TaskID = "TaskMigrateAndDeleteExtensionsAfterKubeAPIServer"
+
+// MigrateAndDeleteExtensionsAfterKubeAPIServerTaskGroup handles the migration and deletion of extensions that should be applied after the kube-apiserver.
+func (b *Botanist) MigrateAndDeleteExtensionsAfterKubeAPIServerTaskGroup() flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskMigrateAndDeleteExtensionsAfterKubeAPIServer)
+
+		migrateExtensionsAfterKubeAPIServer = g.Add(flow.Task{
+			Name: "Migrating extensions after kube-apiserver",
+			Fn:   b.Shoot.Components.Extensions.Extension.MigrateAfterKubeAPIServer,
+		})
+		waitUntilExtensionsAfterKubeAPIServerMigrated = g.Add(flow.Task{
+			Name:         "Waiting until extensions that should be handled after kube-apiserver have been migrated",
+			Fn:           b.Shoot.Components.Extensions.Extension.WaitMigrateAfterKubeAPIServer,
+			Dependencies: flow.NewTaskIDs(migrateExtensionsAfterKubeAPIServer),
+		})
+		deleteExtensionsAfterKubeAPIServer = g.Add(flow.Task{
+			Name:         "Deleting extensions after kube-apiserver",
+			Fn:           b.Shoot.Components.Extensions.Extension.DestroyAfterKubeAPIServer,
+			Dependencies: flow.NewTaskIDs(waitUntilExtensionsAfterKubeAPIServerMigrated),
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Waiting until extensions that should be handled after kube-apiserver have been deleted",
+			Fn:           b.Shoot.Components.Extensions.Extension.WaitCleanupAfterKubeAPIServer,
+			Dependencies: flow.NewTaskIDs(deleteExtensionsAfterKubeAPIServer),
+		})
+		// Add this step in interest of completeness. All extension deletions should have already been triggered by previous steps.
+		_ = g.Add(flow.Task{
+			Name:         "Waiting until all extensions have been deleted",
+			Fn:           b.Shoot.Components.Extensions.Extension.WaitCleanup,
+			Dependencies: flow.NewTaskIDs(waitUntilExtensionsAfterKubeAPIServerMigrated),
+		})
+	)
+
+	return g
+}
+
 // TaskGroupDestroyExtensionAndMachineResources is a flow.TaskID for a logical flow.TaskGroup.
 const TaskGroupDestroyExtensionAndMachineResources flow.TaskID = "TaskGroupDestroyExtensionAndMachineResources"
 
@@ -1431,6 +1595,72 @@ func (b *Botanist) DestroyExtensionAndMachineResourcesTaskGroup() flow.TaskGroup
 
 	return g
 }
+
+// TaskGroupReconcileObservability is a flow.TaskID for a logical flow.TaskGroup.
+const TaskGroupReconcileObservability flow.TaskID = "TaskGroupReconcileObservability"
+
+// ReconcileObservabilityTaskGroup returns the flow.TaskGroup for deploying the shoot monitoring stack
+// (Alertmanager, Prometheus, blackbox-exporter, kube-state-metrics, Plutono, istio-basic-auth-server).
+func (b *Botanist) ReconcileObservabilityTaskGroup() flow.TaskGroup {
+	var (
+		g = flow.NewTaskGroup(TaskGroupReconcileObservability)
+
+		deployAlertManager = g.Add(flow.Task{
+			Name:   "Reconciling shoot Alertmanager",
+			Fn:     flow.TaskFn(b.DeployAlertManager).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+			SkipIf: b.Shoot.IsSelfHosted(),
+		})
+		waitUntilAlertmanagerReconciled = g.Add(flow.Task{
+			Name:         "Waiting until shoot Alertmanager is reconciled",
+			Fn:           b.WaitForAlertManager,
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployAlertManager),
+		})
+		deployPrometheus = g.Add(flow.Task{
+			Name:   "Reconciling shoot Prometheus",
+			Fn:     flow.TaskFn(b.DeployPrometheus).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+			SkipIf: b.Shoot.IsSelfHosted(),
+		})
+		waitUntilPrometheusReconciled = g.Add(flow.Task{
+			Name:         "Waiting until shoot Prometheus is reconciled",
+			Fn:           b.WaitForPrometheus,
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployPrometheus),
+		})
+		_ = g.Add(flow.Task{
+			Name:   "Deploying control plane blackbox-exporter",
+			Fn:     flow.TaskFn(b.ReconcileBlackboxExporterControlPlane).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+			SkipIf: b.Shoot.IsSelfHosted(),
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Reconciling kube-state-metrics for shoot in seed",
+			Fn:           flow.TaskFn(b.DeployKubeStateMetrics).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+			SkipIf:       b.Shoot.IsWorkerless || b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployAlertManager, deployPrometheus),
+		})
+		deployPlutonoForMonitoring = g.Add(flow.Task{
+			Name:         "Reconciling Plutono for shoot in seed",
+			Fn:           flow.TaskFn(b.DeployPlutono).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployAlertManager, deployPrometheus),
+		})
+		waitUntilPlutonoReconciled = g.Add(flow.Task{
+			Name:         "Waiting until Plutono for shoot in seed is reconciled",
+			Fn:           b.WaitForPlutono,
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(deployPlutonoForMonitoring),
+		})
+		_ = g.Add(flow.Task{
+			Name:         "Deploying istio-basic-auth-server",
+			Fn:           flow.TaskFn(b.Shoot.Components.ControlPlane.IstioBasicAuthServer.Deploy).RetryUntilTimeout(defaultInterval, 2*time.Minute),
+			SkipIf:       b.Shoot.IsSelfHosted(),
+			Dependencies: flow.NewTaskIDs(waitUntilAlertmanagerReconciled, waitUntilPrometheusReconciled, waitUntilPlutonoReconciled),
+		})
+	)
+
+	return g
+}
+
 func (b *Botanist) isGardenadmBootstrap() bool {
 	return b.Shoot.IsSelfHosted() && !b.Shoot.RunsControlPlane()
 }
