@@ -71,11 +71,13 @@ func (g TaskGroup) Tasks() []Task {
 	return tasks
 }
 
-// WithTaskDependencies flattens the group like `Tasks` but additionally inserts the given dependencies into each
-// task's own `Task.Dependencies`. It is the way to chain a reused group behind a gate inside a single flow step: the
-// gate is applied per task while the group's own group-level dependency and `SkipIf` wiring (e.g. aliases on
-// prerequisite groups not run in this flow) are dropped, so flattening cannot drag in tasks absent from the graph.
-func (g TaskGroup) WithTaskDependencies(dependencies ...TaskIDer) []Task {
+// TasksWithDependencies returns the group's tasks (like `Tasks`) with the given dependencies added to each task, gating
+// them all behind a common dependency within a single flow step.
+//
+// Unlike `Graph.AddGroup`, the group's own `WithDependencies` and `SkipIf` are dropped. Those may reference other
+// groups by alias, which only resolve if those groups were added too; dropping them keeps the flattened tasks from
+// depending on anything outside the current graph.
+func (g TaskGroup) TasksWithDependencies(dependencies ...TaskIDer) []Task {
 	deps := NewTaskIDs(dependencies...)
 	tasks := g.Tasks()
 	for i := range tasks {
