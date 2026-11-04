@@ -155,32 +155,6 @@ func (r *Reconciler) runMigrateShootFlow(ctx context.Context, o *operation.Opera
 			SkipIf:       !wakeupRequired,
 			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement),
 		})
-		deleteMachineControllerManager = g.Add(flow.Task{
-			Name: "Deleting machine-controller-manager",
-			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return botanist.Shoot.Components.ControlPlane.MachineControllerManager.Destroy(ctx)
-			}),
-			SkipIf:       o.Shoot.IsWorkerless,
-			Dependencies: flow.NewTaskIDs(waitForManagedResourcesDeletion),
-		})
-		waitUntilMachineControllerManagerDeleted = g.Add(flow.Task{
-			Name: "Waiting until machine-controller-manager has been deleted",
-			Fn: flow.TaskFn(func(ctx context.Context) error {
-				return botanist.Shoot.Components.ControlPlane.MachineControllerManager.WaitCleanup(ctx)
-			}),
-			SkipIf:       o.Shoot.IsWorkerless,
-			Dependencies: flow.NewTaskIDs(deleteMachineControllerManager),
-		})
-		migrateExtensionResources = g.Add(flow.Task{
-			Name:         "Migrating extension resources",
-			Fn:           botanist.MigrateExtensionResourcesInParallel,
-			Dependencies: flow.NewTaskIDs(waitUntilMachineControllerManagerDeleted),
-		})
-		waitUntilExtensionResourcesMigrated = g.Add(flow.Task{
-			Name:         "Waiting until extension resources have been migrated",
-			Fn:           botanist.WaitUntilExtensionResourcesMigrated,
-			Dependencies: flow.NewTaskIDs(migrateExtensionResources),
-		})
 		migrateExtensionsBeforeKubeAPIServer = g.Add(flow.Task{
 			Name:         "Migrating extensions before kube-apiserver",
 			Fn:           botanist.Shoot.Components.Extensions.Extension.MigrateBeforeKubeAPIServer,
