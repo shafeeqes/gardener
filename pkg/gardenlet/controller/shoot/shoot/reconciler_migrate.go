@@ -157,6 +157,7 @@ func (r *Reconciler) runMigrateShootFlow(ctx context.Context, o *operation.Opera
 		waitUntilShootManagedResourcesDeleted = g.Add(flow.Task{
 		migrateManagedResources                   = g.AddGroup(botanist.MigrateAndDeleteManagedResourcesTaskGroup(cleanupShootResources).WithDependencies(wakeUpKubeAPIServer))
 		migrateExtensionResourcesGroup            = g.AddGroup(botanist.MigrateExtensionResourcesTaskGroup().WithDependencies(migrateManagedResources))
+		migrateExtensionsBeforeKubeAPIServerGroup = g.AddGroup(botanist.MigrateExtensionsBeforeKubeAPIServerTaskGroup().WithDependencies(migrateExtensionResourcesGroup))
 		migrateControlPlane                       = g.AddGroup(botanist.MigrateAndDeleteControlPlaneTaskGroup().WithDependencies(destroyExtensionAndMachineResourcesGroup))
 			Name:         "Waiting until shoot managed resources have been deleted",
 			Fn:           flow.TaskFn(botanist.WaitUntilShootManagedResourcesDeleted).RetryUntilTimeout(defaultInterval, defaultTimeout),
