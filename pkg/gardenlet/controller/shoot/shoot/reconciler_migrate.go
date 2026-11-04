@@ -154,48 +154,6 @@ func (r *Reconciler) runMigrateShootFlow(ctx context.Context, o *operation.Opera
 			SkipIf:       !wakeupRequired,
 			Dependencies: flow.NewTaskIDs(deployETCD, scaleUpETCD, initializeSecretsManagement),
 		})
-		deleteExtensionResources = g.Add(flow.Task{
-			Name:         "Deleting extension resources from the Shoot namespace",
-			Fn:           botanist.DestroyExtensionResourcesInParallel,
-			Dependencies: flow.NewTaskIDs(persistShootState),
-		})
-		waitUntilExtensionResourcesDeleted = g.Add(flow.Task{
-			Name:         "Waiting until extension resources have been deleted",
-			Fn:           botanist.WaitUntilExtensionResourcesDeleted,
-			Dependencies: flow.NewTaskIDs(deleteExtensionResources),
-		})
-		deleteMachineResources = g.Add(flow.Task{
-			Name:         "Shallow-deleting machine resources from the Shoot namespace",
-			Fn:           botanist.ShallowDeleteMachineResources,
-			Dependencies: flow.NewTaskIDs(persistShootState),
-		})
-		waitUntilMachineResourcesDeleted = g.Add(flow.Task{
-			Name: "Waiting until machine resources have been deleted",
-			Fn: func(ctx context.Context) error {
-				return gardenerutils.WaitUntilMachineResourcesDeleted(ctx, botanist.Logger, botanist.SeedClientSet.Client(), botanist.Shoot.ControlPlaneNamespace)
-			},
-			Dependencies: flow.NewTaskIDs(deleteMachineResources),
-		})
-		deleteExtensionsBeforeKubeAPIServer = g.Add(flow.Task{
-			Name:         "Deleting extensions before kube-apiserver",
-			Fn:           botanist.Shoot.Components.Extensions.Extension.DestroyBeforeKubeAPIServer,
-			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesDeleted, waitUntilExtensionsBeforeKubeAPIServerMigrated),
-		})
-		waitUntilExtensionsBeforeKubeAPIServerDeleted = g.Add(flow.Task{
-			Name:         "Waiting until extensions that should be handled before kube-apiserver have been deleted",
-			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitCleanupBeforeKubeAPIServer,
-			Dependencies: flow.NewTaskIDs(deleteExtensionsBeforeKubeAPIServer),
-		})
-		deleteStaleExtensionResources = g.Add(flow.Task{
-			Name:         "Deleting stale extensions",
-			Fn:           botanist.Shoot.Components.Extensions.Extension.DeleteStaleResources,
-			Dependencies: flow.NewTaskIDs(waitUntilExtensionResourcesMigrated),
-		})
-		waitUntilStaleExtensionResourcesDeleted = g.Add(flow.Task{
-			Name:         "Waiting until all stale extensions have been deleted",
-			Fn:           botanist.Shoot.Components.Extensions.Extension.WaitCleanupStaleResources,
-			Dependencies: flow.NewTaskIDs(deleteStaleExtensionResources),
-		})
 		migrateControlPlane = g.Add(flow.Task{
 			Name: "Migrating shoot control plane",
 			Fn: flow.TaskFn(func(ctx context.Context) error {
