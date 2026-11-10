@@ -415,7 +415,7 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist) flow.TaskGr
 	})
 
 	reconcileExtensions := b.ReconcileExtensionsBeforeKubeAPIServerTaskGroup(false)
-	g = g.AddAll(reconcileExtensions.WithTaskDependencies(reconcileIstioConfigMap)...)
+	g = g.AddAll(reconcileExtensions.TasksWithDependencies(reconcileIstioConfigMap)...)
 
 	deployService := g.Add(flow.Task{
 		Name:         "Deploying kube-apiserver service",
@@ -429,13 +429,13 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist) flow.TaskGr
 	})
 
 	reconcileKubeAPIServer := b.ReconcileKubeAPIServerTaskGroup(false, 30*time.Second)
-	g = g.AddAll(reconcileKubeAPIServer.WithTaskDependencies(waitService, deployVPNServer)...)
+	g = g.AddAll(reconcileKubeAPIServer.TasksWithDependencies(waitService, deployVPNServer)...)
 
 	reconcileGardenerResourceManager := b.ReconcileGardenerResourceManagerTaskGroup(true, false)
-	g = g.AddAll(reconcileGardenerResourceManager.WithTaskDependencies(reconcileKubeAPIServer)...)
+	g = g.AddAll(reconcileGardenerResourceManager.TasksWithDependencies(reconcileKubeAPIServer)...)
 
-	reconcileControlPlaneComponents := b.ReconcileControlPlaneComponentsTaskGroup(false)
-	g = g.AddAll(reconcileControlPlaneComponents.WithTaskDependencies(reconcileGardenerResourceManager)...)
+	reconcileControlPlaneComponents := b.DeployControlPlaneComponentsTaskGroup(false)
+	g = g.AddAll(reconcileControlPlaneComponents.TasksWithDependencies(reconcileGardenerResourceManager)...)
 
 	// TODO(GEP-39): Deploy temporary VPN shoot client and live migration VPN DNS record as part of the live migration process.
 
@@ -558,22 +558,22 @@ func sourceSeedCleanupTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 	})
 
 	migrateManagedResources := b.MigrateAndDeleteManagedResourcesTaskGroup(true)
-	g = g.AddAll(migrateManagedResources.WithTaskDependencies(persistShootState)...)
+	g = g.AddAll(migrateManagedResources.TasksWithDependencies(persistShootState)...)
 
 	migrateExtensions := b.MigrateExtensionResourcesTaskGroup()
-	g = g.AddAll(migrateExtensions.WithTaskDependencies(migrateManagedResources)...)
+	g = g.AddAll(migrateExtensions.TasksWithDependencies(migrateManagedResources)...)
 
-	destroyExtensionsAndMachineResources := b.DestroyExtensionAndMachineResourcesTaskGroup()
-	g = g.AddAll(destroyExtensionsAndMachineResources.WithTaskDependencies(migrateExtensions)...)
+	destroyExtensionsAndMachineResources := b.DestroyExtensionsAndMachineResourcesTaskGroup()
+	g = g.AddAll(destroyExtensionsAndMachineResources.TasksWithDependencies(migrateExtensions)...)
 
 	migrateControlPlane := b.MigrateAndDeleteControlPlaneTaskGroup()
-	g = g.AddAll(migrateControlPlane.WithTaskDependencies(destroyExtensionsAndMachineResources)...)
+	g = g.AddAll(migrateControlPlane.TasksWithDependencies(destroyExtensionsAndMachineResources)...)
 
 	migrateExtensionsAfterKubeAPIServerGroup := b.MigrateAndDeleteExtensionsAfterKubeAPIServerTaskGroup()
-	g = g.AddAll(migrateExtensionsAfterKubeAPIServerGroup.WithTaskDependencies(migrateControlPlane)...)
+	g = g.AddAll(migrateExtensionsAfterKubeAPIServerGroup.TasksWithDependencies(migrateControlPlane)...)
 
 	migrateInfrastructureGroup := b.MigrateAndDeleteInfrastructureTaskGroup()
-	g = g.AddAll(migrateInfrastructureGroup.WithTaskDependencies(migrateExtensionsAfterKubeAPIServerGroup)...)
+	g = g.AddAll(migrateInfrastructureGroup.TasksWithDependencies(migrateExtensionsAfterKubeAPIServerGroup)...)
 
 	destroyEtcd := g.Add(flow.Task{
 		Name:         "Destroying source etcd",
@@ -617,11 +617,11 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 	})
 
 	deployReferencedResources := b.ReconcileReferencedResourcesTaskGroup()
-	g = g.AddAll(deployReferencedResources.WithTaskDependencies(refreshShootState)...)
+	g = g.AddAll(deployReferencedResources.TasksWithDependencies(refreshShootState)...)
 	// Deploy the DNSRecords first so api.<domain> resolves to the destination before the long tail of restores (and
 	// before the permanent vpn-shoot, whose endpoint is api.<internalDomain>, is brought up).
 	deployDNS := b.ReconcileDNSRecordsTaskGroup()
-	g = g.AddAll(deployDNS.WithTaskDependencies(refreshShootState)...)
+	g = g.AddAll(deployDNS.TasksWithDependencies(refreshShootState)...)
 
 	// Give upstream DNS caches time to pick up the destination targets before bringing up the permanent vpn-shoot
 	// (whose endpoint resolves via api.<internalDomain>) and the other components that resolve these names.
@@ -632,13 +632,13 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 	})
 
 	deployCloudProviderSecret := b.DeployCloudProviderSecretTaskGroup()
-	g = g.AddAll(deployCloudProviderSecret.WithTaskDependencies(waitDNSCacheSync)...)
+	g = g.AddAll(deployCloudProviderSecret.TasksWithDependencies(waitDNSCacheSync)...)
 
 	reconcileInfrastructure := b.ReconcileInfrastructureTaskGroup(false)
-	g = g.AddAll(reconcileInfrastructure.WithTaskDependencies(deployCloudProviderSecret)...)
+	g = g.AddAll(reconcileInfrastructure.TasksWithDependencies(deployCloudProviderSecret)...)
 
 	reconcileControlPlane := b.ReconcileControlPlaneTaskGroup(false)
-	g = g.AddAll(reconcileControlPlane.WithTaskDependencies(reconcileInfrastructure)...)
+	g = g.AddAll(reconcileControlPlane.TasksWithDependencies(reconcileInfrastructure)...)
 
 	restoreNetwork := g.Add(flow.Task{
 		Name:         "Restoring network",
@@ -654,19 +654,19 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 	})
 
 	reconcileOperatingSystemConfig := b.ReconcileOperatingSystemConfigTaskGroup(false)
-	g = g.AddAll(reconcileOperatingSystemConfig.WithTaskDependencies(waitNetwork)...)
+	g = g.AddAll(reconcileOperatingSystemConfig.TasksWithDependencies(waitNetwork)...)
 
 	// machine-controller-manager must run before the worker is restored so it adopts the migrated MachineDeployments.
 	mcm := b.ReconcileMachineControllerManagerTaskGroup()
-	g = g.AddAll(mcm.WithTaskDependencies(reconcileOperatingSystemConfig)...)
+	g = g.AddAll(mcm.TasksWithDependencies(reconcileOperatingSystemConfig)...)
 	worker := b.ReconcileWorkerTaskGroup(false)
-	g = g.AddAll(worker.WithTaskDependencies(mcm)...)
+	g = g.AddAll(worker.TasksWithDependencies(mcm)...)
 
 	reconcileContainerRuntime := b.ReconcileContainerRuntimeTaskGroup(false)
-	g = g.AddAll(reconcileContainerRuntime.WithTaskDependencies(worker)...)
+	g = g.AddAll(reconcileContainerRuntime.TasksWithDependencies(worker)...)
 
 	reconcileExtensionsAfterKubeAPIServer := b.ReconcileExtensionsAfterKubeAPIServerTaskGroup(false)
-	g = g.AddAll(reconcileExtensionsAfterKubeAPIServer.WithTaskDependencies(reconcileContainerRuntime)...)
+	g = g.AddAll(reconcileExtensionsAfterKubeAPIServer.TasksWithDependencies(reconcileContainerRuntime)...)
 
 	// Deploy the permanent vpn-shoot and wait until it is healthy before tearing down the temporary VPN, so the
 	// permanent tunnel to the destination is established first and connectivity is uninterrupted.
@@ -717,13 +717,13 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 	})
 
 	shootNamespaces := b.ReconcileShootNamespacesTaskGroup(false)
-	g = g.AddAll(shootNamespaces.WithTaskDependencies(ensureShootClusterIdentity)...)
+	g = g.AddAll(shootNamespaces.TasksWithDependencies(ensureShootClusterIdentity)...)
 
 	systemComponents := b.ReconcileSystemComponentsTaskGroup(kubeProxyEnabled, false)
-	g = g.AddAll(systemComponents.WithTaskDependencies(shootNamespaces)...)
+	g = g.AddAll(systemComponents.TasksWithDependencies(shootNamespaces)...)
 
 	systemResources := b.ReconcileSystemResourcesTaskGroup()
-	g = g.AddAll(systemResources.WithTaskDependencies(systemComponents)...)
+	g = g.AddAll(systemResources.TasksWithDependencies(systemComponents)...)
 
 	deployNodeAgent := g.Add(flow.Task{
 		Name: "Deploying gardener-node-agent's OperatingSystemConfig secrets and RBAC resources",
@@ -750,7 +750,7 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 		Dependencies: flow.NewTaskIDs(updateAdvertisedAddresses),
 	})
 	observabilityGroup := b.ReconcileObservabilityTaskGroup()
-	g = g.AddAll(observabilityGroup.WithTaskDependencies(deployLogging)...)
+	g = g.AddAll(observabilityGroup.TasksWithDependencies(deployLogging)...)
 
 	waitNginx := g.Add(flow.Task{
 		Name:         "Waiting until nginx ingress LoadBalancer is ready",
