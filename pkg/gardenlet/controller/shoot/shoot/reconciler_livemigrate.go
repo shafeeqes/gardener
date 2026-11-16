@@ -63,6 +63,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 		botanist        *botanistpkg.Botanist
 		err             error
 		tasksWithErrors []string
+		forceShrinkEtcd = v1beta1helper.HasForceShrinkEtcdAnnotation(o.Shoot.GetInfo().Annotations)
 	)
 
 	for _, lastError := range o.Shoot.GetInfo().Status.LastErrors {
@@ -129,7 +130,7 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 
 		destinationKubeAPIServerReady = g.Add(flow.Task{
 			Name:         "Deploying destination control plane and temporary VPN",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, destinationKubeAPIServerReadyTaskGroup(botanist)),
+			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, destinationKubeAPIServerReadyTaskGroup(botanist, forceShrinkEtcd)),
 			Dependencies: flow.NewTaskIDs(migrateExtensionsNeededBeforeKubeAPIServer),
 		})
 
@@ -395,8 +396,10 @@ func destinationEtcdPeersJoinedTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup
 // taskGroupDestinationKubeAPIServerReady is a flow.TaskID for a logical flow.TaskGroup.
 const taskGroupDestinationKubeAPIServerReady flow.TaskID = "TaskGroupDestinationKubeAPIServerReady"
 
-// destinationKubeAPIServerReadyTaskGroup brings up the destination control plane and the temporary VPN.
-func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
+// destinationKubeAPIServerReadyTaskGroup brings up the destination control plane and the temporary VPN. When
+// forceShrink is true, the destination etcd is scaled to three members and the source members are removed before the
+// kube-apiserver is deployed, so its linearized reads are served from a local quorum.
+func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist, forceShrinkEtcd bool) flow.TaskGroup {
 	g := flow.NewTaskGroup(taskGroupDestinationKubeAPIServerReady).
 		SkipIf(v1beta1helper.GetLiveMigrationCondition(b.Shoot.GetInfo(), gardencorev1beta1.ShootLiveMigrationMigrationCompleted) != nil)
 
@@ -432,8 +435,18 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist) flow.TaskGr
 		Dependencies: flow.NewTaskIDs(deployService),
 	})
 
+	// When force-shrink recovery is requested, the destination etcd is scaled to three members and the source members
+	// are removed before the kube-apiserver is deployed, so the apiserver's linearized reads are served locally. In the
+	// normal flow this is skipped here; source members are removed only at the EtcdMigrationComplete step after cutover.
+	var etcdMigrationComplete flow.TaskIDer = refreshShootState
+	if forceShrinkEtcd {
+		etcdMigrationCompleteTaskGroup := etcdMigrationCompleteTaskGroup(b)
+		g = g.AddAll(etcdMigrationCompleteTaskGroup.TasksWithDependencies(refreshShootState)...)
+		etcdMigrationComplete = etcdMigrationCompleteTaskGroup
+	}
+
 	reconcileKubeAPIServer := b.ReconcileKubeAPIServerTaskGroup(false, 30*time.Second)
-	g = g.AddAll(reconcileKubeAPIServer.TasksWithDependencies(waitService, deployVPNServer)...)
+	g = g.AddAll(reconcileKubeAPIServer.TasksWithDependencies(waitService, deployVPNServer, etcdMigrationComplete)...)
 
 	reconcileGardenerResourceManager := b.ReconcileGardenerResourceManagerTaskGroup(true, false)
 	g = g.AddAll(reconcileGardenerResourceManager.TasksWithDependencies(reconcileKubeAPIServer)...)
@@ -448,13 +461,13 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist) flow.TaskGr
 	deployLiveMigrationVPNDNSRecord := g.Add(flow.Task{
 		Name:         "Deploying temporary VPN DNS record",
 		Fn:           b.DeployLiveMigrationVPNDNSRecord,
-		SkipIf:       b.Shoot.IsWorkerless,
+		SkipIf:       b.Shoot.IsWorkerless || forceShrinkEtcd,
 		Dependencies: flow.NewTaskIDs(waitService),
 	})
 	deployTemporaryVPNShoot := g.Add(flow.Task{
 		Name:         "Deploying temporary VPN shoot client to destination",
 		Fn:           b.DeployTemporaryVPNShoot,
-		SkipIf:       b.Shoot.IsWorkerless,
+		SkipIf:       b.Shoot.IsWorkerless || forceShrinkEtcd,
 		Dependencies: flow.NewTaskIDs(reconcileGardenerResourceManager, deployLiveMigrationVPNDNSRecord),
 	})
 
@@ -474,7 +487,7 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist) flow.TaskGr
 	_ = g.Add(flow.Task{
 		Name:         "Waiting until the temporary VPN tunnel connection to the destination is established",
 		Fn:           b.WaitUntilTemporaryTunnelConnectionExists,
-		SkipIf:       b.Shoot.IsWorkerless,
+		SkipIf:       b.Shoot.IsWorkerless || forceShrinkEtcd,
 		Dependencies: flow.NewTaskIDs(initializeShootClients, deployTemporaryVPNShoot),
 	})
 
