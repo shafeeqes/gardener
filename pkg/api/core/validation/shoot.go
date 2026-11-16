@@ -291,6 +291,7 @@ func ValidateShootUpdate(newShoot, oldShoot *core.Shoot) field.ErrorList {
 	allErrs = append(allErrs, ValidateShootHAConfigUpdate(newShoot, oldShoot)...)
 	allErrs = append(allErrs, validateHibernationUpdate(newShoot, oldShoot)...)
 	allErrs = append(allErrs, ValidateForceDeletion(newShoot, oldShoot)...)
+	allErrs = append(allErrs, ValidateForceShrinkEtcd(newShoot, oldShoot)...)
 	allErrs = append(allErrs, validateNodeLocalDNSUpdate(&newShoot.Spec, &oldShoot.Spec, field.NewPath("spec"))...)
 	allErrs = append(allErrs, ValidateInPlaceUpdates(newShoot, oldShoot)...)
 
@@ -3685,6 +3686,35 @@ func ValidateForceDeletion(newShoot, oldShoot *core.Shoot) field.ErrorList {
 		if !errorCodePresent {
 			allErrs = append(allErrs, field.Forbidden(fldPath, fmt.Sprintf("force-deletion annotation cannot be set when Shoot status does not contain one of these error codes: %v", sets.List(errorCodesAllowingForceDeletion))))
 		}
+	}
+
+	return allErrs
+}
+
+// ValidateForceShrinkEtcd validates the addition of the force-shrink-etcd recovery annotation on the Shoot. It may only
+// be set while a live control plane migration is stuck in the state the recovery targets: the destination etcd members
+// have joined the cluster (DestinationEtcdPeersJoined is True) but the destination kube-apiserver could not come up
+// (DestinationKubeAPIServerReady is False).
+func ValidateForceShrinkEtcd(newShoot, oldShoot *core.Shoot) field.ErrorList {
+	var (
+		fldPath = field.NewPath("metadata", "annotations").Key(v1beta1constants.AnnotationMigrationForceShrinkEtcd)
+		allErrs = field.ErrorList{}
+	)
+
+	// Only validate when the annotation is newly added.
+	oldHasAnnotation := oldShoot != nil && v1beta1helper.HasForceShrinkEtcdAnnotation(oldShoot.Annotations)
+	if !v1beta1helper.HasForceShrinkEtcdAnnotation(newShoot.Annotations) || oldHasAnnotation {
+		return allErrs
+	}
+
+	etcdPeersJoined := helper.GetLiveMigrationCondition(newShoot, core.ConditionType(gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined))
+	if etcdPeersJoined == nil || etcdPeersJoined.Status != core.ConditionTrue {
+		allErrs = append(allErrs, field.Forbidden(fldPath, fmt.Sprintf("force-shrink-etcd annotation can only be set when the %q condition is %q in the Shoot status.liveMigration", gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined, core.ConditionTrue)))
+	}
+
+	kubeAPIServerReady := helper.GetLiveMigrationCondition(newShoot, core.ConditionType(gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady))
+	if kubeAPIServerReady == nil || kubeAPIServerReady.Status != core.ConditionFalse {
+		allErrs = append(allErrs, field.Forbidden(fldPath, fmt.Sprintf("force-shrink-etcd annotation can only be set when the %q condition is %q in the Shoot status.liveMigration", gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, core.ConditionFalse)))
 	}
 
 	return allErrs

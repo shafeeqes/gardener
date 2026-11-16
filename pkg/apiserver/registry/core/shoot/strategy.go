@@ -244,6 +244,7 @@ func (s shootStrategy) Validate(_ context.Context, obj runtime.Object) field.Err
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, validation.ValidateShoot(shoot)...)
 	allErrs = append(allErrs, validation.ValidateForceDeletion(shoot, nil)...)
+	allErrs = append(allErrs, validation.ValidateForceShrinkEtcd(shoot, nil)...)
 	allErrs = append(allErrs, validation.ValidateFinalizersOnCreation(shoot.Finalizers, field.NewPath("metadata", "finalizers"))...)
 	allErrs = append(allErrs, validation.ValidateInPlaceUpdateStrategyOnCreation(shoot)...)
 	if len(allErrs) > 0 {

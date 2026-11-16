@@ -290,6 +290,20 @@ func AccessRestrictionsAreSupported(seedAccessRestrictions []core.AccessRestrict
 	return true
 }
 
+// GetLiveMigrationConditions returns the conditions tracking the progress of a live control plane migration, or nil if
+// no live migration is in progress.
+func GetLiveMigrationConditions(shoot *core.Shoot) []core.Condition {
+	if shoot.Status.LiveMigration == nil {
+		return nil
+	}
+	return shoot.Status.LiveMigration.Conditions
+}
+
+// GetLiveMigrationCondition returns the live migration condition of the given type, or nil if it is not present.
+func GetLiveMigrationCondition(shoot *core.Shoot, conditionType core.ConditionType) *core.Condition {
+	return GetCondition(GetLiveMigrationConditions(shoot), conditionType)
+}
+
 // FindWorkerByName tries to find the worker with the given name. If it cannot be found it returns nil.
 func FindWorkerByName(workers []core.Worker, name string) *core.Worker {
 	if idx := slices.IndexFunc(workers, func(worker core.Worker) bool {

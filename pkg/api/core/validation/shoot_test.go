@@ -25,6 +25,7 @@ import (
 
 	. "github.com/gardener/gardener/pkg/api/core/validation"
 	"github.com/gardener/gardener/pkg/apis/core"
+	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	v1beta1constants "github.com/gardener/gardener/pkg/apis/core/v1beta1/constants"
 	"github.com/gardener/gardener/pkg/features"
 	"github.com/gardener/gardener/pkg/utils"
@@ -660,6 +661,74 @@ var _ = Describe("Shoot Validation Tests", func() {
 				}
 
 				Expect(ValidateForceDeletion(newShoot, shoot)).To(BeEmpty())
+			})
+		})
+
+		Context("#ValidateForceShrinkEtcd", func() {
+			withLiveMigrationConditions := func(shoot *core.Shoot, etcdPeersJoined, kubeAPIServerReady core.ConditionStatus) {
+				shoot.Status.LiveMigration = &core.LiveMigration{
+					Conditions: []core.Condition{
+						{
+							Type:   core.ConditionType(gardencorev1beta1.ShootLiveMigrationDestinationEtcdPeersJoined),
+							Status: etcdPeersJoined,
+						},
+						{
+							Type:   core.ConditionType(gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady),
+							Status: kubeAPIServerReady,
+						},
+					},
+				}
+			}
+
+			forbiddenError := PointTo(MatchFields(IgnoreExtras, Fields{
+				"Type":  Equal(field.ErrorTypeForbidden),
+				"Field": Equal("metadata.annotations[migration.gardener.cloud/force-shrink-etcd]"),
+			}))
+
+			It("should allow setting the annotation when etcd peers joined and the destination kube-apiserver step failed", func() {
+				newShoot := prepareShootForUpdate(shoot)
+				metav1.SetMetaDataAnnotation(&newShoot.ObjectMeta, v1beta1constants.AnnotationMigrationForceShrinkEtcd, "true")
+				withLiveMigrationConditions(newShoot, core.ConditionTrue, core.ConditionFalse)
+
+				Expect(ValidateForceShrinkEtcd(newShoot, shoot)).To(BeEmpty())
+			})
+
+			It("should forbid setting the annotation when no live migration conditions are present", func() {
+				newShoot := prepareShootForUpdate(shoot)
+				metav1.SetMetaDataAnnotation(&newShoot.ObjectMeta, v1beta1constants.AnnotationMigrationForceShrinkEtcd, "true")
+
+				Expect(ValidateForceShrinkEtcd(newShoot, shoot)).To(ConsistOf(forbiddenError, forbiddenError))
+			})
+
+			It("should forbid setting the annotation when the destination etcd peers have not joined", func() {
+				newShoot := prepareShootForUpdate(shoot)
+				metav1.SetMetaDataAnnotation(&newShoot.ObjectMeta, v1beta1constants.AnnotationMigrationForceShrinkEtcd, "true")
+				withLiveMigrationConditions(newShoot, core.ConditionProgressing, core.ConditionFalse)
+
+				Expect(ValidateForceShrinkEtcd(newShoot, shoot)).To(ConsistOf(forbiddenError))
+			})
+
+			It("should forbid setting the annotation while the destination kube-apiserver step is still progressing", func() {
+				newShoot := prepareShootForUpdate(shoot)
+				metav1.SetMetaDataAnnotation(&newShoot.ObjectMeta, v1beta1constants.AnnotationMigrationForceShrinkEtcd, "true")
+				withLiveMigrationConditions(newShoot, core.ConditionTrue, core.ConditionProgressing)
+
+				Expect(ValidateForceShrinkEtcd(newShoot, shoot)).To(ConsistOf(forbiddenError))
+			})
+
+			It("should forbid setting the annotation when the destination kube-apiserver is already ready", func() {
+				newShoot := prepareShootForUpdate(shoot)
+				metav1.SetMetaDataAnnotation(&newShoot.ObjectMeta, v1beta1constants.AnnotationMigrationForceShrinkEtcd, "true")
+				withLiveMigrationConditions(newShoot, core.ConditionTrue, core.ConditionTrue)
+
+				Expect(ValidateForceShrinkEtcd(newShoot, shoot)).To(ConsistOf(forbiddenError))
+			})
+
+			It("should not validate when the annotation was already set on the old Shoot", func() {
+				metav1.SetMetaDataAnnotation(&shoot.ObjectMeta, v1beta1constants.AnnotationMigrationForceShrinkEtcd, "true")
+				newShoot := shoot.DeepCopy()
+
+				Expect(ValidateForceShrinkEtcd(newShoot, shoot)).To(BeEmpty())
 			})
 		})
 
