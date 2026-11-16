@@ -251,6 +251,21 @@ var _ = Describe("Helper", func() {
 			BeTrue()),
 	)
 
+	DescribeTable("#HasForceShrinkEtcdAnnotation",
+		func(objectMeta metav1.ObjectMeta, match gomegatypes.GomegaMatcher) {
+			Expect(HasForceShrinkEtcdAnnotation(objectMeta.Annotations)).To(match)
+		},
+
+		Entry("annotations not set", metav1.ObjectMeta{}, BeFalse()),
+		Entry("annotation not present", metav1.ObjectMeta{Annotations: map[string]string{}}, BeFalse()),
+		Entry("annotation present but false",
+			metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationMigrationForceShrinkEtcd: "false"}},
+			BeFalse()),
+		Entry("annotation present and true",
+			metav1.ObjectMeta{Annotations: map[string]string{v1beta1constants.AnnotationMigrationForceShrinkEtcd: "true"}},
+			BeTrue()),
+	)
+
 	var (
 		liveMigratingShoot = func(sourceSeed, destinationSeed string, annotate bool) *gardencorev1beta1.Shoot {
 			shoot := &gardencorev1beta1.Shoot{

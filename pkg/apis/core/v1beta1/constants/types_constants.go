@@ -770,6 +770,11 @@ const (
 	// be set to "true" to allow live control plane migration between seeds in distant regions despite exceeding the
 	// configured distance threshold.
 	AnnotationMigrationAllowDistantRegions = "migration.gardener.cloud/allow-distant-regions"
+	// AnnotationMigrationForceShrinkEtcd is a constant for an annotation key on a Shoot resource whose value must be
+	// set to "true" to recover a stuck live control plane migration where etcd is healthy but the destination
+	// kube-apiserver cannot come up. It instructs the destination gardenlet to scale the destination etcd to three
+	// members and remove the source members before deploying the destination kube-apiserver.
+	AnnotationMigrationForceShrinkEtcd = "migration.gardener.cloud/force-shrink-etcd"
 
 	// AnnotationConfirmationForceDeletion is a constant for an annotation on a Shoot resource whose value must be set to "true" in order to
 	// trigger force-deletion of the cluster. It can only be set if the Shoot has a deletion timestamp and contains an ErrorCode in the Shoot Status.

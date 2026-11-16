@@ -646,6 +646,12 @@ func HasLiveMigrationAnnotation(annotations map[string]string) bool {
 	return liveMigrate
 }
 
+// HasForceShrinkEtcdAnnotation returns true if the force-shrink-etcd recovery annotation is set to a truthy value.
+func HasForceShrinkEtcdAnnotation(annotations map[string]string) bool {
+	forceShrink, _ := strconv.ParseBool(annotations[v1beta1constants.AnnotationMigrationForceShrinkEtcd])
+	return forceShrink
+}
+
 // LiveMigrationRole describes the role a seed plays during a live control plane migration of a shoot.
 type LiveMigrationRole string
 
