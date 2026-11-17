@@ -127,37 +127,52 @@ func (r *Reconciler) runLiveMigrateShootFlow(ctx context.Context, o *operation.O
 			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrateExtensionsNeededBeforeKubeAPIServer, botanist.MigrateExtensionsBeforeKubeAPIServerTaskGroup(false)),
 			Dependencies: flow.NewTaskIDs(destinationEtcdPeersJoined),
 		})
-
-		destinationKubeAPIServerReady = g.Add(flow.Task{
-			Name:         "Deploying destination control plane and temporary VPN",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, destinationKubeAPIServerReadyTaskGroup(botanist, forceShrinkEtcd)),
-			Dependencies: flow.NewTaskIDs(migrateExtensionsNeededBeforeKubeAPIServer),
-		})
-
-		sourceSeedCleanup = g.Add(flow.Task{
-			Name:         "Cleaning up the source seed",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedCleanup, sourceSeedCleanupTaskGroup(botanist)),
-			Dependencies: flow.NewTaskIDs(destinationKubeAPIServerReady),
-		})
-
-		etcdMigrationComplete = g.Add(flow.Task{
-			Name:         "Migrating etcd cluster to destination seed",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationEtcdMigrationComplete, etcdMigrationCompleteTaskGroup(botanist)),
-			Dependencies: flow.NewTaskIDs(sourceSeedCleanup),
-		})
-
-		migrationCompleted = g.Add(flow.Task{
-			Name:         "Completing live migration",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted, destinationCompletionTaskGroup(botanist)),
-			Dependencies: flow.NewTaskIDs(etcdMigrationComplete),
-		})
-
-		_ = g.Add(flow.Task{
-			Name:         "Tearing down components and namespace in source seed",
-			Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedFinalTeardown, sourceSeedFinalTeardownTaskGroup(ctx, botanist, o)),
-			Dependencies: flow.NewTaskIDs(migrationCompleted),
-		})
 	)
+
+	destinationKubeAPIServerReadyTask := flow.Task{
+		Name: "Deploying destination control plane and temporary VPN",
+		Fn:   r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationDestinationKubeAPIServerReady, destinationKubeAPIServerReadyTaskGroup(botanist, forceShrinkEtcd)),
+	}
+	sourceSeedCleanupTask := flow.Task{
+		Name: "Cleaning up the source seed",
+		Fn:   r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedCleanup, sourceSeedCleanupTaskGroup(botanist)),
+	}
+
+	// On force-shrink recovery, the etcd migration is embedded in the destination kube-apiserver step and removes the
+	// source etcd members before the source seed cleanup would normally run. That cleanup (managed-resource deletion in
+	// particular) still needs the source shoot kube-apiserver, so it must complete before the members are removed.
+	// Reorder it ahead of the destination kube-apiserver step for force-shrink only. Both gardenlets compute the same
+	// forceShrinkEtcd value and build the same graph, so the condition-based peer-wait handshake follows these edges.
+	var etcdMigrationCompleteDep flow.TaskID
+	if forceShrinkEtcd {
+		sourceSeedCleanupTask.Dependencies = flow.NewTaskIDs(migrateExtensionsNeededBeforeKubeAPIServer)
+		sourceSeedCleanup := g.Add(sourceSeedCleanupTask)
+		destinationKubeAPIServerReadyTask.Dependencies = flow.NewTaskIDs(sourceSeedCleanup)
+		etcdMigrationCompleteDep = g.Add(destinationKubeAPIServerReadyTask)
+	} else {
+		destinationKubeAPIServerReadyTask.Dependencies = flow.NewTaskIDs(migrateExtensionsNeededBeforeKubeAPIServer)
+		destinationKubeAPIServerReady := g.Add(destinationKubeAPIServerReadyTask)
+		sourceSeedCleanupTask.Dependencies = flow.NewTaskIDs(destinationKubeAPIServerReady)
+		etcdMigrationCompleteDep = g.Add(sourceSeedCleanupTask)
+	}
+
+	etcdMigrationComplete := g.Add(flow.Task{
+		Name:         "Migrating etcd cluster to destination seed",
+		Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationEtcdMigrationComplete, etcdMigrationCompleteTaskGroup(botanist)),
+		Dependencies: flow.NewTaskIDs(etcdMigrationCompleteDep),
+	})
+
+	migrationCompleted := g.Add(flow.Task{
+		Name:         "Completing live migration",
+		Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationMigrationCompleted, destinationCompletionTaskGroup(botanist)),
+		Dependencies: flow.NewTaskIDs(etcdMigrationComplete),
+	})
+
+	_ = g.Add(flow.Task{
+		Name:         "Tearing down components and namespace in source seed",
+		Fn:           r.executeStepOrWait(botanist, role, gardencorev1beta1.ShootLiveMigrationSourceSeedFinalTeardown, sourceSeedFinalTeardownTaskGroup(ctx, botanist, o)),
+		Dependencies: flow.NewTaskIDs(migrationCompleted),
+	})
 
 	f := g.Compile()
 	if err := f.Run(ctx, flow.Opts{
@@ -438,10 +453,13 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist, forceShrink
 	// When force-shrink recovery is requested, the destination etcd is scaled to three members and the source members
 	// are removed before the kube-apiserver is deployed, so the apiserver's linearized reads are served locally. In the
 	// normal flow this is skipped here; source members are removed only at the EtcdMigrationComplete step after cutover.
+	// The group depends on waitService (not just refreshShootState): its DNS reconcile re-points the apiserver records
+	// at b.APIServerAddress, which is only populated by the kube-apiserver service's ingress callback during waitService.
+	// Running it earlier would restore the DNS records with an empty target.
 	var etcdMigrationComplete flow.TaskIDer = refreshShootState
 	if forceShrinkEtcd {
 		etcdMigrationCompleteTaskGroup := etcdMigrationCompleteTaskGroup(b)
-		g = g.AddAll(etcdMigrationCompleteTaskGroup.TasksWithDependencies(refreshShootState)...)
+		g = g.AddAll(etcdMigrationCompleteTaskGroup.TasksWithDependencies(waitService)...)
 		etcdMigrationComplete = etcdMigrationCompleteTaskGroup
 	}
 
