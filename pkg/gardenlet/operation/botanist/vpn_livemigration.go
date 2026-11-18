@@ -111,9 +111,10 @@ func (b *Botanist) DefaultTemporaryVPNShoot() (vpnshoot.Interface, error) {
 			HighAvailabilityEnabled:              b.Shoot.VPNHighAvailabilityEnabled,
 			HighAvailabilityNumberOfSeedServers:  b.Shoot.VPNHighAvailabilityNumberOfSeedServers,
 			HighAvailabilityNumberOfShootClients: b.Shoot.VPNHighAvailabilityNumberOfShootClients,
-			// Offset the temporary clients' bonding indices to N..2N-1 so they don't collide with the permanent
-			// vpn-shoot's 0..N-1 on the shared destination vpn-seed-server. Certificate identity stays on the raw
-			// ordinal (reusing vpn-shoot-client-0..N-1), which is legal under the server's duplicate-cn.
+			// Offset the temporary clients' overlay IPs to N..2N-1 so they don't collide with the permanent vpn-shoot's
+			// 0..N-1 on the shared destination vpn-seed-server. NameSuffix ("temp") gives the temporary clients distinct
+			// certificate CNs (vpn-shoot-client-temp-*), decoupling them from the permanent cert so a permanent roll or
+			// cert regeneration at cutover does not roll the temporary vpn-shoot.
 			ClientIndexOffset: b.Shoot.VPNHighAvailabilityNumberOfShootClients,
 			SeedPodNetwork:    b.Seed.GetInfo().Spec.Networks.Pods,
 			NameSuffix:        "temp",

@@ -38,21 +38,43 @@ func (b *Botanist) WaitUntilNginxIngressServiceIsReady(ctx context.Context) erro
 // WaitUntilTunnelConnectionExists waits until a port forward connection to the permanent tunnel pod (vpn-shoot) in the
 // kube-system namespace of the Shoot cluster can be established.
 func (b *Botanist) WaitUntilTunnelConnectionExists(ctx context.Context) error {
-	return b.waitUntilTunnelConnectionExists(ctx, v1beta1constants.VPNTunnel)
+	return b.waitUntilTunnelConnectionExists(ctx, v1beta1constants.VPNTunnel, "")
 }
 
 // WaitUntilTemporaryTunnelConnectionExists waits until a port forward connection to the temporary tunnel pod
 // (vpn-shoot-temp) in the kube-system namespace of the Shoot cluster can be established. The temporary vpn-shoot is
 // deployed on the destination seed during live control plane migration.
 func (b *Botanist) WaitUntilTemporaryTunnelConnectionExists(ctx context.Context) error {
-	return b.waitUntilTunnelConnectionExists(ctx, v1beta1constants.VPNTunnel+"-temp")
+	return b.waitUntilTunnelConnectionExists(ctx, v1beta1constants.VPNTunnel+"-temp", "temp")
 }
 
-func (b *Botanist) waitUntilTunnelConnectionExists(ctx context.Context, tunnelName string) error {
+func (b *Botanist) waitUntilTunnelConnectionExists(ctx context.Context, tunnelName, clientCNSuffix string) error {
 	const timeout = 15 * time.Minute
 
 	return retry.UntilTimeout(ctx, 5*time.Second, timeout, func(ctx context.Context) (bool, error) {
-		return CheckTunnelConnection(ctx, b.Logger, b.ShootClientSet, tunnelName)
+		if done, err := CheckTunnelConnection(ctx, b.Logger, b.ShootClientSet, tunnelName); err != nil || !done {
+			return done, err
+		}
+
+		// For HA VPN, a successful shoot-side port forward only proves some bonded member is up - possibly the other
+		// (permanent vs temporary) vpn-shoot. Additionally verify at the destination vpn-seed-server that the clients
+		// belonging to this tunnel are actually connected, identified by their unique common names. The exporter that
+		// backs this check only exists for HA, so non-HA keeps the shoot-side check alone.
+		if !b.Shoot.VPNHighAvailabilityEnabled {
+			return retry.Ok()
+		}
+
+		expected := expectedVPNClientCNs(clientCNSuffix, b.Shoot.VPNHighAvailabilityNumberOfShootClients)
+		connected, err := CheckVPNSeedServerClientsConnected(ctx, b.SeedClientSet.RESTConfig(), b.SeedClientSet.Client(), b.Shoot.ControlPlaneNamespace)
+		if err != nil {
+			return retry.MinorError(fmt.Errorf("could not determine connected vpn clients: %w", err))
+		}
+		if missing := expected.Difference(connected); missing.Len() > 0 {
+			b.Logger.Info("Waiting until vpn clients are connected to the vpn-seed-server", "tunnelName", tunnelName, "missingClients", sets.List(missing))
+			return retry.MinorError(fmt.Errorf("vpn clients not connected to the vpn-seed-server yet: %v", sets.List(missing)))
+		}
+
+		return retry.Ok()
 	})
 }
 

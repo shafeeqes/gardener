@@ -104,9 +104,10 @@ type Values struct {
 	HighAvailabilityNumberOfSeedServers int
 	// HighAvailabilityNumberOfShootClients is the number of VPN shoot clients used for HA.
 	HighAvailabilityNumberOfShootClients int
-	// ClientIndexOffset is added to a client's pod ordinal to pick its VPN overlay IP, keeping the cert identity on the
-	// raw ordinal. The temporary vpn-shoot sets it to N so its clients don't collide with the permanent ones (0..N-1)
-	// on the shared vpn-seed-server during live migration.
+	// ClientIndexOffset is added to a client's pod ordinal to pick its VPN overlay IP. The temporary vpn-shoot sets it to
+	// N so its clients' overlay IPs (N..2N-1) don't collide with the permanent ones (0..N-1) on the shared destination
+	// vpn-seed-server during live migration. Certificate identity is kept distinct via NameSuffix (see below), so this
+	// offset only separates overlay IPs, not cert CNs.
 	ClientIndexOffset int
 	// AutoMTU enables automatic MTU configuration for the VPN connection.
 	// When nil, the OPENVPN_AUTO_MTU environment variable is not set.
@@ -315,7 +316,7 @@ func (v *vpnShoot) Deploy(ctx context.Context) error {
 		})
 	} else {
 		for i := 0; i < v.values.HighAvailabilityNumberOfShootClients; i++ {
-			config.Name = fmt.Sprintf("vpn-shoot-client-%d", i)
+			config.Name = fmt.Sprintf("%s-%d", v.values.suffixedName("vpn-shoot-client"), i)
 			config.CommonName = config.Name
 			secret, err := v.secretsManager.Generate(ctx, config, secretsmanager.SignedByCA(signingCA), secretsmanager.Rotate(secretsmanager.InPlace))
 			if err != nil {
