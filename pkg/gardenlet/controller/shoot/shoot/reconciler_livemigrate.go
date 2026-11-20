@@ -559,6 +559,12 @@ func sourceSeedCleanupTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 	migrateInfrastructureGroup := b.MigrateAndDeleteInfrastructureTaskGroup()
 	g = g.AddAll(migrateInfrastructureGroup.TasksWithDependencies(migrateExtensionsAfterKubeAPIServerGroup)...)
 
+	g = g.AddAll(flow.Task{
+		Name:         "Deleting DNSRecords from the Shoot namespace",
+		Fn:           b.DestroyDNSRecords,
+		Dependencies: flow.NewTaskIDs(migrateDNSRecordsTaskGroup, destroyExtensionsAndMachineResources, migrateControlPlane, migrateExtensionsAfterKubeAPIServerGroup, migrateInfrastructureGroup),
+	})
+
 	return g
 }
 
@@ -727,10 +733,7 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 		Fn:           b.InitializeDesiredShootClients,
 		Dependencies: flow.NewTaskIDs(deployGardenerAccess),
 	})
-	// Confirm the permanent tunnel actually carries traffic to the shoot BEFORE tearing down the
-	// temporary VPN. Otherwise the temp path is removed while the permanent one may not yet be
-	// established end-to-end (VPNShoot.Wait only checks pod/ManagedResource health, not tunnel
-	// reachability), briefly black-holing apiserver->shoot traffic - webhooks, logs, exec.
+
 	waitTunnelConnection := g.Add(flow.Task{
 		Name:         "Waiting until the permanent VPN tunnel connection to the destination is established",
 		Fn:           b.WaitUntilTunnelConnectionExists,
@@ -738,8 +741,6 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 		Dependencies: flow.NewTaskIDs(initializeShootClients),
 	})
 
-	// Tear down the temporary VPN only after the permanent tunnel is confirmed, so apiserver->shoot connectivity is
-	// never interrupted (per GEP-39). Not needed for workerless shoots.
 	destroyTemporaryVPNShoot := g.Add(flow.Task{
 		Name:         "Destroying temporary VPN shoot client",
 		Fn:           b.DestroyTemporaryVPNShoot,
