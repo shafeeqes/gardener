@@ -422,18 +422,27 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist, forceShrink
 		Name: "Refreshing shoot state",
 		Fn:   b.RefreshShootStateForLiveMigration,
 	})
+	// The secretsManager is only populated by the DestinationEtcdPeersJoined step, which is skipped once
+	// EtcdMigrationComplete is set. A reconcile that starts after that (restart, or a retry before MigrationCompleted)
+	// would otherwise reach the secret-consuming tasks below with an empty manager and fail with "secret ca-vpn not
+	// found". Initialize it here so this step is self-sufficient across reconciles.
+	initSecretsManagement := g.Add(flow.Task{
+		Name:         "Initializing secrets management",
+		Fn:           b.InitializeSecretsManagement,
+		Dependencies: flow.NewTaskIDs(refreshShootState),
+	})
 	deployVPNServer := g.Add(flow.Task{
 		Name:         "Deploying destination VPN server",
 		Fn:           b.DeployVPNServer,
 		SkipIf:       b.Shoot.IsWorkerless,
-		Dependencies: flow.NewTaskIDs(refreshShootState),
+		Dependencies: flow.NewTaskIDs(initSecretsManagement),
 	})
 	// The istio ConfigMap gates the pod-kube-apiserver-load-balancing webhook; without it control plane pods resolve
 	// api.<internalDomain> to the source apiserver and fail authentication (401).
 	reconcileIstioConfigMap := g.Add(flow.Task{
 		Name:         "Reconciling istio internal load balancing configmap",
 		Fn:           b.ReconcileIstioInternalLoadBalancingConfigMap,
-		Dependencies: flow.NewTaskIDs(refreshShootState),
+		Dependencies: flow.NewTaskIDs(initSecretsManagement),
 	})
 
 	reconcileExtensions := b.ReconcileExtensionsBeforeKubeAPIServerTaskGroup(false)
@@ -456,7 +465,7 @@ func destinationKubeAPIServerReadyTaskGroup(b *botanistpkg.Botanist, forceShrink
 	// The group depends on waitService (not just refreshShootState): its DNS reconcile re-points the apiserver records
 	// at b.APIServerAddress, which is only populated by the kube-apiserver service's ingress callback during waitService.
 	// Running it earlier would restore the DNS records with an empty target.
-	var etcdMigrationComplete flow.TaskIDer = refreshShootState
+	var etcdMigrationComplete flow.TaskIDer = initSecretsManagement
 	if forceShrinkEtcd {
 		etcdMigrationCompleteTaskGroup := etcdMigrationCompleteTaskGroup(b)
 		g = g.AddAll(etcdMigrationCompleteTaskGroup.TasksWithDependencies(waitService)...)
@@ -667,9 +676,17 @@ func destinationCompletionTaskGroup(b *botanistpkg.Botanist) flow.TaskGroup {
 		Name: "Refreshing shoot state",
 		Fn:   b.RefreshShootStateForLiveMigration,
 	})
+	// Self-sufficient secrets init: this step can be the first destination step to run in a reconcile (the earlier
+	// steps are skipped once their conditions are set), so it must populate the secretsManager itself rather than rely
+	// on DestinationEtcdPeersJoined. Idempotent, so a single-pass reconcile is unaffected.
+	initSecretsManagement := g.Add(flow.Task{
+		Name:         "Initializing secrets management",
+		Fn:           b.InitializeSecretsManagement,
+		Dependencies: flow.NewTaskIDs(refreshShootState),
+	})
 
 	deployReferencedResources := b.ReconcileReferencedResourcesTaskGroup()
-	g = g.AddAll(deployReferencedResources.TasksWithDependencies(refreshShootState)...)
+	g = g.AddAll(deployReferencedResources.TasksWithDependencies(initSecretsManagement)...)
 
 	deployCloudProviderSecret := b.DeployCloudProviderSecretTaskGroup()
 	g = g.AddAll(deployCloudProviderSecret.TasksWithDependencies(deployReferencedResources)...)
