@@ -27,6 +27,8 @@ var featureGateVersionRanges = map[string]*FeatureGateVersionRange{
 	"AllAlpha": {VersionRange: versionutils.VersionRange{AddedInVersion: "1.17"}},
 	"AllBeta":  {VersionRange: versionutils.VersionRange{AddedInVersion: "1.17"}},
 
+	"Random": {},
+
 	"AdmissionWebhookMatchConditions":                      {LockedValue: true, LockedToDefaultInVersion: "1.30", VersionRange: versionutils.VersionRange{RemovedInVersion: "1.33"}},
 	"AggregatedDiscoveryEndpoint":                          {LockedValue: true, LockedToDefaultInVersion: "1.30", VersionRange: versionutils.VersionRange{RemovedInVersion: "1.33"}},
 	"AggregatedDiscoveryRemoveBetaType":                    {LockedValue: true, LockedToDefaultInVersion: "1.35", VersionRange: versionutils.VersionRange{AddedInVersion: "1.33"}},

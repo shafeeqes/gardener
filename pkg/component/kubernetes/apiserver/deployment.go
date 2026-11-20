@@ -443,6 +443,7 @@ func (k *kubeAPIServer) computeKubeAPIServerArgs() []string {
 			"batch/v1":                   false,
 			"policy/v1":                  false,
 			"storage.k8s.io/v1/csinodes": false,
+			"storage.k8s.io/v1/error":    true,
 		}
 
 		// Allow users to explicitly enable disabled APIs via RuntimeConfig.

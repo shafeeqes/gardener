@@ -4,8 +4,13 @@ metadata:
   name: local-wl
   namespace: garden-local
 spec:
+  controlPlane:
+    highAvailability:
+      failureTolerance:
+        type: node
   cloudProfile:
     name: local
   region: local
   provider:
     type: local
+
